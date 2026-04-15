@@ -1,0 +1,74 @@
+services:
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    container_name: strava-analizator-db
+    environment:
+      POSTGRES_DB: strava_analizator
+      POSTGRES_USER: sa_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sa_user -d strava_analizator"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - strava-net2
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: strava-analizator-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/strava_analizator
+      SPRING_DATASOURCE_USERNAME: sa_user
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+    env_file: .env
+    restart: unless-stopped
+    networks:
+      - strava-net2
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: strava-analizator-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - strava-net2
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: strava-analizator-ollama
+    ports:
+      - "11435:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - strava-net2
+
+volumes:
+  pgdata:
+  ollama_data:
+
+networks:
+  strava-net2:
+    name: strava-net2

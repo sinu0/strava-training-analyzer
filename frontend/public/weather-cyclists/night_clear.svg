@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141126" />
+      <stop offset="100%" stop-color="#0d1117" />
+    </linearGradient>
+    <linearGradient id="accentBand" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#a371f7" stop-opacity="0.92" />
+      <stop offset="100%" stop-color="#a371f7" stop-opacity="0" />
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="320" height="240" rx="28" fill="url(#bg)" />
+  <rect x="0" y="0" width="320" height="8" rx="28" fill="url(#accentBand)" />
+  <rect x="16" y="16" width="288" height="208" rx="22" fill="none" stroke="#a371f7" stroke-opacity="0.14" />
+  
+    <g opacity="0.16" stroke="#9da5b0" stroke-width="1">
+      <path d="M24 54H296" />
+      <path d="M24 94H296" />
+      <path d="M24 134H296" />
+      <path d="M24 174H296" />
+      <path d="M76 20V220" />
+      <path d="M140 20V220" />
+      <path d="M204 20V220" />
+      <path d="M268 20V220" />
+    </g>
+  
+  
+    <g transform="translate(30 36)">
+      <rect width="100" height="76" rx="18" fill="#111827" stroke="#a371f7" stroke-opacity="0.28" />
+      <circle cx="22" cy="20" r="8" fill="#a371f7" fill-opacity="0.18" stroke="#a371f7" />
+      <path d="M16 20h12" stroke="#a371f7" stroke-width="2.5" stroke-linecap="round" />
+      <rect x="14" y="50" width="12" height="12" rx="6" fill="#a371f7" fill-opacity="0.28" /><rect x="34" y="44" width="12" height="18" rx="6" fill="#a371f7" fill-opacity="0.4" /><rect x="54" y="36" width="12" height="26" rx="6" fill="#a371f7" fill-opacity="0.52" /><rect x="74" y="30" width="12" height="32" rx="6" fill="#a371f7" fill-opacity="0.64" />
+    </g>
+  
+  
+        <g transform="translate(236 32)">
+          <path d="M18 0c-10 4-16 14-16 26 0 16 12 28 28 28 6 0 12-2 17-6-4 2-8 3-12 3-16 0-28-12-28-28 0-10 4-18 11-23z" fill="#a371f7" />
+          <circle cx="52" cy="8" r="3" fill="#58a6ff" />
+          <circle cx="70" cy="22" r="2.5" fill="#58a6ff" />
+          <circle cx="60" cy="36" r="2" fill="#58a6ff" />
+        </g>
+      
+  
+    <path d="M132 184 C180 178, 236 191, 302 185" stroke="#a371f7" stroke-width="10" stroke-linecap="round" opacity="0.24" />
+    <path d="M132 184 C180 178, 236 191, 302 185" stroke="#1f2937" stroke-width="6" stroke-linecap="round" />
+  
+  
+    <g transform="translate(152 72) rotate(-1 74 58)">
+      <circle cx="26" cy="106" r="24" fill="none" stroke="#c9d1d9" stroke-width="5" opacity="0.85" />
+      <circle cx="122" cy="106" r="24" fill="none" stroke="#c9d1d9" stroke-width="5" opacity="0.85" />
+      <path d="M26 106 L62 66 L92 106 L54 106 Z" fill="none" stroke="#58a6ff" stroke-width="5" stroke-linejoin="round" />
+      <path d="M62 66 L90 44 L104 58" fill="none" stroke="#58a6ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M62 66 L54 44" fill="none" stroke="#58a6ff" stroke-width="5" stroke-linecap="round" />
+      <circle cx="80" cy="23.8" r="10" fill="#ffd7b5" />
+      <path d="M78 33.8 L64 41.44 L80 61.44 L98 53.08" fill="none" stroke="#a371f7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M80 61.44 L62 79.08 L44 108" fill="none" stroke="#a371f7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M80 61.44 L98 71.26 L122 108" fill="none" stroke="#a371f7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+      <circle cx="80" cy="23.8" r="16" fill="#a371f7" fill-opacity="0.09" />
+    </g>
+  
+  <ellipse cx="228" cy="194" rx="74" ry="22" fill="#a371f7" fill-opacity="0.06" filter="url(#glow)" />
+</svg>
