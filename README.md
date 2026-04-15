@@ -1,29 +1,31 @@
-# Strava Analizator — Dokumentacja użytkownika
+**EN** | [PL](README.pl.md)
 
-> Aplikacja do zaawansowanej analizy treningów rowerowych z danymi ze Stravy.
-> Self-hosted, dark mode UI, metryki: CTL/ATL/TSB, krzywa mocy, strefy, EF, monotonia.
+# Strava Training Analyzer — User Documentation
 
----
-
-## Spis treści
-
-1. [Wymagania systemowe](#1-wymagania-systemowe)
-2. [Konfiguracja Strava API](#2-konfiguracja-strava-api)
-3. [Konfiguracja środowiska (.env)](#3-konfiguracja-środowiska-env)
-4. [Uruchomienie — Docker Compose (produkcja)](#4-uruchomienie--docker-compose-produkcja)
-5. [Uruchomienie — tryb deweloperski](#5-uruchomienie--tryb-deweloperski)
-6. [Pierwsze użycie — połączenie ze Stravą](#6-pierwsze-użycie--połączenie-ze-stravą)
-7. [Import danych (synchronizacja)](#7-import-danych-synchronizacja)
-8. [Nawigacja w aplikacji](#8-nawigacja-w-aplikacji)
-9. [API Reference — kluczowe endpointy](#9-api-reference--kluczowe-endpointy)
-10. [Uruchamianie testów](#10-uruchamianie-testów)
-11. [Rozwiązywanie problemów](#11-rozwiązywanie-problemów)
+> Advanced cycling training analysis application powered by Strava data.
+> Self-hosted, dark mode UI, metrics: CTL/ATL/TSB, power curve, zones, EF, monotony.
 
 ---
 
-## 1. Wymagania systemowe
+## Table of Contents
 
-| Składnik        | Minimalna wersja |
+1. [System Requirements](#1-system-requirements)
+2. [Strava API Setup](#2-strava-api-setup)
+3. [Environment Configuration (.env)](#3-environment-configuration-env)
+4. [Running — Docker Compose (production)](#4-running--docker-compose-production)
+5. [Running — Developer Mode](#5-running--developer-mode)
+6. [First Use — Connecting to Strava](#6-first-use--connecting-to-strava)
+7. [Data Import (Sync)](#7-data-import-sync)
+8. [Navigating the App](#8-navigating-the-app)
+9. [API Reference — Key Endpoints](#9-api-reference--key-endpoints)
+10. [Running Tests](#10-running-tests)
+11. [Troubleshooting](#11-troubleshooting)
+
+---
+
+## 1. System Requirements
+
+| Component       | Minimum Version  |
 |-----------------|------------------|
 | Docker          | 24+              |
 | Docker Compose  | 2.20+            |
@@ -31,126 +33,126 @@
 | Node.js (dev)   | 20+              |
 | PostgreSQL      | 16 + PostGIS 3.4 |
 
-> **Uwaga**: Docker Compose uruchamia bazę danych automatycznie — nie potrzebujesz lokalnie zainstalowanego PostgreSQL.
+> **Note**: Docker Compose starts the database automatically — no local PostgreSQL installation required.
 
 ---
 
-## 2. Konfiguracja Strava API
+## 2. Strava API Setup
 
-Zanim uruchomisz aplikację, musisz utworzyć aplikację w portalu Strava:
+Before running the application, you need to create an app in the Strava developer portal:
 
-### Krok po kroku:
+### Step by step:
 
-1. Przejdź na **https://developers.strava.com** i zaloguj się kontem Strava
-2. W górnym menu kliknij **"Create & Manage Your App"**
-   - Jeśli nie widzisz opcji, wejdź bezpośrednio: **https://www.strava.com/settings/api** (wymaga zalogowania)
-3. Wypełnij formularz:
-   - **Application Name**: `Strava Analizator` (dowolna nazwa)
+1. Go to **https://developers.strava.com** and log in with your Strava account
+2. Click **"Create & Manage Your App"** in the top menu
+   - If you don't see the option, go directly to: **https://www.strava.com/settings/api** (requires login)
+3. Fill in the form:
+   - **Application Name**: `Strava Training Analyzer` (any name)
    - **Category**: `Training Analysis`
-   - **Club**: *(opcjonalnie)*
+   - **Club**: *(optional)*
    - **Website**: `http://localhost:5173`
    - **Authorization Callback Domain**: `localhost`
-4. Po utworzeniu skopiuj:
-   - **Client ID** → wpisz do `.env` jako `STRAVA_CLIENT_ID`
-   - **Client Secret** → wpisz do `.env` jako `STRAVA_CLIENT_SECRET`
+4. After creation, copy:
+   - **Client ID** → paste into `.env` as `STRAVA_CLIENT_ID`
+   - **Client Secret** → paste into `.env` as `STRAVA_CLIENT_SECRET`
 
-> **Ważne**: Callback Domain musi być ustawiony na `localhost` — aplikacja używa redirect URI: `http://localhost:8080/api/auth/strava/callback`
+> **Important**: Callback Domain must be set to `localhost` — the app uses redirect URI: `http://localhost:8080/api/auth/strava/callback`
 
 ---
 
-## 3. Konfiguracja środowiska (.env)
+## 3. Environment Configuration (.env)
 
-Skopiuj plik `.env.example` do `.env` i uzupełnij wartości:
+Copy `.env.example` to `.env` and fill in the values:
 
 ```bash
 cp .env.example .env
 ```
 
-Zawartość `.env`:
+`.env` contents:
 
 ```bash
-# === Baza danych ===
-DB_PASSWORD=twoje-bezpieczne-haslo
+# === Database ===
+DB_PASSWORD=your-secure-password
 
 # === Strava OAuth2 ===
-STRAVA_CLIENT_ID=12345                        # Z portalu Strava API
-STRAVA_CLIENT_SECRET=abc123def456...           # Z portalu Strava API
-STRAVA_WEBHOOK_TOKEN=losowy-token-webhook      # Dowolny ciąg znaków
+STRAVA_CLIENT_ID=12345                        # From Strava API portal
+STRAVA_CLIENT_SECRET=abc123def456...           # From Strava API portal
+STRAVA_WEBHOOK_TOKEN=random-webhook-token      # Any random string
 
-# === Bezpieczeństwo ===
-JWT_SECRET=minimum-32-znakowy-losowy-secret
-ENCRYPTION_KEY=64-znakowy-hex-klucz-aes-256
+# === Security ===
+JWT_SECRET=minimum-32-char-random-secret
+ENCRYPTION_KEY=64-char-hex-aes-256-key
 ```
 
-### Generowanie bezpiecznych kluczy:
+### Generating secure keys:
 
 ```bash
-# JWT Secret (32+ znaków)
+# JWT Secret (32+ chars)
 openssl rand -base64 32
 
-# Encryption Key (32 bajty = 64 znaki hex)
+# Encryption Key (32 bytes = 64 hex chars)
 openssl rand -hex 32
 ```
 
 ---
 
-## 4. Uruchomienie — Docker Compose (produkcja)
+## 4. Running — Docker Compose (production)
 
-Najprostszy sposób uruchomienia całej aplikacji:
+The easiest way to run the entire application:
 
 ```bash
-# 1. Sklonuj repozytorium
-cd strava-analizator
+# 1. Clone the repository
+cd strava-training-analyzer
 
-# 2. Skonfiguruj .env (patrz sekcja 3)
+# 2. Configure .env (see section 3)
 cp .env.example .env
-# edytuj .env z własnymi wartościami
+# edit .env with your values
 
-# 3. Uruchom wszystko
+# 3. Start everything
 docker compose up -d
 
-# 4. Sprawdź status
+# 4. Check status
 docker compose ps
 ```
 
-Po uruchomieniu:
+After startup:
 
-| Usługa    | URL                                 |
-|-----------|-------------------------------------|
-| Frontend  | http://localhost                     |
-| Backend   | http://localhost:8080                |
+| Service   | URL                                   |
+|-----------|---------------------------------------|
+| Frontend  | http://localhost                      |
+| Backend   | http://localhost:8080                 |
 | Swagger   | http://localhost:8080/swagger-ui.html |
-| Baza      | localhost:5432                       |
+| Database  | localhost:5432                        |
 
-### Zatrzymanie:
+### Stop:
 
 ```bash
-docker compose down          # zatrzymaj kontenery
-docker compose down -v       # zatrzymaj + usuń dane (UWAGA: kasuje bazę!)
+docker compose down          # stop containers
+docker compose down -v       # stop + remove data (WARNING: deletes database!)
 ```
 
-### Logi:
+### Logs:
 
 ```bash
-docker compose logs -f             # wszystkie usługi
-docker compose logs -f backend     # tylko backend
-docker compose logs -f frontend    # tylko frontend
-docker compose logs -f db          # tylko baza
+docker compose logs -f             # all services
+docker compose logs -f backend     # backend only
+docker compose logs -f frontend    # frontend only
+docker compose logs -f db          # database only
 ```
 
 ---
 
-## 5. Uruchomienie — tryb deweloperski
+## 5. Running — Developer Mode
 
-W trybie deweloperskim uruchamiasz każdy komponent osobno z hot-reload:
+In developer mode you run each component separately with hot-reload:
 
-### 5.1 Baza danych (Docker)
+### 5.1 Database (Docker)
 
 ```bash
 docker compose up -d db
 ```
 
-Poczekaj na healthcheck (baza gotowa po ~10s):
+Wait for the healthcheck (database ready after ~10s):
 
 ```bash
 docker compose ps   # status: healthy
@@ -161,54 +163,54 @@ docker compose ps   # status: healthy
 ```bash
 cd backend
 
-# Ustaw zmienne środowiskowe lub użyj .env
-export DB_PASSWORD=twoje-haslo
+# Set environment variables or use .env
+export DB_PASSWORD=your-password
 export STRAVA_CLIENT_ID=12345
 export STRAVA_CLIENT_SECRET=abc123
 
-# Uruchom Spring Boot
+# Start Spring Boot
 ./gradlew bootRun
 ```
 
-Backend wystartuje na **http://localhost:8080**.
+Backend starts at **http://localhost:8080**.
 
-Flyway automatycznie wykona migracje bazy danych przy starcie.
+Flyway automatically runs database migrations on startup.
 
 ### 5.3 Frontend (Vite)
 
 ```bash
 cd frontend
 
-# Zainstaluj zależności (pierwszy raz)
+# Install dependencies (first time)
 npm install
 
-# Uruchom dev server
+# Start dev server
 npm run dev
 ```
 
-Frontend wystartuje na **http://localhost:5173** z hot-reload.
+Frontend starts at **http://localhost:5173** with hot-reload.
 
-Proxy Vite automatycznie przekierowuje żądania `/api/*` do backendu na porcie 8080.
+Vite proxy automatically forwards `/api/*` requests to the backend on port 8080.
 
 ---
 
-## 6. Pierwsze użycie — połączenie ze Stravą
+## 6. First Use — Connecting to Strava
 
-Po uruchomieniu aplikacji musisz połączyć ją z kontem Strava:
+After starting the application you need to connect it to your Strava account:
 
-### Krok 1: Otwórz frontend
+### Step 1: Open the frontend
 
-Przejdź do **http://localhost:5173** (dev) lub **http://localhost** (Docker).
+Go to **http://localhost:5173** (dev) or **http://localhost** (Docker).
 
-### Krok 2: Autoryzacja OAuth2
+### Step 2: OAuth2 Authorization
 
-Wywołaj endpoint połączenia (z przeglądarki lub cURL):
+Call the connect endpoint (from browser or cURL):
 
 ```
 GET http://localhost:8080/api/auth/strava/connect
 ```
 
-Odpowiedź zawiera URL autoryzacji:
+The response contains the authorization URL:
 
 ```json
 {
@@ -216,38 +218,38 @@ Odpowiedź zawiera URL autoryzacji:
 }
 ```
 
-**Otwórz ten URL w przeglądarce** → Strava poprosi o autoryzację → Po zatwierdzeniu nastąpi redirect z powrotem do aplikacji.
+**Open that URL in your browser** → Strava will ask for authorization → After approval you'll be redirected back to the app.
 
-### Krok 3: Weryfikacja
+### Step 3: Verify
 
-Sprawdź, czy profil został zapisany:
+Check that the profile was saved:
 
 ```
 GET http://localhost:8080/api/profile
 ```
 
-Powinna zwrócić Twoje dane (imię, nazwisko, FTP, itp.).
+Should return your data (name, FTP, etc.).
 
 ---
 
-## 7. Import danych (synchronizacja)
+## 7. Data Import (Sync)
 
-Po połączeniu ze Stravą możesz zaimportować aktywności.
+After connecting to Strava you can import your activities.
 
-### Pełna synchronizacja (wszystkie aktywności)
+### Full sync (all activities)
 
 ```bash
 POST http://localhost:8080/api/sync/strava/full
 ```
 
-Przykład z Swagger UI lub dowolnego klienta HTTP:
+Example with Swagger UI or any HTTP client:
 
 ```
 POST http://localhost:8080/api/sync/strava/full
 Content-Type: application/json
 ```
 
-Odpowiedź (202 Accepted):
+Response (202 Accepted):
 
 ```json
 {
@@ -257,222 +259,231 @@ Odpowiedź (202 Accepted):
 }
 ```
 
-> **Uwaga**: Pierwsze pełne pobranie może zająć kilka minut w zależności od liczby aktywności na koncie Strava. API Strava ma limity: 100 req/15min, 1000 req/dzień.
+> **Note**: The first full import may take a few minutes depending on the number of activities in your Strava account. Strava API limits: 100 req/15min, 1000 req/day.
 
-### Synchronizacja ostatnich aktywności
+### Sync recent activities
 
 ```bash
 POST http://localhost:8080/api/sync/strava/recent
 ```
 
-Pobiera tylko nowe aktywności od ostatniej synchronizacji. Używaj tego na co dzień.
+Fetches only new activities since the last sync. Use this for daily updates.
 
-### Sprawdzenie statusu synchronizacji
+### Check sync status
 
 ```bash
 GET http://localhost:8080/api/sync/status
 ```
 
-### Przeliczanie metryk
+### Metric recalculation
 
-Po imporcie aktywności, metryki (NP, TSS, IF, strefy, krzywa mocy, CTL/ATL/TSB) są obliczane automatycznie przez silnik metrykowy (`MetricRegistry`).
+After importing activities, metrics (NP, TSS, IF, zones, power curve, CTL/ATL/TSB) are calculated automatically by the metric engine (`MetricRegistry`).
 
 ---
 
-## 8. Nawigacja w aplikacji
+## 8. Navigating the App
 
-Aplikacja ma trzy główne sekcje dostępne z paska bocznego:
+The application has three main sections accessible from the sidebar:
 
 ### Dashboard (`/`)
 
-- **Podsumowanie tygodnia** — dystans, czas, TSS, wzniesienie
-- **Obciążenie treningowe (30d)** — wykres PMC (CTL/ATL/TSB)
-- **Ostatnie aktywności** — 5 ostatnich z linkami do szczegółów
-- **Gotowość** — placeholder (przyszła integracja z Garmin)
-- **Rekomendacja na dziś** — placeholder (przyszły advisor)
+- **Weekly summary** — distance, time, TSS, elevation
+- **Training load (30d)** — PMC chart (CTL/ATL/TSB)
+- **Recent activities** — last 5 with links to details
+- **Readiness** — placeholder (future Garmin integration)
+- **Today's recommendation** — placeholder (future advisor)
 
-### Aktywności (`/activities`)
+### Activities (`/activities`)
 
-- **Lista aktywności** — tabela z filtrowaniem po typie sportu
-- **Kliknięcie w wiersz** → strona szczegółowa aktywności
-- **Szczegóły aktywności** (`/activities/:id`):
-  - Mapa trasy (Leaflet + CARTO dark tiles)
-  - Metryki: moc, tętno, kadencja, dystans, czas, wzniesienie
-  - Wykresy strumieni (power, HR, kadencja, wysokość)
-  - Strefy mocy i tętna (poziome paski)
+- **Activity list** — table with sport type filtering
+- **Click a row** → activity detail page
+- **Activity details** (`/activities/:id`):
+  - Route map (Leaflet + CARTO dark tiles)
+  - Metrics: power, heart rate, cadence, distance, time, elevation
+  - Stream charts (power, HR, cadence, altitude)
+  - Power and HR zones (horizontal bars)
 
-### Analityka (`/analytics`)
+### Analytics (`/analytics`)
 
-6 zakładek:
+6 tabs:
 
-| Zakładka | Opis |
-|----------|------|
-| **PMC** | Performance Management Chart — CTL (fitness), ATL (zmęczenie), TSB (forma) |
-| **Krzywa mocy** | Najlepsze wysiłki 1s–120min, skala logarytmiczna |
-| **Strefy** | Rozkład czasu w strefach mocy (wykres słupkowy) |
-| **Obciążenie** | TSS tygodniowo (wykres słupkowy) |
-| **Trendy** | FTP w czasie + Efficiency Factor (scatter plot) |
-| **Porównanie** | Zestawienie dwóch dowolnych okresów (dystans, czas, wzniesienie) |
+| Tab | Description |
+|-----|-------------|
+| **PMC** | Performance Management Chart — CTL (fitness), ATL (fatigue), TSB (form) |
+| **Power Curve** | Best efforts 1s–120min, logarithmic scale |
+| **Zones** | Time distribution across power zones (bar chart) |
+| **Load** | Weekly TSS (bar chart) |
+| **Trends** | FTP over time + Efficiency Factor (scatter plot) |
+| **Compare** | Side-by-side comparison of two arbitrary periods (distance, time, elevation) |
 
-Każda zakładka ma **date range picker** do wyboru zakresu dat.
-
----
-
-## 9. API Reference — kluczowe endpointy
-
-Pełna dokumentacja interaktywna: **http://localhost:8080/swagger-ui.html**
-
-### Autoryzacja
-
-| Metoda | Endpoint | Opis |
-|--------|----------|------|
-| `GET` | `/api/auth/strava/connect` | Zwraca URL autoryzacji Strava |
-| `GET` | `/api/auth/strava/callback` | Callback OAuth2 (automatyczny redirect) |
-
-### Profil
-
-| Metoda | Endpoint | Opis |
-|--------|----------|------|
-| `GET` | `/api/profile` | Pobierz profil sportowca |
-| `PUT` | `/api/profile` | Zaktualizuj profil (np. FTP) |
-
-### Synchronizacja
-
-| Metoda | Endpoint | Opis |
-|--------|----------|------|
-| `POST` | `/api/sync/strava/full` | Pełna synchronizacja wszystkich aktywności |
-| `POST` | `/api/sync/strava/recent` | Synchronizacja nowych aktywności |
-| `GET` | `/api/sync/status` | Status ostatniej synchronizacji |
-
-### Aktywności
-
-| Metoda | Endpoint | Parametry | Opis |
-|--------|----------|-----------|------|
-| `GET` | `/api/activities` | `?sportType`, `?from`, `?to` | Lista aktywności z filtrami |
-| `GET` | `/api/activities/{id}` | — | Szczegóły aktywności + metryki + strumienie |
-| `GET` | `/api/activities/{id}/map` | — | Trasa w formacie GeoJSON |
-
-### Analityka
-
-| Metoda | Endpoint | Parametry | Opis |
-|--------|----------|-----------|------|
-| `GET` | `/api/analytics/pmc` | `from`, `to` | Seria CTL/ATL/TSB |
-| `GET` | `/api/analytics/power-curve` | `from`, `to` | Krzywa mocy (best efforts) |
-| `GET` | `/api/analytics/zones` | `zoneType`, `from`, `to` | Rozkład stref (power/hr) |
-| `GET` | `/api/analytics/weekly` | `?weeks=8` | Podsumowania tygodniowe |
-| `GET` | `/api/analytics/summary` | `?period=month` | Zagregowane statystyki |
-| `GET` | `/api/analytics/trends` | `metric`, `from`, `to` | Trend metryki w czasie |
-| `GET` | `/api/analytics/compare` | `period1From`, `period1To`, `period2From`, `period2To` | Porównanie dwóch okresów |
+Each tab has a **date range picker** for selecting the date range.
 
 ---
 
-## 10. Uruchamianie testów
+## 9. API Reference — Key Endpoints
 
-### Backend (90+ testów)
+Full interactive documentation: **http://localhost:8080/swagger-ui.html**
+
+### Authorization
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/auth/strava/connect` | Returns Strava authorization URL |
+| `GET` | `/api/auth/strava/callback` | OAuth2 callback (automatic redirect) |
+
+### Profile
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/profile` | Get athlete profile |
+| `PUT` | `/api/profile` | Update profile (e.g. FTP) |
+
+### Sync
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/sync/strava/full` | Full sync of all activities |
+| `POST` | `/api/sync/strava/recent` | Sync new activities only |
+| `GET` | `/api/sync/status` | Status of last sync |
+
+### Activities
+
+| Method | Endpoint | Parameters | Description |
+|--------|----------|------------|-------------|
+| `GET` | `/api/activities` | `?sportType`, `?from`, `?to` | Activity list with filters |
+| `GET` | `/api/activities/{id}` | — | Activity details + metrics + streams |
+| `GET` | `/api/activities/{id}/map` | — | Route as GeoJSON |
+
+### Analytics
+
+| Method | Endpoint | Parameters | Description |
+|--------|----------|------------|-------------|
+| `GET` | `/api/analytics/pmc` | `from`, `to` | CTL/ATL/TSB series |
+| `GET` | `/api/analytics/power-curve` | `from`, `to` | Power curve (best efforts) |
+| `GET` | `/api/analytics/zones` | `zoneType`, `from`, `to` | Zone distribution (power/hr) |
+| `GET` | `/api/analytics/weekly` | `?weeks=8` | Weekly summaries |
+| `GET` | `/api/analytics/summary` | `?period=month` | Aggregated statistics |
+| `GET` | `/api/analytics/trends` | `metric`, `from`, `to` | Metric trend over time |
+| `GET` | `/api/analytics/compare` | `period1From`, `period1To`, `period2From`, `period2To` | Two-period comparison |
+
+---
+
+## 10. Running Tests
+
+### Backend (90+ tests)
 
 ```bash
 cd backend
 ./gradlew test
 ```
 
-Obejmuje:
-- Testy jednostkowe kalkulatorów metryk (NP, TSS, IF, EF, strefy, PMC, krzywa mocy, monotonia)
-- Testy ArchUnit (architektura heksagonalna)
-- Testy MockMvc kontrolerów (Activity, Analytics, Auth, Sync, Profile)
+Covers:
+- Unit tests for metric calculators (NP, TSS, IF, EF, zones, PMC, power curve, monotony)
+- ArchUnit tests (hexagonal architecture)
+- MockMvc controller tests (Activity, Analytics, Auth, Sync, Profile)
 
-### Frontend (40+ testów)
+### Frontend (40+ tests)
 
 ```bash
 cd frontend
-npm test              # jednokrotne uruchomienie
-npm run test:watch    # tryb watch (auto-rerun)
+npm test              # single run
+npm run test:watch    # watch mode (auto-rerun)
 ```
 
-Obejmuje:
-- Testy komponentów (Dashboard, Activities, Analytics, wykresy)
-- Testy utility (formattersy, theme)
+Covers:
+- Component tests (Dashboard, Activities, Analytics, charts)
+- Utility tests (formatters, theme)
 
-### Wszystko razem
+### All together
 
 ```bash
-# Z katalogu głównego
+# From the root directory
 cd backend && ./gradlew test && cd ../frontend && npm test
 ```
 
 ---
 
-## 11. Rozwiązywanie problemów
+## 11. Troubleshooting
 
-### Baza danych nie startuje
+### Database won't start
 
 ```bash
-# Sprawdź logi
+# Check logs
 docker compose logs db
 
-# Sprawdź czy port 5432 nie jest zajęty
+# Check if port 5432 is already in use
 ss -tlnp | grep 5432
 ```
 
 ### Flyway migration error
 
 ```bash
-# Jeśli schemat się rozjeżdża — wyczyść i odtwórz (DEV only!)
+# If schema is out of sync — wipe and recreate (DEV only!)
 docker compose down -v
 docker compose up -d db
 ```
 
 ### Strava API — 401 Unauthorized
 
-Token wygasł. Aplikacja automatycznie odświeża tokeny, ale jeśli refresh token wygasł:
-1. Usuń profil z bazy
-2. Ponownie wykonaj autoryzację: `GET /api/auth/strava/connect`
+Token expired. The app refreshes tokens automatically, but if the refresh token has expired:
+1. Delete the profile from the database
+2. Re-authorize: `GET /api/auth/strava/connect`
 
 ### Strava API — 429 Rate Limit
 
-Limity Strava:
-- **100 żądań / 15 minut**
-- **1000 żądań / dzień**
+Strava limits:
+- **100 requests / 15 minutes**
+- **1000 requests / day**
 
-Poczekaj 15 minut i spróbuj ponownie. Przy dużej liczbie aktywności, pełna synchronizacja może wymagać wielu prób.
+Wait 15 minutes and try again. For large activity counts, a full sync may require multiple attempts.
 
-### Frontend nie łączy się z backendem (dev)
+### Frontend can't connect to backend (dev)
 
-Upewnij się, że:
-1. Backend działa na porcie **8080**
-2. Frontend (Vite) skonfigurowany z proxy `/api` → `http://localhost:8080`
-3. Sprawdź konsolę przeglądarki (F12 → Network)
+Make sure:
+1. Backend is running on port **8080**
+2. Frontend (Vite) is configured with proxy `/api` → `http://localhost:8080`
+3. Check the browser console (F12 → Network)
 
 ### CORS errors
 
-W trybie deweloperskim proxy Vite obsługuje CORS automatycznie. Jeśli wywołujesz API bezpośrednio (np. Postman), CORS jest wyłączony — SecurityConfig pozwala na wszystkie żądania.
+In developer mode, Vite proxy handles CORS automatically. If you call the API directly (e.g. Postman), CORS is disabled — SecurityConfig allows all requests.
 
 ---
 
-## Szybki start (TL;DR)
+## Quick Start (TL;DR)
 
 ```bash
-# 1. Skonfiguruj Strava API (https://developers.strava.com → Create & Manage Your App)
-# 2. Skopiuj .env.example → .env i uzupełnij dane
+# 1. Set up Strava API (https://developers.strava.com → Create & Manage Your App)
+# 2. Copy .env.example → .env and fill in your values
 
 cp .env.example .env
-# edytuj .env
+# edit .env
 
-# 3. Uruchom bazę
+# 3. Start database
 docker compose up -d db
 
-# 4. Uruchom backend
+# 4. Start backend
 cd backend && ./gradlew bootRun &
 
-# 5. Uruchom frontend
+# 5. Start frontend
 cd frontend && npm install && npm run dev &
 
-# 6. Połącz ze Stravą
-#    Otwórz: http://localhost:8080/api/auth/strava/connect
-#    Skopiuj URL z odpowiedzi i otwórz w przeglądarce
+# 6. Connect to Strava
+#    Open: http://localhost:8080/api/auth/strava/connect
+#    Copy the URL from the response and open it in your browser
 
-# 7. Zaimportuj dane
+# 7. Import data
 #    POST http://localhost:8080/api/sync/strava/full
 
-# 8. Gotowe!
-#    Otwórz http://localhost:5173
+# 8. Done!
+#    Open http://localhost:5173
 ```
+
+---
+
+## License
+
+This project is licensed under the **GNU General Public License v3.0**.
+You are free to use, study, and modify this software. Any derivative works must also be distributed under the GPL v3 license. Commercial use is not prohibited, but proprietary closed-source forks are not allowed.
+
+See [LICENSE](LICENSE) for the full license text.
