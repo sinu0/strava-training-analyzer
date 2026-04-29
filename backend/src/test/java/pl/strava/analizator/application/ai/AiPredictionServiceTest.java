@@ -297,6 +297,43 @@ class AiPredictionServiceTest {
     }
 
     @Test
+    void predict_trainingRecommendation_productiveFatigueAvoidsBlanketRest() {
+        TrainingContext context = productiveFatigueContext();
+        when(trainingDataPort.buildContext(PredictionType.TRAINING_TYPE_RECOMMENDATION)).thenReturn(context);
+
+        String llmResponse = """
+                {
+                  "summary": "Take a full rest day today.",
+                  "insight": "TSB is negative so full rest is safest.",
+                  "action": "Full rest or 30 min easy recovery spin only.",
+                  "todayWorkout": {
+                    "type": "recovery",
+                    "durationMinutes": 30,
+                    "targetZone": "Z1",
+                    "targetTss": 20
+                  },
+                  "confidence": 0.81,
+                  "warnings": []
+                }
+                """;
+        when(llmPort.chat(anyString(), anyString(), anyString())).thenReturn(llmResponse);
+
+        PredictionRequestDto request = PredictionRequestDto.builder()
+                .predictionType("TRAINING_TYPE_RECOMMENDATION")
+                .build();
+
+        PredictionResponseDto response = enabledService.predict(request);
+
+        assertThat(response.getSummary()).containsIgnoringCase("kontrolowany bodziec");
+        assertThat(response.getStructuredData())
+                .containsEntry("summary", "Kontrolowany bodziec jest OK; nie potrzebujesz pełnego dnia wolnego.");
+        assertThat(response.getStructuredData().get("action"))
+                .asString()
+                .contains("60-90 min Z2")
+                .contains("tempo/sweet spot");
+    }
+
+    @Test
     void predict_toolCallingProvider_usesToolCallingLoop() {
         TrainingContext context = sampleContext();
         when(trainingDataPort.buildContext(PredictionType.FTP_PREDICTION)).thenReturn(context);
@@ -470,6 +507,28 @@ class AiPredictionServiceTest {
                 .weeklyVolume(Map.of())
                 .zoneDistribution(Map.of())
                 .readiness(Map.of("currentReadiness", 75))
+                .powerCurve(Map.of())
+                .build();
+    }
+
+    private TrainingContext productiveFatigueContext() {
+        return TrainingContext.builder()
+                .athleteProfile("FTP: 250 W, Weight: 75 kg, Max HR: 190 bpm, LTHR: 170 bpm")
+                .recentActivities(List.of("[2024-06-03] Ride — Threshold Ride, Duration: 75min"))
+                .pmcData(Map.of("currentCTL", 70, "currentATL", 84, "currentTSB", -18))
+                .ftpHistory(Map.of("2024-01-01", 240, "2024-06-01", 250))
+                .weeklyVolume(Map.of("currentWeekTss", 420, "previousWeekTss", 390))
+                .zoneDistribution(Map.of())
+                .readiness(Map.of(
+                        "currentReadiness", 38,
+                        "currentTSB", -18,
+                        "currentCTL", 70,
+                        "currentATL", 84,
+                        "atlCtlRatio", 1.2,
+                        "trainingWindow", "productive-fatigue",
+                        "coachingGuidance",
+                        "TSB between -30 and 0 is still a trainable window for aerobic, tempo, or controlled threshold work."
+                ))
                 .powerCurve(Map.of())
                 .build();
     }

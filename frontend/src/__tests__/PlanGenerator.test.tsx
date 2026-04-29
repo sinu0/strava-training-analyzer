@@ -1,8 +1,8 @@
 import { ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import PlanGenerator from '../components/training/PlanGenerator';
 import theme from '../theme/theme';
@@ -30,39 +30,66 @@ function renderWithProviders(ui: React.ReactElement) {
 }
 
 describe('PlanGenerator', () => {
-  it('renders all form fields', () => {
+  it('renders first wizard step with goal fields', () => {
     renderWithProviders(<PlanGenerator />);
-    expect(screen.getByLabelText(/Cel/)).toBeDefined();
+    expect(screen.getByText('Wizard planu')).toBeDefined();
+    expect(screen.getByLabelText(/^Cel$/)).toBeDefined();
+    expect(screen.getByLabelText(/Priorytet celu/)).toBeDefined();
     expect(screen.getByLabelText(/Data rozpoczęcia/)).toBeDefined();
-    expect(screen.getByLabelText(/Liczba tygodni/)).toBeDefined();
-    expect(screen.getByLabelText(/Dni treningowe/)).toBeDefined();
-    expect(screen.getByLabelText(/Docelowy TSS/)).toBeDefined();
-    expect(screen.getByText('Generuj plan')).toBeDefined();
+    expect(screen.getByText('Dalej')).toBeDefined();
   });
 
-  it('calls generate mutation on submit', () => {
+  it('shows constraint step after moving forward', () => {
     renderWithProviders(<PlanGenerator />);
+    fireEvent.click(screen.getByText('Dalej'));
+    expect(screen.getByLabelText(/Okno w dzień roboczy/)).toBeDefined();
+    expect(screen.getByLabelText(/Okno weekendowe/)).toBeDefined();
+    expect(screen.getByLabelText(/Preferowany dzień długiej jazdy/)).toBeDefined();
+    expect(screen.getByLabelText(/Środowisko treningu/)).toBeDefined();
+  });
+
+  it('calls generate mutation with planner constraints on submit', () => {
+    renderWithProviders(<PlanGenerator />);
+    fireEvent.change(screen.getByLabelText(/Data rozpoczęcia/), { target: { value: '2099-01-06' } });
+    fireEvent.change(screen.getByLabelText(/Data startu docelowego/), { target: { value: '2099-02-02' } });
+    fireEvent.click(screen.getByText('Dalej'));
+    fireEvent.change(screen.getByLabelText(/Okno w dzień roboczy/), { target: { value: '90' } });
+    fireEvent.change(screen.getByLabelText(/Okno weekendowe/), { target: { value: '240' } });
+    fireEvent.click(screen.getByText('Dalej'));
     fireEvent.click(screen.getByText('Generuj plan'));
+
     expect(mockMutate).toHaveBeenCalledTimes(1);
     const callArgs = mockMutate.mock.calls[0]![0];
-    expect(callArgs.goal).toBe('BUILD_BASE');
-    expect(callArgs.weeks).toBe(8);
-    expect(callArgs.trainingDaysPerWeek).toBe(4);
-    expect(callArgs.targetWeeklyTss).toBe(500);
+    expect(callArgs).toMatchObject({
+      goal: 'BUILD_BASE',
+      goalPriority: 'B',
+      startDate: '2099-01-06',
+      eventDate: '2099-02-02',
+      weeks: 8,
+      trainingDaysPerWeek: 4,
+      targetWeeklyTss: 500,
+      weekdayAvailabilityMinutes: 90,
+      weekendAvailabilityMinutes: 240,
+      preferredLongRideDay: 'SATURDAY',
+      environmentPreference: 'MIXED',
+    });
   });
 
   it('shows validation for invalid weeks value', () => {
     renderWithProviders(<PlanGenerator />);
-    const weeksInput = screen.getByLabelText(/Liczba tygodni/);
-    fireEvent.change(weeksInput, { target: { value: '0' } });
+    fireEvent.change(screen.getByLabelText(/Liczba tygodni/), { target: { value: '0' } });
     expect(screen.getByText('1–52')).toBeDefined();
   });
 
-  it('disables button when validation fails', () => {
+  it('disables next button when first-step validation fails', () => {
     renderWithProviders(<PlanGenerator />);
-    const tssInput = screen.getByLabelText(/Docelowy TSS/);
-    fireEvent.change(tssInput, { target: { value: '50' } });
-    const button = screen.getByText('Generuj plan');
-    expect(button.closest('button')?.disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText(/Docelowy TSS/), { target: { value: '50' } });
+    expect(screen.getByText('Dalej').closest('button')?.disabled).toBe(true);
+  });
+
+  it('shows validation when event date is before plan start', () => {
+    renderWithProviders(<PlanGenerator />);
+    fireEvent.change(screen.getByLabelText(/Data startu docelowego/), { target: { value: '2000-01-01' } });
+    expect(screen.getByText('Data celu nie może być wcześniejsza niż start planu')).toBeDefined();
   });
 });

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import pl.strava.analizator.application.dto.GarminHealthImportDayDto;
 import pl.strava.analizator.domain.model.AthleteProfile;
 import pl.strava.analizator.domain.model.DailySummary;
 import pl.strava.analizator.domain.port.AthleteProfileRepository;
@@ -255,5 +257,76 @@ class GarminSyncServiceTest {
                         && s.getBodyBattery() == 70   // kept from existing
                         && s.getHrvRmssd().compareTo(new BigDecimal("42.5")) == 0 // kept from existing
                         && s.getSteps() == 7000));    // new value
+    }
+
+    @Test
+    void importHealthDataCreatesAndMergesImportedDays() {
+        LocalDate existingDate = LocalDate.of(2024, 3, 15);
+        LocalDate newDate = LocalDate.of(2024, 3, 16);
+        Instant importedAt = Instant.parse("2026-04-26T22:10:00Z");
+
+        DailySummary existing = DailySummary.builder()
+                .id(UUID.randomUUID())
+                .date(existingDate)
+                .activitiesCount((short) 2)
+                .totalDistanceM(BigDecimal.valueOf(80000))
+                .restingHrBpm((short) 54)
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
+
+        when(dailySummaryRepository.findByDate(existingDate)).thenReturn(Optional.of(existing));
+        when(dailySummaryRepository.findByDate(newDate)).thenReturn(Optional.empty());
+        when(dailySummaryRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        GarminSyncService.SyncResult result = service.importHealthData(List.of(
+                new GarminHealthImportDayDto(
+                        existingDate,
+                        (short) 49,
+                        new BigDecimal("51.4"),
+                        (short) 83,
+                        (short) 78,
+                        (short) 22,
+                        28200,
+                        11000,
+                        530,
+                        7200,
+                        13000,
+                        6200,
+                        1800,
+                        importedAt),
+                new GarminHealthImportDayDto(
+                        newDate,
+                        (short) 50,
+                        new BigDecimal("47.0"),
+                        (short) 79,
+                        (short) 70,
+                        (short) 28,
+                        27000,
+                        9500,
+                        410,
+                        6800,
+                        13200,
+                        5200,
+                        1600,
+                        importedAt)));
+
+        assertThat(result.synced()).isEqualTo(2);
+        assertThat(result.skipped()).isEqualTo(0);
+        assertThat(result.failed()).isEqualTo(0);
+
+        verify(dailySummaryRepository, times(2)).save(any());
+        verify(dailySummaryRepository).save(argThat(summary ->
+                summary.getId().equals(existing.getId())
+                        && summary.getActivitiesCount() == 2
+                        && summary.getRestingHrBpm() == 49
+                        && summary.getBodyBattery() == 78
+                        && summary.getGarminSyncedAt().equals(importedAt)));
+        verify(dailySummaryRepository).save(argThat(summary ->
+                summary.getDate().equals(newDate)
+                        && summary.getId() != null
+                        && summary.getSleepScore() == 79
+                        && summary.getSteps() == 9500
+                        && summary.getGarminSyncedAt().equals(importedAt)));
     }
 }

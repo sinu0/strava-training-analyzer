@@ -5,10 +5,10 @@ import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
-import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import { Box, Button, Chip, Divider, LinearProgress, Popover, Stack, Tooltip, Typography } from '@mui/material';
 import { useState, type MouseEvent } from 'react';
 
+import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
 import {
   WEATHER_SCORE_LEGEND,
   formatDayName,
@@ -159,7 +159,7 @@ function GradientStrip({ hours, bestStart, bestEnd }: GradientStripProps) {
               <Typography variant="body2">{selectedHour.precipitation} mm</Typography>
             </Stack>
             <Stack direction="row" spacing={1} alignItems="center">
-              <WbSunnyIcon fontSize="small" sx={{ color: WEATHER_METRIC_COLORS.sun }} />
+              <WeatherConditionIcon kind="sunny" size={16} alt="" />
               <Typography variant="body2">Wynik: {selectedHour.score}/100</Typography>
             </Stack>
             {!!selectedHour.sunrise && (
@@ -219,8 +219,16 @@ function DayGradientRow({ day }: { day: GradientDay }) {
       <Box
         component="img"
         src={getWeatherIllustrationPath(dayCyclist)}
-        alt={dayCyclist}
-        sx={{ width: 22, height: 18, objectFit: 'contain', borderRadius: 0.5, flexShrink: 0 }}
+        alt={`Warunki: ${dayCyclist}`}
+        sx={{
+          width: 24,
+          height: 20,
+          objectFit: 'cover',
+          objectPosition: 'center',
+          borderRadius: 0.75,
+          flexShrink: 0,
+          border: `1px solid ${alphaColor(CHART_COLORS.primary, 0.14)}`,
+        }}
       />
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3, width: 50 }}>

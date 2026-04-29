@@ -2,7 +2,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import DashboardPage from '../pages/DashboardPage';
 import theme from '../theme/theme';
@@ -96,8 +96,29 @@ vi.mock('../hooks/useAnalytics', () => ({
       ctl: 55,
       atl: 47,
       description: 'Organizm wypoczęty, dobry dzień na intensywny trening',
+      healthSignals: {
+        sourceDate: '2024-06-02',
+        sleepScore: 82,
+        bodyBattery: 68,
+        restingHrBpm: 50,
+        restingHrDelta: -1,
+        scoreAdjustment: 6,
+      },
+      checkIn: {
+        date: '2024-06-02',
+        sleepQuality: 4,
+        legFreshness: 4,
+        motivation: 5,
+        soreness: 2,
+        scoreAdjustment: 10,
+        updatedAt: '2024-06-02T06:30:00Z',
+      },
     },
     isLoading: false,
+  }),
+  useSaveReadinessCheckIn: () => ({
+    mutate: vi.fn(),
+    isPending: false,
   }),
   useZoneDistribution: () => ({
     data: {
@@ -159,6 +180,65 @@ vi.mock('../hooks/useAnalytics', () => ({
     ],
     isLoading: false,
   }),
+  useProgressionLevels: () => ({
+    data: [
+      {
+        system: 'THRESHOLD',
+        label: 'Próg',
+        level: 6,
+        currentLoad: 82,
+        previousLoad: 55,
+        targetLoad: 70,
+        trend: 'UP',
+        description: 'Próg rośnie stabilnie.',
+        nextRecommendation: 'Broń jednego akcentu progowego.',
+      },
+    ],
+    isLoading: false,
+  }),
+  useBlockHealth: () => ({
+    data: {
+      status: 'STABLE_PRODUCTIVE',
+      label: 'Blok stabilny',
+      description: 'Tydzień dowozi główny bodziec bez chaosu.',
+      objectiveLabel: 'Budowa progu',
+      programGoal: 'BUILD_PEAK',
+      goalExecutionStatus: 'ON_TARGET',
+      goalExecutionScore: 84,
+      adjustmentDays: 1,
+      missedStimulusDays: 0,
+      overloadDays: 0,
+      keySignals: ['Bodziec celu: 1/1', 'Korekty w 14 dniach: 1'],
+      nextFocus: 'Broń progu i nie dokładaj losowej intensywności.',
+    },
+    isLoading: false,
+  }),
+}));
+vi.mock('../hooks/useAi', () => ({
+  useAiStatus: () => ({
+    data: { enabled: true, activeProvider: 'provider', activeModel: 'model', modelAvailable: true, availableProviders: ['provider'], availablePredictionTypes: ['TRAINING_COACH_SUMMARY'] },
+  }),
+  useTodayAiTips: () => ({ data: [], isLoading: false }),
+  useLatestAiPrediction: () => ({
+    data: {
+      id: 'coach-1',
+      predictionType: 'TRAINING_COACH_SUMMARY',
+      modelId: 'model',
+      providerName: 'provider',
+      summary: 'Broń progu i pilnuj świeżości.',
+      detail: 'detail',
+      confidence: 0.82,
+      createdAt: '2026-04-07T08:00:00Z',
+      structuredData: {
+        weekReview: 'Tydzień trzyma priorytet progowy.',
+        blockReview: 'Blok nadal buduje próg.',
+        keyWins: ['Próg rośnie.'],
+        keyRisks: ['Weekend może wymusić auto-swap.'],
+        nextFocus: 'Obroń jeden akcent progowy w 3-5 dni.',
+      },
+    },
+  }),
+  useAiPredict: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 function renderWithProviders(ui: React.ReactElement) {
@@ -179,16 +259,21 @@ describe('DashboardPage', () => {
   it('renders all dashboard cards', () => {
     renderWithProviders(<DashboardPage />);
 
+    expect(screen.getByText('Widgety focus')).toBeDefined();
+    expect(screen.getAllByText('Centrum danych').length).toBeGreaterThan(0);
+    expect(screen.getByRole('img', { name: 'Dashboard hero' })).toBeDefined();
     expect(screen.getByText('Gotowość na dziś')).toBeDefined();
+    expect(screen.getByText('Poranny check-in')).toBeDefined();
     expect(screen.getByText('Trening dziś')).toBeDefined();
     expect(screen.getByText('Analiza obciążeń')).toBeDefined();
     expect(screen.getByText('Aktywności i AI')).toBeDefined();
-    expect(screen.getByText('Szybkie przejścia')).toBeDefined();
+    expect(screen.getAllByText('Coach AI').length).toBeGreaterThan(0);
+    expect(screen.getByText('Stan bloku')).toBeDefined();
   });
 
   it('renders recent activity name', () => {
     renderWithProviders(<DashboardPage />);
 
-    expect(screen.getByText('Morning Ride')).toBeDefined();
+    expect(screen.getAllByText('Morning Ride').length).toBeGreaterThan(0);
   });
 });

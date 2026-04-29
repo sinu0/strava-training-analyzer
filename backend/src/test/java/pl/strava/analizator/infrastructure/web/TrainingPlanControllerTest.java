@@ -28,9 +28,15 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import pl.strava.analizator.application.TrainingPlanService;
 import pl.strava.analizator.application.dto.CalendarActivitySummaryDto;
+import pl.strava.analizator.application.dto.TrainingAdjustmentSuggestionDto;
 import pl.strava.analizator.application.dto.CalendarDayDto;
+import pl.strava.analizator.application.dto.RecordAdjustmentFeedbackRequest;
+import pl.strava.analizator.application.dto.TrainingDayProjectionDto;
+import pl.strava.analizator.application.dto.TrainingExecutionAssessmentDto;
+import pl.strava.analizator.application.dto.TrainingGoalScorecardDto;
 import pl.strava.analizator.application.dto.TrainingPlanDto;
 import pl.strava.analizator.application.dto.TrainingPlanProgramDto;
+import pl.strava.analizator.application.dto.TrainingWeekObjectiveDto;
 import pl.strava.analizator.domain.model.TrainingPlanStatus;
 import pl.strava.analizator.infrastructure.config.SecurityConfig;
 
@@ -136,6 +142,30 @@ class TrainingPlanControllerTest {
                         .tss(BigDecimal.valueOf(85))
                         .build())
                 .compliance(106.25)
+                .projection(TrainingDayProjectionDto.builder()
+                        .plannedTss(BigDecimal.valueOf(80))
+                        .projectedCtl(BigDecimal.valueOf(71.1))
+                        .projectedAtl(BigDecimal.valueOf(77.2))
+                        .projectedTsb(BigDecimal.valueOf(-6.0))
+                        .projectedReadiness(68)
+                        .dayType("TEMPO")
+                        .dayLabel("Tempo")
+                        .taperDay(false)
+                        .build())
+                .adjustment(TrainingAdjustmentSuggestionDto.builder()
+                        .type("LIGHTEN")
+                        .title("Zdejmij intensywność")
+                        .description("ATL jest już wysoko względem CTL.")
+                        .build())
+                .execution(TrainingExecutionAssessmentDto.builder()
+                        .outcome("WELL_EXECUTED")
+                        .label("Trafiony bodziec")
+                        .description("Czas i obciążenie były blisko planu.")
+                        .score(92)
+                        .tssCompliance(106.25)
+                        .durationCompliance(100.0)
+                        .stimulusMatch(true)
+                        .build())
                 .build();
 
         CalendarDayDto day2 = CalendarDayDto.builder()
@@ -151,20 +181,55 @@ class TrainingPlanControllerTest {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].planned.plannedType", is("ENDURANCE")))
                 .andExpect(jsonPath("$[0].actual.name", is("Morning Ride")))
-                .andExpect(jsonPath("$[0].compliance", is(106.25)));
+                .andExpect(jsonPath("$[0].compliance", is(106.25)))
+                .andExpect(jsonPath("$[0].projection.projectedReadiness", is(68)))
+                .andExpect(jsonPath("$[0].adjustment.title", is("Zdejmij intensywność")))
+                .andExpect(jsonPath("$[0].execution.label", is("Trafiony bodziec")))
+                .andExpect(jsonPath("$[0].execution.score", is(92)));
     }
 
     @Test
     void generatePlan_returns201() throws Exception {
-        TrainingPlanProgramDto dto = TrainingPlanProgramDto.builder()
-                .id(UUID.randomUUID())
-                .name("BUILD_BASE 4w")
-                .goal("BUILD_BASE")
-                .startDate(LocalDate.of(2025, 1, 6))
-                .endDate(LocalDate.of(2025, 2, 2))
-                .targetWeeklyTss(BigDecimal.valueOf(400))
-                .generatedBy("auto")
-                .build();
+        TrainingPlanProgramDto dto = new TrainingPlanProgramDto(
+                UUID.randomUUID(),
+                "BUILD_BASE 4w",
+                "BUILD_BASE",
+                "A",
+                LocalDate.of(2025, 1, 6),
+                LocalDate.of(2025, 2, 2),
+                LocalDate.of(2025, 2, 2),
+                LocalDate.of(2025, 1, 20),
+                List.of(new TrainingWeekObjectiveDto(
+                        LocalDate.of(2025, 1, 6),
+                        LocalDate.of(2025, 1, 12),
+                        "BASE_ENDURANCE",
+                        "Budowa bazy",
+                        "Długi tlen i kontrola akcentu",
+                        BigDecimal.valueOf(380),
+                        1,
+                        List.of("ENDURANCE", "TEMPO"),
+                        "Dowóz na długi tlen",
+                        "Najwięcej węgli zaplanuj pod długi tlen i jedyny akcent tygodnia; lekkie dni bez dodatkowego ładowania.")),
+                List.of(TrainingGoalScorecardDto.builder()
+                        .weekStart(LocalDate.of(2025, 1, 6))
+                        .weekEnd(LocalDate.of(2025, 1, 12))
+                        .label("Budowa bazy")
+                        .plannedTss(BigDecimal.valueOf(380))
+                        .actualTss(BigDecimal.valueOf(360))
+                        .plannedQualityDays(1)
+                        .completedQualityDays(1)
+                        .avgExecutionScore(88)
+                        .onTrack(true)
+                        .build()),
+                BigDecimal.valueOf(400),
+                null,
+                75,
+                180,
+                "SUNDAY",
+                "INDOOR_FRIENDLY",
+                "auto",
+                null
+        );
 
         when(trainingPlanService.generatePlan(any())).thenReturn(dto);
 
@@ -173,7 +238,9 @@ class TrainingPlanControllerTest {
                         .content("""
                             {
                                 "goal": "BUILD_BASE",
+                                "goalPriority": "A",
                                 "startDate": "2025-01-06",
+                                "eventDate": "2025-02-02",
                                 "weeks": 4,
                                 "trainingDaysPerWeek": 3,
                                 "targetWeeklyTss": 400
@@ -181,6 +248,31 @@ class TrainingPlanControllerTest {
                             """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.goal", is("BUILD_BASE")))
+                .andExpect(jsonPath("$.goalPriority", is("A")))
+                .andExpect(jsonPath("$.eventDate", is("2025-02-02")))
+                .andExpect(jsonPath("$.taperStartDate", is("2025-01-20")))
+                .andExpect(jsonPath("$.weeklyObjectives[0].objectiveType", is("BASE_ENDURANCE")))
+                .andExpect(jsonPath("$.weeklyObjectives[0].maxQualityDays", is(1)))
+                .andExpect(jsonPath("$.weeklyObjectives[0].fuelingLabel", is("Dowóz na długi tlen")))
+                .andExpect(jsonPath("$.goalScorecards[0].plannedQualityDays", is(1)))
                 .andExpect(jsonPath("$.name", is("BUILD_BASE 4w")));
+    }
+
+    @Test
+    void recordAdjustmentFeedback_returns204() throws Exception {
+        mockMvc.perform(post("/api/training/adjustments/feedback")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {
+                                "date": "2025-01-06",
+                                "planId": "11111111-1111-1111-1111-111111111111",
+                                "suggestionType": "LIGHTEN",
+                                "suggestionTitle": "Zdejmij intensywność",
+                                "feedback": "ACCEPTED"
+                            }
+                            """))
+                .andExpect(status().isNoContent());
+
+        verify(trainingPlanService).recordAdjustmentFeedback(any(RecordAdjustmentFeedbackRequest.class));
     }
 }

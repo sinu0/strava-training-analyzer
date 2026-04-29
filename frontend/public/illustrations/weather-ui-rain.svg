@@ -1,0 +1,27 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rain-cloud-fill" x1="14" y1="16" x2="47" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C7D2FE"/>
+      <stop offset="0.45" stop-color="#64748B"/>
+      <stop offset="1" stop-color="#334155"/>
+    </linearGradient>
+    <linearGradient id="rain-cloud-stroke" x1="16" y1="17" x2="47" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E0E7FF"/>
+      <stop offset="1" stop-color="#64748B"/>
+    </linearGradient>
+    <linearGradient id="rain-drop" x1="19" y1="38" x2="37" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7DD3FC"/>
+      <stop offset="1" stop-color="#0EA5E9"/>
+    </linearGradient>
+    <filter id="rain-shadow" x="4" y="10" width="56" height="48" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.34"/>
+    </filter>
+  </defs>
+  <g filter="url(#rain-shadow)">
+    <path d="M21 37.5C15.48 37.5 11 33.32 11 28.17C11 23.36 14.91 19.35 19.89 18.88C21.47 13.18 26.83 9.1 33.12 9.1C40.45 9.1 46.48 14.52 47.29 21.48C51.08 22.32 53.8 25.54 53.8 29.35C53.8 33.82 50.12 37.45 45.58 37.45H21V37.5Z" fill="url(#rain-cloud-fill)"/>
+    <path d="M21 37.5C15.48 37.5 11 33.32 11 28.17C11 23.36 14.91 19.35 19.89 18.88C21.47 13.18 26.83 9.1 33.12 9.1C40.45 9.1 46.48 14.52 47.29 21.48C51.08 22.32 53.8 25.54 53.8 29.35C53.8 33.82 50.12 37.45 45.58 37.45H21" stroke="url(#rain-cloud-stroke)" stroke-width="2.3" stroke-linejoin="round"/>
+    <path d="M23 43L19 52.5" stroke="url(#rain-drop)" stroke-width="3.1" stroke-linecap="round"/>
+    <path d="M33 43L29 54.5" stroke="url(#rain-drop)" stroke-width="3.1" stroke-linecap="round"/>
+    <path d="M43 43L39 52.5" stroke="url(#rain-drop)" stroke-width="3.1" stroke-linecap="round"/>
+  </g>
+</svg>

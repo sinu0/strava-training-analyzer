@@ -24,6 +24,10 @@ import type {
   WeeklySummary,
   WeeklyOptimalLoad,
   DailyOptimalLoad,
+  DurabilityInsight,
+  BlockHealth,
+  ProgressionLevel,
+  SaveReadinessCheckInInput,
   ZoneDistribution,
   TrendPoint,
   PeriodSummary,
@@ -120,6 +124,17 @@ export function useRecentActivities(size = 5) {
   });
 }
 
+export function useBlockHealth() {
+  return useQuery<BlockHealth>({
+    queryKey: ['blockHealth'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<BlockHealth>('/analytics/block-health');
+      return data;
+    },
+    staleTime: STALE_REALTIME,
+  });
+}
+
 export function useComparePeriods(period1: DateRange, period2: DateRange) {
   return useQuery<PeriodSummary[]>({
     queryKey: ['compare', period1, period2],
@@ -183,6 +198,24 @@ export function useWeatherGradient(location: string | undefined) {
       return data;
     },
     enabled: !!location,
+    staleTime: STALE_STATIC,
+  });
+}
+
+export function useWeatherPointGradient(
+  lat: number | undefined,
+  lon: number | undefined,
+  label?: string,
+) {
+  return useQuery<WeatherGradient>({
+    queryKey: ['weatherPointGradient', lat, lon, label],
+    queryFn: async () => {
+      const { data } = await apiClient.get<WeatherGradient>('/weather/gradient/point', {
+        params: { lat, lon, label },
+      });
+      return data;
+    },
+    enabled: lat != null && lon != null,
     staleTime: STALE_STATIC,
   });
 }
@@ -266,6 +299,42 @@ export function useReadiness() {
     queryFn: async () => {
       const { data } = await apiClient.get<ReadinessData>('/analytics/readiness');
       return data;
+    },
+  });
+}
+
+export function useDurability() {
+  return useQuery<DurabilityInsight>({
+    queryKey: ['durability'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<DurabilityInsight>('/analytics/durability');
+      return data;
+    },
+  });
+}
+
+export function useProgressionLevels() {
+  return useQuery<ProgressionLevel[]>({
+    queryKey: ['progressionLevels'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<ProgressionLevel[]>('/analytics/progression-levels');
+      return data;
+    },
+    staleTime: STALE_REALTIME,
+  });
+}
+
+export function useSaveReadinessCheckIn() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: SaveReadinessCheckInInput) => {
+      const { data } = await apiClient.post<ReadinessData>('/analytics/readiness/check-in', payload);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(['readiness'], data);
+      queryClient.invalidateQueries({ queryKey: ['readiness'] });
     },
   });
 }

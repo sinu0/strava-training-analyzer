@@ -38,6 +38,7 @@ public class ActivityService {
             "intensity_factor", "if",
             "efficiency_factor", "ef",
             "aerobic_decoupling", "aerobicDecoupling",
+            "power_fade", "powerFade",
             "power_curve", "powerCurve",
             "time_in_zones", "timeInZones",
             "hr_training_stress_score", "hrTss"

@@ -54,6 +54,12 @@ export default function CalendarDayCell({ day, dateNum, isCurrentMonth, isToday,
         />
       )}
 
+      {!!day?.projection && (
+        <Typography variant="caption" display="block" noWrap sx={{ mt: 0.25, color: 'text.secondary', fontSize: '0.65rem', fontWeight: 600 }}>
+          TSB {day.projection.projectedTsb > 0 ? '+' : ''}{Math.round(day.projection.projectedTsb)}
+        </Typography>
+      )}
+
       {!!day?.actual && (
         <Typography variant="caption" display="block" noWrap sx={{ mt: 0.25, color: 'text.secondary', fontSize: '0.65rem' }}>
           {day.actual.name} {day.actual.tss != null ? `(${day.actual.tss} TSS)` : ''}
@@ -65,6 +71,16 @@ export default function CalendarDayCell({ day, dateNum, isCurrentMonth, isToday,
           {day.compliance}%
         </Typography>
       )}
+
+      {!!day?.execution && (
+        <Chip
+          label={day.execution.label}
+          size="small"
+          color={executionChipColor(day.execution.outcome)}
+          variant="outlined"
+          sx={{ fontSize: '0.6rem', height: 18, mt: 0.25, maxWidth: '100%' }}
+        />
+      )}
     </Box>
   );
 }
@@ -72,4 +88,18 @@ export default function CalendarDayCell({ day, dateNum, isCurrentMonth, isToday,
 function categoryLabel(type: string | null): string {
   if (!type) return '';
   return CATEGORY_LABELS[type as WorkoutCategory] ?? type;
+}
+
+function executionChipColor(outcome: string): 'success' | 'warning' | 'error' | 'info' {
+  switch (outcome) {
+    case 'WELL_EXECUTED':
+      return 'success';
+    case 'TOO_HARD':
+    case 'MISSED_STIMULUS':
+      return 'error';
+    case 'TOO_EASY':
+    case 'PARTIAL':
+    default:
+      return 'warning';
+  }
 }

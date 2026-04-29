@@ -50,6 +50,14 @@ public class WeatherController {
         return ResponseEntity.ok(weatherService.getWeatherGradient(location));
     }
 
+    @GetMapping("/gradient/point")
+    public ResponseEntity<WeatherGradientDto> getWeatherPointGradient(
+            @RequestParam double lat,
+            @RequestParam double lon,
+            @RequestParam(required = false) String label) {
+        return ResponseEntity.ok(weatherService.getWeatherPointGradient(lat, lon, label));
+    }
+
     @PostMapping("/gradient/refresh")
     public ResponseEntity<Void> refreshGradient(@RequestParam String location) {
         cacheScheduler.refreshLocation(location);

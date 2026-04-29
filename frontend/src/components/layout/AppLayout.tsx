@@ -8,6 +8,7 @@ import {
   useFtpProgress,
   useProfile,
   useReadiness,
+  useBlockHealth,
   useWeatherGradient,
   useWeatherLocations,
 } from '@/hooks/useAnalytics';
@@ -50,6 +51,7 @@ export default function AppLayout() {
 
   // Lightweight queries for TopBar status pill (shared cache with DashboardPage)
   const { data: readiness } = useReadiness();
+  const { data: blockHealth } = useBlockHealth();
   const { data: ftpProgress } = useFtpProgress();
   const { data: profile } = useProfile();
   const { data: weatherLocations } = useWeatherLocations();
@@ -94,6 +96,7 @@ export default function AppLayout() {
         <TopBar
           onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
           readiness={readiness}
+          blockHealth={blockHealth}
           ftpProgress={ftpProgress}
           weatherGradient={weatherGradient}
           profileName={profile?.name}
@@ -103,6 +106,7 @@ export default function AppLayout() {
           sx={{
             flexGrow: 1,
             p: { xs: 2, sm: 3, md: 3.5 },
+            pt: { xs: 5, sm: 6, md: 7 },
             pb: { xs: 12, md: 3.5 },
             backgroundImage: `linear-gradient(rgba(13,17,23,0.93), rgba(13,17,23,0.93)), url('/illustrations/bg-main.jpg')`,
             backgroundSize: 'cover',

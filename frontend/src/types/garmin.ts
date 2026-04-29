@@ -2,6 +2,7 @@ export interface GarminStatus {
   connected: boolean;
   lastSyncAt: string | null;
   email: string | null;
+  lastError: string | null;
 }
 
 export interface GarminHealthData {
@@ -26,4 +27,13 @@ export interface GarminSyncResult {
   skipped: number;
   failed: number;
   errors?: string[];
+}
+
+export interface GarminBridgeStatus {
+  online: boolean;
+  busy: boolean;
+  sessionReady: boolean;
+  requiresInteraction: boolean;
+  lastSyncAt: string | null;
+  lastError: string | null;
 }

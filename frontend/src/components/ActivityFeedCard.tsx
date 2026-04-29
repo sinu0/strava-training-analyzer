@@ -41,6 +41,7 @@ interface ActivityFeedCardProps {
   onClick: (id: string) => void;
   metricKey?: MetricKey;
   maxValues?: MaxValues;
+  summaryText?: string;
 }
 
 const previewFrameSx = {
@@ -264,6 +265,7 @@ const ActivityFeedCard = memo(function ActivityFeedCard({
   onClick,
   metricKey,
   maxValues,
+  summaryText,
 }: ActivityFeedCardProps) {
   const positions = useMemo(() => {
     if (!activity.summaryPolyline) return [] as [number, number][];
@@ -354,6 +356,22 @@ const ActivityFeedCard = memo(function ActivityFeedCard({
         </Stack>
 
         <Divider sx={{ my: 0.25, borderColor: alphaColor(COMMON_COLORS.white, 0.06) }} />
+
+        {summaryText ? (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              display: '-webkit-box',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+            }}
+          >
+            {summaryText}
+          </Typography>
+        ) : null}
 
         <Stack direction="row" spacing={0} sx={{ flexWrap: 'wrap', gap: 0.75 }}>
           {activity.distanceM != null && activity.distanceM > 0 && (

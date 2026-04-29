@@ -69,13 +69,25 @@ vi.mock('@/hooks/useAi', () => ({
 
 vi.mock('@/hooks/useGarmin', () => ({
   useGarminStatus: () => ({
-    data: { connected: false, lastSyncAt: null, email: null },
+    data: { connected: false, lastSyncAt: null, email: null, lastError: null },
+    isLoading: false,
+  }),
+  useGarminBridgeStatus: () => ({
+    data: {
+      online: false,
+      busy: false,
+      sessionReady: false,
+      requiresInteraction: false,
+      lastSyncAt: null,
+      lastError: null,
+    },
     isLoading: false,
   }),
   useGarminHealth: () => ({ data: null, isLoading: false }),
   useSaveGarminCredentials: () => ({ mutate: vi.fn(), isPending: false }),
   useDeleteGarminCredentials: () => ({ mutate: vi.fn(), isPending: false }),
   useGarminSync: () => ({ mutate: vi.fn(), isPending: false, data: null }),
+  useGarminBridgeSync: () => ({ mutate: vi.fn(), isPending: false, data: null, isError: false, error: null }),
 }));
 
 vi.mock('@/hooks/useAnalytics', () => ({

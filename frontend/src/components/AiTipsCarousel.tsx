@@ -1,3 +1,4 @@
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import BatteryAlertIcon from '@mui/icons-material/BatteryAlert';
 import BoltIcon from '@mui/icons-material/Bolt';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -38,6 +39,7 @@ const TYPE_ICONS: Record<PredictionType, React.ReactNode> = {
   PERFORMANCE_TREND: <TrendingUpIcon />,
   OVERTRAINING_RISK: <WarningIcon />,
   RACE_READINESS: <EmojiEventsIcon />,
+  TRAINING_COACH_SUMMARY: <AutoAwesomeIcon />,
 };
 
 interface TipStructuredData {

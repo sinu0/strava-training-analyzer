@@ -46,6 +46,8 @@ import {
 } from '@/hooks/useAnalytics';
 import { useCountdown } from '@/hooks/useCountdown';
 import {
+  useGarminBridgeStatus,
+  useGarminBridgeSync,
   useDeleteGarminCredentials,
   useGarminHealth,
   useGarminStatus,
@@ -252,9 +254,11 @@ export default function AdminPage() {
   const { data: aiStatus } = useAiStatus();
   const runAiBatch = useRunAiBatch();
   const { data: garminStatus } = useGarminStatus();
+  const { data: garminBridgeStatus } = useGarminBridgeStatus();
   const saveGarminCredentials = useSaveGarminCredentials();
   const deleteGarminCredentials = useDeleteGarminCredentials();
   const garminSync = useGarminSync();
+  const garminBridgeSync = useGarminBridgeSync();
   const todayStr = new Date().toISOString().slice(0, 10);
   const { data: garminHealthToday } = useGarminHealth(todayStr, todayStr);
 
@@ -329,6 +333,7 @@ export default function AdminPage() {
           <Grid item xs={12} md={6}>
             <GarminConnectSection
               garminStatus={garminStatus}
+              garminBridgeStatus={garminBridgeStatus}
               garminEmail={garminCredentialsForm.garminEmail}
               garminPassword={garminCredentialsForm.garminPassword}
               showGarminForm={garminCredentialsForm.showGarminForm}
@@ -339,14 +344,22 @@ export default function AdminPage() {
               }
               deleteGarminCredentialsPending={deleteGarminCredentials.isPending}
               garminSyncPending={garminSync.isPending}
-              garminSyncData={garminSync.data}
-              garminSyncError={garminSync.isError ? garminSync.error : null}
+              garminBridgeSyncPending={garminBridgeSync.isPending}
+              garminSyncData={garminBridgeSync.data ?? garminSync.data}
+              garminSyncError={
+                garminBridgeSync.isError
+                  ? garminBridgeSync.error
+                  : garminSync.isError
+                    ? garminSync.error
+                    : null
+              }
               onGarminEmailChange={garminCredentialsForm.setGarminEmail}
               onGarminPasswordChange={garminCredentialsForm.setGarminPassword}
               onShowGarminFormChange={garminCredentialsForm.setShowGarminForm}
               onSaveGarminCredentials={garminCredentialsForm.handleSaveGarminCredentials}
               onDeleteGarminCredentials={() => deleteGarminCredentials.mutate()}
               onGarminSync={(from, to) => garminSync.mutate({ from, to })}
+              onGarminBridgeSync={(from, to) => garminBridgeSync.mutate({ from, to })}
             />
           </Grid>
         </Grid>

@@ -342,6 +342,135 @@ public class WeatherService {
                 .build();
     }
 
+    @SuppressWarnings("unchecked")
+    public WeatherGradientDto getWeatherPointGradient(double latitude, double longitude, String label) {
+        try {
+            Map<String, Object> response = restTemplate.getForObject(
+                    OPEN_METEO_FORECAST_URL, Map.class, latitude, longitude);
+
+            if (response == null) {
+                return WeatherGradientDto.builder()
+                        .locationName(resolvePointLabel(label, latitude, longitude))
+                        .current(fallbackWeather())
+                        .days(List.of())
+                        .build();
+            }
+
+            Map<String, Object> hourlyData = (Map<String, Object>) response.get("hourly");
+            Map<String, Object> dailyData = (Map<String, Object>) response.get("daily");
+
+            if (hourlyData == null || dailyData == null) {
+                return WeatherGradientDto.builder()
+                        .locationName(resolvePointLabel(label, latitude, longitude))
+                        .current(getCurrentWeather(latitude, longitude))
+                        .days(List.of())
+                        .build();
+            }
+
+            List<String> times = (List<String>) hourlyData.get("time");
+            List<Number> temps = (List<Number>) hourlyData.get("temperature_2m");
+            List<Number> winds = (List<Number>) hourlyData.get("wind_speed_10m");
+            List<Number> precips = (List<Number>) hourlyData.get("precipitation");
+            List<Number> hourlyCodes = (List<Number>) hourlyData.get("weather_code");
+
+            List<String> dates = (List<String>) dailyData.get("time");
+            List<Number> maxTemps = (List<Number>) dailyData.get("temperature_2m_max");
+            List<Number> minTemps = (List<Number>) dailyData.get("temperature_2m_min");
+            List<Number> precipSums = (List<Number>) dailyData.get("precipitation_sum");
+            List<Number> windMaxes = (List<Number>) dailyData.get("wind_speed_10m_max");
+            List<Number> dailyCodes = (List<Number>) dailyData.get("weather_code");
+
+            if (times == null || dates == null) {
+                return WeatherGradientDto.builder()
+                        .locationName(resolvePointLabel(label, latitude, longitude))
+                        .current(getCurrentWeather(latitude, longitude))
+                        .days(List.of())
+                        .build();
+            }
+
+            Map<LocalDate, SunTimes> sunTimesByDate = fetchSunTimes(latitude, longitude);
+            List<WeatherGradientDto.GradientDay> days = new ArrayList<>();
+
+            for (int dayIndex = 0; dayIndex < dates.size(); dayIndex++) {
+                LocalDate forecastDate = LocalDate.parse(dates.get(dayIndex));
+                List<WeatherGradientDto.HourScore> hourScores = new ArrayList<>();
+                int dayStartIndex = dayIndex * 24;
+
+                for (int hourIndex = 0; hourIndex < 24; hourIndex++) {
+                    int dataIndex = dayStartIndex + hourIndex;
+                    if (dataIndex >= times.size()) {
+                        break;
+                    }
+
+                    double temperature = temps.get(dataIndex).doubleValue();
+                    double wind = winds.get(dataIndex).doubleValue();
+                    double precipitation = precips.get(dataIndex).doubleValue();
+                    int weatherCode = hourlyCodes.get(dataIndex).intValue();
+
+                    hourScores.add(WeatherGradientDto.HourScore.builder()
+                            .hour(String.format("%02d:00", hourIndex))
+                            .score(calculateHourlyScore(temperature, wind, precipitation, weatherCode))
+                            .temperature(temperature)
+                            .windSpeed(wind)
+                            .precipitation(precipitation)
+                            .weatherCode(weatherCode)
+                            .build());
+                }
+
+                int dayScore = (int) Math.round(hourScores.stream()
+                        .filter(hourScore -> {
+                            int hour = Integer.parseInt(hourScore.getHour().split(":")[0]);
+                            return hour >= 6 && hour <= 22;
+                        })
+                        .mapToInt(WeatherGradientDto.HourScore::getScore)
+                        .average()
+                        .orElse(0));
+
+                String bestStart = null;
+                String bestEnd = null;
+                int bestScore = 0;
+                for (int hour = 6; hour <= 21; hour++) {
+                    if (hour < hourScores.size() && hour + 1 < hourScores.size()) {
+                        int windowScore = (hourScores.get(hour).getScore() + hourScores.get(hour + 1).getScore()) / 2;
+                        if (windowScore > bestScore) {
+                            bestScore = windowScore;
+                            bestStart = hourScores.get(hour).getHour();
+                            bestEnd = String.format("%02d:00", hour + 2);
+                        }
+                    }
+                }
+
+                days.add(WeatherGradientDto.GradientDay.builder()
+                        .date(forecastDate.toString())
+                        .dailyScore(dayScore)
+                        .bestWindowStart(bestStart)
+                        .bestWindowEnd(bestEnd)
+                        .bestWindowScore(bestScore)
+                        .tempMin(minTemps != null && dayIndex < minTemps.size() ? minTemps.get(dayIndex).doubleValue() : 0)
+                        .tempMax(maxTemps != null && dayIndex < maxTemps.size() ? maxTemps.get(dayIndex).doubleValue() : 0)
+                        .precipitationSum(precipSums != null && dayIndex < precipSums.size() ? precipSums.get(dayIndex).doubleValue() : 0)
+                        .windSpeedMax(windMaxes != null && dayIndex < windMaxes.size() ? windMaxes.get(dayIndex).doubleValue() : 0)
+                        .weatherCode(dailyCodes != null && dayIndex < dailyCodes.size() ? dailyCodes.get(dayIndex).intValue() : 0)
+                        .weatherDescription(describeWeatherCode(dailyCodes != null && dayIndex < dailyCodes.size() ? dailyCodes.get(dayIndex).intValue() : 0))
+                        .hourlyScores(enrichHoursWithSunTimes(hourScores, forecastDate, sunTimesByDate))
+                        .build());
+            }
+
+            return WeatherGradientDto.builder()
+                    .locationName(resolvePointLabel(label, latitude, longitude))
+                    .current(getCurrentWeather(latitude, longitude))
+                    .days(days)
+                    .build();
+        } catch (Exception exception) {
+            log.warn("Failed to build point weather gradient: {}", exception.getMessage());
+            return WeatherGradientDto.builder()
+                    .locationName(resolvePointLabel(label, latitude, longitude))
+                    .current(fallbackWeather())
+                    .days(List.of())
+                    .build();
+        }
+    }
+
     // ===================== LOCATION MANAGEMENT =====================
 
     public List<WeatherLocationDto> getAllLocations() {
@@ -405,6 +534,13 @@ public class WeatherService {
                 .longitude(entity.getLongitude().doubleValue())
                 .active(entity.isActive())
                 .build();
+    }
+
+    private String resolvePointLabel(String label, double latitude, double longitude) {
+        if (label != null && !label.isBlank()) {
+            return label;
+        }
+        return String.format("%.4f, %.4f", latitude, longitude);
     }
 
     // ===================== HELPERS =====================
@@ -527,6 +663,50 @@ public class WeatherService {
     private int toInt(Object val) {
         if (val instanceof Number n) return n.intValue();
         return -1;
+    }
+
+    private int calculateHourlyScore(double temp, double wind, double precip, int code) {
+        double feelsLike = temp;
+        if (temp <= 10 && wind > 4.8) {
+            feelsLike = 13.12 + 0.6215 * temp - 11.37 * Math.pow(wind, 0.16)
+                    + 0.3965 * temp * Math.pow(wind, 0.16);
+        }
+
+        int tempScore;
+        if (feelsLike >= 12 && feelsLike <= 22) tempScore = 30;
+        else if (feelsLike >= 8 && feelsLike < 12) tempScore = 20;
+        else if (feelsLike > 22 && feelsLike <= 28) tempScore = 20;
+        else if (feelsLike >= 3 && feelsLike < 8) tempScore = 10;
+        else if (feelsLike > 28 && feelsLike <= 35) tempScore = 10;
+        else tempScore = 0;
+
+        int precipScore;
+        if (precip == 0 && code < 51) precipScore = 30;
+        else if (precip == 0 && code >= 51) precipScore = 20;
+        else if (precip > 0 && precip <= 0.5) precipScore = 10;
+        else if (precip > 0.5 && precip <= 2) precipScore = 5;
+        else precipScore = 0;
+
+        int windScore;
+        if (wind <= 10) windScore = 20;
+        else if (wind <= 20) windScore = 12;
+        else if (wind <= 30) windScore = 5;
+        else windScore = 0;
+
+        int codeScore;
+        if (code <= 3) codeScore = 20;
+        else if (code <= 48) codeScore = 12;
+        else if (code <= 55) codeScore = 5;
+        else if (code <= 67) codeScore = 2;
+        else if (code <= 77) codeScore = 0;
+        else if (code <= 86) codeScore = 2;
+        else codeScore = 0;
+
+        int total = tempScore + precipScore + windScore + codeScore;
+        if (feelsLike < 10 && precip > 0) {
+            total -= 10;
+        }
+        return Math.max(0, Math.min(100, total));
     }
 
     private record SunTimes(String sunrise, String sunset) {}

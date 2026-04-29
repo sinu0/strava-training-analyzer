@@ -124,4 +124,101 @@ class WeatherServiceTest {
             });
         });
     }
+
+    @Test
+    void getWeatherPointGradient_buildsLiveGradientForClickedCoordinates() {
+        when(restTemplate.getForObject(anyString(), eq(Map.class), anyDouble(), anyDouble()))
+                .thenAnswer(invocation -> {
+                    String url = invocation.getArgument(0, String.class);
+                    if (url.contains("&current=") && url.contains("&hourly=")) {
+                        return Map.of(
+                                "current", Map.of(
+                                        "temperature_2m", 19.5,
+                                        "wind_speed_10m", 11.0,
+                                        "precipitation", 0.0,
+                                        "weather_code", 1
+                                ),
+                                "hourly", Map.of(
+                                        "time", List.of(
+                                                LocalDate.now() + "T00:00",
+                                                LocalDate.now() + "T01:00",
+                                                LocalDate.now() + "T02:00",
+                                                LocalDate.now() + "T03:00",
+                                                LocalDate.now() + "T04:00",
+                                                LocalDate.now() + "T05:00",
+                                                LocalDate.now() + "T06:00",
+                                                LocalDate.now() + "T07:00",
+                                                LocalDate.now() + "T08:00",
+                                                LocalDate.now() + "T09:00",
+                                                LocalDate.now() + "T10:00",
+                                                LocalDate.now() + "T11:00",
+                                                LocalDate.now() + "T12:00",
+                                                LocalDate.now() + "T13:00",
+                                                LocalDate.now() + "T14:00",
+                                                LocalDate.now() + "T15:00",
+                                                LocalDate.now() + "T16:00",
+                                                LocalDate.now() + "T17:00",
+                                                LocalDate.now() + "T18:00",
+                                                LocalDate.now() + "T19:00",
+                                                LocalDate.now() + "T20:00",
+                                                LocalDate.now() + "T21:00",
+                                                LocalDate.now() + "T22:00",
+                                                LocalDate.now() + "T23:00"
+                                        ),
+                                        "temperature_2m", List.of(8, 8, 7, 7, 6, 7, 9, 11, 13, 15, 17, 18, 19, 20, 20, 19, 18, 16, 14, 12, 11, 10, 9, 8),
+                                        "wind_speed_10m", List.of(7, 7, 6, 6, 6, 7, 8, 9, 10, 11, 12, 12, 13, 14, 14, 13, 12, 11, 10, 9, 8, 8, 7, 7),
+                                        "precipitation", List.of(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                                        "weather_code", List.of(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+                                ),
+                                "daily", Map.of(
+                                        "time", List.of(LocalDate.now().toString()),
+                                        "temperature_2m_max", List.of(20.0),
+                                        "temperature_2m_min", List.of(6.0),
+                                        "precipitation_sum", List.of(0.0),
+                                        "wind_speed_10m_max", List.of(14.0),
+                                        "weather_code", List.of(1)
+                                )
+                        );
+                    }
+                    if (url.contains("daily=sunrise,sunset")) {
+                        return Map.of(
+                                "daily", Map.of(
+                                        "time", List.of(LocalDate.now().toString()),
+                                        "sunrise", List.of(LocalDate.now() + "T06:05"),
+                                        "sunset", List.of(LocalDate.now() + "T19:48")
+                                )
+                        );
+                    }
+                    if (url.contains("&current=")) {
+                        return Map.of(
+                                "current", Map.of(
+                                        "temperature_2m", 19.5,
+                                        "wind_speed_10m", 11.0,
+                                        "precipitation", 0.0,
+                                        "weather_code", 1
+                                )
+                        );
+                    }
+                    return null;
+                });
+
+        WeatherGradientDto gradient = weatherService.getWeatherPointGradient(
+                50.0614,
+                19.9366,
+                "Kliknięty punkt"
+        );
+
+        assertThat(gradient.getLocationName()).isEqualTo("Kliknięty punkt");
+        assertThat(gradient.getCurrent().getTemperature()).isEqualTo(19.5);
+        assertThat(gradient.getDays()).singleElement().satisfies(day -> {
+            assertThat(day.getBestWindowStart()).isNotBlank();
+            assertThat(day.getBestWindowEnd()).isNotBlank();
+            assertThat(day.getBestWindowScore()).isPositive();
+            assertThat(day.getHourlyScores()).hasSize(24);
+            assertThat(day.getHourlyScores()).anySatisfy(hour -> {
+                assertThat(hour.getSunrise()).isEqualTo("06:05");
+                assertThat(hour.getSunset()).isEqualTo("19:48");
+            });
+        });
+    }
 }

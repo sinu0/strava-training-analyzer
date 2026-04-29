@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { useReducer, type MouseEvent } from 'react';
 
 
@@ -15,6 +15,7 @@ interface WeatherWidgetProps {
   onAddLocation: (name: string, lat: number, lon: number) => void;
   onDeleteLocation: (name: string) => void;
   onRefresh: (location: string) => void;
+  onOpenStudio?: () => void;
 }
 
 interface WeatherWidgetState {
@@ -55,6 +56,7 @@ export default function WeatherWidget({
   onAddLocation,
   onDeleteLocation,
   onRefresh,
+  onOpenStudio,
 }: WeatherWidgetProps) {
   const [state, dispatch] = useReducer(
     weatherWidgetReducer,
@@ -94,6 +96,18 @@ export default function WeatherWidget({
         view={state.view}
         onViewChange={(view) => dispatch({ type: 'set-view', view })}
       />
+
+      {!!onOpenStudio && (
+        <Box sx={{ mt: 1.5, display: 'flex', justifyContent: 'flex-end' }}>
+          <Button
+            type="button"
+            variant="outlined"
+            onClick={onOpenStudio}
+          >
+            Otwórz pełne studio pogody
+          </Button>
+        </Box>
+      )}
 
       <WeatherLocationMenu
         anchorEl={state.anchorEl}

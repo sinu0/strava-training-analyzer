@@ -1,0 +1,21 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cloud-fill" x1="14" y1="18" x2="49" y2="46" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#CBD5E1"/>
+      <stop offset="0.55" stop-color="#94A3B8"/>
+      <stop offset="1" stop-color="#475569"/>
+    </linearGradient>
+    <linearGradient id="cloud-stroke" x1="18" y1="20" x2="47" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E2E8F0"/>
+      <stop offset="1" stop-color="#64748B"/>
+    </linearGradient>
+    <filter id="cloud-shadow" x="4" y="10" width="56" height="44" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.32"/>
+    </filter>
+  </defs>
+  <g filter="url(#cloud-shadow)">
+    <path d="M20.5 46C14.7 46 10 41.52 10 36C10 30.84 14.1 26.55 19.31 26.04C20.96 19.6 26.97 15 34.04 15C42.2 15 48.9 21.13 49.81 28.94C53.99 29.87 57 33.48 57 37.75C57 42.75 52.88 46.8 47.8 46.8H20.5V46Z" fill="url(#cloud-fill)"/>
+    <path d="M20.5 46C14.7 46 10 41.52 10 36C10 30.84 14.1 26.55 19.31 26.04C20.96 19.6 26.97 15 34.04 15C42.2 15 48.9 21.13 49.81 28.94C53.99 29.87 57 33.48 57 37.75C57 42.75 52.88 46.8 47.8 46.8H20.5" stroke="url(#cloud-stroke)" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M20 40C22.93 38.82 26.29 38.25 29.92 38.25C35.22 38.25 39.95 39.46 43.42 41.75" stroke="#F8FAFC" stroke-opacity="0.32" stroke-width="2.2" stroke-linecap="round"/>
+  </g>
+</svg>

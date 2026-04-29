@@ -27,6 +27,10 @@ function mockAppLayout() {
 }
 
 function mockStaticPages(importedPages: string[] = [], options?: { skipDashboard?: boolean }) {
+  vi.doMock('../pages/HomePage', () => {
+    importedPages.push('home');
+    return { default: () => <div>Home page</div> };
+  });
   if (!options?.skipDashboard) {
     vi.doMock('../pages/DashboardPage', () => {
       importedPages.push('dashboard');
@@ -56,6 +60,10 @@ function mockStaticPages(importedPages: string[] = [], options?: { skipDashboard
   vi.doMock('../pages/HealthPage', () => {
     importedPages.push('health');
     return { default: () => <div>Health page</div> };
+  });
+  vi.doMock('../pages/WeatherPage', () => {
+    importedPages.push('weather');
+    return { default: () => <div>Weather page</div> };
   });
   vi.doMock('../pages/RoutePlannerPage', () => {
     importedPages.push('route-planner');
@@ -93,9 +101,10 @@ describe('App', () => {
     mockStaticPages(importedPages);
 
     await renderApp('/');
-    expect((await screen.findAllByText('Dashboard page')).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText('Home page')).length).toBeGreaterThan(0);
 
-    expect(importedPages).toContain('dashboard');
+    expect(importedPages).toContain('home');
+    expect(importedPages).not.toContain('dashboard');
     expect(importedPages).not.toContain('activities');
     expect(importedPages).not.toContain('analytics');
   });
@@ -112,5 +121,32 @@ describe('App', () => {
     await renderApp('/');
 
     expect((await screen.findAllByText('Ładowanie strony…')).length).toBeGreaterThan(0);
+  });
+
+  it('loads dashboard module only on dashboard route', async () => {
+    const importedPages: string[] = [];
+
+    mockAppLayout();
+    mockStaticPages(importedPages);
+
+    await renderApp('/dashboard');
+    expect((await screen.findAllByText('Dashboard page')).length).toBeGreaterThan(0);
+
+    expect(importedPages).toContain('dashboard');
+    expect(importedPages).not.toContain('activities');
+  });
+
+  it('loads weather module only on weather route', async () => {
+    const importedPages: string[] = [];
+
+    mockAppLayout();
+    mockStaticPages(importedPages);
+
+    await renderApp('/weather');
+    expect((await screen.findAllByText('Weather page')).length).toBeGreaterThan(0);
+
+    expect(importedPages).toContain('weather');
+    expect(importedPages).not.toContain('dashboard');
+    expect(importedPages).not.toContain('activities');
   });
 });

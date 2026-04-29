@@ -80,6 +80,7 @@ function renderWidget(overrides: Partial<ComponentProps<typeof WeatherWidget>> =
     onAddLocation: vi.fn(),
     onDeleteLocation: vi.fn(),
     onRefresh: vi.fn(),
+    onOpenStudio: vi.fn(),
     ...overrides,
   };
 
@@ -204,5 +205,13 @@ describe('WeatherWidget', () => {
     fireEvent.click(locationButtons[locationButtons.length - 1]!);
 
     expect(props.onAddLocation).toHaveBeenCalledWith('Kraków', 50.0614, 19.9366);
+  });
+
+  it('opens the full weather studio from the widget CTA', () => {
+    const { props } = renderWidget();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Otwórz pełne studio pogody' }));
+
+    expect(props.onOpenStudio).toHaveBeenCalled();
   });
 });

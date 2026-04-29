@@ -88,6 +88,7 @@ public class PromptRegistry {
         templates.put(PredictionType.PERFORMANCE_TREND, performanceTrend());
         templates.put(PredictionType.OVERTRAINING_RISK, overtrainingRisk());
         templates.put(PredictionType.RACE_READINESS, raceReadiness());
+        templates.put(PredictionType.TRAINING_COACH_SUMMARY, trainingCoachSummary());
     }
 
     // --- FTP PREDICTION ---
@@ -155,8 +156,9 @@ public class PromptRegistry {
                         
                         FATIGUE ASSESSMENT SPECIFICS:
                         - ATL (Acute Training Load) is the primary fatigue indicator: ATL > 1.3 × CTL → significant fatigue.
-                        - TSB (Training Stress Balance): < -20 = deep fatigue, -20 to -10 = moderate, -10 to +5 = fresh, > +5 = very fresh.
-                        - Readiness score < 40 = rest/recovery recommended, 40-70 = moderate training ok, > 70 = high intensity ok.
+                        - TSB (Training Stress Balance): < -30 = recovery priority, -30 to -10 = productive fatigue, -10 to +5 = normal trainable state, > +5 = fresh.
+                        - Negative TSB alone is not a reason for full rest. TSB between -30 and 0 can still support productive training if no extra red flags exist.
+                        - Readiness score < 25 = recovery priority, 25-55 = controlled training still possible, > 55 = normal/high-quality training depending on TSB.
                         - Monitor weekly TSS using currentWeekTss and previousWeekTss: >550 per week for 2+ consecutive weeks → accumulated fatigue risk.
                         - In "metrics" include: ATL, CTL, TSB, readinessScore, currentWeekTss, previousWeekTss, daysToRecovery (estimate).
                         """)
@@ -203,11 +205,17 @@ public class PromptRegistry {
                         Respond ONLY with a single valid JSON object — no surrounding text, no markdown fences.
                         """ + UNIVERSAL_SYSTEM_RULES + """
                         
-                        TRAINING RECOMMENDATION SPECIFICS:
-                        - Match training type to TSB: TSB < -15 → recovery/Z1; TSB -15 to 0 → Z2/Z3; TSB > 0 → Z4/Z5/intervals.
-                        - Identify the underrepresented zone from zoneDistribution and prioritize it if athlete is fresh.
-                        - Specify duration in minutes, target power range (or %FTP), and target HR zone.
-                        - If readiness < 40: recommend full rest or 30-min easy spin ONLY.
+                         TRAINING RECOMMENDATION SPECIFICS:
+                         - Match training type to TSB: TSB < -30 → rest or recovery/Z1; TSB -30 to -10 → endurance, tempo, or controlled sweet spot; TSB -10 to +5 → normal quality work including threshold; TSB > +5 → hard intervals or race-specific intensity.
+                         - Negative TSB alone is not a reason for full rest. Full rest needs at least one red flag: TSB < -30, readiness < 25, ATL >= 1.35 × CTL, or a major recent load spike.
+                         - The readiness payload already contains structured dayType/dayLabel/dayFocus, sessionVariants, fuelingHint, recoveryHint, tomorrowHint, and 72h quality windows — use them as the first source of truth, then add coaching nuance.
+                         - durability contains aerobic decoupling and power fade trends. If durability is weak, protect the long ride or threshold durability work instead of stacking random intensity.
+                         - programReview contains the current weekly objective, recent execution quality, and the next 3-7 days of planned work. Use it to connect today's call with the rest of the week instead of recommending an isolated session.
+                         - blockHealth tells you if the block is stable, over-adjusted, or missing key stimulus. If blockHealth is not stable, protect the main weekly stimulus before adding extra load.
+                         - coachMemory summarizes which corrections this athlete usually accepts or rejects. Use it to tune the fallback or tone, but never override safety or block protection.
+                         - Identify the underrepresented zone from zoneDistribution and prioritize it if athlete is fresh.
+                         - Specify duration in minutes, target power range (or %FTP), and target HR zone.
+                         - If readiness < 25: recommend full rest or 30-min easy spin ONLY. If readiness is 25-55 and TSB is between -30 and 0, prefer a controlled stimulus instead of a blanket rest day.
                         - In "action" always include: session type, duration (minutes), and power/HR target.
                         - In "metrics" include: TSB, readinessScore, recommendedType, targetPower, expectedTSS.
                         """)
@@ -231,6 +239,18 @@ public class PromptRegistry {
                         
                         WEEKLY TRAINING VOLUME:
                         {{weeklyVolume}}
+
+                         DURABILITY:
+                         {{durability}}
+
+                          BLOCK HEALTH:
+                          {{blockHealth}}
+
+                         COACH MEMORY:
+                         {{coachMemory}}
+ 
+                          PROGRAM REVIEW (objective, recent execution, next 3-7 days):
+                          {{programReview}}
                         
                         RECENT ACTIVITIES (last 7 days):
                         {{recentActivities}}
@@ -242,6 +262,81 @@ public class PromptRegistry {
                         {{responseFormat}}
                         """)
                 .responseFormat(UNIVERSAL_RESPONSE_FORMAT)
+                .build();
+    }
+
+    private PromptTemplate trainingCoachSummary() {
+        return PromptTemplate.builder()
+                .type(PredictionType.TRAINING_COACH_SUMMARY)
+                .systemPrompt("""
+                        You are the lead endurance coach for this athlete. Your role is to summarize the week/block,
+                        highlight what matters most next, and keep the plan coherent.
+                        
+                        Respond ONLY with a single valid JSON object — no surrounding text, no markdown fences.
+                        """ + UNIVERSAL_SYSTEM_RULES + """
+                        
+                        TRAINING COACH SUMMARY SPECIFICS:
+                        - Build the narrative from progressionLevels, programReview, coachSummary, readiness, durability, blockHealth, and coachMemory.
+                        - weekReview should explain whether the current week is on track for its main objective.
+                        - blockReview should describe whether the bigger energy-system direction is improving, stable, or slipping, and explicitly mention blockHealth when the block is drifting.
+                        - keyWins must focus on the 1-3 strongest useful positives, not vanity stats.
+                        - keyRisks must focus on practical blockers: low readiness, durability fade, missed stimulus, or forced auto-swaps.
+                        - If coachMemory is clear, mention whether the athlete usually accepts load cuts, shifts, or swaps, but do not let preference memory overrule red flags.
+                        - nextFocus must state the single best near-term direction for the next 3-7 days.
+                        - In "metrics" include: readinessScore, durabilityTrend, mainProgressionSystem, executionScore, nextFocusWindow.
+                        """)
+                .userPromptTemplate("""
+                        Summarize the athlete's current week and block like a practical coach handoff.
+                        
+                        ATHLETE PROFILE:
+                        {{athleteProfile}}
+
+                        TIME CONTEXT:
+                        {{timeContext}}
+                         
+                        READINESS:
+                        {{readiness}}
+
+                         DURABILITY:
+                         {{durability}}
+
+                         BLOCK HEALTH:
+                         {{blockHealth}}
+
+                         PROGRESSION LEVELS:
+                         {{progressionLevels}}
+
+                         PROGRAM REVIEW:
+                         {{programReview}}
+
+                        STRUCTURED COACH SUMMARY:
+                        {{coachSummary}}
+
+                        COACH MEMORY:
+                        {{coachMemory}}
+                         
+                         PREVIOUS PREDICTIONS FOR THIS TYPE:
+                         {{recentPredictionHistory}}
+                        
+                        Respond ONLY with valid JSON in this exact format:
+                        {{responseFormat}}
+                        """)
+                .responseFormat("""
+                        {
+                          "summary": "<1-2 sentences, ≤120 chars, actionable coach takeaway>",
+                          "weekReview": "<2-3 sentences about current week execution>",
+                          "blockReview": "<2-3 sentences about the bigger block direction>",
+                          "keyWins": ["<useful positive>", "<useful positive>"],
+                          "keyRisks": ["<practical risk>", "<practical risk>"],
+                          "nextFocus": "<single clearest focus for next 3-7 days>",
+                          "metrics": {"readinessScore": "<value>", "durabilityTrend": "<value>", "mainProgressionSystem": "<value>", "executionScore": "<value>", "nextFocusWindow": "<value>"},
+                          "confidence": <0.0-1.0>,
+                          "insight": "<2-4 sentences explaining WHY>",
+                          "action": "<single concrete next step>",
+                          "reasoning": "<full technical justification for internal coach review>",
+                          "warnings": ["<caution if any, else empty array>"]
+                        }
+                        """)
                 .build();
     }
 

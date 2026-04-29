@@ -25,6 +25,7 @@ vi.mock('../components/layout/TopBar', () => ({
 
 vi.mock('../hooks/useAnalytics', () => ({
   useReadiness: () => ({ data: null }),
+  useBlockHealth: () => ({ data: null }),
   useFtpProgress: () => ({ data: null }),
   useProfile: () => ({ data: null }),
   useWeatherLocations: () => ({ data: [] }),

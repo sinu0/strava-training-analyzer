@@ -68,6 +68,7 @@ describe('AnalyticsPage', () => {
     renderWithProviders(<AnalyticsPage />);
 
     expect(screen.getByRole('heading', { name: 'Analityka' })).toBeDefined();
+    expect(screen.getByRole('img', { name: 'Analityka hero' })).toBeDefined();
     expect(screen.getAllByText('PMC').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('Krzywa mocy')).toBeDefined();
     expect(screen.getByText('Obciążenie')).toBeDefined();

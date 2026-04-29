@@ -3,8 +3,10 @@ package pl.strava.analizator.application;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.IsoFields;
@@ -25,11 +27,19 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import pl.strava.analizator.application.dto.DailyOptimalLoadDto;
+import pl.strava.analizator.application.dto.DurabilityInsightDto;
+import pl.strava.analizator.application.dto.DurabilityWorkoutDto;
 import pl.strava.analizator.application.dto.FtpProgressDto;
 import pl.strava.analizator.application.dto.PmcDataDto;
 import pl.strava.analizator.application.dto.PowerCurveDto;
+import pl.strava.analizator.application.dto.ProgressionLevelDto;
 import pl.strava.analizator.application.dto.RaceReadinessProjection;
+import pl.strava.analizator.application.dto.ReadinessCheckInDto;
 import pl.strava.analizator.application.dto.ReadinessDto;
+import pl.strava.analizator.application.dto.ReadinessHealthSignalsDto;
+import pl.strava.analizator.application.dto.ReadinessSessionVariantDto;
+import pl.strava.analizator.application.dto.ReadinessWindowDto;
+import pl.strava.analizator.application.dto.SaveReadinessCheckInRequest;
 import pl.strava.analizator.application.dto.TrainingPhaseAnalysis;
 import pl.strava.analizator.application.dto.TrendDto;
 import pl.strava.analizator.application.dto.WeeklyMmpDto;
@@ -38,11 +48,13 @@ import pl.strava.analizator.application.dto.WeeklySummaryDto;
 import pl.strava.analizator.application.dto.ZoneDistributionDto;
 import pl.strava.analizator.domain.model.Activity;
 import pl.strava.analizator.domain.model.AthleteProfile;
+import pl.strava.analizator.domain.model.DailySummary;
 import pl.strava.analizator.domain.model.MetricResult;
 import pl.strava.analizator.domain.port.ActivityMetricRepository;
 import pl.strava.analizator.domain.port.ActivityRepository;
 import pl.strava.analizator.domain.port.AthleteProfileRepository;
 import pl.strava.analizator.domain.port.DailyMetricRepository;
+import pl.strava.analizator.domain.port.DailySummaryRepository;
 import pl.strava.analizator.domain.vo.DateRange;
 
 @Service
@@ -73,6 +85,7 @@ public class AnalyticsService {
     private final ActivityRepository activityRepository;
     private final ActivityMetricRepository activityMetricRepository;
     private final AthleteProfileRepository athleteProfileRepository;
+    private final DailySummaryRepository dailySummaryRepository;
 
     /**
      * PMC chart: CTL/ATL/TSB time series with day-over-day deltas.
@@ -390,6 +403,11 @@ public class AnalyticsService {
         BigDecimal atlVal = dailyMetricRepository.findNumericValue(today, "atl")
                 .or(() -> dailyMetricRepository.findNumericValue(today.minusDays(1), "atl"))
                 .orElse(BigDecimal.ZERO);
+        DailySummary todaySummary = dailySummaryRepository.findByDate(today).orElse(null);
+        DailySummary healthSummary = todaySummary != null
+                ? todaySummary
+                : dailySummaryRepository.findByDate(today.minusDays(1)).orElse(null);
+        AthleteProfile profile = athleteProfileRepository.findFirst().orElse(null);
 
         double tsb = tsbVal.doubleValue();
         double ctl = ctlVal.doubleValue();
@@ -409,7 +427,15 @@ public class AnalyticsService {
             fatiguePenalty = Math.min(15, (atl - ctl) * 0.5);
         }
 
-        int score = (int) Math.round(Math.max(0, Math.min(100, tsbScore + fitnessBonus - fatiguePenalty)));
+        int baseScore = (int) Math.round(Math.max(0, Math.min(100, tsbScore + fitnessBonus - fatiguePenalty)));
+        ReadinessHealthSignalsDto healthSignals = buildHealthSignals(healthSummary, profile);
+        ReadinessCheckInDto checkIn = buildCheckIn(todaySummary);
+        int score = clampReadinessScore(baseScore
+                + (healthSignals != null ? healthSignals.getScoreAdjustment() : 0)
+                + (checkIn != null ? checkIn.getScoreAdjustment() : 0));
+        DayTypeDecision dayType = classifyDayType(score, tsb, ctl, atl);
+        List<ReadinessWindowDto> qualityWindows = buildQualityWindows(score, tsb, ctl, atl);
+        ReadinessWindowDto bestQualityWindow = selectBestQualityWindow(qualityWindows);
 
         String level;
         String description;
@@ -440,7 +466,668 @@ public class AnalyticsService {
                 .ctl(ctl)
                 .atl(atl)
                 .description(description)
+                .dayType(dayType.type())
+                .dayLabel(dayType.label())
+                .dayFocus(dayType.focus())
+                .sessionVariants(buildSessionVariants(dayType.type()))
+                .tomorrowHint(buildTomorrowHint(dayType.type()))
+                .bestQualityWindowLabel(bestQualityWindow != null ? bestQualityWindow.getLabel() : null)
+                .qualityWindowSummary(buildQualityWindowSummary(bestQualityWindow))
+                .qualityWindows(qualityWindows)
+                .healthSignals(healthSignals)
+                .checkIn(checkIn)
                 .build();
+    }
+
+    public ReadinessDto saveReadinessCheckIn(SaveReadinessCheckInRequest request) {
+        LocalDate today = LocalDate.now();
+        Instant now = Instant.now();
+        DailySummary summary = dailySummaryRepository.findByDate(today)
+                .orElse(DailySummary.builder()
+                        .date(today)
+                        .createdAt(now)
+                        .updatedAt(now)
+                        .build());
+
+        DailySummary updated = summary.toBuilder()
+                .checkInSleepQuality(request.getSleepQuality())
+                .checkInLegFreshness(request.getLegFreshness())
+                .checkInMotivation(request.getMotivation())
+                .checkInSoreness(request.getSoreness())
+                .checkInUpdatedAt(now)
+                .createdAt(summary.getCreatedAt() != null ? summary.getCreatedAt() : now)
+                .updatedAt(now)
+                .build();
+
+        dailySummaryRepository.save(updated);
+        return getReadiness();
+    }
+
+    public DurabilityInsightDto getDurabilityInsights() {
+        OffsetDateTime from = OffsetDateTime.now(ZoneOffset.UTC).minusDays(90);
+        OffsetDateTime to = OffsetDateTime.now(ZoneOffset.UTC);
+        List<Activity> activities = activityRepository.findByStartedAtBetween(from, to).stream()
+                .filter(activity -> activity.getStartedAt() != null)
+                .filter(activity -> activity.getMovingTimeSec() != null && activity.getMovingTimeSec() >= 45 * 60)
+                .sorted(Comparator.comparing(Activity::getStartedAt).reversed())
+                .limit(6)
+                .toList();
+
+        if (activities.isEmpty()) {
+            return DurabilityInsightDto.builder()
+                    .trend("NO_DATA")
+                    .label("Brak danych")
+                    .description("Potrzeba kilku dłuższych jazd z mocą i tętnem, żeby ocenić odporność na zmęczenie.")
+                    .avgAerobicDecoupling(BigDecimal.ZERO)
+                    .avgPowerFade(BigDecimal.ZERO)
+                    .avgDurabilityScore(0)
+                    .workouts(List.of())
+                    .build();
+        }
+
+        List<UUID> activityIds = activities.stream().map(Activity::getId).toList();
+        Map<UUID, BigDecimal> tssByActivity = activityMetricRepository.findNumericValues(activityIds, "tss");
+        Map<UUID, BigDecimal> decouplingByActivity = activityMetricRepository.findNumericValues(activityIds, "aerobic_decoupling");
+        Map<UUID, BigDecimal> powerFadeByActivity = activityMetricRepository.findNumericValues(activityIds, "power_fade");
+
+        List<DurabilityWorkoutDto> workouts = activities.stream()
+                .map(activity -> toDurabilityWorkout(activity, tssByActivity, decouplingByActivity, powerFadeByActivity))
+                .toList();
+
+        BigDecimal avgDecoupling = average(workouts.stream()
+                .map(DurabilityWorkoutDto::getAerobicDecoupling)
+                .filter(value -> value != null)
+                .toList());
+        BigDecimal avgPowerFade = average(workouts.stream()
+                .map(DurabilityWorkoutDto::getPowerFade)
+                .filter(value -> value != null)
+                .toList());
+        int avgDurabilityScore = (int) Math.round(workouts.stream()
+                .map(DurabilityWorkoutDto::getDurabilityScore)
+                .filter(score -> score != null)
+                .mapToInt(Integer::intValue)
+                .average()
+                .orElse(0));
+
+        String trend = classifyDurabilityTrend(avgDurabilityScore, avgDecoupling, avgPowerFade);
+        return DurabilityInsightDto.builder()
+                .trend(trend)
+                .label(durabilityLabel(trend))
+                .description(durabilityDescription(trend, avgDecoupling, avgPowerFade))
+                .avgAerobicDecoupling(avgDecoupling)
+                .avgPowerFade(avgPowerFade)
+                .avgDurabilityScore(avgDurabilityScore)
+                .workouts(workouts)
+                .build();
+    }
+
+    private List<ReadinessWindowDto> buildQualityWindows(int score, double tsb, double ctl, double atl) {
+        return List.of(
+                buildQualityWindow("Dziś", LocalDate.now(), score, tsb, ctl, atl),
+                buildQualityWindow("Jutro", LocalDate.now().plusDays(1), forecastScore(score, tsb, 1), forecastTsb(tsb, score, 1), ctl, atl),
+                buildQualityWindow("Pojutrze", LocalDate.now().plusDays(2), forecastScore(score, tsb, 2), forecastTsb(tsb, score, 2), ctl, atl));
+    }
+
+    private ReadinessWindowDto buildQualityWindow(String label, LocalDate date, int score, double tsb, double ctl, double atl) {
+        DayTypeDecision decision = classifyDayType(score, tsb, ctl, atl);
+        return ReadinessWindowDto.builder()
+                .date(date)
+                .label(label)
+                .score(score)
+                .recommendation(classifyQualityRecommendation(score, decision.type()))
+                .focus(decision.focus())
+                .build();
+    }
+
+    private int forecastScore(int score, double tsb, int dayOffset) {
+        if (score >= 75) {
+            return clampReadinessScore(score - (dayOffset == 1 ? 6 : 10));
+        }
+        if (tsb <= -15) {
+            return clampReadinessScore(score + (dayOffset == 1 ? 12 : 18));
+        }
+        if (tsb < 0) {
+            return clampReadinessScore(score + (dayOffset == 1 ? 8 : 12));
+        }
+        return clampReadinessScore(score + (dayOffset == 1 ? 2 : 0));
+    }
+
+    private double forecastTsb(double tsb, int score, int dayOffset) {
+        if (score >= 75) {
+            return tsb - (dayOffset == 1 ? 5 : 8);
+        }
+        if (tsb <= -15) {
+            return tsb + (dayOffset == 1 ? 8 : 14);
+        }
+        if (tsb < 0) {
+            return tsb + (dayOffset == 1 ? 6 : 10);
+        }
+        return tsb;
+    }
+
+    private String classifyQualityRecommendation(int score, String dayType) {
+        if (score >= 70 && ("HIGH_INTENSITY".equals(dayType) || "TEMPO".equals(dayType))) {
+            return "BEST_QUALITY";
+        }
+        if (score >= 55 && "TEMPO".equals(dayType)) {
+            return "BEST_QUALITY";
+        }
+        if (score >= 45) {
+            return "CONTROLLED";
+        }
+        return "PROTECT";
+    }
+
+    private String buildQualityWindowSummary(ReadinessWindowDto bestQualityWindow) {
+        if (bestQualityWindow == null) {
+            return "Brak czytelnego okna jakości na najbliższe 72h.";
+        }
+        return "Najlepsze okno jakości wypada %s, jeśli utrzymasz kontrolę obciążenia.".formatted(
+                bestQualityWindow.getLabel().toLowerCase());
+    }
+
+    private ReadinessWindowDto selectBestQualityWindow(List<ReadinessWindowDto> qualityWindows) {
+        return qualityWindows.stream()
+                .filter(window -> "BEST_QUALITY".equals(window.getRecommendation()))
+                .findFirst()
+                .orElseGet(() -> qualityWindows.stream()
+                        .filter(window -> window.getScore() >= 55)
+                        .findFirst()
+                        .orElseGet(() -> qualityWindows.stream()
+                                .max(Comparator.comparingInt(ReadinessWindowDto::getScore))
+                                .orElse(null)));
+    }
+
+    public List<ProgressionLevelDto> getProgressionLevels() {
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        OffsetDateTime from = today.minusDays(42).atStartOfDay().atOffset(ZoneOffset.UTC);
+        OffsetDateTime to = today.plusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC);
+        List<Activity> activities = activityRepository.findByStartedAtBetween(from, to).stream()
+                .filter(activity -> activity.getStartedAt() != null)
+                .filter(activity -> activity.getMovingTimeSec() != null && activity.getMovingTimeSec() >= 30 * 60)
+                .toList();
+
+        if (activities.isEmpty()) {
+            return List.of(
+                    emptyProgression("THRESHOLD", "Próg", BigDecimal.valueOf(70)),
+                    emptyProgression("VO2", "VO2", BigDecimal.valueOf(28)),
+                    emptyProgression("LONG_ENDURANCE", "Długi tlen", BigDecimal.valueOf(180))
+            );
+        }
+
+        List<UUID> activityIds = activities.stream().map(Activity::getId).toList();
+        Map<UUID, BigDecimal> intensityFactors = activityMetricRepository.findNumericValues(activityIds, "intensity_factor");
+        Map<UUID, BigDecimal> decouplingValues = activityMetricRepository.findNumericValues(activityIds, "aerobic_decoupling");
+        LocalDate currentBlockStart = today.minusDays(20);
+        LocalDate previousBlockStart = today.minusDays(41);
+        LocalDate previousBlockEnd = today.minusDays(21);
+
+        return List.of(
+                buildProgressionLevel(
+                        "THRESHOLD",
+                        "Próg",
+                        BigDecimal.valueOf(70),
+                        sumSystemLoad(activities, intensityFactors, decouplingValues, currentBlockStart, today, "THRESHOLD"),
+                        sumSystemLoad(activities, intensityFactors, decouplingValues, previousBlockStart, previousBlockEnd, "THRESHOLD")),
+                buildProgressionLevel(
+                        "VO2",
+                        "VO2",
+                        BigDecimal.valueOf(28),
+                        sumSystemLoad(activities, intensityFactors, decouplingValues, currentBlockStart, today, "VO2"),
+                        sumSystemLoad(activities, intensityFactors, decouplingValues, previousBlockStart, previousBlockEnd, "VO2")),
+                buildProgressionLevel(
+                        "LONG_ENDURANCE",
+                        "Długi tlen",
+                        BigDecimal.valueOf(180),
+                        sumSystemLoad(activities, intensityFactors, decouplingValues, currentBlockStart, today, "LONG_ENDURANCE"),
+                        sumSystemLoad(activities, intensityFactors, decouplingValues, previousBlockStart, previousBlockEnd, "LONG_ENDURANCE"))
+        );
+    }
+
+    private DayTypeDecision classifyDayType(int score, double tsb, double ctl, double atl) {
+        double atlCtlRatio = ctl > 0 ? atl / ctl : 0;
+        if (score < 20 || tsb < -30 || atlCtlRatio >= 1.45) {
+            return new DayTypeDecision(
+                    "OFF",
+                    "Wolne",
+                    "Priorytetem jest odpoczynek albo bardzo lekka mobilność.");
+        }
+        if (score < 35 || tsb < -20 || atlCtlRatio >= 1.35) {
+            return new DayTypeDecision(
+                    "RECOVERY",
+                    "Regeneracja",
+                    "Najlepszy będzie bardzo lekki trening regeneracyjny albo krótka spokojna jazda.");
+        }
+        if (score < 55 || tsb < -5) {
+            return new DayTypeDecision(
+                    "ENDURANCE",
+                    "Tlen",
+                    "Najlepszy będzie spokojny trening tlenowy z kontrolą obciążenia.");
+        }
+        if (score < 70 || tsb < 5) {
+            return new DayTypeDecision(
+                    "TEMPO",
+                    "Tempo",
+                    "Dzień pasuje do stabilnego tempa bez wchodzenia w pełną jakość.");
+        }
+        if (score < 85 || tsb < 12) {
+            return new DayTypeDecision(
+                    "THRESHOLD",
+                    "Próg",
+                    "To dobre okno na solidny bodziec progowy lub sweet spot.");
+        }
+        return new DayTypeDecision(
+                "HIGH_INTENSITY",
+                "Mocny bodziec",
+                "Jesteś świeży — to dobry moment na interwały, mocny akcent albo test.");
+    }
+
+    private record DayTypeDecision(String type, String label, String focus) {
+    }
+
+    private ReadinessHealthSignalsDto buildHealthSignals(DailySummary summary, AthleteProfile profile) {
+        if (summary == null) {
+            return null;
+        }
+        int adjustment = 0;
+        if (summary.getSleepScore() != null) {
+            if (summary.getSleepScore() >= 85) {
+                adjustment += 4;
+            } else if (summary.getSleepScore() < 60) {
+                adjustment -= 8;
+            } else if (summary.getSleepScore() < 70) {
+                adjustment -= 4;
+            }
+        }
+        if (summary.getBodyBattery() != null) {
+            if (summary.getBodyBattery() >= 70) {
+                adjustment += 5;
+            } else if (summary.getBodyBattery() < 35) {
+                adjustment -= 8;
+            } else if (summary.getBodyBattery() < 50) {
+                adjustment -= 4;
+            }
+        }
+
+        BigDecimal restingHrDelta = BigDecimal.ZERO;
+        if (summary.getRestingHrBpm() != null && profile != null && profile.getRestingHrBpm() != null) {
+            restingHrDelta = BigDecimal.valueOf(summary.getRestingHrBpm() - profile.getRestingHrBpm());
+            if (restingHrDelta.compareTo(BigDecimal.valueOf(5)) >= 0) {
+                adjustment -= 6;
+            } else if (restingHrDelta.compareTo(BigDecimal.valueOf(3)) >= 0) {
+                adjustment -= 3;
+            } else if (restingHrDelta.compareTo(BigDecimal.valueOf(-3)) <= 0) {
+                adjustment += 2;
+            }
+        }
+
+        if (summary.getSleepScore() == null && summary.getBodyBattery() == null && summary.getRestingHrBpm() == null) {
+            return null;
+        }
+
+        return ReadinessHealthSignalsDto.builder()
+                .sourceDate(summary.getDate())
+                .sleepScore(summary.getSleepScore())
+                .bodyBattery(summary.getBodyBattery())
+                .restingHrBpm(summary.getRestingHrBpm())
+                .restingHrDelta(restingHrDelta.compareTo(BigDecimal.ZERO) == 0 ? null : restingHrDelta)
+                .scoreAdjustment(adjustment)
+                .build();
+    }
+
+    private ReadinessCheckInDto buildCheckIn(DailySummary summary) {
+        if (summary == null
+                || summary.getCheckInSleepQuality() == null
+                || summary.getCheckInLegFreshness() == null
+                || summary.getCheckInMotivation() == null
+                || summary.getCheckInSoreness() == null) {
+            return null;
+        }
+        return ReadinessCheckInDto.builder()
+                .date(summary.getDate())
+                .sleepQuality(summary.getCheckInSleepQuality())
+                .legFreshness(summary.getCheckInLegFreshness())
+                .motivation(summary.getCheckInMotivation())
+                .soreness(summary.getCheckInSoreness())
+                .scoreAdjustment(calculateCheckInAdjustment(summary))
+                .updatedAt(summary.getCheckInUpdatedAt())
+                .build();
+    }
+
+    private int calculateCheckInAdjustment(DailySummary summary) {
+        return ((summary.getCheckInSleepQuality() - 3) * 2)
+                + ((summary.getCheckInLegFreshness() - 3) * 3)
+                + ((summary.getCheckInMotivation() - 3) * 2)
+                + ((3 - summary.getCheckInSoreness()) * 3);
+    }
+
+    private int clampReadinessScore(int score) {
+        return Math.max(0, Math.min(100, score));
+    }
+
+    private DurabilityWorkoutDto toDurabilityWorkout(
+            Activity activity,
+            Map<UUID, BigDecimal> tssByActivity,
+            Map<UUID, BigDecimal> decouplingByActivity,
+            Map<UUID, BigDecimal> powerFadeByActivity) {
+        BigDecimal decoupling = decouplingByActivity.get(activity.getId());
+        BigDecimal powerFade = powerFadeByActivity.get(activity.getId());
+        return DurabilityWorkoutDto.builder()
+                .activityId(activity.getId())
+                .date(activity.getStartedAt().toLocalDate())
+                .name(activity.getName())
+                .durationMin(activity.getMovingTimeSec() / 60)
+                .tss(tssByActivity.get(activity.getId()))
+                .aerobicDecoupling(decoupling)
+                .powerFade(powerFade)
+                .durabilityScore(calculateDurabilityScore(decoupling, powerFade))
+                .build();
+    }
+
+    private int calculateDurabilityScore(BigDecimal decoupling, BigDecimal powerFade) {
+        double penalty = Math.max(0.0, decoupling != null ? decoupling.doubleValue() : 0.0) * 4.0
+                + Math.max(0.0, powerFade != null ? powerFade.doubleValue() : 0.0) * 3.0;
+        return clampReadinessScore((int) Math.round(100 - penalty));
+    }
+
+    private BigDecimal average(List<BigDecimal> values) {
+        if (values.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal sum = values.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+        return sum.divide(BigDecimal.valueOf(values.size()), 2, RoundingMode.HALF_UP);
+    }
+
+    private ProgressionLevelDto emptyProgression(String system, String label, BigDecimal targetLoad) {
+        return ProgressionLevelDto.builder()
+                .system(system)
+                .label(label)
+                .level(0)
+                .currentLoad(BigDecimal.ZERO)
+                .previousLoad(BigDecimal.ZERO)
+                .targetLoad(targetLoad)
+                .trend("NO_DATA")
+                .description("Brakuje spójnych danych, żeby ocenić progres tego systemu.")
+                .nextRecommendation("Zbierz jeszcze 2-3 trafione jednostki, zanim ocenimy trend.")
+                .build();
+    }
+
+    private ProgressionLevelDto buildProgressionLevel(
+            String system,
+            String label,
+            BigDecimal targetLoad,
+            BigDecimal currentLoad,
+            BigDecimal previousLoad) {
+        String trend = progressionTrend(currentLoad, previousLoad);
+        return ProgressionLevelDto.builder()
+                .system(system)
+                .label(label)
+                .level(calculateProgressionLevel(system, currentLoad))
+                .currentLoad(currentLoad)
+                .previousLoad(previousLoad)
+                .targetLoad(targetLoad)
+                .trend(trend)
+                .description(progressionDescription(system, trend, currentLoad, targetLoad))
+                .nextRecommendation(progressionRecommendation(system, currentLoad, targetLoad, trend))
+                .build();
+    }
+
+    private BigDecimal sumSystemLoad(
+            List<Activity> activities,
+            Map<UUID, BigDecimal> intensityFactors,
+            Map<UUID, BigDecimal> decouplingValues,
+            LocalDate from,
+            LocalDate to,
+            String system) {
+        return activities.stream()
+                .filter(activity -> {
+                    LocalDate date = activity.getStartedAt().toLocalDate();
+                    return !date.isBefore(from) && !date.isAfter(to);
+                })
+                .map(activity -> progressionLoadFor(activity, intensityFactors.get(activity.getId()), decouplingValues.get(activity.getId()), system))
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(1, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal progressionLoadFor(Activity activity, BigDecimal intensityFactor, BigDecimal decoupling, String system) {
+        if (activity.getMovingTimeSec() == null) {
+            return BigDecimal.ZERO;
+        }
+
+        int durationMin = activity.getMovingTimeSec() / 60;
+        double intensity = intensityFactor != null ? intensityFactor.doubleValue() : 0.0;
+        return switch (system) {
+            case "THRESHOLD" -> isThresholdSession(durationMin, intensity)
+                    ? BigDecimal.valueOf(durationMin * Math.max(0.8, Math.min(1.2, intensity / 0.95)))
+                    : BigDecimal.ZERO;
+            case "VO2" -> isVo2Session(durationMin, intensity)
+                    ? BigDecimal.valueOf(durationMin * Math.max(0.3, (intensity - 1.0) * 4.5))
+                    : BigDecimal.ZERO;
+            case "LONG_ENDURANCE" -> isLongEnduranceSession(durationMin, intensity)
+                    ? BigDecimal.valueOf(durationMin * longEnduranceQualityFactor(decoupling))
+                    : BigDecimal.ZERO;
+            default -> BigDecimal.ZERO;
+        };
+    }
+
+    private boolean isThresholdSession(int durationMin, double intensityFactor) {
+        return durationMin >= 35 && durationMin <= 120 && intensityFactor >= 0.90 && intensityFactor <= 1.03;
+    }
+
+    private boolean isVo2Session(int durationMin, double intensityFactor) {
+        return durationMin >= 30 && durationMin <= 90 && intensityFactor >= 1.03;
+    }
+
+    private boolean isLongEnduranceSession(int durationMin, double intensityFactor) {
+        return durationMin >= 120 && intensityFactor >= 0.55 && intensityFactor <= 0.80;
+    }
+
+    private double longEnduranceQualityFactor(BigDecimal decoupling) {
+        if (decoupling == null) {
+            return 1.0;
+        }
+        double value = decoupling.doubleValue();
+        if (value <= 5.0) {
+            return 1.05;
+        }
+        if (value >= 8.0) {
+            return 0.90;
+        }
+        return 1.0;
+    }
+
+    private String progressionTrend(BigDecimal currentLoad, BigDecimal previousLoad) {
+        if (currentLoad.compareTo(BigDecimal.ZERO) == 0 && previousLoad.compareTo(BigDecimal.ZERO) == 0) {
+            return "NO_DATA";
+        }
+        if (previousLoad.compareTo(BigDecimal.ZERO) == 0) {
+            return "UP";
+        }
+        BigDecimal ratio = currentLoad.subtract(previousLoad)
+                .divide(previousLoad, 4, RoundingMode.HALF_UP);
+        if (ratio.compareTo(BigDecimal.valueOf(0.10)) >= 0) {
+            return "UP";
+        }
+        if (ratio.compareTo(BigDecimal.valueOf(-0.10)) <= 0) {
+            return "DOWN";
+        }
+        return "STABLE";
+    }
+
+    private int calculateProgressionLevel(String system, BigDecimal currentLoad) {
+        double load = currentLoad.doubleValue();
+        double step = switch (system) {
+            case "THRESHOLD" -> 14.0;
+            case "VO2" -> 6.0;
+            case "LONG_ENDURANCE" -> 36.0;
+            default -> 10.0;
+        };
+        return Math.max(0, Math.min(10, (int) Math.round(load / step)));
+    }
+
+    private String progressionDescription(String system, String trend, BigDecimal currentLoad, BigDecimal targetLoad) {
+        String base = switch (system) {
+            case "THRESHOLD" -> "Próg";
+            case "VO2" -> "VO2";
+            case "LONG_ENDURANCE" -> "Długi tlen";
+            default -> "System";
+        };
+        if ("NO_DATA".equals(trend)) {
+            return base + " nie ma jeszcze dość danych, żeby ocenić stabilny trend.";
+        }
+        if ("UP".equals(trend)) {
+            return "%s rośnie — bieżący blok niesie więcej trafionej pracy niż poprzedni.".formatted(base);
+        }
+        if ("DOWN".equals(trend)) {
+            return "%s spadł względem poprzedniego bloku i warto pilnować brakującego bodźca.".formatted(base);
+        }
+        if (currentLoad.compareTo(targetLoad.multiply(BigDecimal.valueOf(0.9))) >= 0) {
+            return "%s jest stabilny i blisko dawki docelowej dla aktualnego bloku.".formatted(base);
+        }
+        return "%s jest stabilny, ale nadal poniżej dawki, która zwykle daje mocniejszy efekt treningowy.".formatted(base);
+    }
+
+    private String progressionRecommendation(String system, BigDecimal currentLoad, BigDecimal targetLoad, String trend) {
+        if (currentLoad.compareTo(targetLoad) >= 0 && !"DOWN".equals(trend)) {
+            return switch (system) {
+                case "THRESHOLD" -> "Broń jednego mocnego bodźca progowego i nie dokładaj drugiego na siłę.";
+                case "VO2" -> "Utrzymaj jedną sesję VO2 i pilnuj świeżości przed kolejnym akcentem.";
+                case "LONG_ENDURANCE" -> "Trzymaj regularny długi tlen i pilnuj fuelingu w końcówce.";
+                default -> "Utrzymaj obecną strukturę pracy.";
+            };
+        }
+        return switch (system) {
+            case "THRESHOLD" -> "Dodaj lub obroń jedną jakościową sesję progową w najbliższych 7 dniach.";
+            case "VO2" -> "Jeśli świeżość pozwoli, dołóż krótki akcent VO2 zamiast kolejnego neutralnego tempa.";
+            case "LONG_ENDURANCE" -> "Przyda się kolejny długi tlen, najlepiej z równym tempem i dobrym fuelingiem.";
+            default -> "Dołóż brakujący bodziec w kolejnym mikrocyklu.";
+        };
+    }
+
+    private String classifyDurabilityTrend(int avgDurabilityScore, BigDecimal avgDecoupling, BigDecimal avgPowerFade) {
+        if (avgDurabilityScore >= 75
+                && avgDecoupling.compareTo(BigDecimal.valueOf(5)) < 0
+                && avgPowerFade.compareTo(BigDecimal.valueOf(4)) < 0) {
+            return "STABLE";
+        }
+        if (avgDurabilityScore < 55
+                || avgDecoupling.compareTo(BigDecimal.valueOf(8)) >= 0
+                || avgPowerFade.compareTo(BigDecimal.valueOf(6)) >= 0) {
+            return "FADE_RISK";
+        }
+        return "BUILDING";
+    }
+
+    private String durabilityLabel(String trend) {
+        return switch (trend) {
+            case "STABLE" -> "Trzymasz końcówkę";
+            case "FADE_RISK" -> "Końcówka siada";
+            case "BUILDING" -> "Odporność rośnie";
+            default -> "Brak danych";
+        };
+    }
+
+    private String durabilityDescription(String trend, BigDecimal avgDecoupling, BigDecimal avgPowerFade) {
+        String summary = switch (trend) {
+            case "STABLE" -> "Średni drift i fade są niskie, więc długi tlen i końcówki sesji wyglądają stabilnie.";
+            case "FADE_RISK" -> "W końcówce pracy widać wyraźny drift albo spadek mocy — warto pilnować fuelingu i trwałości tempa.";
+            case "BUILDING" -> "Odporność jest jeszcze w budowie, ale bez mocnych czerwonych flag; dobry moment na kontrolowane długie tleny.";
+            default -> "Brakuje dłuższych sesji z wiarygodnymi danymi, żeby ocenić odporność na zmęczenie.";
+        };
+        return summary + String.format(" Średnio decoupling %s%%, power fade %s%%.",
+                avgDecoupling.setScale(1, RoundingMode.HALF_UP),
+                avgPowerFade.setScale(1, RoundingMode.HALF_UP));
+    }
+
+    private List<ReadinessSessionVariantDto> buildSessionVariants(String dayType) {
+        return switch (dayType) {
+            case "OFF" -> List.of(
+                    session("Pełne wolne", 0, "Brak", 0),
+                    session("Mobilność", 20, "Bardzo lekko", 5),
+                    session("Spacer / rozruch", 30, "Bardzo lekko", 10)
+            );
+            case "RECOVERY" -> List.of(
+                    session("Krótka regeneracja", 30, "<55% FTP", 15),
+                    session("Spokojny spin", 45, "55-60% FTP", 22),
+                    session("Dłuższe rozkręcenie", 60, "55-60% FTP", 30)
+            );
+            case "ENDURANCE" -> List.of(
+                    session("Krótki tlen", 45, "60-70% FTP", 35),
+                    session("Tlen podstawowy", 75, "65-72% FTP", 52),
+                    session("Długi tlen", 120, "65-72% FTP", 80)
+            );
+            case "TEMPO" -> List.of(
+                    session("Tempo short", 45, "80-88% FTP", 45),
+                    session("Tempo steady", 75, "80-88% FTP", 65),
+                    session("Tempo + tlen", 105, "75-88% FTP", 82)
+            );
+            case "THRESHOLD" -> List.of(
+                    session("Sweet spot", 45, "88-94% FTP", 52),
+                    session("Próg", 75, "95-100% FTP", 72),
+                    session("Długi próg", 105, "90-100% FTP", 88)
+            );
+            default -> List.of(
+                    session("VO2 short", 45, "110-120% FTP", 55),
+                    session("VO2 classic", 75, "108-120% FTP", 74),
+                    session("Mocny akcent + tlen", 105, "70-120% FTP", 90)
+            );
+        };
+    }
+
+    private ReadinessSessionVariantDto session(String title, int durationMinutes, String targetPower, int targetTss) {
+        return ReadinessSessionVariantDto.builder()
+                .title(title)
+                .durationMinutes(durationMinutes)
+                .targetPower(targetPower)
+                .targetTss(targetTss)
+                .fuelingHint(buildFuelingHint(targetPower, durationMinutes, targetTss))
+                .recoveryHint(buildRecoveryHint(targetPower, durationMinutes, targetTss))
+                .build();
+    }
+
+    private String buildFuelingHint(String targetPower, int durationMinutes, int targetTss) {
+        if (durationMinutes == 0) {
+            return "Jedz normalnie; nie potrzebujesz dodatkowego ładowania pod tę opcję.";
+        }
+        if (isHighIntensity(targetPower, targetTss)) {
+            return "Przed: lekki posiłek 2-3 h wcześniej. W trakcie: 60-80 g węgli/h + elektrolity.";
+        }
+        if (durationMinutes >= 45 || targetTss >= 35) {
+            return "Przed: lekki posiłek 2-3 h wcześniej. W trakcie: 30-45 g węgli/h + bidon z elektrolitami.";
+        }
+        return "Lekki posiłek 2-3 h wcześniej, a w trakcie woda lub lekki bidon; 20-30 g węgli wystarczy przy końcówce sesji.";
+    }
+
+    private String buildRecoveryHint(String targetPower, int durationMinutes, int targetTss) {
+        if (durationMinutes == 0) {
+            return "Priorytet: sen, spacer i lekka mobilność zamiast dokładania kolejnego bodźca.";
+        }
+        if (isHighIntensity(targetPower, targetTss)) {
+            return "Po treningu dołóż węgle + 20-30 g białka, schłodzenie 10 min i spokojny wieczór bez drugiego bodźca.";
+        }
+        if (durationMinutes >= 90 || targetTss >= 70) {
+            return "Po treningu uzupełnij płyny i 20-30 g białka, a wieczorem postaw na spokojne nogi i sen.";
+        }
+        return "Po treningu 20-30 g białka, nawodnienie i krótka mobilność wystarczą.";
+    }
+
+    private boolean isHighIntensity(String targetPower, int targetTss) {
+        return targetPower.contains("95-")
+                || targetPower.contains("108-")
+                || targetPower.contains("110-")
+                || targetTss >= 74;
+    }
+
+    private String buildTomorrowHint(String dayType) {
+        return switch (dayType) {
+            case "OFF" -> "Jutro sprawdź świeżość; jeśli noga odżyje, wróć do lekkiego tlenu.";
+            case "RECOVERY" -> "Jutro nadal trzymaj luz albo wejdź w spokojny tlen, jeśli samopoczucie się poprawi.";
+            case "ENDURANCE" -> "Jutro nadal spokojnie albo wejście w tempo, jeśli noga będzie świeża.";
+            case "TEMPO" -> "Jutro preferuj tlen lub lekką regenerację przed kolejnym mocniejszym akcentem.";
+            case "THRESHOLD", "HIGH_INTENSITY" ->
+                    "Jutro preferowana regeneracja albo bardzo lekki tlen; nie dokładaj drugiego mocnego dnia.";
+            default -> "Jutro utrzymaj spokojniejszy dzień i obserwuj reakcję organizmu.";
+        };
     }
 
     /**

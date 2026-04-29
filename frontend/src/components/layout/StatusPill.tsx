@@ -1,30 +1,26 @@
-import AcUnitIcon from '@mui/icons-material/AcUnit';
 import AirIcon from '@mui/icons-material/Air';
 import BalanceIcon from '@mui/icons-material/Balance';
 import BoltIcon from '@mui/icons-material/Bolt';
-import CloudIcon from '@mui/icons-material/Cloud';
-import GrainIcon from '@mui/icons-material/Grain';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
-import ThunderstormIcon from '@mui/icons-material/Thunderstorm';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
-import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import { Box, Typography, Popover, Stack, LinearProgress, Tooltip } from '@mui/material';
 import { useState } from 'react';
 
-import { getWeatherIconConfig } from '@/constants/weatherIcons';
+import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
 import type { ReadinessData, FtpProgress, WeatherGradient } from '@/types/analytics';
 import {
   CHART_COLORS,
+  COMMON_COLORS,
   PMC_COLORS,
   STATUS_COLORS,
   SURFACE_COLORS,
   WEATHER_METRIC_COLORS,
   alphaColor,
 } from '@/utils/colors';
-import { getReadinessIllustrationPath } from '@/utils/illustrationAssets';
+import { getHomeWidgetIllustrationPath, getReadinessIllustrationPath } from '@/utils/illustrationAssets';
 import {
   getReadinessColor,
   getReadinessImage,
@@ -37,25 +33,6 @@ interface StatusPillProps {
   readiness: ReadinessData | undefined;
   ftpProgress: FtpProgress | undefined;
   weatherGradient: WeatherGradient | undefined;
-}
-
-function getWeatherIcon(code: number) {
-  const config = getWeatherIconConfig(code);
-  const sx = { fontSize: 16, color: config.color };
-
-  switch (config.kind) {
-    case 'sunny':
-      return <WbSunnyIcon sx={sx} />;
-    case 'rain':
-      return <GrainIcon sx={sx} />;
-    case 'snow':
-      return <AcUnitIcon sx={sx} />;
-    case 'storm':
-      return <ThunderstormIcon sx={sx} />;
-    case 'cloud':
-    default:
-      return <CloudIcon sx={sx} />;
-  }
 }
 
 const trendIcons = {
@@ -72,7 +49,31 @@ function ReadinessPopover({ data }: { data: ReadinessData }) {
   const color = getReadinessColor(data.score);
   const tsbColor = data.tsb >= 0 ? PMC_COLORS.TSB : STATUS_COLORS.error;
   return (
-    <Box sx={{ p: 2, width: 280 }}>
+    <Box sx={{ p: 2, width: 304 }}>
+      <Box
+        sx={{
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: 2.5,
+          height: 88,
+          mb: 1.5,
+          border: `1px solid ${alphaColor(color, 0.14)}`,
+        }}
+      >
+        <Box
+          component="img"
+          src={getHomeWidgetIllustrationPath('readiness')}
+          alt="Gotowość"
+          sx={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover', objectPosition: 'center 48%' }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            background: `linear-gradient(180deg, ${alphaColor(COMMON_COLORS.black, 0.06)} 0%, ${alphaColor(COMMON_COLORS.black, 0.34)} 100%)`,
+          }}
+        />
+      </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
         <Box
           component="img"
@@ -116,7 +117,31 @@ function ReadinessPopover({ data }: { data: ReadinessData }) {
 function FtpPopover({ data }: { data: FtpProgress }) {
   const tc = trendColors[data.trend];
   return (
-    <Box sx={{ p: 2, width: 240 }}>
+    <Box sx={{ p: 2, width: 280 }}>
+      <Box
+        sx={{
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: 2.5,
+          height: 88,
+          mb: 1.5,
+          border: `1px solid ${alphaColor(tc, 0.14)}`,
+        }}
+      >
+        <Box
+          component="img"
+          src={getHomeWidgetIllustrationPath('progress')}
+          alt="FTP"
+          sx={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover', objectPosition: 'center 54%' }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            background: `linear-gradient(180deg, ${alphaColor(COMMON_COLORS.black, 0.06)} 0%, ${alphaColor(COMMON_COLORS.black, 0.34)} 100%)`,
+          }}
+        />
+      </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1 }}>
@@ -160,12 +185,36 @@ function WeatherPopover({ data }: { data: WeatherGradient }) {
   const c = data.current;
   const sc = getScoreColor(c.outdoorScore);
   return (
-    <Box sx={{ p: 2, width: 260 }}>
+    <Box sx={{ p: 2, width: 292 }}>
+      <Box
+        sx={{
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: 2.5,
+          height: 88,
+          mb: 1.5,
+          border: `1px solid ${alphaColor(sc, 0.14)}`,
+        }}
+      >
+        <Box
+          component="img"
+          src={getHomeWidgetIllustrationPath('weather')}
+          alt="Pogoda"
+          sx={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover', objectPosition: 'center 58%' }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            background: `linear-gradient(180deg, ${alphaColor(COMMON_COLORS.black, 0.06)} 0%, ${alphaColor(COMMON_COLORS.black, 0.34)} 100%)`,
+          }}
+        />
+      </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
         <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1 }}>
           {Math.round(c.temperature)}°
         </Typography>
-        {getWeatherIcon(c.weatherCode)}
+        <WeatherConditionIcon code={c.weatherCode} size={18} alt={c.weatherDescription} />
         <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
           {c.weatherDescription}
         </Typography>
@@ -227,14 +276,15 @@ export default function StatusPill({ readiness, ftpProgress, weatherGradient }: 
     <>
       <Stack
         direction="row"
-        spacing={0}
+        spacing={0.6}
         sx={{
-          bgcolor: alphaColor(CHART_COLORS.tooltip, 0.95),
-          borderRadius: 3,
-          border: `1px solid ${alphaColor(CHART_COLORS.grid, 0.8)}`,
-          overflow: 'hidden',
-          backdropFilter: 'blur(8px)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+          px: 0.8,
+          py: 0.7,
+          bgcolor: alphaColor(CHART_COLORS.tooltip, 0.84),
+          borderRadius: 999,
+          border: `1px solid ${alphaColor(CHART_COLORS.grid, 0.6)}`,
+          backdropFilter: 'blur(14px)',
+          boxShadow: '0 12px 30px rgba(0,0,0,0.18)',
         }}
       >
         {/* Readiness segment */}
@@ -242,70 +292,94 @@ export default function StatusPill({ readiness, ftpProgress, weatherGradient }: 
           <Box
             onClick={(e) => handleOpen(e, 'readiness')}
             sx={{
-              display: 'flex', alignItems: 'center', gap: 0.5,
-              px: 1.5, py: 0.5, cursor: 'pointer',
-              transition: 'background 0.15s',
-              '&:hover': { bgcolor: SURFACE_COLORS.hover },
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.8,
+              px: 1.15,
+              py: 0.7,
+              minWidth: 94,
+              borderRadius: 999,
+              cursor: 'pointer',
+              transition: 'background 0.15s, transform 0.15s',
+              '&:hover': { bgcolor: SURFACE_COLORS.hover, transform: 'translateY(-1px)' },
             }}
           >
             <Box
               component="img"
               src={getReadinessIllustrationPath(getReadinessImage(readiness.score))}
               alt="readiness"
-              sx={{ width: 20, height: 18, objectFit: 'contain' }}
+              sx={{ width: 22, height: 20, objectFit: 'contain' }}
             />
-            <Typography variant="caption" sx={{
-              fontWeight: 700, color: getReadinessColor(readiness.score), fontSize: '0.75rem',
-            }}>
-              {readiness.score}
-            </Typography>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', lineHeight: 1 }}>
+                Gotowość
+              </Typography>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: getReadinessColor(readiness.score), fontSize: '0.78rem' }}>
+                {readiness.score}/100
+              </Typography>
+            </Box>
           </Box>
         )}
-
-        {/* Divider */}
-        {!!readiness && !!ftpProgress && <Box sx={{ width: '1px', bgcolor: alphaColor(CHART_COLORS.grid, 0.8), my: 0.5 }} />}
 
         {/* FTP segment */}
         {!!ftpProgress && (
           <Box
             onClick={(e) => handleOpen(e, 'ftp')}
             sx={{
-              display: 'flex', alignItems: 'center', gap: 0.5,
-              px: 1.5, py: 0.5, cursor: 'pointer',
-              transition: 'background 0.15s',
-              '&:hover': { bgcolor: SURFACE_COLORS.hover },
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.8,
+              px: 1.15,
+              py: 0.7,
+              minWidth: 86,
+              borderRadius: 999,
+              cursor: 'pointer',
+              transition: 'background 0.15s, transform 0.15s',
+              '&:hover': { bgcolor: SURFACE_COLORS.hover, transform: 'translateY(-1px)' },
             }}
           >
             <BoltIcon sx={{ fontSize: 16, color: trendColors[ftpProgress.trend] }} />
-            <Typography variant="caption" sx={{
-              fontWeight: 700, color: 'text.primary', fontSize: '0.75rem',
-            }}>
-              {ftpProgress.currentFtp ?? '—'}
-              <Typography component="span" variant="caption" sx={{ color: 'text.secondary', fontSize: '0.6rem', ml: 0.3 }}>W</Typography>
-            </Typography>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', lineHeight: 1 }}>
+                FTP
+              </Typography>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.primary', fontSize: '0.78rem' }}>
+                {ftpProgress.currentFtp ?? '—'} W
+              </Typography>
+            </Box>
           </Box>
         )}
-
-        {/* Divider */}
-        {!!ftpProgress && !!weatherGradient && <Box sx={{ width: '1px', bgcolor: alphaColor(CHART_COLORS.grid, 0.8), my: 0.5 }} />}
 
         {/* Weather segment */}
         {!!weatherGradient && (
           <Box
             onClick={(e) => handleOpen(e, 'weather')}
             sx={{
-              display: 'flex', alignItems: 'center', gap: 0.5,
-              px: 1.5, py: 0.5, cursor: 'pointer',
-              transition: 'background 0.15s',
-              '&:hover': { bgcolor: SURFACE_COLORS.hover },
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.8,
+              px: 1.15,
+              py: 0.7,
+              minWidth: 88,
+              borderRadius: 999,
+              cursor: 'pointer',
+              transition: 'background 0.15s, transform 0.15s',
+              '&:hover': { bgcolor: SURFACE_COLORS.hover, transform: 'translateY(-1px)' },
             }}
           >
-            {getWeatherIcon(weatherGradient.current.weatherCode)}
-            <Typography variant="caption" sx={{
-              fontWeight: 700, color: 'text.primary', fontSize: '0.75rem',
-            }}>
-              {Math.round(weatherGradient.current.temperature)}°
-            </Typography>
+            <WeatherConditionIcon
+              code={weatherGradient.current.weatherCode}
+              size={16}
+              alt={weatherGradient.current.weatherDescription}
+            />
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', lineHeight: 1 }}>
+                Pogoda
+              </Typography>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.primary', fontSize: '0.78rem' }}>
+                {Math.round(weatherGradient.current.temperature)}°
+              </Typography>
+            </Box>
           </Box>
         )}
       </Stack>

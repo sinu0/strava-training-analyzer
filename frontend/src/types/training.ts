@@ -105,6 +105,12 @@ export const CATEGORY_LABELS: Record<WorkoutCategory, string> = {
 // --- Training Plans ---
 
 export type PlanStatus = 'PLANNED' | 'COMPLETED' | 'SKIPPED' | 'PARTIAL';
+export type TrainingSessionRole =
+  | 'LONG_ENDURANCE'
+  | 'THRESHOLD_QUALITY'
+  | 'VO2_QUALITY'
+  | 'RECOVERY'
+  | 'ENDURANCE';
 
 export interface TrainingPlan {
   id: string;
@@ -120,6 +126,7 @@ export interface TrainingPlan {
   workoutTemplateName: string | null;
   targetPowerLowW: number | null;
   targetPowerHighW: number | null;
+  sessionRole?: TrainingSessionRole | null;
   status: PlanStatus;
   notes: string | null;
 }
@@ -138,23 +145,112 @@ export interface CalendarDay {
   planned: TrainingPlan | null;
   actual: CalendarActivity | null;
   compliance: number | null;
+  execution?: TrainingExecutionAssessment | null;
+  projection?: TrainingDayProjection | null;
+  adjustment?: TrainingAdjustmentSuggestion | null;
 }
 
 export interface TrainingPlanProgram {
   id: string;
   name: string;
   goal: string;
+  goalPriority?: string;
   startDate: string;
   endDate: string;
+  eventDate?: string | null;
+  taperStartDate?: string | null;
+  weeklyObjectives?: TrainingWeekObjective[];
+  goalScorecards?: TrainingGoalScorecard[];
   targetWeeklyTss: number | null;
   targetWeeklyHours: number | null;
+  weekdayAvailabilityMinutes?: number | null;
+  weekendAvailabilityMinutes?: number | null;
+  preferredLongRideDay?: string | null;
+  environmentPreference?: string | null;
   generatedBy: string;
 }
 
 export interface GeneratePlanRequest {
   goal: string;
+  goalPriority?: string;
   startDate: string;
+  eventDate?: string | null;
   weeks: number;
   trainingDaysPerWeek: number;
   targetWeeklyTss: number;
+  weekdayAvailabilityMinutes?: number;
+  weekendAvailabilityMinutes?: number;
+  preferredLongRideDay?: string;
+  environmentPreference?: string;
+}
+
+export interface TrainingDayProjection {
+  plannedTss: number | null;
+  projectedCtl: number;
+  projectedAtl: number;
+  projectedTsb: number;
+  projectedReadiness: number;
+  dayType: string;
+  dayLabel: string;
+  taperDay: boolean;
+}
+
+export interface TrainingAdjustmentSuggestion {
+  type: string;
+  title: string;
+  description: string;
+  memoryHint?: string | null;
+}
+
+export interface RecordAdjustmentFeedbackRequest {
+  date: string;
+  planId: string | null;
+  suggestionType: string;
+  suggestionTitle: string;
+  feedback: 'ACCEPTED' | 'REJECTED';
+}
+
+export interface TrainingExecutionAssessment {
+  outcome: string;
+  label: string;
+  description: string;
+  score: number;
+  tssCompliance: number | null;
+  durationCompliance: number | null;
+  intervalCompliance?: number | null;
+  zoneCompliance?: number | null;
+  stimulusMatch: boolean;
+  primaryLimiter?: string | null;
+  nextDayAdvice?: string | null;
+}
+
+export interface TrainingWeekObjective {
+  weekStart: string;
+  weekEnd: string;
+  objectiveType: string;
+  label: string;
+  focus: string;
+  plannedTss: number;
+  maxQualityDays: number;
+  keySessionTypes: string[];
+  fuelingLabel: string;
+  fuelingGuidance: string;
+}
+
+export interface TrainingGoalScorecard {
+  weekStart: string;
+  weekEnd: string;
+  label: string;
+  plannedTss: number;
+  actualTss: number;
+  plannedQualityDays: number;
+  completedQualityDays: number;
+  goalFocusLabel?: string | null;
+  goalFocusRole?: TrainingSessionRole | null;
+  plannedGoalSessions?: number;
+  completedGoalSessions?: number;
+  goalExecutionScore?: number | null;
+  goalExecutionStatus?: 'STABLE' | 'ON_TARGET' | 'PARTIAL' | 'MISSED' | string;
+  avgExecutionScore: number | null;
+  onTrack: boolean;
 }
