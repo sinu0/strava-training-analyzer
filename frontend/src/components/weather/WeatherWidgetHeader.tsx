@@ -5,6 +5,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
 import type { CyclistType } from '@/components/weather/weatherWidgetUtils';
@@ -41,6 +42,7 @@ export default function WeatherWidgetHeader({
   cyclistType,
   onOpenSettings,
 }: WeatherWidgetHeaderProps) {
+  const theme = useTheme();
   return (
     <>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -85,7 +87,7 @@ export default function WeatherWidgetHeader({
           mb: 1.5,
           p: 1.25,
           borderRadius: 3,
-          bgcolor: alphaColor('#0D1117', 0.26),
+          bgcolor: alphaColor(theme.palette.background.default, 0.26),
           border: `1px solid ${alphaColor(CHART_COLORS.primary, 0.16)}`,
           overflow: 'hidden',
         }}
@@ -119,7 +121,7 @@ export default function WeatherWidgetHeader({
             sx={{
               position: 'absolute',
               inset: 0,
-              background: `linear-gradient(135deg, ${alphaColor('#0D1117', 0.08)} 0%, ${alphaColor('#0D1117', 0.3)} 100%)`,
+              background: `linear-gradient(135deg, ${alphaColor(theme.palette.background.default, 0.08)} 0%, ${alphaColor(theme.palette.background.default, 0.3)} 100%)`,
             }}
           />
         </Box>

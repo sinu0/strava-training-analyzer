@@ -27,10 +27,6 @@ function mockAppLayout() {
 }
 
 function mockStaticPages(importedPages: string[] = [], options?: { skipDashboard?: boolean }) {
-  vi.doMock('../pages/HomePage', () => {
-    importedPages.push('home');
-    return { default: () => <div>Home page</div> };
-  });
   if (!options?.skipDashboard) {
     vi.doMock('../pages/DashboardPage', () => {
       importedPages.push('dashboard');
@@ -101,10 +97,9 @@ describe('App', () => {
     mockStaticPages(importedPages);
 
     await renderApp('/');
-    expect((await screen.findAllByText('Home page')).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText('Dashboard page')).length).toBeGreaterThan(0);
 
-    expect(importedPages).toContain('home');
-    expect(importedPages).not.toContain('dashboard');
+    expect(importedPages).toContain('dashboard');
     expect(importedPages).not.toContain('activities');
     expect(importedPages).not.toContain('analytics');
   });

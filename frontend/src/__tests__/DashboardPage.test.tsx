@@ -66,13 +66,8 @@ vi.mock('../hooks/useAnalytics', () => ({
         outdoorScore: 85,
         warnings: [],
       },
-      hourly: [
-        { time: '2024-06-02T10:00', temperature: 23, windSpeed: 8, precipitation: 0, weatherCode: 1, weatherDescription: 'Bezchmurnie' },
-        { time: '2024-06-02T12:00', temperature: 25, windSpeed: 10, precipitation: 0, weatherCode: 1, weatherDescription: 'Bezchmurnie' },
-      ],
-      daily: [
-        { date: '2024-06-03', tempMin: 14, tempMax: 26, precipitationSum: 0, windSpeedMax: 12, weatherCode: 1, weatherDescription: 'Bezchmurnie' },
-      ],
+      hourly: [],
+      daily: [],
     },
     isLoading: false,
   }),
@@ -214,6 +209,10 @@ vi.mock('../hooks/useAnalytics', () => ({
     isLoading: false,
   }),
 }));
+vi.mock('../hooks/useGamification', () => ({
+  useAchievements: () => ({ data: [], isLoading: false }),
+}));
+
 vi.mock('../hooks/useAi', () => ({
   useAiStatus: () => ({
     data: { enabled: true, activeProvider: 'provider', activeModel: 'model', modelAvailable: true, availableProviders: ['provider'], availablePredictionTypes: ['TRAINING_COACH_SUMMARY'] },
@@ -239,6 +238,8 @@ vi.mock('../hooks/useAi', () => ({
     },
   }),
   useAiPredict: () => ({ mutate: vi.fn(), isPending: false }),
+  useAiNote: () => ({ data: null, isLoading: false }),
+  useGenerateAiNote: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 function renderWithProviders(ui: React.ReactElement) {
@@ -255,25 +256,59 @@ function renderWithProviders(ui: React.ReactElement) {
   );
 }
 
-describe('DashboardPage', () => {
-  it('renders all dashboard cards', () => {
+describe('DashboardPage v2', () => {
+  it('renders the editorial hero section', () => {
     renderWithProviders(<DashboardPage />);
 
-    expect(screen.getByText('Widgety focus')).toBeDefined();
-    expect(screen.getAllByText('Centrum danych').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Home').length).toBeGreaterThan(0);
     expect(screen.getByRole('img', { name: 'Dashboard hero' })).toBeDefined();
-    expect(screen.getByText('Gotowość na dziś')).toBeDefined();
-    expect(screen.getByText('Poranny check-in')).toBeDefined();
-    expect(screen.getByText('Trening dziś')).toBeDefined();
-    expect(screen.getByText('Analiza obciążeń')).toBeDefined();
-    expect(screen.getByText('Aktywności i AI')).toBeDefined();
-    expect(screen.getAllByText('Coach AI').length).toBeGreaterThan(0);
-    expect(screen.getByText('Stan bloku')).toBeDefined();
   });
 
-  it('renders recent activity name', () => {
+  it('renders the three-column layout with sticky side widgets', () => {
     renderWithProviders(<DashboardPage />);
 
+    expect(screen.getByText('Pogoda')).toBeDefined();
+    expect(screen.getByText('Gotowość')).toBeDefined();
+    expect(screen.getAllByText('Blok').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Postęp').length).toBeGreaterThan(0);
+  });
+
+  it('renders illustration artwork in widget cards', () => {
+    renderWithProviders(<DashboardPage />);
+
+    expect(screen.getByTestId('dashboard-widget-art-weather')).toBeDefined();
+    expect(screen.getByTestId('dashboard-widget-art-readiness')).toBeDefined();
+    expect(screen.getByTestId('dashboard-widget-art-block')).toBeDefined();
+    expect(screen.getByTestId('dashboard-widget-art-progress')).toBeDefined();
+  });
+
+  it('renders the central training and activity section', () => {
+    renderWithProviders(<DashboardPage />);
+
+    expect(screen.getByText('Trening i aktywności')).toBeDefined();
     expect(screen.getAllByText('Morning Ride').length).toBeGreaterThan(0);
+    expect(screen.getByText('280 W')).toBeDefined();
+  });
+
+  it('renders PMC load chips', () => {
+    renderWithProviders(<DashboardPage />);
+
+    expect(screen.getByText('CTL')).toBeDefined();
+    expect(screen.getByText('ATL')).toBeDefined();
+    expect(screen.getByText('TSB')).toBeDefined();
+  });
+
+  it('renders coach AI summary panel', () => {
+    renderWithProviders(<DashboardPage />);
+
+    expect(screen.getByText('Coach AI')).toBeDefined();
+  });
+
+  it('renders quick navigation buttons', () => {
+    renderWithProviders(<DashboardPage />);
+
+    expect(screen.getByText('Studio pogody')).toBeDefined();
+    expect(screen.getByText('Aktywności')).toBeDefined();
+    expect(screen.getByText('Analityka')).toBeDefined();
   });
 });

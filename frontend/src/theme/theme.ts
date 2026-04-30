@@ -154,6 +154,10 @@ const theme = createTheme({
           backgroundColor: '#0D1117',
           scrollbarColor: '#30363D #0D1117',
         },
+        '@keyframes sectionFadeInUp': {
+          from: { opacity: 0, transform: 'translateY(8px)' },
+          to: { opacity: 1, transform: 'translateY(0)' },
+        },
       },
     },
 

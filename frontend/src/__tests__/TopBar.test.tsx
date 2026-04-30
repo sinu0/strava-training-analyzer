@@ -51,10 +51,10 @@ describe('TopBar', () => {
     expect(screen.getByText('Blok stabilny')).toBeDefined();
   });
 
-  it('shows dashboard context on dashboard route', () => {
+  it('shows home context on dashboard route', () => {
     renderTopBar('/dashboard');
 
-    expect(screen.getByText('Centrum danych')).toBeDefined();
-    expect(screen.getByText('Widgety i pełne widoki')).toBeDefined();
+    expect(screen.getByText('Home')).toBeDefined();
+    expect(screen.getByText('Ostatni trening')).toBeDefined();
   });
 });

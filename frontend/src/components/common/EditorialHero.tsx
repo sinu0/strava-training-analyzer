@@ -1,4 +1,5 @@
 import { Box, Paper, Stack, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 import { SURFACE_COLORS, alphaColor } from '@/utils/colors';
 
@@ -11,6 +12,7 @@ type EditorialHeroProps = {
   imageAlt: string;
   highlights?: string[];
   imagePosition?: string;
+  compact?: boolean;
 };
 
 /**
@@ -25,12 +27,14 @@ export default function EditorialHero({
   imageAlt,
   highlights = [],
   imagePosition = 'center',
+  compact = false,
 }: EditorialHeroProps) {
+  const theme = useTheme();
   return (
     <Paper
       sx={{
-        p: { xs: 1.5, md: 2 },
-        mb: { xs: 2, md: 2.5 },
+        p: compact ? { xs: 1.25, md: 1.5 } : { xs: 1.5, md: 2 },
+        mb: compact ? { xs: 1.5, md: 2 } : { xs: 2, md: 2.5 },
         borderRadius: 4,
         border: '1px solid',
         borderColor: alphaColor(accentColor, 0.18),
@@ -54,10 +58,10 @@ export default function EditorialHero({
             >
               {eyebrow}
             </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 900, lineHeight: 1.05, maxWidth: 620 }}>
+            <Typography variant={compact ? 'h5' : 'h4'} sx={{ fontWeight: 900, lineHeight: 1.05, maxWidth: 620 }}>
               {title}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1, maxWidth: 720 }}>
+            <Typography variant={compact ? 'body2' : 'body2'} color="text.secondary" sx={{ mt: compact ? 0.75 : 1, maxWidth: 720, ...(compact && { fontSize: '0.82rem' }) }}>
               {description}
             </Typography>
           </Box>
@@ -68,12 +72,12 @@ export default function EditorialHero({
                 <Box
                   key={highlight}
                   sx={{
-                    px: 1.1,
-                    py: 0.7,
+                    px: compact ? 0.9 : 1.1,
+                    py: compact ? 0.45 : 0.7,
                     borderRadius: 999,
                     border: '1px solid',
                     borderColor: alphaColor(accentColor, 0.2),
-                    bgcolor: alphaColor('#0D1117', 0.28),
+                    bgcolor: alphaColor(theme.palette.background.default, 0.28),
                   }}
                 >
                   <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 700 }}>
@@ -92,7 +96,7 @@ export default function EditorialHero({
             minWidth: { md: 280 },
             borderRadius: 3,
             overflow: 'hidden',
-            minHeight: { xs: 160, md: 220 },
+            minHeight: { xs: compact ? 120 : 160, md: compact ? 150 : 220 },
             border: '1px solid',
             borderColor: alphaColor(accentColor, 0.14),
           }}
@@ -114,8 +118,8 @@ export default function EditorialHero({
             sx={{
               position: 'absolute',
               inset: 0,
-              background: `linear-gradient(135deg, ${alphaColor('#0D1117', 0.12)} 0%, ${alphaColor(
-                '#0D1117',
+              background: `linear-gradient(135deg, ${alphaColor(theme.palette.background.default, 0.12)} 0%, ${alphaColor(
+                theme.palette.background.default,
                 0.58,
               )} 100%)`,
             }}

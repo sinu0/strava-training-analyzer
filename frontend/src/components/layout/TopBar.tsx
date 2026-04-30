@@ -37,18 +37,11 @@ interface TopBarProps {
 }
 
 function getPageContext(pathname: string) {
-  if (pathname === '/') {
+  if (pathname === '/' || pathname.startsWith('/dashboard')) {
     return {
       eyebrow: 'Home',
       title: 'Ostatni trening',
       subtitle: 'Twoja ostatnia aktywność, AI i najbliższy kontekst dnia.',
-    };
-  }
-  if (pathname.startsWith('/dashboard')) {
-    return {
-      eyebrow: 'Centrum danych',
-      title: 'Widgety i pełne widoki',
-      subtitle: 'Kompaktowe moduły danych prowadzące do głębszych stron analitycznych.',
     };
   }
   if (pathname.startsWith('/weather')) {

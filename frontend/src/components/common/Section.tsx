@@ -49,10 +49,6 @@ export default function Section({
         height: '100%',
         position: 'relative',
         transition: (theme) => theme.tokens?.transition ?? 'all 160ms ease',
-        '@keyframes sectionFadeInUp': {
-          from: { opacity: 0, transform: 'translateY(8px)' },
-          to: { opacity: 1, transform: 'translateY(0)' },
-        },
         animation: 'sectionFadeInUp 320ms ease',
         '&::before': accentColor ? {
           content: '""',

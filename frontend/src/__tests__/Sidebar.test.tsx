@@ -16,7 +16,6 @@ it('renders grouped navigation with Home and groups', () => {
   );
 
   expect(screen.getByText('Home')).toBeDefined();
-  expect(screen.getByText('Centrum danych')).toBeDefined();
   expect(screen.getByText('Aktywności')).toBeDefined();
   expect(screen.getByText('Analityka')).toBeDefined();
   expect(screen.getByText('Ustawienia')).toBeDefined();

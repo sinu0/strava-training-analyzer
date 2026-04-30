@@ -1,11 +1,10 @@
 import { lazy, Suspense, type ComponentType, type LazyExoticComponent } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import LoadingState from '@/components/common/LoadingState';
 import AppLayout from '@/components/layout/AppLayout';
 
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
-const HomePage = lazy(() => import('@/pages/HomePage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const ActivitiesPage = lazy(() => import('@/pages/ActivitiesPage'));
 const ActivityDetailPage = lazy(() => import('@/pages/ActivityDetailPage'));
@@ -33,8 +32,8 @@ export default function App() {
   return (
     <Routes>
       <Route element={<AppLayout />}>
-        <Route path="/" element={renderLazyPage(HomePage)} />
-        <Route path="/dashboard" element={renderLazyPage(DashboardPage)} />
+        <Route path="/" element={renderLazyPage(DashboardPage)} />
+        <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="/profile" element={renderLazyPage(ProfilePage)} />
         <Route path="/activities" element={renderLazyPage(ActivitiesPage)} />
         <Route path="/activities/:id" element={renderLazyPage(ActivityDetailPage)} />

@@ -39,7 +39,7 @@ export default function WeatherStudioMap({
   return (
     <Box
       sx={{
-        height: 360,
+        height: 420,
         overflow: 'hidden',
         borderRadius: 4,
         border: '1px solid',

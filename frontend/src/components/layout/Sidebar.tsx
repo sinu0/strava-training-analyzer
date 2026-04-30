@@ -44,12 +44,11 @@ const HERO_ITEM: NavItem = { label: 'Home', path: '/', icon: <DashboardIcon /> }
 const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Trening',
-      items: [
-        { label: 'Centrum danych', path: '/dashboard', icon: <DashboardIcon /> },
-        { label: 'Pogoda', path: '/weather', icon: <WbSunnyOutlinedIcon /> },
-        { label: 'Aktywności', path: '/activities', icon: <DirectionsBikeIcon /> },
-        { label: 'Analityka', path: '/analytics', icon: <BarChartIcon /> },
-        { label: 'Planer', path: '/training', icon: <FitnessCenterIcon /> },
+    items: [
+      { label: 'Pogoda', path: '/weather', icon: <WbSunnyOutlinedIcon /> },
+      { label: 'Aktywności', path: '/activities', icon: <DirectionsBikeIcon /> },
+      { label: 'Analityka', path: '/analytics', icon: <BarChartIcon /> },
+      { label: 'Planer', path: '/training', icon: <FitnessCenterIcon /> },
     ],
   },
   {

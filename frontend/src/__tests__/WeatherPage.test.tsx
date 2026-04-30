@@ -85,6 +85,7 @@ vi.mock('@/hooks/useAnalytics', () => ({
     },
   }),
   useAddWeatherLocation: () => ({ mutate: vi.fn(), isPending: false }),
+  useRefreshWeatherCache: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 function renderPage() {

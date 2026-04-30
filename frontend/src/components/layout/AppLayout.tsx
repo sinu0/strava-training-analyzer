@@ -1,5 +1,5 @@
 import { Alert, Box, Snackbar } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -108,7 +108,7 @@ export default function AppLayout() {
             p: { xs: 2, sm: 3, md: 3.5 },
             pt: { xs: 5, sm: 6, md: 7 },
             pb: { xs: 12, md: 3.5 },
-            backgroundImage: `linear-gradient(rgba(13,17,23,0.93), rgba(13,17,23,0.93)), url('/illustrations/bg-main.jpg')`,
+            backgroundImage: `linear-gradient(${alpha(theme.palette.background.default, 0.93)}, ${alpha(theme.palette.background.default, 0.93)}), url('/illustrations/bg-main.jpg')`,
             backgroundSize: 'cover',
             backgroundAttachment: 'fixed',
             backgroundPosition: 'center',
