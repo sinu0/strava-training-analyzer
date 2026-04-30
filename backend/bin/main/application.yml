@@ -1,0 +1,91 @@
+spring:
+  application:
+    name: strava-analizator
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/strava_analizator
+    username: sa_user
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect
+        format_sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: true
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+strava:
+  client-id: ${STRAVA_CLIENT_ID:}
+  client-secret: ${STRAVA_CLIENT_SECRET:}
+  redirect-uri: http://localhost:8080/api/auth/strava/callback
+  webhook-verify-token: ${STRAVA_WEBHOOK_TOKEN:}
+
+app:
+  jwt-secret: ${JWT_SECRET:dev-jwt-secret-32-chars-minimum!!}
+  jwt-expiration: 7d
+  encryption-key: ${ENCRYPTION_KEY:0123456789abcdef0123456789abcdef}
+  frontend-url: http://localhost:5173
+
+garmin:
+  enabled: ${GARMIN_ENABLED:false}
+  sync-interval-hours: ${GARMIN_SYNC_INTERVAL:6}
+
+ai:
+  enabled: ${AI_ENABLED:false}
+  provider: ${AI_PROVIDER:ollama}
+  model: ${AI_MODEL:}
+  ollama:
+    enabled: ${AI_OLLAMA_ENABLED:false}
+    base-url: ${AI_OLLAMA_URL:http://localhost:11434}
+  openai:
+    enabled: ${AI_OPENAI_ENABLED:false}
+    base-url: ${AI_OPENAI_URL:https://api.openai.com/v1}
+    api-key: ${AI_OPENAI_API_KEY:}
+  anthropic:
+    enabled: ${AI_ANTHROPIC_ENABLED:false}
+    base-url: ${AI_ANTHROPIC_URL:https://api.anthropic.com}
+    api-key: ${AI_ANTHROPIC_API_KEY:}
+  azure-openai:
+    enabled: ${AI_AZURE_OPENAI_ENABLED:false}
+    base-url: ${AI_AZURE_OPENAI_URL:}
+    api-key: ${AI_AZURE_OPENAI_API_KEY:}
+    deployment: ${AI_AZURE_OPENAI_DEPLOYMENT:}
+    api-version: ${AI_AZURE_OPENAI_API_VERSION:2024-02-01}
+  gemini:
+    enabled: ${AI_GEMINI_ENABLED:false}
+    api-key: ${AI_GEMINI_API_KEY:}
+  embedding:
+    model: ${AI_EMBEDDING_MODEL:all-minilm}
+  batch:
+    enabled: ${AI_BATCH_ENABLED:true}
+    cron: ${AI_BATCH_CRON:0 0 3 * * *}
+  note-queue:
+    interval-ms: ${AI_NOTE_QUEUE_INTERVAL:30000}
+
+logging:
+  level:
+    pl.strava.analizator: DEBUG
+    org.hibernate.SQL: WARN
