@@ -196,7 +196,7 @@ export function useRoutePlannerState() {
   );
   const weatherQueries = useRouteWeather(
     weatherStops,
-    showWeather && !isRouting && weatherStops.length > 0,
+    showWeather && weatherStops.length > 0,
   );
   const routeWeatherStops = useMemo<RouteWeatherStopWithStatus[]>(
     () =>
@@ -327,19 +327,18 @@ export function useRoutePlannerState() {
 
       try {
         const preview = await fetchRoute(nextWaypoints, routingPreferences);
-        const routedLine = preview.polyline.length > 1 ? preview.polyline : nextWaypoints;
+        const hasRoutedPolyline = preview.polyline.length > 1 && preview.provider !== 'MANUAL';
 
         dispatch({
           type: 'apply-route-preview',
           preview,
-          routedLine,
+          ...(hasRoutedPolyline ? { routedLine: preview.polyline } : {}),
         });
-        await loadElevationProfile(routedLine, preview.elevationGainM);
+        if (hasRoutedPolyline) {
+          await loadElevationProfile(preview.polyline, preview.elevationGainM);
+        }
       } catch {
-        dispatch({
-          type: 'routing-failed',
-          fallbackPolyline: nextWaypoints,
-        });
+        dispatch({ type: 'routing-failed' });
       } finally {
         dispatch({ type: 'set-routing', isRouting: false });
       }
@@ -501,7 +500,8 @@ export function useRoutePlannerState() {
 
       const suggestedWaypoints = suggestion.waypoints ?? [];
       const preview = suggestion.preview;
-      const routedLine = preview.polyline.length > 1 ? preview.polyline : suggestedWaypoints;
+      const hasRoutedPolyline = preview.polyline.length > 1 && preview.provider !== 'MANUAL';
+      const routedLine = hasRoutedPolyline ? preview.polyline : suggestedWaypoints;
 
       dispatch({
         type: 'apply-generated-alternative',
