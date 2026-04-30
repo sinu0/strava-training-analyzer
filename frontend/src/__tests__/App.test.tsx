@@ -57,6 +57,10 @@ function mockStaticPages(importedPages: string[] = [], options?: { skipDashboard
     importedPages.push('health');
     return { default: () => <div>Health page</div> };
   });
+  vi.doMock('../pages/WeatherPage', () => {
+    importedPages.push('weather');
+    return { default: () => <div>Weather page</div> };
+  });
   vi.doMock('../pages/RoutePlannerPage', () => {
     importedPages.push('route-planner');
     return { default: () => <div>Route planner page</div> };
@@ -112,5 +116,32 @@ describe('App', () => {
     await renderApp('/');
 
     expect((await screen.findAllByText('Ładowanie strony…')).length).toBeGreaterThan(0);
+  });
+
+  it('loads dashboard module only on dashboard route', async () => {
+    const importedPages: string[] = [];
+
+    mockAppLayout();
+    mockStaticPages(importedPages);
+
+    await renderApp('/dashboard');
+    expect((await screen.findAllByText('Dashboard page')).length).toBeGreaterThan(0);
+
+    expect(importedPages).toContain('dashboard');
+    expect(importedPages).not.toContain('activities');
+  });
+
+  it('loads weather module only on weather route', async () => {
+    const importedPages: string[] = [];
+
+    mockAppLayout();
+    mockStaticPages(importedPages);
+
+    await renderApp('/weather');
+    expect((await screen.findAllByText('Weather page')).length).toBeGreaterThan(0);
+
+    expect(importedPages).toContain('weather');
+    expect(importedPages).not.toContain('dashboard');
+    expect(importedPages).not.toContain('activities');
   });
 });

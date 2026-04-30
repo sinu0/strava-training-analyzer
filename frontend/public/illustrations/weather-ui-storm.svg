@@ -1,0 +1,26 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="storm-cloud-fill" x1="14" y1="15" x2="49" y2="41" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#CBD5E1"/>
+      <stop offset="0.5" stop-color="#64748B"/>
+      <stop offset="1" stop-color="#1E293B"/>
+    </linearGradient>
+    <linearGradient id="storm-cloud-stroke" x1="17" y1="17" x2="48" y2="41" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E2E8F0"/>
+      <stop offset="1" stop-color="#64748B"/>
+    </linearGradient>
+    <linearGradient id="storm-bolt" x1="26" y1="34" x2="38" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FDE68A"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+    <filter id="storm-shadow" x="4" y="10" width="56" height="50" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.36"/>
+    </filter>
+  </defs>
+  <g filter="url(#storm-shadow)">
+    <path d="M21 36.5C15.48 36.5 11 32.32 11 27.17C11 22.36 14.91 18.35 19.89 17.88C21.47 12.18 26.83 8.1 33.12 8.1C40.45 8.1 46.48 13.52 47.29 20.48C51.08 21.32 53.8 24.54 53.8 28.35C53.8 32.82 50.12 36.45 45.58 36.45H21V36.5Z" fill="url(#storm-cloud-fill)"/>
+    <path d="M21 36.5C15.48 36.5 11 32.32 11 27.17C11 22.36 14.91 18.35 19.89 17.88C21.47 12.18 26.83 8.1 33.12 8.1C40.45 8.1 46.48 13.52 47.29 20.48C51.08 21.32 53.8 24.54 53.8 28.35C53.8 32.82 50.12 36.45 45.58 36.45H21" stroke="url(#storm-cloud-stroke)" stroke-width="2.3" stroke-linejoin="round"/>
+    <path d="M34.5 37L26 49.6H33.2L29.8 58L40.5 43.8H33.4L34.5 37Z" fill="url(#storm-bolt)"/>
+    <path d="M34.5 37L26 49.6H33.2L29.8 58L40.5 43.8H33.4L34.5 37Z" stroke="#FCD34D" stroke-width="1.4" stroke-linejoin="round"/>
+  </g>
+</svg>

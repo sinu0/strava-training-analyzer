@@ -77,9 +77,9 @@ export type RoutePlannerAction =
   | {
       type: 'apply-route-preview';
       preview: RoutePreview;
-      routedLine: RoutePoint[];
+      routedLine?: RoutePoint[];
     }
-  | { type: 'routing-failed'; fallbackPolyline: RoutePoint[] }
+  | { type: 'routing-failed' }
   | {
       type: 'set-elevation-profile';
       elevations: number[];
@@ -253,7 +253,7 @@ export function routePlannerReducer(
       return {
         ...state,
         routePreview: action.preview,
-        polyline: action.routedLine,
+        polyline: action.routedLine ?? state.polyline,
         totalDistance: action.preview.distanceM,
         totalGain: action.preview.elevationGainM,
         estimatedTimeSec: action.preview.estimatedTimeSec,
@@ -262,14 +262,8 @@ export function routePlannerReducer(
     case 'routing-failed':
       return {
         ...state,
-        polyline: action.fallbackPolyline,
         elevations: [],
         elevationPoints: [],
-        totalDistance: 0,
-        totalGain: 0,
-        estimatedTimeSec: 0,
-        estimatedTss: 0,
-        routePreview: null,
       };
     case 'set-elevation-profile':
       return {

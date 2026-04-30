@@ -1,34 +1,36 @@
-import AcUnitIcon from '@mui/icons-material/AcUnit';
-import CloudIcon from '@mui/icons-material/Cloud';
-import GrainIcon from '@mui/icons-material/Grain';
-import ThunderstormIcon from '@mui/icons-material/Thunderstorm';
-import WbSunnyIcon from '@mui/icons-material/WbSunny';
+import { Box } from '@mui/material';
 
-import { getWeatherIconConfig } from '@/constants/weatherIcons';
+import { getWeatherIconConfig, type WeatherIconKind } from '@/constants/weatherIcons';
+import { getWeatherUiIconPath } from '@/utils/illustrationAssets';
 
 interface WeatherConditionIconProps {
-  code: number;
+  code?: number;
+  kind?: WeatherIconKind;
   size?: number;
+  alt?: string;
 }
 
 export default function WeatherConditionIcon({
   code,
+  kind,
   size = 20,
+  alt,
 }: WeatherConditionIconProps) {
-  const { kind, color } = getWeatherIconConfig(code);
-  const sx = { fontSize: size, color };
+  const resolvedKind = kind ?? getWeatherIconConfig(code ?? 2).kind;
+  const resolvedAlt = alt ?? `Ikona pogody: ${resolvedKind}`;
 
-  switch (kind) {
-    case 'sunny':
-      return <WbSunnyIcon sx={sx} />;
-    case 'rain':
-      return <GrainIcon sx={sx} />;
-    case 'snow':
-      return <AcUnitIcon sx={sx} />;
-    case 'storm':
-      return <ThunderstormIcon sx={sx} />;
-    case 'cloud':
-    default:
-      return <CloudIcon sx={sx} />;
-  }
+  return (
+    <Box
+      component="img"
+      src={getWeatherUiIconPath(resolvedKind)}
+      alt={resolvedAlt}
+      sx={{
+        width: size,
+        height: size,
+        display: 'block',
+        objectFit: 'contain',
+        filter: 'drop-shadow(0 6px 12px rgba(15, 23, 42, 0.24))',
+      }}
+    />
+  );
 }

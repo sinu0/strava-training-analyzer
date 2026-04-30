@@ -1,6 +1,7 @@
 package pl.strava.analizator.application.ai;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -17,6 +18,18 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
+import pl.strava.analizator.application.AnalyticsService;
+import pl.strava.analizator.application.BlockHealthService;
+import pl.strava.analizator.application.TrainingPlanService;
+import pl.strava.analizator.application.dto.BlockHealthDto;
+import pl.strava.analizator.application.dto.CalendarDayDto;
+import pl.strava.analizator.application.dto.DurabilityInsightDto;
+import pl.strava.analizator.application.dto.ProgressionLevelDto;
+import pl.strava.analizator.application.dto.ReadinessDto;
+import pl.strava.analizator.application.dto.ReadinessSessionVariantDto;
+import pl.strava.analizator.application.dto.TrainingGoalScorecardDto;
+import pl.strava.analizator.application.dto.TrainingPlanProgramDto;
+import pl.strava.analizator.application.dto.TrainingWeekObjectiveDto;
 import pl.strava.analizator.domain.ai.PredictionType;
 import pl.strava.analizator.domain.ai.TrainingContext;
 import pl.strava.analizator.domain.ai.TrainingDataPort;
@@ -44,6 +57,9 @@ public class TrainingDataAdapter implements TrainingDataPort {
     private final AthleteProfileRepository athleteProfileRepository;
     private final DailyMetricRepository dailyMetricRepository;
     private final AiPredictionRepository aiPredictionRepository;
+    private final AnalyticsService analyticsService;
+    private final BlockHealthService blockHealthService;
+    private final TrainingPlanService trainingPlanService;
 
     @Override
     public TrainingContext buildContext(PredictionType predictionType) {
@@ -64,6 +80,12 @@ public class TrainingDataAdapter implements TrainingDataPort {
                 .zoneDistribution(buildZoneDistribution(activities))
                 .readiness(buildReadiness())
                 .powerCurve(buildPowerCurve(activities))
+                .durability(buildDurability())
+                .progressionLevels(buildProgressionLevels())
+                .blockHealth(buildBlockHealth())
+                .programReview(buildProgramReview())
+                .coachSummary(buildCoachSummary())
+                .coachMemory(buildCoachMemory())
                 .recentPredictionHistory(buildPredictionHistory(predictionType))
                 .build();
     }
@@ -75,6 +97,7 @@ public class TrainingDataAdapter implements TrainingDataPort {
             case FTP_PREDICTION, OVERTRAINING_RISK -> 30;
             case PERFORMANCE_TREND -> 60;
             case RACE_READINESS -> 21;
+            case TRAINING_COACH_SUMMARY -> 28;
         };
     }
 
@@ -224,6 +247,192 @@ public class TrainingDataAdapter implements TrainingDataPort {
         return volume;
     }
 
+    private Map<String, Object> buildDurability() {
+        DurabilityInsightDto durability = analyticsService.getDurabilityInsights();
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("trend", durability.getTrend());
+        result.put("label", durability.getLabel());
+        result.put("description", durability.getDescription());
+        result.put("avgAerobicDecoupling", durability.getAvgAerobicDecoupling());
+        result.put("avgPowerFade", durability.getAvgPowerFade());
+        result.put("avgDurabilityScore", durability.getAvgDurabilityScore());
+        result.put("recentDurabilityWorkouts", durability.getWorkouts().stream().map(workout -> {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("date", workout.getDate());
+            row.put("name", workout.getName());
+            row.put("durationMin", workout.getDurationMin());
+            row.put("tss", workout.getTss());
+            row.put("aerobicDecoupling", workout.getAerobicDecoupling());
+            row.put("powerFade", workout.getPowerFade());
+            row.put("durabilityScore", workout.getDurabilityScore());
+            return row;
+        }).toList());
+        return result;
+    }
+
+    private Map<String, Object> buildProgramReview() {
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        List<TrainingPlanProgramDto> programs = trainingPlanService.getPrograms();
+        TrainingPlanProgramDto currentProgram = programs.stream()
+                .filter(program -> !today.isBefore(program.getStartDate()) && !today.isAfter(program.getEndDate()))
+                .findFirst()
+                .orElse(null);
+
+        if (currentProgram == null) {
+            return Map.of();
+        }
+
+        TrainingWeekObjectiveDto currentObjective = currentProgram.getWeeklyObjectives().stream()
+                .filter(objective -> !today.isBefore(objective.getWeekStart()) && !today.isAfter(objective.getWeekEnd()))
+                .findFirst()
+                .orElse(null);
+        TrainingGoalScorecardDto currentScorecard = currentProgram.getGoalScorecards().stream()
+                .filter(scorecard -> !today.isBefore(scorecard.getWeekStart()) && !today.isAfter(scorecard.getWeekEnd()))
+                .findFirst()
+                .orElse(null);
+        List<CalendarDayDto> reviewWindow = trainingPlanService.getCalendarView(today.minusDays(3), today.plusDays(7));
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("programGoal", currentProgram.getGoal());
+        result.put("programPriority", currentProgram.getGoalPriority());
+        result.put("objectiveLabel", currentObjective != null ? currentObjective.getLabel() : null);
+        result.put("objectiveFocus", currentObjective != null ? currentObjective.getFocus() : null);
+        result.put("fuelingLabel", currentObjective != null ? currentObjective.getFuelingLabel() : null);
+        result.put("scorecardOnTrack", currentScorecard != null && currentScorecard.isOnTrack());
+        result.put("goalFocusLabel", currentScorecard != null ? currentScorecard.getGoalFocusLabel() : null);
+        result.put("goalFocusRole", currentScorecard != null ? currentScorecard.getGoalFocusRole() : null);
+        result.put("goalExecutionStatus", currentScorecard != null ? currentScorecard.getGoalExecutionStatus() : null);
+        result.put("goalExecutionScore", currentScorecard != null ? currentScorecard.getGoalExecutionScore() : null);
+        result.put("goalSessions", currentScorecard == null
+                ? null
+                : "%d/%d".formatted(currentScorecard.getCompletedGoalSessions(), currentScorecard.getPlannedGoalSessions()));
+        result.put("avgExecutionScore", currentScorecard != null ? currentScorecard.getAvgExecutionScore() : null);
+        result.put("recentExecutions", reviewWindow.stream()
+                .filter(day -> day.getExecution() != null)
+                .map(day -> {
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("date", day.getDate());
+                    row.put("label", day.getExecution().getLabel());
+                    row.put("score", day.getExecution().getScore());
+                    row.put("outcome", day.getExecution().getOutcome());
+                    return row;
+                })
+                .toList());
+        result.put("upcomingPlan", reviewWindow.stream()
+                .filter(day -> !day.getDate().isBefore(today))
+                .filter(day -> day.getPlanned() != null)
+                .map(day -> {
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("date", day.getDate());
+                    row.put("plannedType", day.getPlanned().getPlannedType());
+                    row.put("plannedTss", day.getPlanned().getPlannedTss());
+                    row.put("projectionDayType", day.getProjection() != null ? day.getProjection().getDayType() : null);
+                    row.put("adjustment", day.getAdjustment() != null ? day.getAdjustment().getTitle() : null);
+                    return row;
+                })
+                .toList());
+        return result;
+    }
+
+    private Map<String, Object> buildProgressionLevels() {
+        List<ProgressionLevelDto> progressionLevels = analyticsService.getProgressionLevels();
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("systems", progressionLevels.stream().map(level -> {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("system", level.getSystem());
+            row.put("label", level.getLabel());
+            row.put("level", level.getLevel());
+            row.put("currentLoad", level.getCurrentLoad());
+            row.put("previousLoad", level.getPreviousLoad());
+            row.put("targetLoad", level.getTargetLoad());
+            row.put("trend", level.getTrend());
+            row.put("description", level.getDescription());
+            row.put("nextRecommendation", level.getNextRecommendation());
+            return row;
+        }).toList());
+        result.put("topFocus", progressionLevels.stream()
+                .filter(level -> level.getTargetLoad() != null && level.getCurrentLoad() != null)
+                .min(java.util.Comparator.comparing(level -> level.getCurrentLoad()
+                        .subtract(level.getTargetLoad())
+                        .abs()))
+                .map(ProgressionLevelDto::getSystem)
+                .orElse(null));
+        return result;
+    }
+
+    private Map<String, Object> buildBlockHealth() {
+        BlockHealthDto blockHealth = blockHealthService.getCurrentBlockHealth();
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("status", blockHealth.getStatus());
+        result.put("label", blockHealth.getLabel());
+        result.put("description", blockHealth.getDescription());
+        result.put("objectiveLabel", blockHealth.getObjectiveLabel());
+        result.put("goalExecutionStatus", blockHealth.getGoalExecutionStatus());
+        result.put("goalExecutionScore", blockHealth.getGoalExecutionScore());
+        result.put("adjustmentDays", blockHealth.getAdjustmentDays());
+        result.put("missedStimulusDays", blockHealth.getMissedStimulusDays());
+        result.put("overloadDays", blockHealth.getOverloadDays());
+        result.put("keySignals", blockHealth.getKeySignals());
+        result.put("nextFocus", blockHealth.getNextFocus());
+        return result;
+    }
+
+    private Map<String, Object> buildCoachSummary() {
+        ReadinessDto readiness = analyticsService.getReadiness();
+        DurabilityInsightDto durability = analyticsService.getDurabilityInsights();
+        List<ProgressionLevelDto> progressionLevels = analyticsService.getProgressionLevels();
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        List<CalendarDayDto> nextDays = trainingPlanService.getCalendarView(today, today.plusDays(6));
+
+        List<String> keyWins = progressionLevels.stream()
+                .filter(level -> "UP".equals(level.getTrend()))
+                .map(level -> level.getLabel() + " idzie w dobrą stronę.")
+                .limit(2)
+                .toList();
+        List<String> keyRisks = nextDays.stream()
+                .filter(day -> day.getAdjustment() != null)
+                .map(day -> day.getDate() + ": " + day.getAdjustment().getTitle())
+                .limit(2)
+                .toList();
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("readinessLabel", readiness != null ? readiness.getDayLabel() : null);
+        result.put("durabilityTrend", durability != null ? durability.getTrend() : null);
+        result.put("progressionFocus", progressionLevels.stream()
+                .filter(level -> "DOWN".equals(level.getTrend()) || level.getCurrentLoad().compareTo(level.getTargetLoad()) < 0)
+                .map(ProgressionLevelDto::getLabel)
+                .toList());
+        result.put("autoAdjustedDays", nextDays.stream()
+                .filter(day -> day.getAdjustment() != null)
+                .map(day -> day.getDate() + " - " + day.getAdjustment().getTitle())
+                .toList());
+        result.put("keyWins", keyWins);
+        result.put("keyRisks", keyRisks.isEmpty() ? List.of("Brak dużych czerwonych flag w najbliższym tygodniu.") : keyRisks);
+        result.put("nextFocus", progressionLevels.stream()
+                .filter(level -> level.getCurrentLoad().compareTo(level.getTargetLoad()) < 0)
+                .map(ProgressionLevelDto::getNextRecommendation)
+                .findFirst()
+                .orElse("Broń głównego celu tygodnia i nie dokładaj przypadkowej intensywności."));
+        return result;
+    }
+
+    private Map<String, Object> buildCoachMemory() {
+        var summary = trainingPlanService.getCoachMemory();
+        return Map.of(
+                "headline", summary.getHeadline(),
+                "coachNote", summary.getCoachNote(),
+                "preferences", summary.getPreferences().stream()
+                        .map(preference -> Map.<String, Object>of(
+                                "suggestionType", preference.getSuggestionType(),
+                                "acceptedCount", preference.getAcceptedCount(),
+                                "rejectedCount", preference.getRejectedCount(),
+                                "acceptanceRate", preference.getAcceptanceRate(),
+                                "guidance", preference.getGuidance()
+                        ))
+                        .toList()
+        );
+    }
+
     private List<Map<String, Object>> buildWeeklyTssByWeek(Map<LocalDate, BigDecimal> tssSeries) {
         Map<LocalDate, BigDecimal> weeklyTotals = new LinkedHashMap<>();
         tssSeries.entrySet().stream()
@@ -270,9 +479,110 @@ public class TrainingDataAdapter implements TrainingDataPort {
         LocalDate today = LocalDate.now();
         DateRange range = DateRange.of(today, today);
 
+        Map<LocalDate, BigDecimal> ctlSeries = dailyMetricRepository.findNumericSeries("ctl", range);
+        Map<LocalDate, BigDecimal> atlSeries = dailyMetricRepository.findNumericSeries("atl", range);
+        Map<LocalDate, BigDecimal> tsbSeries = dailyMetricRepository.findNumericSeries("tsb", range);
         Map<LocalDate, BigDecimal> readinessSeries = dailyMetricRepository.findNumericSeries("readiness", range);
-        readiness.put("currentReadiness", readinessSeries.getOrDefault(today, BigDecimal.ZERO));
+        BigDecimal currentReadiness = readinessSeries.getOrDefault(today, BigDecimal.ZERO);
+        BigDecimal currentCtl = ctlSeries.getOrDefault(today, BigDecimal.ZERO);
+        BigDecimal currentAtl = atlSeries.getOrDefault(today, BigDecimal.ZERO);
+        BigDecimal currentTsb = tsbSeries.getOrDefault(today, BigDecimal.ZERO);
+
+        double ctl = currentCtl.doubleValue();
+        double atl = currentAtl.doubleValue();
+        double tsb = currentTsb.doubleValue();
+        double readinessScore = currentReadiness.doubleValue();
+        double atlCtlRatio = ctl > 0 ? atl / ctl : 0.0;
+
+        readiness.put("currentReadiness", currentReadiness);
+        readiness.put("currentTSB", currentTsb);
+        readiness.put("currentCTL", currentCtl);
+        readiness.put("currentATL", currentAtl);
+        readiness.put("atlCtlRatio", BigDecimal.valueOf(atlCtlRatio).setScale(2, RoundingMode.HALF_UP));
+        readiness.put("trainingWindow", determineTrainingWindow(tsb, readinessScore, atlCtlRatio));
+        readiness.put("coachingGuidance", buildCoachingGuidance(tsb, readinessScore, atlCtlRatio));
+        enrichWithStructuredReadiness(readiness);
         return readiness;
+    }
+
+    private void enrichWithStructuredReadiness(Map<String, Object> readiness) {
+        ReadinessDto structuredReadiness = analyticsService.getReadiness();
+        if (structuredReadiness == null) {
+            return;
+        }
+        readiness.put("dayType", structuredReadiness.getDayType());
+        readiness.put("dayLabel", structuredReadiness.getDayLabel());
+        readiness.put("dayFocus", structuredReadiness.getDayFocus());
+        readiness.put("tomorrowHint", structuredReadiness.getTomorrowHint());
+        readiness.put("bestQualityWindowLabel", structuredReadiness.getBestQualityWindowLabel());
+        readiness.put("qualityWindowSummary", structuredReadiness.getQualityWindowSummary());
+        readiness.put("qualityWindows", mapQualityWindows(structuredReadiness.getQualityWindows()));
+        readiness.put("sessionVariants", mapSessionVariants(structuredReadiness.getSessionVariants()));
+    }
+
+    private List<Map<String, Object>> mapSessionVariants(List<ReadinessSessionVariantDto> sessionVariants) {
+        if (sessionVariants == null) {
+            return List.of();
+        }
+        return sessionVariants.stream()
+                .map(variant -> {
+                    Map<String, Object> mappedVariant = new LinkedHashMap<>();
+                    mappedVariant.put("title", variant.getTitle());
+                    mappedVariant.put("durationMinutes", variant.getDurationMinutes());
+                    mappedVariant.put("targetPower", variant.getTargetPower());
+                    mappedVariant.put("targetTss", variant.getTargetTss());
+                    mappedVariant.put("fuelingHint", variant.getFuelingHint());
+                    mappedVariant.put("recoveryHint", variant.getRecoveryHint());
+                    return mappedVariant;
+                })
+                .toList();
+    }
+
+    private List<Map<String, Object>> mapQualityWindows(List<pl.strava.analizator.application.dto.ReadinessWindowDto> qualityWindows) {
+        if (qualityWindows == null) {
+            return List.of();
+        }
+        return qualityWindows.stream()
+                .map(window -> {
+                    Map<String, Object> mappedWindow = new LinkedHashMap<>();
+                    mappedWindow.put("date", window.getDate());
+                    mappedWindow.put("label", window.getLabel());
+                    mappedWindow.put("score", window.getScore());
+                    mappedWindow.put("recommendation", window.getRecommendation());
+                    mappedWindow.put("focus", window.getFocus());
+                    return mappedWindow;
+                })
+                .toList();
+    }
+
+    private String determineTrainingWindow(double tsb, double readinessScore, double atlCtlRatio) {
+        if (tsb < -30 || readinessScore < 25 || atlCtlRatio >= 1.35) {
+            return "recovery-priority";
+        }
+        if (tsb < 0) {
+            return "productive-fatigue";
+        }
+        if (tsb <= 10) {
+            return "quality-window";
+        }
+        return "fresh";
+    }
+
+    private String buildCoachingGuidance(double tsb, double readinessScore, double atlCtlRatio) {
+        if (tsb < -30 || readinessScore < 25 || atlCtlRatio >= 1.35) {
+            return "TSB below -30, readiness under 25, or ATL/CTL >= 1.35 points to recovery priority."
+                    + " Keep the day easy or fully off.";
+        }
+        if (tsb < 0) {
+            return "TSB between -30 and 0 is still a trainable window for aerobic, tempo, or controlled threshold work."
+                    + " Do not default to full rest unless stronger fatigue red flags appear.";
+        }
+        if (tsb <= 10) {
+            return "TSB between 0 and +10 is a solid quality-training window."
+                    + " Threshold or race-specific work is usually appropriate.";
+        }
+        return "TSB above +10 usually means the athlete is fresh."
+                + " This is a good window for hard intervals, testing, or racing.";
     }
 
     private String formatDaysAgo(OffsetDateTime startedAt) {

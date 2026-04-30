@@ -23,6 +23,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 
 import DateRangePicker from '@/components/common/DateRangePicker';
+import EditorialHero from '@/components/common/EditorialHero';
 import PageContainer from '@/components/common/PageContainer';
 import PullToRefreshPanel from '@/components/common/PullToRefreshPanel';
 import Section from '@/components/common/Section';
@@ -45,6 +46,7 @@ import {
   useZoneDistribution,
 } from '@/hooks/useAnalytics';
 import { CHART_COLORS } from '@/utils/colors';
+import { getPageHeroIllustrationPath } from '@/utils/illustrationAssets';
 
 function defaultRange(): { from: string; to: string } {
   const to = new Date().toISOString().slice(0, 10);
@@ -243,6 +245,16 @@ export default function AnalyticsPage() {
       ]}
     >
       <PullToRefreshPanel onRefresh={handleRefresh}>
+        <EditorialHero
+          eyebrow="Analityka"
+          title="Wykresy, obciążenie i trendy w jednym bardziej spójnym rytmie."
+          description="Sekcja dostała ten sam ciemniejszy, mniej generyczny kierunek co Home, żeby dane wyglądały jak narzędzie treningowe, a nie kolejny dashboard z szablonu."
+          accentColor={CHART_COLORS.primary}
+          imageSrc={getPageHeroIllustrationPath('analytics')}
+          imageAlt="Analityka hero"
+          imagePosition="center 52%"
+          highlights={['PMC i krzywa mocy', 'Obciążenie dnia i tygodnia', 'Trend FTP / EF']}
+        />
         {isMobile ? (
           <Accordion
             expanded={filtersExpanded}

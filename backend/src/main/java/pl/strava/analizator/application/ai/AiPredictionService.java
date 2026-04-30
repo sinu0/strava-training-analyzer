@@ -139,7 +139,7 @@ public class AiPredictionService {
                 : provider.chat(systemPrompt, fullUserPrompt, modelId);
 
         // 4. Parse response
-        AiPrediction prediction = parseResponse(rawResponse, type, modelId);
+        AiPrediction prediction = parseResponse(rawResponse, type, modelId, context);
 
         log.info("AI prediction completed: type={}, confidence={}", type, prediction.getConfidence());
 
@@ -201,7 +201,7 @@ public class AiPredictionService {
                 String rawResponse = provider.supportsToolCalling()
                         ? toolCallingLoop.run(systemPrompt, fullUserPrompt, null, providerName, modelId)
                         : provider.chat(systemPrompt, fullUserPrompt, modelId);
-                AiPrediction prediction = parseResponse(rawResponse, type, modelId);
+                AiPrediction prediction = parseResponse(rawResponse, type, modelId, context);
                 try {
                     predictionRepository.save(prediction, providerName);
                 } catch (Exception e) {
@@ -258,6 +258,12 @@ public class AiPredictionService {
         vars.put("zoneDistribution", toJson(context.getZoneDistribution()));
         vars.put("readiness", toJson(context.getReadiness()));
         vars.put("powerCurve", toJson(context.getPowerCurve()));
+        vars.put("durability", toJson(context.getDurability()));
+        vars.put("progressionLevels", toJson(context.getProgressionLevels()));
+        vars.put("blockHealth", toJson(context.getBlockHealth()));
+        vars.put("programReview", toJson(context.getProgramReview()));
+        vars.put("coachSummary", toJson(context.getCoachSummary()));
+        vars.put("coachMemory", toJson(context.getCoachMemory()));
         vars.put("recentPredictionHistory", context.getRecentPredictionHistory() != null && !context.getRecentPredictionHistory().isEmpty()
                 ? String.join("\n", context.getRecentPredictionHistory())
                 : "No previous predictions for this type.");
@@ -273,7 +279,7 @@ public class AiPredictionService {
         }
     }
 
-    private AiPrediction parseResponse(String rawResponse, PredictionType type, String modelId) {
+    private AiPrediction parseResponse(String rawResponse, PredictionType type, String modelId, TrainingContext context) {
         Map<String, Object> structured = Map.of();
         double confidence = 0.5;
         String summary;
@@ -282,6 +288,7 @@ public class AiPredictionService {
         try {
             String jsonStr = extractJson(rawResponse);
             structured = objectMapper.readValue(jsonStr, new TypeReference<>() {});
+            structured = applyRecommendationGuardrails(type, context, structured);
 
             if (structured.containsKey("confidence")) {
                 confidence = ((Number) structured.get("confidence")).doubleValue();
@@ -325,6 +332,159 @@ public class AiPredictionService {
         return trimmed.trim();
     }
 
+    private Map<String, Object> applyRecommendationGuardrails(PredictionType type,
+                                                              TrainingContext context,
+                                                              Map<String, Object> structured) {
+        if (type != PredictionType.TRAINING_TYPE_RECOMMENDATION || structured.isEmpty()) {
+            return structured;
+        }
+
+        LoadSnapshot loadSnapshot = LoadSnapshot.from(context);
+        if (!loadSnapshot.isProductiveFatigueWindow() || !isRestRecommendation(structured)) {
+            return structured;
+        }
+
+        Map<String, Object> normalized = new HashMap<>(structured);
+        normalized.put("summary", "Kontrolowany bodziec jest OK; nie potrzebujesz pełnego dnia wolnego.");
+        normalized.put("insight",
+                "TSB jest ujemny, ale nadal mieści się w produktywnym oknie zmęczenia."
+                        + " Przy TSB %.0f i ATL/CTL %.2f warto zrobić kontrolowany bodziec zamiast pełnego rest day."
+                        .formatted(loadSnapshot.tsb(), loadSnapshot.atlCtlRatio()));
+        normalized.put("action", "60-90 min Z2 lub 2-3 x 8-12 min tempo/sweet spot; bez sprintów i VO2max.");
+
+        Map<String, Object> metrics = copyMetrics(normalized.get("metrics"));
+        metrics.put("TSB", formatMetric(loadSnapshot.tsb()));
+        metrics.put("ATL/CTL", formatMetric(loadSnapshot.atlCtlRatio()));
+        metrics.put("window", "produktywne zmęczenie");
+        normalized.put("metrics", metrics);
+
+        normalized.put("warnings", mergeWarnings(normalized.get("warnings"),
+                "Jeśli noga jest pusta albo tętno nietypowo wysokie, skróć sesję i zejdź do Z2."));
+
+        Map<String, Object> workout = copyNestedMap(normalized.get("todayWorkout"));
+        workout.put("type", "tempo/endurance");
+        workout.put("durationMinutes", 75);
+        workout.put("targetZone", "Z2-Z3");
+        workout.put("targetTss", 60);
+        normalized.put("todayWorkout", workout);
+
+        return normalized;
+    }
+
+    private boolean isRestRecommendation(Map<String, Object> structured) {
+        StringBuilder signal = new StringBuilder();
+        appendIfPresent(signal, structured.get("summary"));
+        appendIfPresent(signal, structured.get("insight"));
+        appendIfPresent(signal, structured.get("action"));
+        if (structured.get("todayWorkout") instanceof Map<?, ?> workout) {
+            appendIfPresent(signal, workout.get("type"));
+        }
+        String normalized = signal.toString().toLowerCase();
+        return normalized.contains("full rest")
+                || normalized.contains("rest day")
+                || normalized.contains("rest or")
+                || normalized.contains("easy recovery spin")
+                || normalized.contains("recovery spin only")
+                || normalized.contains("off day")
+                || normalized.contains("odpoc")
+                || normalized.contains("wolne")
+                || normalized.contains("recovery");
+    }
+
+    private void appendIfPresent(StringBuilder signal, Object value) {
+        if (value != null) {
+            signal.append(value).append(' ');
+        }
+    }
+
+    private Map<String, Object> copyMetrics(Object value) {
+        if (value instanceof Map<?, ?> map) {
+            Map<String, Object> copy = new HashMap<>();
+            map.forEach((key, entryValue) -> copy.put(String.valueOf(key), entryValue));
+            return copy;
+        }
+        return new HashMap<>();
+    }
+
+    private Map<String, Object> copyNestedMap(Object value) {
+        if (value instanceof Map<?, ?> map) {
+            Map<String, Object> copy = new HashMap<>();
+            map.forEach((key, entryValue) -> copy.put(String.valueOf(key), entryValue));
+            return copy;
+        }
+        return new HashMap<>();
+    }
+
+    private List<String> mergeWarnings(Object existingWarnings, String extraWarning) {
+        List<String> warnings = new java.util.ArrayList<>();
+        if (existingWarnings instanceof List<?> list) {
+            list.stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .forEach(warnings::add);
+        }
+        if (!warnings.contains(extraWarning)) {
+            warnings.add(extraWarning);
+        }
+        return warnings;
+    }
+
+    private String formatMetric(double value) {
+        return String.format(java.util.Locale.US, "%.2f", value);
+    }
+
+    private record LoadSnapshot(double readinessScore, double tsb, double ctl, double atl, double atlCtlRatio) {
+
+        private static LoadSnapshot from(TrainingContext context) {
+            Map<String, Object> readiness = context != null && context.getReadiness() != null
+                    ? context.getReadiness()
+                    : Map.of();
+            Map<String, Object> pmc = context != null && context.getPmcData() != null
+                    ? context.getPmcData()
+                    : Map.of();
+
+            double ctl = number(readiness, "currentCTL", pmc, "currentCTL");
+            double atl = number(readiness, "currentATL", pmc, "currentATL");
+            double tsb = number(readiness, "currentTSB", pmc, "currentTSB");
+            double ratio = number(readiness, "atlCtlRatio", Map.of(), "unused");
+            if (ratio == 0.0 && ctl > 0.0) {
+                ratio = atl / ctl;
+            }
+            return new LoadSnapshot(
+                    number(readiness, "currentReadiness", Map.of(), "unused"),
+                    tsb,
+                    ctl,
+                    atl,
+                    ratio);
+        }
+
+        private boolean isProductiveFatigueWindow() {
+            return tsb >= -30.0
+                    && tsb < 0.0
+                    && readinessScore >= 25.0
+                    && atlCtlRatio < 1.35;
+        }
+
+        private static double number(Map<String, Object> primary, String primaryKey,
+                                     Map<String, Object> fallback, String fallbackKey) {
+            Object value = primary.get(primaryKey);
+            if (value == null && fallbackKey != null) {
+                value = fallback.get(fallbackKey);
+            }
+            if (value instanceof Number number) {
+                return number.doubleValue();
+            }
+            if (value instanceof String stringValue) {
+                try {
+                    return Double.parseDouble(stringValue);
+                } catch (NumberFormatException ignored) {
+                    return 0.0;
+                }
+            }
+            return 0.0;
+        }
+    }
+
     private String buildSummary(PredictionType type, Map<String, Object> data) {
         // Universal format: all templates now produce a "summary" field directly
         if (data.containsKey("summary") && data.get("summary") instanceof String s && !s.isBlank()) {
@@ -355,12 +515,14 @@ public class AiPredictionService {
             case RACE_READINESS -> String.format("Readiness: %s (%s/100)",
                     data.getOrDefault("readinessLevel", "?"),
                     data.getOrDefault("readinessScore", "?"));
+            case TRAINING_COACH_SUMMARY -> String.format("Coach focus: %s",
+                    data.getOrDefault("nextFocus", data.getOrDefault("summary", "?")));
         };
     }
 
     private static final List<String> ALL_PREDICTION_TYPES = List.of(
             "TRAINING_TYPE_RECOMMENDATION", "FATIGUE_PREDICTION", "OVERTRAINING_RISK",
-            "PERFORMANCE_TREND", "FTP_PREDICTION", "RACE_READINESS");
+            "PERFORMANCE_TREND", "FTP_PREDICTION", "RACE_READINESS", "TRAINING_COACH_SUMMARY");
 
     public BatchRunResultDto runBatch(boolean skipExisting) {
         log.info("Starting batch AI predictions (skipExisting={})", skipExisting);

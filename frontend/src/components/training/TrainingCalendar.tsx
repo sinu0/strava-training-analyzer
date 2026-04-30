@@ -5,6 +5,7 @@ import { useState, useMemo } from 'react';
 
 import CalendarDayCell from './CalendarDayCell';
 import CalendarDayDialog from './CalendarDayDialog';
+import TrainingProjectionChart from './TrainingProjectionChart';
 import { useCalendarView } from '../../hooks/useTrainingPlan';
 import LoadingState from '../common/LoadingState';
 
@@ -51,6 +52,8 @@ export default function TrainingCalendar() {
 
   return (
     <Box>
+      <TrainingProjectionChart days={days ?? []} />
+
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <IconButton onClick={prev} size="small"><ChevronLeftIcon /></IconButton>
         <Typography variant="h6" sx={{ mx: 2, textTransform: 'capitalize', minWidth: 180, textAlign: 'center' }}>
@@ -69,8 +72,8 @@ export default function TrainingCalendar() {
         ))}
       </Grid>
 
-      {weeks.map((week, wi) => (
-        <Grid container columns={7} spacing={0.5} key={wi} sx={{ mb: 0.5 }}>
+      {weeks.map((week) => (
+        <Grid container columns={7} spacing={0.5} key={week[0]?.toISOString() ?? `${year}-${month}`} sx={{ mb: 0.5 }}>
           {week.map((d) => {
             const dateStr = fmt(d);
             const day = dayMap.get(dateStr) ?? null;

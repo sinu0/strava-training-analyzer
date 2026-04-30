@@ -3,6 +3,7 @@ package pl.strava.analizator.application.ai;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -25,6 +26,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import pl.strava.analizator.application.AnalyticsService;
+import pl.strava.analizator.application.BlockHealthService;
+import pl.strava.analizator.application.TrainingPlanService;
+import pl.strava.analizator.application.dto.BlockHealthDto;
+import pl.strava.analizator.application.dto.CoachMemoryPreferenceDto;
+import pl.strava.analizator.application.dto.CoachMemorySummaryDto;
+import pl.strava.analizator.application.dto.DurabilityInsightDto;
+import pl.strava.analizator.application.dto.ProgressionLevelDto;
+import pl.strava.analizator.application.dto.ReadinessDto;
+import pl.strava.analizator.application.dto.ReadinessSessionVariantDto;
 import pl.strava.analizator.domain.ai.PredictionType;
 import pl.strava.analizator.domain.ai.TrainingContext;
 import pl.strava.analizator.domain.model.Activity;
@@ -44,6 +55,9 @@ class TrainingDataAdapterTest {
     @Mock private AthleteProfileRepository athleteProfileRepository;
     @Mock private DailyMetricRepository dailyMetricRepository;
     @Mock private AiPredictionRepository aiPredictionRepository;
+    @Mock private AnalyticsService analyticsService;
+    @Mock private BlockHealthService blockHealthService;
+    @Mock private TrainingPlanService trainingPlanService;
 
     private TrainingDataAdapter adapter;
 
@@ -52,7 +66,53 @@ class TrainingDataAdapterTest {
         adapter = new TrainingDataAdapter(
                 activityRepository, activityMetricRepository,
                 athleteProfileRepository, dailyMetricRepository,
-                aiPredictionRepository);
+                aiPredictionRepository, analyticsService, blockHealthService, trainingPlanService);
+        lenient().when(analyticsService.getDurabilityInsights()).thenReturn(DurabilityInsightDto.builder()
+                .trend("stable")
+                .label("Stabilna")
+                .description("Brak sygnalow pogorszenia durability.")
+                .workouts(List.of())
+                .build());
+        lenient().when(analyticsService.getProgressionLevels()).thenReturn(List.of(
+                ProgressionLevelDto.builder()
+                        .system("THRESHOLD")
+                        .label("Próg")
+                        .level(5)
+                        .currentLoad(BigDecimal.valueOf(64))
+                        .previousLoad(BigDecimal.valueOf(52))
+                        .targetLoad(BigDecimal.valueOf(70))
+                        .trend("UP")
+                        .description("Próg rośnie.")
+                        .nextRecommendation("Broń jednej jakościowej sesji progowej.")
+                        .build()
+        ));
+        lenient().when(trainingPlanService.getPrograms()).thenReturn(List.of());
+        lenient().when(trainingPlanService.getCalendarView(any(), any())).thenReturn(List.of());
+        lenient().when(trainingPlanService.getCoachMemory()).thenReturn(CoachMemorySummaryDto.builder()
+                .headline("LIGHTEN zwykle wchodzi")
+                .coachNote("LIGHTEN zwykle akceptowany, SHIFT częściej odrzucany.")
+                .preferences(List.of(
+                        CoachMemoryPreferenceDto.builder()
+                                .suggestionType("LIGHTEN")
+                                .acceptedCount(3)
+                                .rejectedCount(1)
+                                .acceptanceRate(0.75)
+                                .guidance("Najpierw tnij koszt, potem przenoś.")
+                                .build()
+                ))
+                .build());
+        lenient().when(blockHealthService.getCurrentBlockHealth()).thenReturn(BlockHealthDto.builder()
+                .status("STABLE_PRODUCTIVE")
+                .label("Blok stabilny")
+                .description("Blok trzyma kierunek.")
+                .goalExecutionStatus("ON_TARGET")
+                .goalExecutionScore(84)
+                .adjustmentDays(0)
+                .missedStimulusDays(0)
+                .overloadDays(0)
+                .keySignals(List.of("Bodziec celu: 1/1"))
+                .nextFocus("Broń głównego akcentu.")
+                .build());
     }
 
     @Test
@@ -184,6 +244,89 @@ class TrainingDataAdapterTest {
         assertThat(context.getPmcData()).containsKey("currentCTL");
         assertThat(context.getPmcData()).containsKey("currentATL");
         assertThat(context.getPmcData()).containsKey("currentTSB");
+    }
+
+    @Test
+    void buildContext_readinessIncludesTrainingWindowGuidance() {
+        when(athleteProfileRepository.findFirst()).thenReturn(Optional.empty());
+        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(Collections.emptyList());
+
+        LocalDate today = LocalDate.now();
+        TreeMap<LocalDate, BigDecimal> ctlSeries = new TreeMap<>();
+        ctlSeries.put(today, BigDecimal.valueOf(70));
+        TreeMap<LocalDate, BigDecimal> atlSeries = new TreeMap<>();
+        atlSeries.put(today, BigDecimal.valueOf(84));
+        TreeMap<LocalDate, BigDecimal> tsbSeries = new TreeMap<>();
+        tsbSeries.put(today, BigDecimal.valueOf(-18));
+        TreeMap<LocalDate, BigDecimal> readinessSeries = new TreeMap<>();
+        readinessSeries.put(today, BigDecimal.valueOf(38));
+
+        when(dailyMetricRepository.findNumericSeries(any(), any())).thenAnswer(invocation -> {
+            String metric = invocation.getArgument(0);
+            return switch (metric) {
+                case "ctl" -> ctlSeries;
+                case "atl" -> atlSeries;
+                case "tsb" -> tsbSeries;
+                case "readiness" -> readinessSeries;
+                default -> new TreeMap<>();
+            };
+        });
+        when(analyticsService.getReadiness()).thenReturn(ReadinessDto.builder()
+                .dayType("ENDURANCE")
+                .dayLabel("Tlen")
+                .dayFocus("Spokojny tlen")
+                .tomorrowHint("Jutro spokojnie")
+                .sessionVariants(List.of(ReadinessSessionVariantDto.builder()
+                        .title("Krótki tlen")
+                        .durationMinutes(45)
+                        .targetPower("60-70% FTP")
+                        .targetTss(35)
+                        .fuelingHint("30-45 g węgli/h")
+                        .recoveryHint("20-30 g białka")
+                        .build()))
+                .build());
+
+        TrainingContext context = adapter.buildContext(PredictionType.TRAINING_TYPE_RECOMMENDATION);
+
+        assertThat(context.getReadiness()).containsEntry("currentReadiness", BigDecimal.valueOf(38));
+        assertThat(context.getReadiness()).containsEntry("currentTSB", BigDecimal.valueOf(-18));
+        assertThat(context.getReadiness()).containsEntry("currentCTL", BigDecimal.valueOf(70));
+        assertThat(context.getReadiness()).containsEntry("currentATL", BigDecimal.valueOf(84));
+        assertThat(context.getReadiness()).containsEntry("trainingWindow", "productive-fatigue");
+        assertThat(context.getReadiness()).containsEntry("dayType", "ENDURANCE");
+        assertThat(context.getReadiness()).containsEntry("dayLabel", "Tlen");
+        assertThat(context.getReadiness()).containsEntry("tomorrowHint", "Jutro spokojnie");
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> sessionVariants = (List<Map<String, Object>>) context.getReadiness().get("sessionVariants");
+        assertThat(sessionVariants.get(0)).containsEntry("fuelingHint", "30-45 g węgli/h");
+        assertThat(sessionVariants.get(0)).containsEntry("recoveryHint", "20-30 g białka");
+        assertThat(context.getReadiness().get("coachingGuidance"))
+                .asString()
+                .contains("TSB between -30 and 0");
+    }
+
+    @Test
+    void buildContext_includesProgressionLevelsCoachSummaryAndCoachMemory() {
+        when(athleteProfileRepository.findFirst()).thenReturn(Optional.empty());
+        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(Collections.emptyList());
+        when(dailyMetricRepository.findNumericSeries(any(), any())).thenReturn(new TreeMap<>());
+        when(analyticsService.getReadiness()).thenReturn(ReadinessDto.builder()
+                .score(62)
+                .dayLabel("Tempo")
+                .build());
+
+        TrainingContext context = adapter.buildContext(PredictionType.TRAINING_COACH_SUMMARY);
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> systems = (List<Map<String, Object>>) context.getProgressionLevels().get("systems");
+        assertThat(systems).hasSize(1);
+        assertThat(systems.getFirst()).containsEntry("system", "THRESHOLD");
+        assertThat(context.getCoachSummary()).containsEntry("readinessLabel", "Tempo");
+        assertThat(context.getCoachSummary()).containsKey("nextFocus");
+        assertThat(context.getBlockHealth()).containsEntry("status", "STABLE_PRODUCTIVE");
+        assertThat(context.getBlockHealth()).containsEntry("goalExecutionScore", 84);
+        assertThat(context.getCoachMemory()).containsEntry("headline", "LIGHTEN zwykle wchodzi");
+        assertThat(context.getCoachMemory()).containsEntry("coachNote", "LIGHTEN zwykle akceptowany, SHIFT częściej odrzucany.");
     }
 
     @Test

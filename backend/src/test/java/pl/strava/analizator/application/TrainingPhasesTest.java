@@ -26,6 +26,7 @@ import pl.strava.analizator.domain.port.ActivityMetricRepository;
 import pl.strava.analizator.domain.port.ActivityRepository;
 import pl.strava.analizator.domain.port.AthleteProfileRepository;
 import pl.strava.analizator.domain.port.DailyMetricRepository;
+import pl.strava.analizator.domain.port.DailySummaryRepository;
 
 class TrainingPhasesTest {
 
@@ -33,6 +34,7 @@ class TrainingPhasesTest {
     private ActivityRepository activityRepository;
     private ActivityMetricRepository activityMetricRepository;
     private AthleteProfileRepository athleteProfileRepository;
+    private DailySummaryRepository dailySummaryRepository;
     private AnalyticsService analyticsService;
 
     @BeforeEach
@@ -41,9 +43,10 @@ class TrainingPhasesTest {
         activityRepository = mock(ActivityRepository.class);
         activityMetricRepository = mock(ActivityMetricRepository.class);
         athleteProfileRepository = mock(AthleteProfileRepository.class);
+        dailySummaryRepository = mock(DailySummaryRepository.class);
         analyticsService = new AnalyticsService(
                 dailyMetricRepository, activityRepository,
-                activityMetricRepository, athleteProfileRepository);
+                activityMetricRepository, athleteProfileRepository, dailySummaryRepository);
 
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of());
         when(dailyMetricRepository.findNumericSeries(any(), any())).thenReturn(Map.of());

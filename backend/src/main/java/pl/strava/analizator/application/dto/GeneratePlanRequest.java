@@ -14,8 +14,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GeneratePlanRequest {
     private String goal;
+    private String goalPriority;
     private LocalDate startDate;
+    private LocalDate eventDate;
     private int weeks;
     private int trainingDaysPerWeek;
     private BigDecimal targetWeeklyTss;
+    private Integer weekdayAvailabilityMinutes;
+    private Integer weekendAvailabilityMinutes;
+    private String preferredLongRideDay;
+    private String environmentPreference;
 }

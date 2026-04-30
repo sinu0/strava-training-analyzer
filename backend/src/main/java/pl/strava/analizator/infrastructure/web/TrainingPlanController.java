@@ -22,6 +22,7 @@ import pl.strava.analizator.application.TrainingPlanService;
 import pl.strava.analizator.application.dto.CalendarDayDto;
 import pl.strava.analizator.application.dto.CreateTrainingPlanRequest;
 import pl.strava.analizator.application.dto.GeneratePlanRequest;
+import pl.strava.analizator.application.dto.RecordAdjustmentFeedbackRequest;
 import pl.strava.analizator.application.dto.TrainingPlanDto;
 import pl.strava.analizator.application.dto.TrainingPlanProgramDto;
 import pl.strava.analizator.domain.model.TrainingPlanStatus;
@@ -65,6 +66,12 @@ public class TrainingPlanController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         return ResponseEntity.ok(trainingPlanService.getCalendarView(from, to));
+    }
+
+    @PostMapping("/adjustments/feedback")
+    public ResponseEntity<Void> recordAdjustmentFeedback(@RequestBody RecordAdjustmentFeedbackRequest request) {
+        trainingPlanService.recordAdjustmentFeedback(request);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/programs")

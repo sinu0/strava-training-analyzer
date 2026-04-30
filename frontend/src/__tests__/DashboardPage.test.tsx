@@ -2,7 +2,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import DashboardPage from '../pages/DashboardPage';
 import theme from '../theme/theme';
@@ -66,13 +66,8 @@ vi.mock('../hooks/useAnalytics', () => ({
         outdoorScore: 85,
         warnings: [],
       },
-      hourly: [
-        { time: '2024-06-02T10:00', temperature: 23, windSpeed: 8, precipitation: 0, weatherCode: 1, weatherDescription: 'Bezchmurnie' },
-        { time: '2024-06-02T12:00', temperature: 25, windSpeed: 10, precipitation: 0, weatherCode: 1, weatherDescription: 'Bezchmurnie' },
-      ],
-      daily: [
-        { date: '2024-06-03', tempMin: 14, tempMax: 26, precipitationSum: 0, windSpeedMax: 12, weatherCode: 1, weatherDescription: 'Bezchmurnie' },
-      ],
+      hourly: [],
+      daily: [],
     },
     isLoading: false,
   }),
@@ -96,8 +91,29 @@ vi.mock('../hooks/useAnalytics', () => ({
       ctl: 55,
       atl: 47,
       description: 'Organizm wypoczęty, dobry dzień na intensywny trening',
+      healthSignals: {
+        sourceDate: '2024-06-02',
+        sleepScore: 82,
+        bodyBattery: 68,
+        restingHrBpm: 50,
+        restingHrDelta: -1,
+        scoreAdjustment: 6,
+      },
+      checkIn: {
+        date: '2024-06-02',
+        sleepQuality: 4,
+        legFreshness: 4,
+        motivation: 5,
+        soreness: 2,
+        scoreAdjustment: 10,
+        updatedAt: '2024-06-02T06:30:00Z',
+      },
     },
     isLoading: false,
+  }),
+  useSaveReadinessCheckIn: () => ({
+    mutate: vi.fn(),
+    isPending: false,
   }),
   useZoneDistribution: () => ({
     data: {
@@ -159,6 +175,71 @@ vi.mock('../hooks/useAnalytics', () => ({
     ],
     isLoading: false,
   }),
+  useProgressionLevels: () => ({
+    data: [
+      {
+        system: 'THRESHOLD',
+        label: 'Próg',
+        level: 6,
+        currentLoad: 82,
+        previousLoad: 55,
+        targetLoad: 70,
+        trend: 'UP',
+        description: 'Próg rośnie stabilnie.',
+        nextRecommendation: 'Broń jednego akcentu progowego.',
+      },
+    ],
+    isLoading: false,
+  }),
+  useBlockHealth: () => ({
+    data: {
+      status: 'STABLE_PRODUCTIVE',
+      label: 'Blok stabilny',
+      description: 'Tydzień dowozi główny bodziec bez chaosu.',
+      objectiveLabel: 'Budowa progu',
+      programGoal: 'BUILD_PEAK',
+      goalExecutionStatus: 'ON_TARGET',
+      goalExecutionScore: 84,
+      adjustmentDays: 1,
+      missedStimulusDays: 0,
+      overloadDays: 0,
+      keySignals: ['Bodziec celu: 1/1', 'Korekty w 14 dniach: 1'],
+      nextFocus: 'Broń progu i nie dokładaj losowej intensywności.',
+    },
+    isLoading: false,
+  }),
+}));
+vi.mock('../hooks/useGamification', () => ({
+  useAchievements: () => ({ data: [], isLoading: false }),
+}));
+
+vi.mock('../hooks/useAi', () => ({
+  useAiStatus: () => ({
+    data: { enabled: true, activeProvider: 'provider', activeModel: 'model', modelAvailable: true, availableProviders: ['provider'], availablePredictionTypes: ['TRAINING_COACH_SUMMARY'] },
+  }),
+  useTodayAiTips: () => ({ data: [], isLoading: false }),
+  useLatestAiPrediction: () => ({
+    data: {
+      id: 'coach-1',
+      predictionType: 'TRAINING_COACH_SUMMARY',
+      modelId: 'model',
+      providerName: 'provider',
+      summary: 'Broń progu i pilnuj świeżości.',
+      detail: 'detail',
+      confidence: 0.82,
+      createdAt: '2026-04-07T08:00:00Z',
+      structuredData: {
+        weekReview: 'Tydzień trzyma priorytet progowy.',
+        blockReview: 'Blok nadal buduje próg.',
+        keyWins: ['Próg rośnie.'],
+        keyRisks: ['Weekend może wymusić auto-swap.'],
+        nextFocus: 'Obroń jeden akcent progowy w 3-5 dni.',
+      },
+    },
+  }),
+  useAiPredict: () => ({ mutate: vi.fn(), isPending: false }),
+  useAiNote: () => ({ data: null, isLoading: false }),
+  useGenerateAiNote: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 function renderWithProviders(ui: React.ReactElement) {
@@ -175,20 +256,59 @@ function renderWithProviders(ui: React.ReactElement) {
   );
 }
 
-describe('DashboardPage', () => {
-  it('renders all dashboard cards', () => {
+describe('DashboardPage v2', () => {
+  it('renders the editorial hero section', () => {
     renderWithProviders(<DashboardPage />);
 
-    expect(screen.getByText('Gotowość na dziś')).toBeDefined();
-    expect(screen.getByText('Trening dziś')).toBeDefined();
-    expect(screen.getByText('Analiza obciążeń')).toBeDefined();
-    expect(screen.getByText('Aktywności i AI')).toBeDefined();
-    expect(screen.getByText('Szybkie przejścia')).toBeDefined();
+    expect(screen.getAllByText('Home').length).toBeGreaterThan(0);
+    expect(screen.getByRole('img', { name: 'Dashboard hero' })).toBeDefined();
   });
 
-  it('renders recent activity name', () => {
+  it('renders the three-column layout with sticky side widgets', () => {
     renderWithProviders(<DashboardPage />);
 
-    expect(screen.getByText('Morning Ride')).toBeDefined();
+    expect(screen.getByText('Pogoda')).toBeDefined();
+    expect(screen.getByText('Gotowość')).toBeDefined();
+    expect(screen.getAllByText('Blok').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Postęp').length).toBeGreaterThan(0);
+  });
+
+  it('renders illustration artwork in widget cards', () => {
+    renderWithProviders(<DashboardPage />);
+
+    expect(screen.getByTestId('dashboard-widget-art-weather')).toBeDefined();
+    expect(screen.getByTestId('dashboard-widget-art-readiness')).toBeDefined();
+    expect(screen.getByTestId('dashboard-widget-art-block')).toBeDefined();
+    expect(screen.getByTestId('dashboard-widget-art-progress')).toBeDefined();
+  });
+
+  it('renders the central training and activity section', () => {
+    renderWithProviders(<DashboardPage />);
+
+    expect(screen.getByText('Trening i aktywności')).toBeDefined();
+    expect(screen.getAllByText('Morning Ride').length).toBeGreaterThan(0);
+    expect(screen.getByText('280 W')).toBeDefined();
+  });
+
+  it('renders PMC load chips', () => {
+    renderWithProviders(<DashboardPage />);
+
+    expect(screen.getByText('CTL')).toBeDefined();
+    expect(screen.getByText('ATL')).toBeDefined();
+    expect(screen.getByText('TSB')).toBeDefined();
+  });
+
+  it('renders coach AI summary panel', () => {
+    renderWithProviders(<DashboardPage />);
+
+    expect(screen.getByText('Coach AI')).toBeDefined();
+  });
+
+  it('renders quick navigation buttons', () => {
+    renderWithProviders(<DashboardPage />);
+
+    expect(screen.getByText('Studio pogody')).toBeDefined();
+    expect(screen.getByText('Aktywności')).toBeDefined();
+    expect(screen.getByText('Analityka')).toBeDefined();
   });
 });

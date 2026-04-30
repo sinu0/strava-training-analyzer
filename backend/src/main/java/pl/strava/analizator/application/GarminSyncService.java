@@ -2,6 +2,7 @@ package pl.strava.analizator.application;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import pl.strava.analizator.application.dto.GarminHealthImportDayDto;
 import pl.strava.analizator.domain.model.AthleteProfile;
 import pl.strava.analizator.domain.model.DailySummary;
 import pl.strava.analizator.domain.port.AthleteProfileRepository;
@@ -57,17 +59,7 @@ public class GarminSyncService {
                 }
 
                 Optional<DailySummary> existing = dailySummaryRepository.findByDate(current);
-                if (existing.isPresent()) {
-                    DailySummary merged = mergeHealthIntoExisting(existing.get(), healthData);
-                    dailySummaryRepository.save(merged);
-                } else {
-                    DailySummary toSave = healthData.toBuilder()
-                            .id(UUID.randomUUID())
-                            .createdAt(Instant.now())
-                            .updatedAt(Instant.now())
-                            .build();
-                    dailySummaryRepository.save(toSave);
-                }
+                saveHealthData(existing, healthData);
                 synced++;
 
             } catch (Exception e) {
@@ -93,6 +85,29 @@ public class GarminSyncService {
 
         log.info("Garmin health sync completed: synced={}, skipped={}, failed={}", synced, skipped, failed);
         return new SyncResult(synced, skipped, failed, errors);
+    }
+
+    public SyncResult importHealthData(List<GarminHealthImportDayDto> importedDays) {
+        int synced = 0;
+        java.util.List<String> errors = new java.util.ArrayList<>();
+
+        for (GarminHealthImportDayDto importedDay : importedDays) {
+            try {
+                DailySummary summary = mapImportedDay(importedDay);
+                saveHealthData(dailySummaryRepository.findByDate(importedDay.date()), summary);
+                synced++;
+            } catch (Exception e) {
+                log.error("Failed to import Garmin health data for {}: {}", importedDay.date(), e.getMessage(), e);
+                errors.add(importedDay.date() + ": " + e.getMessage());
+            }
+        }
+
+        int failed = errors.size();
+        if (synced > 0) {
+            lastGarminError = null;
+        }
+        log.info("Garmin health import completed: synced={}, failed={}", synced, failed);
+        return new SyncResult(synced, 0, failed, errors);
     }
 
     /**
@@ -243,6 +258,41 @@ public class GarminSyncService {
 
     public Optional<String> getLastGarminError() {
         return Optional.ofNullable(lastGarminError);
+    }
+
+    private DailySummary mapImportedDay(GarminHealthImportDayDto importedDay) {
+        Instant syncedAt = importedDay.syncedAt() != null ? importedDay.syncedAt() : Instant.now();
+        return DailySummary.builder()
+                .date(importedDay.date())
+                .restingHrBpm(importedDay.restingHrBpm())
+                .hrvRmssd(importedDay.hrvRmssd())
+                .sleepScore(importedDay.sleepScore())
+                .bodyBattery(importedDay.bodyBattery())
+                .stressAvg(importedDay.stressAvg())
+                .sleepDurationSeconds(importedDay.sleepDurationSeconds())
+                .steps(importedDay.steps())
+                .activeCalories(importedDay.activeCalories())
+                .deepSleepSeconds(importedDay.deepSleepSeconds())
+                .lightSleepSeconds(importedDay.lightSleepSeconds())
+                .remSleepSeconds(importedDay.remSleepSeconds())
+                .awakeSleepSeconds(importedDay.awakeSleepSeconds())
+                .garminSyncedAt(syncedAt)
+                .build();
+    }
+
+    private void saveHealthData(Optional<DailySummary> existing, DailySummary healthData) {
+        if (existing.isPresent()) {
+            DailySummary merged = mergeHealthIntoExisting(existing.get(), healthData);
+            dailySummaryRepository.save(merged);
+            return;
+        }
+
+        DailySummary toSave = healthData.toBuilder()
+                .id(UUID.randomUUID())
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
+        dailySummaryRepository.save(toSave);
     }
 
     public record SyncResult(int synced, int skipped, int failed, java.util.List<String> errors) {

@@ -102,6 +102,8 @@ export function useAiPredict() {
     mutationFn: requestPredictionWithRecovery,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['aiHistory'] });
+      queryClient.invalidateQueries({ queryKey: ['aiLatest'] });
+      queryClient.invalidateQueries({ queryKey: ['todayAiTips'] });
     },
   });
 }
@@ -115,6 +117,19 @@ export function useAiHistory(type?: string, limit = 20) {
       const { data } = await apiClient.get<PredictionResponse[]>('/ai/predictions', { params });
       return data;
     },
+  });
+}
+
+export function useLatestAiPrediction(type: string) {
+  return useQuery<PredictionResponse | null>({
+    queryKey: ['aiLatest', type],
+    queryFn: async () => {
+      const { data } = await apiClient.get<PredictionResponse[]>('/ai/predictions', {
+        params: { type, limit: 1 },
+      });
+      return data[0] ?? null;
+    },
+    staleTime: STALE_STANDARD,
   });
 }
 

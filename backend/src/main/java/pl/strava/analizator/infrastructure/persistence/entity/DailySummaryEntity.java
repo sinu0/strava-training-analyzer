@@ -81,6 +81,21 @@ public class DailySummaryEntity {
     @Column(name = "awake_sleep_seconds")
     private Integer awakeSleepSeconds;
 
+    @Column(name = "check_in_sleep_quality")
+    private Short checkInSleepQuality;
+
+    @Column(name = "check_in_leg_freshness")
+    private Short checkInLegFreshness;
+
+    @Column(name = "check_in_motivation")
+    private Short checkInMotivation;
+
+    @Column(name = "check_in_soreness")
+    private Short checkInSoreness;
+
+    @Column(name = "check_in_updated_at")
+    private Instant checkInUpdatedAt;
+
     @Column(name = "garmin_synced_at")
     private Instant garminSyncedAt;
 

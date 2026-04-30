@@ -1,8 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import apiClient from '@/api/client';
+import garminBridgeClient from '@/api/garminBridgeClient';
 import { STALE_REALTIME } from '@/constants/queryConfig';
-import type { GarminStatus, GarminHealthData, GarminSyncResult } from '@/types/garmin';
+import type {
+  GarminBridgeStatus,
+  GarminHealthData,
+  GarminStatus,
+  GarminSyncResult,
+} from '@/types/garmin';
+
+const OFFLINE_BRIDGE_STATUS: GarminBridgeStatus = {
+  online: false,
+  busy: false,
+  sessionReady: false,
+  requiresInteraction: false,
+  lastSyncAt: null,
+  lastError: null,
+};
 
 export function useGarminStatus() {
   return useQuery<GarminStatus>({
@@ -65,6 +80,42 @@ export function useGarminSync() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['garminStatus'] });
       queryClient.invalidateQueries({ queryKey: ['garminHealth'] });
+    },
+  });
+}
+
+export function useGarminBridgeStatus() {
+  return useQuery<GarminBridgeStatus>({
+    queryKey: ['garminBridgeStatus'],
+    queryFn: async () => {
+      try {
+        const { data } = await garminBridgeClient.get<GarminBridgeStatus>('/status');
+        return data;
+      } catch {
+        return OFFLINE_BRIDGE_STATUS;
+      }
+    },
+    staleTime: STALE_REALTIME,
+    retry: false,
+  });
+}
+
+export function useGarminBridgeSync() {
+  const queryClient = useQueryClient();
+
+  return useMutation<GarminSyncResult, Error, { from: string; to: string }>({
+    mutationFn: async ({ from, to }) => {
+      const { data } = await garminBridgeClient.post<GarminSyncResult>('/sync', {
+        from,
+        to,
+        backendUrl: window.location.origin,
+      });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['garminStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['garminHealth'] });
+      queryClient.invalidateQueries({ queryKey: ['garminBridgeStatus'] });
     },
   });
 }

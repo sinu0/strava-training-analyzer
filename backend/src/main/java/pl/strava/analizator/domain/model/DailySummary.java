@@ -35,6 +35,11 @@ public class DailySummary {
     private Integer lightSleepSeconds;
     private Integer remSleepSeconds;
     private Integer awakeSleepSeconds;
+    private Short checkInSleepQuality;
+    private Short checkInLegFreshness;
+    private Short checkInMotivation;
+    private Short checkInSoreness;
+    private Instant checkInUpdatedAt;
     private Instant garminSyncedAt;
 
     private Instant createdAt;

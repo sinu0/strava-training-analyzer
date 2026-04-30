@@ -11,6 +11,7 @@ import pl.strava.analizator.domain.metrics.calculator.HeartRateTssCalculator;
 import pl.strava.analizator.domain.metrics.calculator.IntensityFactorCalculator;
 import pl.strava.analizator.domain.metrics.calculator.NormalizedPowerCalculator;
 import pl.strava.analizator.domain.metrics.calculator.PeakEffortCalculator;
+import pl.strava.analizator.domain.metrics.calculator.PowerFadeCalculator;
 import pl.strava.analizator.domain.metrics.calculator.PowerCurveCalculator;
 import pl.strava.analizator.domain.metrics.calculator.TimeInZonesCalculator;
 import pl.strava.analizator.domain.metrics.calculator.TRIMPCalculator;
@@ -55,6 +56,11 @@ public class MetricsConfig {
     @Bean
     public AerobicDecouplingCalculator aerobicDecouplingCalculator() {
         return new AerobicDecouplingCalculator();
+    }
+
+    @Bean
+    public PowerFadeCalculator powerFadeCalculator() {
+        return new PowerFadeCalculator();
     }
 
     @Bean

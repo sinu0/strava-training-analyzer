@@ -25,6 +25,12 @@ public class TrainingContext {
     private Map<String, Object> zoneDistribution;
     private Map<String, Object> readiness;
     private Map<String, Object> powerCurve;
+    private Map<String, Object> durability;
+    private Map<String, Object> progressionLevels;
+    private Map<String, Object> blockHealth;
+    private Map<String, Object> programReview;
+    private Map<String, Object> coachSummary;
+    private Map<String, Object> coachMemory;
     /** Recent past predictions for this type — gives model historical context to avoid repetition */
     private List<String> recentPredictionHistory;
 }

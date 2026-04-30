@@ -92,6 +92,18 @@ class PromptRegistryTest {
         assertThat(template.getUserPromptTemplate()).contains("{{zoneDistribution}}");
     }
 
+    @Test
+    void trainingRecommendation_promptTreatsNegativeTsbAsPotentiallyTrainable() {
+        PromptTemplate template = registry.getTemplate(PredictionType.TRAINING_TYPE_RECOMMENDATION);
+
+        assertThat(template.getSystemPrompt()).contains("TSB -30 to -10");
+        assertThat(template.getSystemPrompt()).contains("Negative TSB alone is not a reason for full rest");
+        assertThat(template.getSystemPrompt()).contains("ATL >= 1.35 × CTL");
+        assertThat(template.getSystemPrompt()).contains("sessionVariants");
+        assertThat(template.getSystemPrompt()).contains("fuelingHint");
+        assertThat(template.getSystemPrompt()).contains("tomorrowHint");
+    }
+
     // --- Universal template contract tests (TDD for new template design) ---
 
     @ParameterizedTest
@@ -147,6 +159,12 @@ class PromptRegistryTest {
         vars.put("zoneDistribution", "{}");
         vars.put("readiness", "{}");
         vars.put("powerCurve", "{}");
+        vars.put("durability", "{}");
+        vars.put("progressionLevels", "{}");
+        vars.put("blockHealth", "{}");
+        vars.put("programReview", "{}");
+        vars.put("coachSummary", "{}");
+        vars.put("coachMemory", "{}");
         vars.put("recentPredictionHistory", "none");
         vars.put("responseFormat", template.getResponseFormat());
 

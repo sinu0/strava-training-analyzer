@@ -3,11 +3,15 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import ReadinessGauge from '@/components/ReadinessGauge';
+import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
 import WeatherWidgetHeader from '@/components/weather/WeatherWidgetHeader';
 import {
   getEmptyStateIllustrationPath,
+  getHomeWidgetIllustrationPath,
+  getPageHeroIllustrationPath,
   getReadinessIllustrationPath,
   getWeatherIllustrationPath,
+  getWeatherUiIconPath,
 } from '@/utils/illustrationAssets';
 
 import theme from '../theme/theme';
@@ -37,6 +41,14 @@ describe('illustration assets', () => {
     expect(getWeatherIllustrationPath('night_clear')).toBe('/illustrations/weather-night.png');
   });
 
+  it('returns svg asset paths for editorial weather ui icons', () => {
+    expect(getWeatherUiIconPath('sunny')).toBe('/illustrations/weather-ui-sunny.svg');
+    expect(getWeatherUiIconPath('cloud')).toBe('/illustrations/weather-ui-cloud.svg');
+    expect(getWeatherUiIconPath('rain')).toBe('/illustrations/weather-ui-rain.svg');
+    expect(getWeatherUiIconPath('snow')).toBe('/illustrations/weather-ui-snow.svg');
+    expect(getWeatherUiIconPath('storm')).toBe('/illustrations/weather-ui-storm.svg');
+  });
+
   it('returns png paths for new weather types', () => {
     expect(getWeatherIllustrationPath('cloudy')).toBe('/illustrations/weather-cloudy.png');
     expect(getWeatherIllustrationPath('stormy')).toBe('/illustrations/weather-stormy.png');
@@ -59,7 +71,20 @@ describe('illustration assets', () => {
     expect(getEmptyStateIllustrationPath('health')).toBe('/illustrations/empty-health.png');
   });
 
-  it('renders readiness hero with png illustration', () => {
+  it('returns jpg asset paths for home widget illustrations', () => {
+    expect(getHomeWidgetIllustrationPath('weather')).toBe('/illustrations/home-weather.jpg');
+    expect(getHomeWidgetIllustrationPath('readiness')).toBe('/illustrations/home-readiness.jpg');
+    expect(getHomeWidgetIllustrationPath('block')).toBe('/illustrations/home-block.jpg');
+    expect(getHomeWidgetIllustrationPath('progress')).toBe('/illustrations/home-progress.jpg');
+  });
+
+  it('returns png asset paths for page hero illustrations', () => {
+    expect(getPageHeroIllustrationPath('dashboard')).toBe('/illustrations/hero-dashboard.png');
+    expect(getPageHeroIllustrationPath('analytics')).toBe('/illustrations/hero-analytics.png');
+    expect(getPageHeroIllustrationPath('training')).toBe('/illustrations/hero-training.png');
+  });
+
+  it('renders readiness hero with matching home illustration', () => {
     renderWithTheme(
       <ReadinessGauge
         data={{
@@ -74,11 +99,11 @@ describe('illustration assets', () => {
     );
 
     expect(screen.getByRole('img', { name: 'Gotowość: pełna moc' }).getAttribute('src')).toBe(
-      '/illustrations/readiness-peak.png',
+      '/illustrations/home-readiness.jpg',
     );
   });
 
-  it('renders weather hero with png illustration', () => {
+  it('renders weather hero with matching weather illustration', () => {
     renderWithTheme(
       <WeatherWidgetHeader
         locationName="Kraków"
@@ -93,8 +118,16 @@ describe('illustration assets', () => {
       />,
     );
 
-    expect(screen.getByRole('img', { name: 'sunny' }).getAttribute('src')).toBe(
+    expect(screen.getByRole('img', { name: 'Pogoda: sunny' }).getAttribute('src')).toBe(
       '/illustrations/weather-sunny.png',
+    );
+  });
+
+  it('renders weather condition icon with matching ui asset', () => {
+    renderWithTheme(<WeatherConditionIcon code={63} />);
+
+    expect(screen.getByRole('img', { name: 'Ikona pogody: rain' }).getAttribute('src')).toBe(
+      '/illustrations/weather-ui-rain.svg',
     );
   });
 });

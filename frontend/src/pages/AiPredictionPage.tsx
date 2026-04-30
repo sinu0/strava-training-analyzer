@@ -33,6 +33,7 @@ const PREDICTION_TYPES: PredictionType[] = [
   'PERFORMANCE_TREND',
   'OVERTRAINING_RISK',
   'RACE_READINESS',
+  'TRAINING_COACH_SUMMARY',
 ];
 
 export default function AiPredictionPage() {

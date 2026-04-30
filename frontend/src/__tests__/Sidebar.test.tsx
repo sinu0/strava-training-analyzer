@@ -6,7 +6,7 @@ import { it, expect } from 'vitest';
 import Sidebar from '../components/layout/Sidebar';
 import theme from '../theme/theme';
 
-it('renders grouped navigation with Dashboard and groups', () => {
+it('renders grouped navigation with Home and groups', () => {
   render(
     <ThemeProvider theme={theme}>
       <MemoryRouter>
@@ -15,7 +15,7 @@ it('renders grouped navigation with Dashboard and groups', () => {
     </ThemeProvider>,
   );
 
-  expect(screen.getByText('Dashboard')).toBeDefined();
+  expect(screen.getByText('Home')).toBeDefined();
   expect(screen.getByText('Aktywności')).toBeDefined();
   expect(screen.getByText('Analityka')).toBeDefined();
   expect(screen.getByText('Ustawienia')).toBeDefined();

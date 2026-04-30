@@ -7,6 +7,7 @@ import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import ScaleIcon from '@mui/icons-material/Scale';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import {
   Drawer,
   List,
@@ -38,12 +39,13 @@ interface NavGroup {
   items: NavItem[];
 }
 
-const HERO_ITEM: NavItem = { label: 'Dashboard', path: '/', icon: <DashboardIcon /> };
+const HERO_ITEM: NavItem = { label: 'Home', path: '/', icon: <DashboardIcon /> };
 
 const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Trening',
     items: [
+      { label: 'Pogoda', path: '/weather', icon: <WbSunnyOutlinedIcon /> },
       { label: 'Aktywności', path: '/activities', icon: <DirectionsBikeIcon /> },
       { label: 'Analityka', path: '/analytics', icon: <BarChartIcon /> },
       { label: 'Planer', path: '/training', icon: <FitnessCenterIcon /> },

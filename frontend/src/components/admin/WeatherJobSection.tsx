@@ -1,5 +1,4 @@
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import {
   Box,
   Typography,
@@ -8,11 +7,11 @@ import {
   CircularProgress,
 } from '@mui/material';
 
+import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
 import {
   CHART_COLORS,
   STATUS_COLORS,
   SURFACE_COLORS,
-  WEATHER_ICON_COLORS,
   alphaColor,
 } from '@/utils/colors';
 
@@ -54,7 +53,7 @@ export default function WeatherJobSection({
     <DataCard title="Cache pogody">
       <Box sx={{ py: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-          <WbSunnyIcon sx={{ color: WEATHER_ICON_COLORS.sunny, fontSize: 28 }} />
+          <WeatherConditionIcon kind="sunny" size={28} alt="" />
           <Box sx={{ flex: 1 }}>
             <Typography variant="body2" color="text.secondary">
               Automatyczne odświeżanie
@@ -150,7 +149,13 @@ export default function WeatherJobSection({
         {/* Refresh all */}
         <Button
           variant="contained"
-          startIcon={refreshAllWeatherPending ? <CircularProgress size={16} color="inherit" /> : <WbSunnyIcon />}
+          startIcon={
+            refreshAllWeatherPending ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : (
+              <WeatherConditionIcon kind="sunny" size={16} alt="" />
+            )
+          }
           onClick={onRefreshAllWeather}
           disabled={refreshAllWeatherPending}
           fullWidth

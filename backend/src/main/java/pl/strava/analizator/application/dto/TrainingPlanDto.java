@@ -30,11 +30,12 @@ public class TrainingPlanDto {
     private String workoutTemplateName;
     private Integer targetPowerLowW;
     private Integer targetPowerHighW;
+    private String sessionRole;
     private String status;
     private String notes;
     private OffsetDateTime createdAt;
 
-    public static TrainingPlanDto fromDomain(TrainingPlan plan, String workoutTemplateName) {
+    public static TrainingPlanDto fromDomain(TrainingPlan plan, String workoutTemplateName, String sessionRole) {
         return TrainingPlanDto.builder()
                 .id(plan.getId())
                 .date(plan.getDate())
@@ -49,6 +50,7 @@ public class TrainingPlanDto {
                 .workoutTemplateName(workoutTemplateName)
                 .targetPowerLowW(plan.getTargetPowerLowW())
                 .targetPowerHighW(plan.getTargetPowerHighW())
+                .sessionRole(sessionRole)
                 .status(plan.getStatus().name())
                 .notes(plan.getNotes())
                 .createdAt(plan.getCreatedAt())

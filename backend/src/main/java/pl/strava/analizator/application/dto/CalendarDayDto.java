@@ -16,4 +16,7 @@ public class CalendarDayDto {
     private TrainingPlanDto planned;
     private CalendarActivitySummaryDto actual;
     private Double compliance;
+    private TrainingExecutionAssessmentDto execution;
+    private TrainingDayProjectionDto projection;
+    private TrainingAdjustmentSuggestionDto adjustment;
 }

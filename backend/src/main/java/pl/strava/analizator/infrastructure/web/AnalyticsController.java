@@ -7,17 +7,25 @@ import java.util.Map;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import pl.strava.analizator.application.AnalyticsService;
+import pl.strava.analizator.application.BlockHealthService;
+import pl.strava.analizator.application.dto.BlockHealthDto;
 import pl.strava.analizator.application.dto.DailyOptimalLoadDto;
+import pl.strava.analizator.application.dto.DurabilityInsightDto;
 import pl.strava.analizator.application.dto.FtpProgressDto;
 import pl.strava.analizator.application.dto.PmcDataDto;
+import pl.strava.analizator.application.dto.ProgressionLevelDto;
 import pl.strava.analizator.application.dto.PowerCurveDto;
 import pl.strava.analizator.application.dto.ReadinessDto;
+import pl.strava.analizator.application.dto.SaveReadinessCheckInRequest;
 import pl.strava.analizator.application.dto.TrendDto;
 import pl.strava.analizator.application.dto.WeeklyMmpDto;
 import pl.strava.analizator.application.dto.WeeklyOptimalLoadDto;
@@ -30,6 +38,7 @@ import pl.strava.analizator.application.dto.ZoneDistributionDto;
 public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
+    private final BlockHealthService blockHealthService;
 
     @GetMapping("/pmc")
     public ResponseEntity<List<PmcDataDto>> getPmc(
@@ -114,6 +123,27 @@ public class AnalyticsController {
     @GetMapping("/readiness")
     public ResponseEntity<ReadinessDto> getReadiness() {
         return ResponseEntity.ok(analyticsService.getReadiness());
+    }
+
+    @GetMapping("/durability")
+    public ResponseEntity<DurabilityInsightDto> getDurability() {
+        return ResponseEntity.ok(analyticsService.getDurabilityInsights());
+    }
+
+    @GetMapping("/progression-levels")
+    public ResponseEntity<List<ProgressionLevelDto>> getProgressionLevels() {
+        return ResponseEntity.ok(analyticsService.getProgressionLevels());
+    }
+
+    @GetMapping("/block-health")
+    public ResponseEntity<BlockHealthDto> getBlockHealth() {
+        return ResponseEntity.ok(blockHealthService.getCurrentBlockHealth());
+    }
+
+    @PostMapping("/readiness/check-in")
+    public ResponseEntity<ReadinessDto> saveReadinessCheckIn(
+            @Validated @RequestBody SaveReadinessCheckInRequest request) {
+        return ResponseEntity.ok(analyticsService.saveReadinessCheckIn(request));
     }
 
     @GetMapping("/weekly-optimal-load")

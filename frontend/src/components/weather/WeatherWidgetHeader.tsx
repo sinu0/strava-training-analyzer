@@ -5,6 +5,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
 import type { CyclistType } from '@/components/weather/weatherWidgetUtils';
@@ -41,6 +42,7 @@ export default function WeatherWidgetHeader({
   cyclistType,
   onOpenSettings,
 }: WeatherWidgetHeaderProps) {
+  const theme = useTheme();
   return (
     <>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -83,25 +85,46 @@ export default function WeatherWidgetHeader({
           alignItems: 'center',
           gap: 2,
           mb: 1.5,
-          p: 1.5,
-          borderRadius: 2,
-          bgcolor: SURFACE_COLORS.subtle,
-          border: `1px solid ${alphaColor(CHART_COLORS.grid, 0.5)}`,
+          p: 1.25,
+          borderRadius: 3,
+          bgcolor: alphaColor(theme.palette.background.default, 0.26),
+          border: `1px solid ${alphaColor(CHART_COLORS.primary, 0.16)}`,
           overflow: 'hidden',
         }}
       >
         <Box
-          component="img"
-          src={getWeatherIllustrationPath(cyclistType)}
-          alt={cyclistType}
           sx={{
-            width: 110,
-            height: 92,
-            objectFit: 'contain',
-            borderRadius: 1.5,
+            position: 'relative',
+            width: 132,
+            height: 96,
+            overflow: 'hidden',
+            borderRadius: 2,
             flexShrink: 0,
+            border: `1px solid ${alphaColor(CHART_COLORS.primary, 0.14)}`,
+            bgcolor: SURFACE_COLORS.subtle,
           }}
-        />
+        >
+          <Box
+            component="img"
+            src={getWeatherIllustrationPath(cyclistType)}
+            alt={`Pogoda: ${cyclistType}`}
+            sx={{
+              width: '100%',
+              height: '100%',
+              display: 'block',
+              objectFit: 'cover',
+              objectPosition: 'center',
+              filter: 'saturate(0.86) contrast(1.02)',
+            }}
+          />
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              background: `linear-gradient(135deg, ${alphaColor(theme.palette.background.default, 0.08)} 0%, ${alphaColor(theme.palette.background.default, 0.3)} 100%)`,
+            }}
+          />
+        </Box>
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5, mb: 0.5 }}>

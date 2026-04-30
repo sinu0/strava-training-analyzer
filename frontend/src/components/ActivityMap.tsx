@@ -21,14 +21,31 @@ interface ActivityMapProps {
   minHeight?: number;
 }
 
-function BoundsFitter({ positions }: { positions: [number, number][] }) {
+function MapLifecycleSync({ positions }: { positions: [number, number][] }) {
   const map = useMap();
+
   useEffect(() => {
     const bounds = getRouteBounds(positions);
-    if (bounds) {
-      map.fitBounds(bounds, { padding: [25, 25], maxZoom: 15 });
-    }
+
+    const syncMapSize = () => {
+      map.invalidateSize(false);
+      if (bounds) {
+        map.fitBounds(bounds, { padding: [25, 25], maxZoom: 15 });
+      }
+    };
+
+    const frameId = window.requestAnimationFrame(syncMapSize);
+    const timeoutId = window.setTimeout(syncMapSize, 140);
+
+    window.addEventListener('resize', syncMapSize);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(timeoutId);
+      window.removeEventListener('resize', syncMapSize);
+    };
   }, [map, positions]);
+
   return null;
 }
 
@@ -61,9 +78,10 @@ export default function ActivityMap({
 
   return (
     <Box
+      data-testid="activity-map-shell"
       sx={{
-        height: '100%',
-        minHeight,
+        height: minHeight > 0 ? minHeight : '100%',
+        minHeight: minHeight > 0 ? minHeight : 0,
         '.leaflet-container': { height: '100%', borderRadius: 1 },
       }}
     >
@@ -78,7 +96,7 @@ export default function ActivityMap({
           url={MAP_TILE_CONFIG[DEFAULT_MAP_TILE_VARIANT].url}
         />
         <Polyline positions={positions} pathOptions={{ color: ROUTE_COLORS.path, weight: 4, opacity: 0.92 }} />
-        <BoundsFitter positions={positions} />
+        <MapLifecycleSync positions={positions} />
       </MapContainer>
     </Box>
   );

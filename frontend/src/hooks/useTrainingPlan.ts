@@ -11,6 +11,7 @@ import type {
   TrainingPlanProgram,
   GeneratePlanRequest,
   PlanStatus,
+  RecordAdjustmentFeedbackRequest,
 } from '../types/training';
 
 export function useWorkoutTemplates(category?: WorkoutCategory) {
@@ -124,6 +125,18 @@ export function useDeleteTrainingPlan() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['training-calendar'] });
       queryClient.invalidateQueries({ queryKey: ['training-plans'] });
+    },
+  });
+}
+
+export function useRecordAdjustmentFeedback() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (feedback: RecordAdjustmentFeedbackRequest) => {
+      await apiClient.post('/training/adjustments/feedback', feedback);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['training-calendar'] });
     },
   });
 }

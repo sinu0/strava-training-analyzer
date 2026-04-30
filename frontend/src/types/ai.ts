@@ -36,7 +36,8 @@ export type PredictionType =
   | 'TRAINING_TYPE_RECOMMENDATION'
   | 'PERFORMANCE_TREND'
   | 'OVERTRAINING_RISK'
-  | 'RACE_READINESS';
+  | 'RACE_READINESS'
+  | 'TRAINING_COACH_SUMMARY';
 
 export const PREDICTION_TYPE_LABELS: Record<PredictionType, string> = {
   FTP_PREDICTION: 'Predykcja FTP',
@@ -45,6 +46,7 @@ export const PREDICTION_TYPE_LABELS: Record<PredictionType, string> = {
   PERFORMANCE_TREND: 'Trend wydolności',
   OVERTRAINING_RISK: 'Ryzyko przetrenowania',
   RACE_READINESS: 'Gotowość wyścigowa',
+  TRAINING_COACH_SUMMARY: 'Podsumowanie trenera AI',
 };
 
 export const PREDICTION_TYPE_ICONS: Record<PredictionType, string> = {
@@ -54,6 +56,7 @@ export const PREDICTION_TYPE_ICONS: Record<PredictionType, string> = {
   PERFORMANCE_TREND: 'TrendingUpIcon',
   OVERTRAINING_RISK: 'WarningIcon',
   RACE_READINESS: 'EmojiEventsIcon',
+  TRAINING_COACH_SUMMARY: 'AutoAwesomeIcon',
 };
 
 export const PREDICTION_TYPE_COLORS: Record<PredictionType, string> = AI_PREDICTION_COLORS;

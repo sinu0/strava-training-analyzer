@@ -14,12 +14,14 @@ import {
 
 import 'leaflet/dist/leaflet.css';
 import { MAP_TILE_CONFIG, type MapTileVariant } from '../../constants/mapTiles';
+import { getWeatherIconConfig } from '../../constants/weatherIcons';
 import {
   COMMON_COLORS,
   ROUTE_COLORS,
   UI_COLORS,
   alphaColor,
 } from '../../utils/colors';
+import { getWeatherUiIconPath } from '../../utils/illustrationAssets';
 import { findRouteInsertionIndex } from '../../utils/routePlannerMap';
 
 import type { WeatherData } from '../../types/analytics';
@@ -46,18 +48,8 @@ interface RouteDrawingMapProps {
 
 const DEFAULT_CENTER: [number, number] = [50.06, 19.94];
 
-function getWeatherEmoji(weatherCode?: number): string {
-  if (weatherCode == null) {
-    return '⛅';
-  }
-  if (weatherCode <= 1) return '☀️';
-  if (weatherCode <= 3) return '⛅';
-  if (weatherCode <= 48) return '🌫️';
-  if (weatherCode <= 67) return '🌧️';
-  if (weatherCode <= 77) return '❄️';
-  if (weatherCode <= 82) return '🌦️';
-  if (weatherCode <= 99) return '⛈️';
-  return '⛅';
+function getWeatherIconPath(weatherCode?: number): string {
+  return getWeatherUiIconPath(getWeatherIconConfig(weatherCode ?? 2).kind);
 }
 
 function createWaypointIcon(index: number, total: number): L.DivIcon {
@@ -99,7 +91,9 @@ function createWeatherBubbleIcon(
 ): L.DivIcon {
   const temperature = weather ? `${Math.round(weather.temperature)}°` : '...';
   const wind = weather ? `${Math.round(weather.windSpeed)} km/h` : 'Ładowanie';
-  const emoji = isLoading ? '⋯' : getWeatherEmoji(weather?.weatherCode);
+  const icon = isLoading
+    ? '<span style="display:block;font-size:16px;line-height:1;">⋯</span>'
+    : `<img src="${getWeatherIconPath(weather?.weatherCode)}" alt="" style="width:18px;height:18px;display:block;filter:drop-shadow(0 5px 10px rgba(15, 23, 42, 0.24));" />`;
 
   return L.divIcon({
     className: 'route-weather-bubble',
@@ -116,7 +110,7 @@ function createWeatherBubbleIcon(
       font-family: Inter, system-ui, sans-serif;
     ">
       <div style="display:flex; align-items:center; gap:6px; font-size:15px; font-weight:700;">
-        <span>${emoji}</span>
+        ${icon}
         <span>${temperature}</span>
       </div>
       <div style="font-size:11px; opacity:0.75; margin-top:2px;">${label} · ${wind}</div>
@@ -252,9 +246,21 @@ function WeatherPopup({
         {label}
       </Typography>
       <Stack spacing={0.35}>
-        <Typography variant="body2">
-          {getWeatherEmoji(weather.weatherCode)} {weather.weatherDescription}
-        </Typography>
+        <Stack direction="row" spacing={0.75} alignItems="center">
+          <Box
+            component="img"
+            src={getWeatherIconPath(weather.weatherCode)}
+            alt=""
+            sx={{
+              width: 18,
+              height: 18,
+              display: 'block',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 5px 10px rgba(15, 23, 42, 0.2))',
+            }}
+          />
+          <Typography variant="body2">{weather.weatherDescription}</Typography>
+        </Stack>
         <Typography variant="body2">Temperatura: {Math.round(weather.temperature)}°C</Typography>
         <Typography variant="body2">Wiatr: {Math.round(weather.windSpeed)} km/h</Typography>
         <Typography variant="body2">Opady: {weather.precipitation.toFixed(1)} mm</Typography>

@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ComponentType, type LazyExoticComponent } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import LoadingState from '@/components/common/LoadingState';
 import AppLayout from '@/components/layout/AppLayout';
@@ -11,6 +11,7 @@ const ActivityDetailPage = lazy(() => import('@/pages/ActivityDetailPage'));
 const AnalyticsPage = lazy(() => import('@/pages/AnalyticsPage'));
 const TrainingPlanPage = lazy(() => import('@/pages/TrainingPlanPage'));
 const HealthPage = lazy(() => import('@/pages/HealthPage'));
+const WeatherPage = lazy(() => import('@/pages/WeatherPage'));
 const RoutePlannerPage = lazy(() => import('@/pages/RoutePlannerPage'));
 const WeightPage = lazy(() => import('@/pages/WeightPage'));
 const AiPredictionPage = lazy(() => import('@/pages/AiPredictionPage'));
@@ -32,12 +33,14 @@ export default function App() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route path="/" element={renderLazyPage(DashboardPage)} />
+        <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="/profile" element={renderLazyPage(ProfilePage)} />
         <Route path="/activities" element={renderLazyPage(ActivitiesPage)} />
         <Route path="/activities/:id" element={renderLazyPage(ActivityDetailPage)} />
         <Route path="/analytics" element={renderLazyPage(AnalyticsPage)} />
         <Route path="/training" element={renderLazyPage(TrainingPlanPage)} />
         <Route path="/health" element={renderLazyPage(HealthPage)} />
+        <Route path="/weather" element={renderLazyPage(WeatherPage)} />
         <Route path="/route-planner" element={renderLazyPage(RoutePlannerPage)} />
         <Route path="/weight" element={renderLazyPage(WeightPage)} />
         <Route path="/ai-predictions" element={renderLazyPage(AiPredictionPage)} />

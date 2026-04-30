@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import pl.strava.analizator.application.GarminSyncService;
+import pl.strava.analizator.application.dto.GarminHealthImportDayDto;
 import pl.strava.analizator.domain.model.DailySummary;
 import pl.strava.analizator.domain.port.DailySummaryRepository;
 import pl.strava.analizator.domain.vo.DateRange;
@@ -83,6 +84,13 @@ public class GarminController {
         return ResponseEntity.ok(result);
     }
 
+    @PostMapping("/import")
+    public ResponseEntity<GarminSyncService.SyncResult> importHealthData(@RequestBody GarminImportRequest body) {
+        List<GarminHealthImportDayDto> days = body.days() != null ? body.days() : List.of();
+        GarminSyncService.SyncResult result = garminSyncService.importHealthData(days);
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("/health/{date}")
     public ResponseEntity<DailySummary> getHealthData(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
@@ -99,5 +107,8 @@ public class GarminController {
 
         List<DailySummary> data = dailySummaryRepository.findByDateRange(DateRange.of(from, to));
         return ResponseEntity.ok(data);
+    }
+
+    public record GarminImportRequest(List<GarminHealthImportDayDto> days) {
     }
 }

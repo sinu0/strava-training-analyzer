@@ -119,6 +119,23 @@ export interface WeatherGradient {
   days: GradientDay[];
 }
 
+export interface WeatherScoringProfile {
+  rideWindowStartHour: number;
+  rideWindowEndHour: number;
+  idealTemperatureMin: number;
+  idealTemperatureMax: number;
+  acceptableTemperatureMin: number;
+  acceptableTemperatureMax: number;
+  comfortableWindMax: number;
+  riskyWindMax: number;
+  drizzleMmMax: number;
+  rainMmMax: number;
+  temperatureWeight: number;
+  windWeight: number;
+  precipitationWeight: number;
+  conditionWeight: number;
+}
+
 export interface FtpProgress {
   currentFtp: number | null;
   trend: 'up' | 'down' | 'stagnant';
@@ -133,6 +150,107 @@ export interface ReadinessData {
   ctl: number;
   atl: number;
   description: string;
+  dayType?: string;
+  dayLabel?: string;
+  dayFocus?: string;
+  sessionVariants?: ReadinessSessionVariant[];
+  tomorrowHint?: string;
+  bestQualityWindowLabel?: string;
+  qualityWindowSummary?: string;
+  qualityWindows?: ReadinessQualityWindow[];
+  healthSignals?: ReadinessHealthSignals;
+  checkIn?: ReadinessCheckIn;
+}
+
+export interface ReadinessQualityWindow {
+  date: string;
+  label: string;
+  score: number;
+  recommendation: string;
+  focus: string;
+}
+
+export interface ReadinessSessionVariant {
+  title: string;
+  durationMinutes: number;
+  targetPower: string;
+  targetTss: number;
+  fuelingHint: string;
+  recoveryHint: string;
+}
+
+export interface ReadinessHealthSignals {
+  sourceDate: string;
+  sleepScore?: number | null;
+  bodyBattery?: number | null;
+  restingHrBpm?: number | null;
+  restingHrDelta?: number | null;
+  scoreAdjustment: number;
+}
+
+export interface ReadinessCheckIn {
+  date: string;
+  sleepQuality: number;
+  legFreshness: number;
+  motivation: number;
+  soreness: number;
+  scoreAdjustment: number;
+  updatedAt?: string | null;
+}
+
+export interface SaveReadinessCheckInInput {
+  sleepQuality: number;
+  legFreshness: number;
+  motivation: number;
+  soreness: number;
+}
+
+export interface DurabilityWorkout {
+  activityId: string;
+  date: string;
+  name: string;
+  durationMin: number;
+  tss?: number | null;
+  aerobicDecoupling?: number | null;
+  powerFade?: number | null;
+  durabilityScore?: number | null;
+}
+
+export interface DurabilityInsight {
+  trend: string;
+  label: string;
+  description: string;
+  avgAerobicDecoupling: number;
+  avgPowerFade: number;
+  avgDurabilityScore: number;
+  workouts: DurabilityWorkout[];
+}
+
+export interface ProgressionLevel {
+  system: string;
+  label: string;
+  level: number;
+  currentLoad: number;
+  previousLoad: number;
+  targetLoad: number;
+  trend: string;
+  description: string;
+  nextRecommendation: string;
+}
+
+export interface BlockHealth {
+  status: string;
+  label: string;
+  description: string;
+  objectiveLabel?: string | null;
+  programGoal?: string | null;
+  goalExecutionStatus?: string | null;
+  goalExecutionScore?: number | null;
+  adjustmentDays: number;
+  missedStimulusDays: number;
+  overloadDays: number;
+  keySignals: string[];
+  nextFocus?: string | null;
 }
 
 
