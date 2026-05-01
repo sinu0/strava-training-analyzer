@@ -3,6 +3,7 @@ package pl.strava.analizator.infrastructure.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import pl.strava.analizator.domain.metrics.LapMetricsService;
 import pl.strava.analizator.domain.metrics.calculator.AerobicDecouplingCalculator;
 import pl.strava.analizator.domain.metrics.calculator.CtlAtlTsbCalculator;
 import pl.strava.analizator.domain.metrics.calculator.EfficiencyFactorCalculator;
@@ -22,6 +23,11 @@ import pl.strava.analizator.domain.metrics.calculator.WPrimeBalanceCalculator;
 
 @Configuration
 public class MetricsConfig {
+
+    @Bean
+    public LapMetricsService lapMetricsService() {
+        return new LapMetricsService();
+    }
 
     @Bean
     public NormalizedPowerCalculator normalizedPowerCalculator() {

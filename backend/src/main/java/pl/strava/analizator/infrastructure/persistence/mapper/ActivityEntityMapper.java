@@ -133,6 +133,10 @@ public interface ActivityEntityMapper {
                 .maxPowerW(getShort(m, "maxPowerW"))
                 .avgCadence(getShort(m, "avgCadence"))
                 .totalElevationGain(getBigDecimal(m, "totalElevationGain"))
+                .normalizedPowerW(getShort(m, "normalizedPowerW"))
+                .variabilityIndex(getBigDecimal(m, "variabilityIndex"))
+                .powerDropPct(getBigDecimal(m, "powerDropPct"))
+                .intensityClass(getString(m, "intensityClass"))
                 .build()
         ).toList();
     }
@@ -157,6 +161,10 @@ public interface ActivityEntityMapper {
             m.put("maxPowerW", lap.getMaxPowerW());
             m.put("avgCadence", lap.getAvgCadence());
             m.put("totalElevationGain", lap.getTotalElevationGain());
+            m.put("normalizedPowerW", lap.getNormalizedPowerW());
+            m.put("variabilityIndex", lap.getVariabilityIndex());
+            m.put("powerDropPct", lap.getPowerDropPct());
+            m.put("intensityClass", lap.getIntensityClass());
             return m;
         }).toList();
     }

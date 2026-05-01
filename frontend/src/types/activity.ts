@@ -57,8 +57,9 @@ export interface ActivityDetail {
 
 export interface ActivityLap {
   lapIndex: number;
-  startIndex: number;
-  endIndex: number;
+  name?: string;
+  startIndex: number | null;
+  endIndex: number | null;
   distanceM: number;
   elapsedTimeSec: number;
   movingTimeSec: number;
@@ -70,6 +71,10 @@ export interface ActivityLap {
   maxPowerW: number | null;
   avgCadence: number | null;
   totalElevationGain: number | null;
+  normalizedPowerW: number | null;
+  variabilityIndex: number | null;
+  powerDropPct: number | null;
+  intensityClass: string | null;
 }
 
 export interface GeoJsonGeometry {

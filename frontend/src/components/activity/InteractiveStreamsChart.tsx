@@ -160,25 +160,27 @@ export default function InteractiveStreamsChart({
               labelFormatter={formatTime}
             />
 
-            {!!altitudeStream && <>
-                <defs>
-                  <linearGradient id="altitudeGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={CHART_COLORS.tertiary} stopOpacity={0.45} />
-                    <stop offset="95%" stopColor={CHART_COLORS.tertiary} stopOpacity={0.12} />
-                  </linearGradient>
-                </defs>
-                <Area
-                  yAxisId="altitude"
-                  type="monotone"
-                  dataKey="altitude"
-                  stroke={alphaColor(CHART_COLORS.tertiary, 0.82)}
-                  strokeWidth={1.5}
-                  fill="url(#altitudeGradient)"
-                  fillOpacity={1}
-                  name="Wysokość (m)"
-                  isAnimationActive={false}
-                />
-              </>}
+            {!!altitudeStream && (
+              <defs>
+                <linearGradient id="altitudeGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={CHART_COLORS.tertiary} stopOpacity={0.45} />
+                  <stop offset="95%" stopColor={CHART_COLORS.tertiary} stopOpacity={0.12} />
+                </linearGradient>
+              </defs>
+            )}
+            {!!altitudeStream && (
+              <Area
+                yAxisId="altitude"
+                type="monotone"
+                dataKey="altitude"
+                stroke={alphaColor(CHART_COLORS.tertiary, 0.82)}
+                strokeWidth={1.5}
+                fill="url(#altitudeGradient)"
+                fillOpacity={1}
+                name="Wysokość (m)"
+                isAnimationActive={false}
+              />
+            )}
 
             {!!powerStream && (
               <Line

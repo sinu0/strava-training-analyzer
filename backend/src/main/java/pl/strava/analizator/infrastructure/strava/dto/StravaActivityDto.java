@@ -112,14 +112,32 @@ public class StravaActivityDto {
 
         private BigDecimal distance;
 
+        @JsonProperty("start_index")
+        private Integer startIndex;
+
+        @JsonProperty("end_index")
+        private Integer endIndex;
+
+        @JsonProperty("total_elevation_gain")
+        private BigDecimal totalElevationGain;
+
         @JsonProperty("average_speed")
         private BigDecimal averageSpeed;
+
+        @JsonProperty("max_speed")
+        private BigDecimal maxSpeed;
 
         @JsonProperty("average_heartrate")
         private BigDecimal averageHeartrate;
 
+        @JsonProperty("max_heartrate")
+        private BigDecimal maxHeartrate;
+
         @JsonProperty("average_watts")
         private BigDecimal averageWatts;
+
+        @JsonProperty("max_watts")
+        private BigDecimal maxWatts;
 
         @JsonProperty("average_cadence")
         private BigDecimal averageCadence;

@@ -68,8 +68,14 @@ docker compose up -d
 - frontend: typy w `types/`, hooki w `hooks/`, komponenty w `components/`
 - commit message: conventional commits (feat:, fix:, chore:, docs:)
 - UI w ciemnym motywie, mobile-first
-
-## Opcjonalne moduły
+- testujesz najpierw cos nie dziala naprawiasz odrazu
+- stosujesz tdd
+- przy wprowadzaniu nowego feature myslisz o architekturze oraz o rozwiazaniu aby bylo reuzywalnie jak najbardziej odizolowane czyste i proste w rozwijaniu
+- jezeli potrzebujesz obrazow rozwaz jego wygenerowanie (ptrzeba uruchomionego gpu zglos to jezeli trzeba)
+- dla kazdego nowego feature jezeli to nie sa fixy do porzednich zaproponuj stworzenie nowego brancha
+- po zakonczeniu pracy zawsze przebuduj dockera z opcja `docker compose up -d --build` aby caly stack sie przeladowal
+- 
+# Opcjonalne moduły
 
 - `ai.enabled=true` w `.env` włącza moduł AI/LLM
 - `*.properties` przez environment variables, nie hardcoded

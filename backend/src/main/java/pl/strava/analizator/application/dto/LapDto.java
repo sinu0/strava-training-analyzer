@@ -17,8 +17,8 @@ public class LapDto {
 
     private int lapIndex;
     private String name;
-    private int startIndex;
-    private int endIndex;
+    private Integer startIndex;
+    private Integer endIndex;
     private BigDecimal distanceM;
     private Integer elapsedTimeSec;
     private Integer movingTimeSec;
@@ -30,4 +30,8 @@ public class LapDto {
     private Short maxPowerW;
     private Short avgCadence;
     private BigDecimal totalElevationGain;
+    private Short normalizedPowerW;
+    private BigDecimal variabilityIndex;
+    private BigDecimal powerDropPct;
+    private String intensityClass;
 }

@@ -83,6 +83,10 @@ export default function ActivityDetailPage() {
             laps={activity.laps!}
             sportType={activity.sportType}
             altitudeStream={activity.altitudeStream}
+            powerStream={activity.powerStream}
+            heartrateStream={activity.heartrateStream}
+            velocityStream={activity.velocityStream}
+            timeStream={activity.timeStream}
             onHoverIndex={handleHoverIndex}
             onSelectRange={(r) => setSelection(r)}
           />

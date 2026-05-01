@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,6 +25,10 @@ public class StravaActivityMapper {
     }
 
     public Activity toDomain(StravaActivityDto dto, List<StravaStreamDto> streams, List<String> photoUrls) {
+        Map<String, StravaStreamDto> streamMap = (streams != null && !streams.isEmpty())
+                ? streams.stream().collect(Collectors.toMap(StravaStreamDto::getType, s -> s, (a, b) -> a))
+                : Map.of();
+
         Activity.ActivityBuilder builder = Activity.builder()
                 .externalId(String.valueOf(dto.getId()))
                 .source("strava")
@@ -34,7 +39,7 @@ public class StravaActivityMapper {
                 .elapsedTimeSec(dto.getElapsedTime())
                 .movingTimeSec(dto.getMovingTime())
                 .distanceM(dto.getDistance())
-                .elevationGainM(dto.getTotalElevationGain())
+                .elevationGainM(computeElevationGain(dto, streamMap))
                 .avgSpeedMs(dto.getAverageSpeed())
                 .maxSpeedMs(dto.getMaxSpeed())
                 .avgHeartrate(toShort(dto.getAverageHeartrate()))
@@ -45,15 +50,12 @@ public class StravaActivityMapper {
                 .maxCadence(resolveMaxCadence(dto, streams))
                 .calories(toInteger(dto.getCalories()))
                 .avgTempC(dto.getAverageTemp())
-                .elevationLossM(calculateElevationLoss(streams))
-                .gearId(null) // gear mapped externally if needed
+                .elevationLossM(computeElevationLoss(streamMap))
+                .gearId(null)
                 .summaryPolyline(dto.getMap() != null ? dto.getMap().getSummaryPolyline() : null)
                 .photoUrls(photoUrls != null ? photoUrls.stream().filter(Objects::nonNull).toList() : List.of());
 
-        if (streams != null && !streams.isEmpty()) {
-            Map<String, StravaStreamDto> streamMap = streams.stream()
-                    .collect(Collectors.toMap(StravaStreamDto::getType, s -> s, (a, b) -> a));
-
+        if (!streamMap.isEmpty()) {
             builder.powerStream(extractIntStream(streamMap.get("watts")))
                     .heartrateStream(extractIntStream(streamMap.get("heartrate")))
                     .cadenceStream(extractIntStream(streamMap.get("cadence")))
@@ -62,7 +64,6 @@ public class StravaActivityMapper {
                     .distanceStream(extractDoubleStream(streamMap.get("distance")))
                     .velocityStream(extractDoubleStream(streamMap.get("velocity_smooth")));
 
-            // latlng stream: Strava returns [[lat,lng], [lat,lng], ...] — split into two arrays
             StravaStreamDto latlngStream = streamMap.get("latlng");
             if (latlngStream != null && latlngStream.getData() != null) {
                 List<Object> latlngData = latlngStream.getData();
@@ -78,27 +79,85 @@ public class StravaActivityMapper {
             }
         }
 
-        // Map laps
+        double[] altitudeArr = builder.build().getAltitudeStream();
         if (dto.getLaps() != null && !dto.getLaps().isEmpty()) {
-            List<Lap> laps = new java.util.ArrayList<>();
+            List<Lap> laps = new ArrayList<>();
             for (int i = 0; i < dto.getLaps().size(); i++) {
-                StravaActivityDto.LapData lap = dto.getLaps().get(i);
+                StravaActivityDto.LapData lapDto = dto.getLaps().get(i);
+                int startIdx = lapDto.getStartIndex() != null ? lapDto.getStartIndex() : -1;
+                int endIdx = lapDto.getEndIndex() != null ? lapDto.getEndIndex() : -1;
+
+                BigDecimal lapElevGain = lapDto.getTotalElevationGain();
+                if (lapElevGain == null && altitudeArr != null && startIdx >= 0 && endIdx > startIdx
+                        && endIdx <= altitudeArr.length) {
+                    lapElevGain = computeElevationGainForRange(altitudeArr, startIdx, endIdx);
+                }
+
                 laps.add(Lap.builder()
-                        .name(lap.getName())
+                        .name(lapDto.getName())
                         .lapIndex(i)
-                        .distanceM(lap.getDistance())
-                        .elapsedTimeSec(lap.getElapsedTime())
-                        .movingTimeSec(lap.getMovingTime())
-                        .avgSpeedMs(lap.getAverageSpeed())
-                        .avgHeartrate(toShort(lap.getAverageHeartrate()))
-                        .avgPowerW(toShort(lap.getAverageWatts()))
-                        .avgCadence(toShort(lap.getAverageCadence()))
+                        .startIndex(startIdx >= 0 ? startIdx : null)
+                        .endIndex(endIdx >= 0 ? endIdx : null)
+                        .distanceM(lapDto.getDistance())
+                        .elapsedTimeSec(lapDto.getElapsedTime())
+                        .movingTimeSec(lapDto.getMovingTime())
+                        .avgSpeedMs(lapDto.getAverageSpeed())
+                        .maxSpeedMs(lapDto.getMaxSpeed())
+                        .avgHeartrate(toShort(lapDto.getAverageHeartrate()))
+                        .maxHeartrate(toShort(lapDto.getMaxHeartrate()))
+                        .avgPowerW(toShort(lapDto.getAverageWatts()))
+                        .maxPowerW(toShort(lapDto.getMaxWatts()))
+                        .avgCadence(toShort(lapDto.getAverageCadence()))
+                        .totalElevationGain(lapElevGain)
                         .build());
             }
             builder.laps(laps);
         }
 
         return builder.build();
+    }
+
+    private BigDecimal computeElevationGain(StravaActivityDto dto, Map<String, StravaStreamDto> streamMap) {
+        double[] altitudeArr = extractDoubleStream(streamMap.get("altitude"));
+        if (altitudeArr != null && altitudeArr.length >= 2) {
+            double gain = 0;
+            for (int i = 1; i < altitudeArr.length; i++) {
+                double delta = altitudeArr[i] - altitudeArr[i - 1];
+                if (delta > 0) {
+                    gain += delta;
+                }
+            }
+            if (gain > 0) {
+                return BigDecimal.valueOf(gain).setScale(1, RoundingMode.HALF_UP);
+            }
+        }
+        return dto.getTotalElevationGain();
+    }
+
+    private BigDecimal computeElevationLoss(Map<String, StravaStreamDto> streamMap) {
+        double[] altitudeArr = extractDoubleStream(streamMap.get("altitude"));
+        if (altitudeArr == null || altitudeArr.length < 2) {
+            return null;
+        }
+        double descent = 0;
+        for (int i = 1; i < altitudeArr.length; i++) {
+            double delta = altitudeArr[i] - altitudeArr[i - 1];
+            if (delta < 0) {
+                descent += -delta;
+            }
+        }
+        return descent > 0 ? BigDecimal.valueOf(descent).setScale(1, RoundingMode.HALF_UP) : null;
+    }
+
+    private BigDecimal computeElevationGainForRange(double[] altitudeArr, int startIdx, int endIdx) {
+        double gain = 0;
+        for (int i = startIdx + 1; i < endIdx && i < altitudeArr.length; i++) {
+            double delta = altitudeArr[i] - altitudeArr[i - 1];
+            if (delta > 0) {
+                gain += delta;
+            }
+        }
+        return gain > 0 ? BigDecimal.valueOf(gain).setScale(1, RoundingMode.HALF_UP) : null;
     }
 
     private String mapSportType(String stravaSportType) {
@@ -173,25 +232,4 @@ public class StravaActivityMapper {
                 .orElse(null);
     }
 
-    private BigDecimal calculateElevationLoss(List<StravaStreamDto> streams) {
-        if (streams == null) {
-            return null;
-        }
-        double[] altitudeStream = streams.stream()
-                .filter(stream -> "altitude".equals(stream.getType()))
-                .findFirst()
-                .map(this::extractDoubleStream)
-                .orElse(null);
-        if (altitudeStream == null || altitudeStream.length < 2) {
-            return null;
-        }
-        double descent = 0;
-        for (int index = 1; index < altitudeStream.length; index++) {
-            double delta = altitudeStream[index] - altitudeStream[index - 1];
-            if (delta < 0) {
-                descent += -delta;
-            }
-        }
-        return descent > 0 ? BigDecimal.valueOf(descent).setScale(1, RoundingMode.HALF_UP) : null;
-    }
 }

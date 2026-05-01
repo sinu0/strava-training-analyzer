@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import pl.strava.analizator.domain.metrics.LapMetricsService;
 import pl.strava.analizator.domain.model.Activity;
 import pl.strava.analizator.domain.model.AthleteProfile;
 import pl.strava.analizator.domain.model.MetricResult;
@@ -43,6 +44,7 @@ class SyncServiceTest {
     @Mock private SyncDataSource syncDataSource;
     @Mock private SyncStateRepository syncStateRepository;
     @Mock private HeatmapBuildService heatmapBuildService;
+    @Mock private LapMetricsService lapMetricsService;
 
     private SyncService syncService;
 
@@ -51,8 +53,10 @@ class SyncServiceTest {
         syncService = new SyncService(profileRepository, activityRepository,
                 activityMetricRepository, dailyMetricRepository,
                 metricRegistry, metricPersistenceService, dailyMetricsService, syncDataSource,
-                syncStateRepository, null, heatmapBuildService);
+                syncStateRepository, null, heatmapBuildService, lapMetricsService);
         lenient().when(syncStateRepository.findFirst()).thenReturn(Optional.empty());
+        lenient().when(lapMetricsService.enrichLaps(any(), any()))
+                .thenAnswer(i -> ((Activity) i.getArgument(0)).getLaps());
     }
 
     @Test
@@ -230,7 +234,14 @@ class SyncServiceTest {
                 .name("Complete Ride")
                 .latStream(new double[]{50.0, 50.1})
                 .lngStream(new double[]{20.0, 20.1})
-                .laps(List.of())
+                .altitudeStream(new double[]{100.0, 101.0})
+                .powerStream(new int[]{200, 210})
+                .laps(List.of(pl.strava.analizator.domain.vo.Lap.builder()
+                        .startIndex(0)
+                        .endIndex(1)
+                        .totalElevationGain(BigDecimal.ONE)
+                        .movingTimeSec(60)
+                        .build()))
                 .elevationGainM(BigDecimal.valueOf(100))
                 .summaryPolyline("alreadypresent")
                 .build();

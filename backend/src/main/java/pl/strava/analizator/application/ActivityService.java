@@ -223,8 +223,10 @@ public class ActivityService {
     private List<LapDto> mapLaps(Activity a) {
         if (a.getLaps() == null || a.getLaps().isEmpty()) return List.of();
         return a.getLaps().stream().map(lap -> LapDto.builder()
-                .lapIndex(lap.getLapIndex())
+                .lapIndex(lap.getLapIndex() != null ? lap.getLapIndex() : 0)
                 .name(lap.getName())
+                .startIndex(lap.getStartIndex())
+                .endIndex(lap.getEndIndex())
                 .distanceM(lap.getDistanceM())
                 .elapsedTimeSec(lap.getElapsedTimeSec())
                 .movingTimeSec(lap.getMovingTimeSec())
@@ -236,6 +238,10 @@ public class ActivityService {
                 .maxPowerW(lap.getMaxPowerW())
                 .avgCadence(lap.getAvgCadence())
                 .totalElevationGain(lap.getTotalElevationGain())
+                .normalizedPowerW(lap.getNormalizedPowerW())
+                .variabilityIndex(lap.getVariabilityIndex())
+                .powerDropPct(lap.getPowerDropPct())
+                .intensityClass(lap.getIntensityClass())
                 .build()
         ).toList();
     }

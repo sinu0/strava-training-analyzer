@@ -20,6 +20,7 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:5173',
     reuseExistingServer: false,
+    timeout: 60000,
     cwd: '../',
   },
 });

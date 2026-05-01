@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import pl.strava.analizator.application.ai.AiActivityNoteService;
+import pl.strava.analizator.domain.metrics.LapMetricsService;
 import pl.strava.analizator.domain.model.Activity;
 import pl.strava.analizator.domain.model.AthleteProfile;
 import pl.strava.analizator.domain.model.MetricResult;
@@ -25,6 +26,7 @@ import pl.strava.analizator.domain.port.ActivityRepository;
 import pl.strava.analizator.domain.port.AthleteProfileRepository;
 import pl.strava.analizator.domain.port.DailyMetricRepository;
 import pl.strava.analizator.domain.port.SyncStateRepository;
+import pl.strava.analizator.domain.vo.Lap;
 
 @Service
 public class SyncService {
@@ -43,6 +45,7 @@ public class SyncService {
     private final SyncStateRepository syncStateRepository;
     private final AiActivityNoteService aiActivityNoteService;
     private final HeatmapBuildService heatmapBuildService;
+    private final LapMetricsService lapMetricsService;
 
     public SyncService(AthleteProfileRepository profileRepository,
                        ActivityRepository activityRepository,
@@ -54,7 +57,8 @@ public class SyncService {
                        SyncDataSource syncDataSource,
                        SyncStateRepository syncStateRepository,
                        @org.springframework.lang.Nullable AiActivityNoteService aiActivityNoteService,
-                       HeatmapBuildService heatmapBuildService) {
+                       HeatmapBuildService heatmapBuildService,
+                       LapMetricsService lapMetricsService) {
         this.profileRepository = profileRepository;
         this.activityRepository = activityRepository;
         this.activityMetricRepository = activityMetricRepository;
@@ -66,6 +70,7 @@ public class SyncService {
         this.syncStateRepository = syncStateRepository;
         this.aiActivityNoteService = aiActivityNoteService;
         this.heatmapBuildService = heatmapBuildService;
+        this.lapMetricsService = lapMetricsService;
     }
 
     @Getter
@@ -253,6 +258,8 @@ public class SyncService {
         Activity fullActivity = syncDataSource.fetchActivityWithStreams(
                 profile, summaryActivity.getExternalId());
 
+        List<Lap> enrichedLaps = lapMetricsService.enrichLaps(fullActivity, profile.getFtpWatts());
+
         Activity.ActivityBuilder builder = Activity.builder()
                 .externalId(fullActivity.getExternalId())
                 .source("strava")
@@ -286,7 +293,7 @@ public class SyncService {
                 .lngStream(fullActivity.getLngStream())
                 .distanceStream(fullActivity.getDistanceStream())
                 .velocityStream(fullActivity.getVelocityStream())
-                .laps(fullActivity.getLaps())
+                .laps(enrichedLaps)
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now());
 
@@ -386,8 +393,8 @@ public class SyncService {
     }
 
     /**
-     * Re-sync streams (GPS, distance, velocity) and laps for existing activities
-     * that are missing the new data. Respects Strava rate limits.
+     * Re-sync streams (GPS, distance, velocity), laps, and elevation for existing activities.
+     * Respects Strava rate limits.
      */
     public SyncStatus resyncStreams() {
         AthleteProfile profile = getProfile();
@@ -402,9 +409,7 @@ public class SyncService {
         try {
             List<Activity> activities = activityRepository.findBySource("strava");
             for (Activity activity : activities) {
-                if (activity.getLatStream() != null && activity.getLaps() != null
-                        && activity.getElevationGainM() != null
-                        && activity.getSummaryPolyline() != null) {
+                if (hasFullData(activity)) {
                     totalSkipped++;
                     continue;
                 }
@@ -417,12 +422,19 @@ public class SyncService {
 
                 try {
                     Activity fresh = syncDataSource.fetchActivityWithStreams(profile, externalId);
+                    List<pl.strava.analizator.domain.vo.Lap> enrichedLaps =
+                            lapMetricsService.enrichLaps(fresh, profile.getFtpWatts());
                     Activity updated = activity.toBuilder()
                             .latStream(fresh.getLatStream())
                             .lngStream(fresh.getLngStream())
                             .distanceStream(fresh.getDistanceStream())
                             .velocityStream(fresh.getVelocityStream())
-                            .laps(fresh.getLaps())
+                            .powerStream(fresh.getPowerStream())
+                            .heartrateStream(fresh.getHeartrateStream())
+                            .cadenceStream(fresh.getCadenceStream())
+                            .altitudeStream(fresh.getAltitudeStream())
+                            .timeStream(fresh.getTimeStream())
+                            .laps(enrichedLaps)
                             .elevationGainM(fresh.getElevationGainM())
                             .elevationLossM(fresh.getElevationLossM())
                             .summaryPolyline(fresh.getSummaryPolyline())
@@ -455,6 +467,22 @@ public class SyncService {
         persistSyncStatus(lastSyncStatus);
         log.info("Stream re-sync completed: {} updated, {} skipped", totalUpdated, totalSkipped);
         return lastSyncStatus;
+    }
+
+    private boolean hasFullData(Activity activity) {
+        if (activity.getLatStream() == null) return false;
+        if (activity.getAltitudeStream() == null) return false;
+        if (activity.getPowerStream() == null) return false;
+        if (activity.getSummaryPolyline() == null) return false;
+        if (activity.getLaps() == null) return false;
+
+        for (pl.strava.analizator.domain.vo.Lap lap : activity.getLaps()) {
+            if (lap.getStartIndex() == null || lap.getEndIndex() == null
+                    || lap.getTotalElevationGain() == null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void persistSyncStatus(SyncStatus status) {
