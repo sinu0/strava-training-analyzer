@@ -14,7 +14,7 @@ export type EmptyStateType =
   | 'health';
 
 export type HomeWidgetIllustration = 'weather' | 'readiness' | 'block' | 'progress';
-export type PageHeroIllustration = 'dashboard' | 'analytics' | 'training';
+export type PageHeroIllustration = 'dashboard' | 'analytics' | 'training' | 'priorities';
 
 const WEATHER_FILE_MAP: Record<CyclistType, string> = {
   sunny: 'weather-sunny',

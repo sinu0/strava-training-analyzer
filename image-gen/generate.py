@@ -3,17 +3,19 @@
 Batch image generator for Strava Analizator frontend.
 Uses Z-Image-Turbo SDNQ uint4 quantized model via diffusers.
 
+Setup (first time):
+    ./setup.sh
+
 Usage:
-    cd /tmp/z-image-studio
-    PYTHONPATH=src .venv/bin/python /home/mariuszp/Dokumenty/stravaAnalizator/image-gen/generate.py [filter] [--force]
+    /tmp/z-image-studio/.venv/bin/python generate.py [filter] [--force]
 
     --force     Regenerate even if file exists
-    filter      Only generate images whose name starts with this prefix
+    filter      Only generate images whose name starts with this prefix (e.g. hero, weather)
 
-Requirements (already in z-image-studio venv):
-    - diffusers (with ZImagePipeline)
-    - torch (CUDA)
+Requirements (auto-installed by setup.sh):
+    - zimage (provides ZImagePipeline)
     - sdnq (quantization support)
+    - torch (CUDA)
 """
 
 import os
@@ -135,6 +137,16 @@ IMAGES = [
             "premium magazine photography, no readable text, no watermark, natural shadows and tactile detail"
         ),
         "w": 1280, "h": 480, "seed": 42012,
+    },
+    {
+        "name": "hero-priorities",
+        "prompt": (
+            "photorealistic editorial cycling photography, intimate close-up of a cyclist studying a route map and notes "
+            "under warm desk lamp, glasses, coffee cup and bike computer on the side, quiet strategic planning moment, "
+            "deep navy background with amber light pool on the table, tactical preparation mood, premium sports magazine, "
+            "no text, no watermark, cinematic lighting with sharp focus on the planning materials"
+        ),
+        "w": 1280, "h": 480, "seed": 42013,
     },
 
     # ── Readiness Cyclists (512×512) — 9 levels ──

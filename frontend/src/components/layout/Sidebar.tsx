@@ -7,6 +7,7 @@ import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import ScaleIcon from '@mui/icons-material/Scale';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import {
   Drawer,
@@ -62,6 +63,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Narzędzia',
     items: [
       { label: 'Trasy', path: '/route-planner', icon: <MapIcon /> },
+      { label: 'Priorytety', path: '/priorities', icon: <WhatshotIcon /> },
       { label: 'Predykcje AI', path: '/ai-predictions', icon: <SmartToyIcon /> },
     ],
   },

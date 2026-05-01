@@ -15,6 +15,7 @@ const WeatherPage = lazy(() => import('@/pages/WeatherPage'));
 const RoutePlannerPage = lazy(() => import('@/pages/RoutePlannerPage'));
 const WeightPage = lazy(() => import('@/pages/WeightPage'));
 const AiPredictionPage = lazy(() => import('@/pages/AiPredictionPage'));
+const PrioritiesPage = lazy(() => import('@/pages/PrioritiesPage'));
 const AdminPage = lazy(() => import('@/pages/AdminPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/route-planner" element={renderLazyPage(RoutePlannerPage)} />
         <Route path="/weight" element={renderLazyPage(WeightPage)} />
         <Route path="/ai-predictions" element={renderLazyPage(AiPredictionPage)} />
+        <Route path="/priorities" element={renderLazyPage(PrioritiesPage)} />
         <Route path="/admin" element={renderLazyPage(AdminPage)} />
         <Route path="*" element={renderLazyPage(NotFoundPage)} />
       </Route>

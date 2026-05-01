@@ -6,18 +6,23 @@
 # === Java / Gradle ===
 backend/.gradle/
 backend/build/
+backend/bin/
 backend/out/
+backend/.classpath
+backend/.factorypath
+backend/.project
+backend/.settings/
 *.class
 *.jar
 *.war
 
 # === Node / Frontend ===
+node_modules/
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
 frontend/test-results/
 frontend/playwright-report/
-frontend/*.png
 
 # === IDEs ===
 .idea/
@@ -30,26 +35,24 @@ frontend/*.png
 .DS_Store
 Thumbs.db
 
-# === Large / project-internal files (not needed in repo) ===
-*.webp
-*.png
-*.jpg
-!frontend/public/illustrations/hero-dashboard.png
-!frontend/public/illustrations/hero-analytics.png
-!frontend/public/illustrations/hero-training.png
-!frontend/public/illustrations/home-weather.jpg
-!frontend/public/illustrations/home-readiness.jpg
-!frontend/public/illustrations/home-block.jpg
-!frontend/public/illustrations/home-progress.jpg
-materials/
-image-gen/
-!image-gen/
-image-gen/*
-!image-gen/generate.py
+# === Project metadata ===
+.opencode/
+
+# === Image generation artifacts ===
 image-gen/.cache/
 image-gen/.hf-cache/
 image-gen/.tmpdir/
+image-gen/__pycache__/
+
+# === Detached files ===
+materials/
 tools/
 PROMPT.md
 AI_PROMPT.md
 AI_PROGRESS.md
+*.webp
+*.png
+*.jpg
+!frontend/public/illustrations/*.png
+!frontend/public/illustrations/*.jpg
+!/image-gen/*.py
