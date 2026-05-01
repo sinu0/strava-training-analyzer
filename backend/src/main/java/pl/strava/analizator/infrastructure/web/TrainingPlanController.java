@@ -18,10 +18,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import pl.strava.analizator.application.TrainingPlanOptimizerService;
 import pl.strava.analizator.application.TrainingPlanService;
+import pl.strava.analizator.application.dto.ApplyOptimizedPlanRequest;
 import pl.strava.analizator.application.dto.CalendarDayDto;
 import pl.strava.analizator.application.dto.CreateTrainingPlanRequest;
 import pl.strava.analizator.application.dto.GeneratePlanRequest;
+import pl.strava.analizator.application.dto.OptimizePlanRequest;
+import pl.strava.analizator.application.dto.OptimizePlanResponse;
 import pl.strava.analizator.application.dto.RecordAdjustmentFeedbackRequest;
 import pl.strava.analizator.application.dto.TrainingPlanDto;
 import pl.strava.analizator.application.dto.TrainingPlanProgramDto;
@@ -33,6 +37,7 @@ import pl.strava.analizator.domain.model.TrainingPlanStatus;
 public class TrainingPlanController {
 
     private final TrainingPlanService trainingPlanService;
+    private final TrainingPlanOptimizerService trainingPlanOptimizerService;
 
     @GetMapping("/plans")
     public ResponseEntity<List<TrainingPlanDto>> getPlans(
@@ -89,5 +94,16 @@ public class TrainingPlanController {
     public ResponseEntity<Void> deleteProgram(@PathVariable UUID id) {
         trainingPlanService.deleteProgram(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/optimize")
+    public ResponseEntity<OptimizePlanResponse> optimize(@RequestBody OptimizePlanRequest request) {
+        return ResponseEntity.ok(trainingPlanOptimizerService.optimize(request));
+    }
+
+    @PostMapping("/optimize/apply")
+    public ResponseEntity<TrainingPlanProgramDto> applyOptimizedPlan(@RequestBody ApplyOptimizedPlanRequest request) {
+        TrainingPlanProgramDto program = trainingPlanOptimizerService.applyOptimizedPlan(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(program);
     }
 }

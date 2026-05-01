@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import pl.strava.analizator.application.TrainingPlanOptimizerService;
 import pl.strava.analizator.application.TrainingPlanService;
 import pl.strava.analizator.application.dto.CalendarActivitySummaryDto;
 import pl.strava.analizator.application.dto.TrainingAdjustmentSuggestionDto;
@@ -49,6 +50,9 @@ class TrainingPlanControllerTest {
 
     @MockitoBean
     private TrainingPlanService trainingPlanService;
+
+    @MockitoBean
+    private TrainingPlanOptimizerService trainingPlanOptimizerService;
 
     @Test
     void getPlans_returns200() throws Exception {

@@ -5,6 +5,7 @@ import EditorialHero from '../components/common/EditorialHero';
 import PageContainer from '../components/common/PageContainer';
 import TabsNav from '../components/common/TabsNav';
 import PlanGenerator from '../components/training/PlanGenerator';
+import PlanOptimizer from '../components/training/PlanOptimizer';
 import ProgramsList from '../components/training/ProgramsList';
 import TrainingCalendar from '../components/training/TrainingCalendar';
 import WeeklyCoachCockpit from '../components/training/WeeklyCoachCockpit';
@@ -16,6 +17,7 @@ const tabs = [
   { label: 'Biblioteka', value: 0 },
   { label: 'Kalendarz', value: 1 },
   { label: 'Programy', value: 2 },
+  { label: 'Optymalizator', value: 3 },
 ];
 
 export default function TrainingPlanPage() {
@@ -57,6 +59,7 @@ export default function TrainingPlanPage() {
         </Grid>
       )}
       {tab === 2 && <ProgramsList />}
+      {tab === 3 && <PlanOptimizer />}
     </PageContainer>
   );
 }
