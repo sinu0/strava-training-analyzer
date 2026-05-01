@@ -4,7 +4,10 @@ import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
-import { Box, Typography, Avatar, Button, Chip, Divider, Tooltip } from '@mui/material';
+import {
+  Box, Typography, Avatar, Button, Chip, Divider, Tooltip,
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField, CircularProgress,
+} from '@mui/material';
 import { useMemo, lazy, Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,7 +19,7 @@ import FourWeekCyclingSummary from '../components/profile/FourWeekCyclingSummary
 import ProfileGallery from '../components/profile/ProfileGallery';
 import SummaryStoryModal from '../components/profile/SummaryStoryModal';
 import WeeklyKmBarChart from '../components/profile/WeeklyKmBarChart';
-import { useProfile, useWeeklySummaries, useFtpProgress, useReadiness } from '../hooks/useAnalytics';
+import { useProfile, useUpdateProfile, useWeeklySummaries, useFtpProgress, useReadiness } from '../hooks/useAnalytics';
 import {
   BRAND_COLORS,
   CHART_COLORS,
@@ -84,6 +87,9 @@ export default function ProfilePage() {
   const latestWeek = weekly.length ? weekly[0] : undefined;
   const navigate = useNavigate();
   const [storyOpen, setStoryOpen] = useState(false);
+  const [ftpDialogOpen, setFtpDialogOpen] = useState(false);
+  const [ftpInput, setFtpInput] = useState('');
+  const updateProfile = useUpdateProfile();
 
   // Training streak: consecutive weeks with at least one activity
   const streak = useMemo(() => {
@@ -221,18 +227,23 @@ export default function ProfilePage() {
           {/* Stats band */}
           <Divider sx={{ my: 2.5, borderColor: alphaColor(CHART_COLORS.tooltipText, 0.08) }} />
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0, justifyContent: 'space-around' }}>
-            <StatPill
-              icon={<BoltIcon fontSize="small" />}
-              label="FTP"
-              tooltip="Functional Threshold Power – szacowane FTP"
-              value={
-                profile?.ftpWatts != null
-                  ? `${profile.ftpWatts} W`
-                  : ftpProgress?.currentFtp != null
-                  ? `${ftpProgress.currentFtp} W`
-                  : '—'
-              }
-            />
+            <Box sx={{ cursor: 'pointer' }} onClick={() => {
+              setFtpInput(String(profile?.ftpWatts ?? ftpProgress?.currentFtp ?? ''));
+              setFtpDialogOpen(true);
+            }}>
+              <StatPill
+                icon={<BoltIcon fontSize="small" />}
+                label="FTP"
+                tooltip="Kliknij, aby edytować"
+                value={
+                  profile?.ftpWatts != null
+                    ? `${profile.ftpWatts} W`
+                    : ftpProgress?.currentFtp != null
+                    ? `${ftpProgress.currentFtp} W`
+                    : '—'
+                }
+              />
+            </Box>
             <Divider orientation="vertical" flexItem sx={{ borderColor: alphaColor(CHART_COLORS.tooltipText, 0.08) }} />
             <StatPill
               icon={<FitnessCenterIcon fontSize="small" />}
@@ -309,6 +320,40 @@ export default function ProfilePage() {
         readiness={readiness}
         streak={streak}
       />
+
+      <Dialog open={ftpDialogOpen} onClose={() => setFtpDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Edytuj FTP</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            label="FTP (W)"
+            type="number"
+            fullWidth
+            value={ftpInput}
+            onChange={(e) => setFtpInput(e.target.value)}
+            slotProps={{ htmlInput: { min: 50, max: 600 } }}
+            sx={{ mt: 1 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setFtpDialogOpen(false)}>Anuluj</Button>
+          <Button
+            variant="contained"
+            disabled={updateProfile.isPending}
+            onClick={() => {
+              const val = parseInt(ftpInput, 10);
+              if (val > 0) {
+                updateProfile.mutate(
+                  { ftpWatts: val },
+                  { onSuccess: () => setFtpDialogOpen(false) },
+                );
+              }
+            }}
+          >
+            {updateProfile.isPending ? <CircularProgress size={18} /> : 'Zapisz'}
+          </Button>
+        </DialogActions>
+      </Dialog>
       </Box>
     </PageContainer>
   );

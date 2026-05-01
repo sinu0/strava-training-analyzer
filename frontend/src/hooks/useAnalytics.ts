@@ -514,6 +514,19 @@ export function useProfile() {
   });
 }
 
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { ftpWatts?: number | null; weightKg?: number | null }) => {
+      const { data } = await apiClient.put<AthleteProfile>('/profile', params);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
+  });
+}
+
 export function useUpdateStravaConfig() {
   const queryClient = useQueryClient();
   return useMutation({
