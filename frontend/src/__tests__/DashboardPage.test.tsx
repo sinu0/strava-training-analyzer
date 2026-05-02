@@ -242,6 +242,46 @@ vi.mock('../hooks/useAi', () => ({
   useGenerateAiNote: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
+vi.mock('../hooks/useDailyDecision', () => ({
+  useDailyDecision: () => ({
+    data: {
+      decision: 'RIDE',
+      workout: {
+        type: 'ENDURANCE',
+        durationMin: 90,
+        targetTss: 75,
+        difficulty: 'MODERATE',
+        intensityDescription: 'Full workout as planned',
+        description: '90min ENDURANCE ride',
+        indoor: false,
+      },
+      confidence: { score: 0.82, label: 'VERY_HIGH', description: 'All signals agree' },
+      risk: 'LOW',
+      reasons: [
+        { priority: 'SAFETY', signal: 'TSB', message: 'Good TSB', evidence: 'TSB=5' },
+        { priority: 'PLAN', signal: 'SCHEDULE', message: 'Endurance planned', evidence: 'type=ENDURANCE' },
+      ],
+      alternatives: [
+        {
+          label: 'Shorter version',
+          type: 'MODIFY',
+          workout: {
+            type: 'ENDURANCE',
+            durationMin: 45,
+            targetTss: 35,
+            difficulty: 'EASY',
+            intensityDescription: 'Half duration',
+            description: 'Compact 45min session',
+            indoor: false,
+          },
+          rationale: 'Time-efficient',
+        },
+      ],
+    },
+    isLoading: false,
+  }),
+}));
+
 function renderWithProviders(ui: React.ReactElement) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -257,11 +297,17 @@ function renderWithProviders(ui: React.ReactElement) {
 }
 
 describe('DashboardPage v2', () => {
-  it('renders the editorial hero section', () => {
+  it('renders the decision page with correct title', () => {
     renderWithProviders(<DashboardPage />);
 
-    expect(screen.getAllByText('Home').length).toBeGreaterThan(0);
-    expect(screen.getByRole('img', { name: 'Dashboard hero' })).toBeDefined();
+    expect(screen.getAllByText('Decyzja').length).toBeGreaterThan(0);
+  });
+
+  it('renders the decision hero card', () => {
+    renderWithProviders(<DashboardPage />);
+
+    expect(screen.getByText('Decyzja na dziś')).toBeDefined();
+    expect(screen.getByText('Jedź!')).toBeDefined();
   });
 
   it('renders the three-column layout with sticky side widgets', () => {
@@ -282,12 +328,11 @@ describe('DashboardPage v2', () => {
     expect(screen.getByTestId('dashboard-widget-art-progress')).toBeDefined();
   });
 
-  it('renders the central training and activity section', () => {
+  it('renders the latest activity section', () => {
     renderWithProviders(<DashboardPage />);
 
-    expect(screen.getByText('Trening i aktywności')).toBeDefined();
+    expect(screen.getByText('Ostatni trening')).toBeDefined();
     expect(screen.getAllByText('Morning Ride').length).toBeGreaterThan(0);
-    expect(screen.getByText('280 W')).toBeDefined();
   });
 
   it('renders PMC load chips', () => {
@@ -295,20 +340,31 @@ describe('DashboardPage v2', () => {
 
     expect(screen.getByText('CTL')).toBeDefined();
     expect(screen.getByText('ATL')).toBeDefined();
-    expect(screen.getByText('TSB')).toBeDefined();
+    expect(screen.getAllByText('TSB').length).toBeGreaterThan(0);
   });
 
   it('renders coach AI summary panel', () => {
     renderWithProviders(<DashboardPage />);
 
-    expect(screen.getByText('Coach AI')).toBeDefined();
+    expect(screen.getByText('Coach AI — podsumowanie')).toBeDefined();
   });
 
   it('renders quick navigation buttons', () => {
     renderWithProviders(<DashboardPage />);
 
-    expect(screen.getByText('Studio pogody')).toBeDefined();
     expect(screen.getByText('Aktywności')).toBeDefined();
     expect(screen.getByText('Analityka')).toBeDefined();
+  });
+
+  it('renders the Daily Decision reasoning panel', () => {
+    renderWithProviders(<DashboardPage />);
+
+    expect(screen.getByText('Dlaczego ta decyzja?')).toBeDefined();
+  });
+
+  it('renders the Daily Decision alternatives panel', () => {
+    renderWithProviders(<DashboardPage />);
+
+    expect(screen.getByText('Alternatywy (1)')).toBeDefined();
   });
 });

@@ -13,6 +13,7 @@ vi.mock('../hooks/useAnalytics', () => ({
   useFtpProgress: () => ({ data: { currentFtp: 260, trend: 'up', changePercent: 5.0, history: [] } }),
   useWeeklySummaries: () => ({ data: [] }),
   useReadiness: () => ({ data: { score: 72, level: 'good', tsb: 5, ctl: 55, atl: 50, description: 'Dobra forma' } }),
+  useUpdateProfile: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 function renderPage() {
