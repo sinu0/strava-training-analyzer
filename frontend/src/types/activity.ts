@@ -13,6 +13,8 @@ export interface ActivitySummary {
   calories: number | null;
   summaryPolyline?: string | null;
   photoUrls?: string[] | null;
+  primaryBenefit?: string | null;
+  trainingScore?: number | null;
 }
 
 export interface ActivityDetail {
@@ -51,6 +53,7 @@ export interface ActivityDetail {
   velocityStream: number[] | null;
   laps: ActivityLap[] | null;
   metrics: Record<string, unknown>;
+  trainingEffect?: import('./trainingEffect').ActivityTrainingEffect | null;
   createdAt: string;
   updatedAt: string;
 }

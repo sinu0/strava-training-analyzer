@@ -29,6 +29,7 @@ import {
   useRebuildFtpHistory,
   useRebuildHeatmap,
   useRecalculateAllActivityMetrics,
+  useRecalculateAllTrainingEffects,
   useRecalculateMetrics,
   useRefreshAllWeatherCache,
   useRefreshWeatherCache,
@@ -242,6 +243,7 @@ export default function AdminPage() {
   const recalculateActivityMetrics = useRecalculateAllActivityMetrics();
   const rebuildHeatmap = useRebuildHeatmap();
   const rebuildFtpHistory = useRebuildFtpHistory();
+  const recalculateAllTe = useRecalculateAllTrainingEffects();
   const { data: weatherLocations } = useWeatherLocations();
   const refreshAllWeather = useRefreshAllWeatherCache();
   const refreshWeather = useRefreshWeatherCache();
@@ -445,6 +447,10 @@ export default function AdminPage() {
             runAiBatchData={runAiBatch.data}
             runAiBatchError={runAiBatch.error}
             onRunAiBatch={(skipToday) => runAiBatch.mutate(skipToday)}
+            recalculateAllTePending={recalculateAllTe.isPending}
+            recalculateAllTeData={recalculateAllTe.data}
+            recalculateAllTeError={recalculateAllTe.error}
+            onRecalculateAllTe={() => recalculateAllTe.mutate()}
           />
         </Grid>
       </AdminGroup>

@@ -106,6 +106,7 @@ vi.mock('@/hooks/useAnalytics', () => ({
   useClearSyncData: () => ({ mutate: vi.fn(), isPending: false }),
   useRecalculateMetrics: () => ({ mutate: vi.fn(), isPending: false }),
   useRecalculateAllActivityMetrics: () => ({ mutate: vi.fn(), isPending: false }),
+  useRecalculateAllTrainingEffects: () => ({ mutate: vi.fn(), isPending: false, data: undefined, error: null }),
   useResyncStreams: () => ({ mutate: vi.fn(), isPending: false, isError: false, error: null }),
   useWeatherLocations: () => ({ data: [], isLoading: false }),
   useRefreshAllWeatherCache: () => ({ mutate: vi.fn(), isPending: false }),

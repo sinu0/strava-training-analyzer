@@ -1,6 +1,7 @@
 package pl.strava.analizator.application;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -18,13 +19,17 @@ import lombok.RequiredArgsConstructor;
 import pl.strava.analizator.application.ai.AiActivityNoteService;
 import pl.strava.analizator.domain.metrics.LapMetricsService;
 import pl.strava.analizator.domain.model.Activity;
+import pl.strava.analizator.domain.model.ActivityTrainingEffect;
 import pl.strava.analizator.domain.model.AthleteProfile;
+import pl.strava.analizator.domain.model.DailySummary;
 import pl.strava.analizator.domain.model.MetricResult;
 import pl.strava.analizator.domain.model.SyncState;
 import pl.strava.analizator.domain.port.ActivityMetricRepository;
 import pl.strava.analizator.domain.port.ActivityRepository;
+import pl.strava.analizator.domain.port.ActivityTrainingEffectRepository;
 import pl.strava.analizator.domain.port.AthleteProfileRepository;
 import pl.strava.analizator.domain.port.DailyMetricRepository;
+import pl.strava.analizator.domain.port.DailySummaryRepository;
 import pl.strava.analizator.domain.port.SyncStateRepository;
 import pl.strava.analizator.domain.vo.Lap;
 
@@ -46,6 +51,9 @@ public class SyncService {
     private final AiActivityNoteService aiActivityNoteService;
     private final HeatmapBuildService heatmapBuildService;
     private final LapMetricsService lapMetricsService;
+    private final WorkoutEvaluationService workoutEvaluationService;
+    private final ActivityTrainingEffectRepository trainingEffectRepository;
+    private final DailySummaryRepository dailySummaryRepository;
 
     public SyncService(AthleteProfileRepository profileRepository,
                        ActivityRepository activityRepository,
@@ -58,7 +66,10 @@ public class SyncService {
                        SyncStateRepository syncStateRepository,
                        @org.springframework.lang.Nullable AiActivityNoteService aiActivityNoteService,
                        HeatmapBuildService heatmapBuildService,
-                       LapMetricsService lapMetricsService) {
+                       LapMetricsService lapMetricsService,
+                       WorkoutEvaluationService workoutEvaluationService,
+                       ActivityTrainingEffectRepository trainingEffectRepository,
+                       DailySummaryRepository dailySummaryRepository) {
         this.profileRepository = profileRepository;
         this.activityRepository = activityRepository;
         this.activityMetricRepository = activityMetricRepository;
@@ -71,6 +82,9 @@ public class SyncService {
         this.aiActivityNoteService = aiActivityNoteService;
         this.heatmapBuildService = heatmapBuildService;
         this.lapMetricsService = lapMetricsService;
+        this.workoutEvaluationService = workoutEvaluationService;
+        this.trainingEffectRepository = trainingEffectRepository;
+        this.dailySummaryRepository = dailySummaryRepository;
     }
 
     @Getter
@@ -323,6 +337,18 @@ public class SyncService {
             heatmapBuildService.updateForActivity(saved.getSummaryPolyline());
         } catch (Exception e) {
             log.debug("Could not update heatmap for activity {}: {}", saved.getExternalId(), e.getMessage());
+        }
+
+        // Auto-calculate training effect for the newly imported activity
+        try {
+            DailySummary daySummary = dailySummaryRepository
+                    .findByDate(saved.getStartedAt().toLocalDate()).orElse(null);
+            ActivityTrainingEffect effect = workoutEvaluationService
+                    .calculateTrainingEffect(saved, profile, daySummary);
+            trainingEffectRepository.save(effect);
+        } catch (Exception e) {
+            log.warn("Failed to calculate training effect for activity {}: {}",
+                    saved.getExternalId(), e.getMessage());
         }
 
         return true;

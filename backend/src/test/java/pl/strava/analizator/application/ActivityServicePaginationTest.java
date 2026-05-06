@@ -11,6 +11,7 @@ import pl.strava.analizator.application.dto.ActivitySummaryPageDto;
 import pl.strava.analizator.domain.model.Activity;
 import pl.strava.analizator.domain.port.ActivityMetricRepository;
 import pl.strava.analizator.domain.port.ActivityRepository;
+import pl.strava.analizator.domain.port.ActivityTrainingEffectRepository;
 import pl.strava.analizator.domain.port.HeatmapSegmentRepository;
 import pl.strava.analizator.domain.vo.ActivityFilter;
 import pl.strava.analizator.domain.vo.ActivityPage;
@@ -30,12 +31,13 @@ class ActivityServicePaginationTest {
     @Mock private ActivityMetricRepository metricRepository;
     @Mock private HeatmapSegmentRepository heatmapSegmentRepository;
     @Mock private HeatmapBuildService heatmapBuildService;
+    @Mock private ActivityTrainingEffectRepository trainingEffectRepository;
 
     private ActivityService activityService;
 
     @BeforeEach
     void setUp() {
-        activityService = new ActivityService(activityRepository, metricRepository, heatmapSegmentRepository, heatmapBuildService);
+        activityService = new ActivityService(activityRepository, metricRepository, heatmapSegmentRepository, heatmapBuildService, trainingEffectRepository);
     }
 
     private Activity makeActivity(String name) {

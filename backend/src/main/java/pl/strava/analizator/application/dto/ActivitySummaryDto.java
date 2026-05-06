@@ -32,4 +32,6 @@ public class ActivitySummaryDto {
     private Integer calories;
     private String summaryPolyline;
     private List<String> photoUrls;
+    private String primaryBenefit;
+    private Integer trainingScore;
 }

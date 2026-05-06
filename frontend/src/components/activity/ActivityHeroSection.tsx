@@ -4,6 +4,7 @@ import { Box, Button, Chip, Collapse, Stack, Table, TableBody, TableCell, TableR
 import { useMemo, useState } from 'react';
 
 import ActivityMediaCarousel from '@/components/ActivityMediaCarousel';
+import ActivityScoreBar from '@/components/activity/ActivityScoreBar';
 import type { ActivityDetail, GeoJsonFeature } from '@/types/activity';
 import { formatDistance, formatDuration, formatPace } from '@/utils/formatters';
 import { extractActivityRoutePositions } from '@/utils/map';
@@ -215,6 +216,10 @@ export default function ActivityHeroSection({ activity, geoJson }: ActivityHeroS
             }}
           />
         </Box>
+      ) : null}
+
+      {activity.trainingEffect ? (
+        <ActivityScoreBar effect={activity.trainingEffect} />
       ) : null}
 
       {primaryRows.length ? (

@@ -6,6 +6,7 @@ import { useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import ActivityHeroSection from '@/components/activity/ActivityHeroSection';
+import ActivityScoreTab from '@/components/activity/ActivityScoreTab';
 import ActivityTabs from '@/components/activity/ActivityTabs';
 import AdvancedStatsTab from '@/components/activity/AdvancedStatsTab';
 import AnalysisTab from '@/components/activity/AnalysisTab';
@@ -53,53 +54,42 @@ export default function ActivityDetailPage() {
   }
 
   const hasLaps = !!activity.laps && activity.laps.length > 0;
-  const tabCount = hasLaps ? 5 : 4;
+  const tabCount = hasLaps ? 6 : 5;
 
-  // Map tab index to tab content, accounting for optional Laps tab
   const renderTabContent = () => {
-    let idx = tabIndex;
-    // Tabs: 0=Overview, 1=Analysis, 2=Laps(optional), 3/2=Advanced, 4/3=AI Coach
-    if (!hasLaps && idx >= 2) {
-      idx = idx + 1; // skip laps index
-    }
+    if (tabIndex === 0) return <OverviewTab activity={activity} />;
+    if (tabIndex === 1) return activity.trainingEffect ? <ActivityScoreTab effect={activity.trainingEffect} /> : null;
+    if (tabIndex === 2) return (
+      <AnalysisTab
+        activity={activity}
+        geoJson={geoJson ?? null}
+        hoverIndex={hoverIndex}
+        selection={selection}
+        onHoverIndex={handleHoverIndex}
+        onSelectionChange={handleSelectionChange}
+      />
+    );
 
-    switch (idx) {
-      case 0:
-        return <OverviewTab activity={activity} />;
-      case 1:
-        return (
-          <AnalysisTab
-            activity={activity}
-            geoJson={geoJson ?? null}
-            hoverIndex={hoverIndex}
-            selection={selection}
-            onHoverIndex={handleHoverIndex}
-            onSelectionChange={handleSelectionChange}
-          />
-        );
-      case 2:
-        return hasLaps ? (
-          <LapsTab
-            laps={activity.laps!}
-            sportType={activity.sportType}
-            altitudeStream={activity.altitudeStream}
-            powerStream={activity.powerStream}
-            heartrateStream={activity.heartrateStream}
-            velocityStream={activity.velocityStream}
-            timeStream={activity.timeStream}
-            onHoverIndex={handleHoverIndex}
-            onSelectRange={(r) => setSelection(r)}
-          />
-        ) : (
-          <AdvancedStatsTab activity={activity} />
-        );
-      case 3:
-        return <AdvancedStatsTab activity={activity} />;
-      case 4:
-        return <AiCoachSection activityId={activity.id} />;
-      default:
-        return null;
-    }
+    const lapsIdx = hasLaps ? 3 : -1;
+    const advancedIdx = hasLaps ? 4 : 3;
+    const aiIdx = hasLaps ? 5 : 4;
+
+    if (hasLaps && tabIndex === lapsIdx) return (
+      <LapsTab
+        laps={activity.laps!}
+        sportType={activity.sportType}
+        altitudeStream={activity.altitudeStream}
+        powerStream={activity.powerStream}
+        heartrateStream={activity.heartrateStream}
+        velocityStream={activity.velocityStream}
+        timeStream={activity.timeStream}
+        onHoverIndex={handleHoverIndex}
+        onSelectRange={(r) => setSelection(r)}
+      />
+    );
+    if (tabIndex === advancedIdx) return <AdvancedStatsTab activity={activity} />;
+    if (tabIndex === aiIdx) return <AiCoachSection activityId={activity.id} />;
+    return null;
   };
 
   return (

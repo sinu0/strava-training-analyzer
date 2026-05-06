@@ -19,9 +19,18 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import pl.strava.analizator.application.ActivityService;
 import pl.strava.analizator.application.SyncService;
+import pl.strava.analizator.application.WorkoutEvaluationService;
 import pl.strava.analizator.application.dto.ActivityHeatmapDto;
 import pl.strava.analizator.application.dto.ActivityDetailDto;
 import pl.strava.analizator.application.dto.ActivitySummaryPageDto;
+import pl.strava.analizator.domain.model.Activity;
+import pl.strava.analizator.domain.model.ActivityTrainingEffect;
+import pl.strava.analizator.domain.model.AthleteProfile;
+import pl.strava.analizator.domain.model.DailySummary;
+import pl.strava.analizator.domain.port.ActivityRepository;
+import pl.strava.analizator.domain.port.ActivityTrainingEffectRepository;
+import pl.strava.analizator.domain.port.AthleteProfileRepository;
+import pl.strava.analizator.domain.port.DailySummaryRepository;
 import pl.strava.analizator.domain.vo.ActivityTimelineEntry;
 
 @RestController
@@ -31,6 +40,11 @@ public class ActivityController {
 
     private final ActivityService activityService;
     private final SyncService syncService;
+    private final WorkoutEvaluationService workoutEvaluationService;
+    private final ActivityRepository activityRepository;
+    private final ActivityTrainingEffectRepository trainingEffectRepository;
+    private final AthleteProfileRepository profileRepository;
+    private final DailySummaryRepository dailySummaryRepository;
 
     @GetMapping
     public ResponseEntity<ActivitySummaryPageDto> listActivities(
@@ -80,6 +94,20 @@ public class ActivityController {
     @PostMapping("/{id}/recalculate-metrics")
     public ResponseEntity<Void> recalculateActivityMetrics(@PathVariable UUID id) {
         syncService.recalculateActivityMetrics(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PostMapping("/{id}/recalculate-training-effect")
+    public ResponseEntity<Void> recalculateTrainingEffect(@PathVariable UUID id) {
+        Activity activity = activityRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Activity not found: " + id));
+        AthleteProfile profile = profileRepository.findFirst().orElse(null);
+        DailySummary daySummary = dailySummaryRepository.findByDate(
+                activity.getStartedAt() != null ? activity.getStartedAt().toLocalDate() : null).orElse(null);
+
+        ActivityTrainingEffect effect = workoutEvaluationService.calculateTrainingEffect(
+                activity, profile, daySummary);
+        trainingEffectRepository.save(effect);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

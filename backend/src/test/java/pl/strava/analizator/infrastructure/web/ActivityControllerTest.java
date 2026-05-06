@@ -17,12 +17,17 @@ import org.springframework.test.web.servlet.MockMvc;
 import pl.strava.analizator.application.ActivityNotFoundException;
 import pl.strava.analizator.application.ActivityService;
 import pl.strava.analizator.application.SyncService;
+import pl.strava.analizator.application.WorkoutEvaluationService;
 import pl.strava.analizator.application.dto.ActivityHeatmapDto;
 import pl.strava.analizator.application.dto.ActivityDetailDto;
 import pl.strava.analizator.application.dto.ActivityHeatmapBoundsDto;
 import pl.strava.analizator.application.dto.HeatmapSegmentDto;
 import pl.strava.analizator.application.dto.ActivitySummaryDto;
 import pl.strava.analizator.application.dto.ActivitySummaryPageDto;
+import pl.strava.analizator.domain.port.ActivityRepository;
+import pl.strava.analizator.domain.port.ActivityTrainingEffectRepository;
+import pl.strava.analizator.domain.port.AthleteProfileRepository;
+import pl.strava.analizator.domain.port.DailySummaryRepository;
 import pl.strava.analizator.infrastructure.config.SecurityConfig;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -48,6 +53,21 @@ class ActivityControllerTest {
 
     @MockitoBean
     private SyncService syncService;
+
+    @MockitoBean
+    private WorkoutEvaluationService workoutEvaluationService;
+
+    @MockitoBean
+    private ActivityRepository activityRepository;
+
+    @MockitoBean
+    private ActivityTrainingEffectRepository trainingEffectRepository;
+
+    @MockitoBean
+    private AthleteProfileRepository profileRepository;
+
+    @MockitoBean
+    private DailySummaryRepository dailySummaryRepository;
 
     @Test
     void listActivities_returnsAll() throws Exception {

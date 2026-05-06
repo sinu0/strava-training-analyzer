@@ -28,8 +28,10 @@ import pl.strava.analizator.domain.model.AthleteProfile;
 import pl.strava.analizator.domain.model.MetricResult;
 import pl.strava.analizator.domain.port.ActivityMetricRepository;
 import pl.strava.analizator.domain.port.ActivityRepository;
+import pl.strava.analizator.domain.port.ActivityTrainingEffectRepository;
 import pl.strava.analizator.domain.port.AthleteProfileRepository;
 import pl.strava.analizator.domain.port.DailyMetricRepository;
+import pl.strava.analizator.domain.port.DailySummaryRepository;
 import pl.strava.analizator.domain.port.SyncStateRepository;
 @ExtendWith(MockitoExtension.class)
 class SyncServiceTest {
@@ -45,6 +47,9 @@ class SyncServiceTest {
     @Mock private SyncStateRepository syncStateRepository;
     @Mock private HeatmapBuildService heatmapBuildService;
     @Mock private LapMetricsService lapMetricsService;
+    @Mock private WorkoutEvaluationService workoutEvaluationService;
+    @Mock private ActivityTrainingEffectRepository trainingEffectRepository;
+    @Mock private DailySummaryRepository dailySummaryRepository;
 
     private SyncService syncService;
 
@@ -53,7 +58,8 @@ class SyncServiceTest {
         syncService = new SyncService(profileRepository, activityRepository,
                 activityMetricRepository, dailyMetricRepository,
                 metricRegistry, metricPersistenceService, dailyMetricsService, syncDataSource,
-                syncStateRepository, null, heatmapBuildService, lapMetricsService);
+                syncStateRepository, null, heatmapBuildService, lapMetricsService,
+                workoutEvaluationService, trainingEffectRepository, dailySummaryRepository);
         lenient().when(syncStateRepository.findFirst()).thenReturn(Optional.empty());
         lenient().when(lapMetricsService.enrichLaps(any(), any()))
                 .thenAnswer(i -> ((Activity) i.getArgument(0)).getLaps());

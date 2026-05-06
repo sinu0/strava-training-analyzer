@@ -15,6 +15,7 @@ import { MapContainer, TileLayer, Polyline } from 'react-leaflet';
 
 import { DEFAULT_MAP_TILE_VARIANT, MAP_TILE_CONFIG } from '@/constants/mapTiles';
 import type { ActivitySummary } from '@/types/activity';
+import { BENEFIT_COLORS, BENEFIT_LABELS } from '@/types/trainingEffect';
 import type { MaxValues, MetricKey } from '@/types/metrics';
 import {
   CHART_COLORS,
@@ -374,6 +375,9 @@ const ActivityFeedCard = memo(function ActivityFeedCard({
         ) : null}
 
         <Stack direction="row" spacing={0} sx={{ flexWrap: 'wrap', gap: 0.75 }}>
+          {activity.primaryBenefit && (
+            <BenefitChip benefit={activity.primaryBenefit} />
+          )}
           {activity.distanceM != null && activity.distanceM > 0 && (
             <StatChip icon={<StraightenIcon sx={{ fontSize: '2rem' }} />} value={formatDistance(activity.distanceM)} color={sportColor} />
           )}
@@ -412,5 +416,25 @@ function StatChip({ icon, value, color }: { icon: React.ReactNode; value: string
       <Box sx={{ color, display: 'flex', alignItems: 'center' }}>{icon}</Box>
       <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '1rem', lineHeight: 1 }}>{value}</Typography>
     </Box>
+  );
+}
+
+function BenefitChip({ benefit }: { benefit: string }) {
+  const color = BENEFIT_COLORS[benefit] ?? '#58A6FF';
+  const label = BENEFIT_LABELS[benefit] ?? benefit;
+  return (
+    <Chip
+      label={label}
+      size="small"
+      sx={{
+        fontWeight: 700,
+        fontSize: '0.65rem',
+        height: 22,
+        bgcolor: `${color}20`,
+        color,
+        border: `1px solid ${color}40`,
+        '& .MuiChip-label': { px: 0.75 },
+      }}
+    />
   );
 }

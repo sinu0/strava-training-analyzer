@@ -68,6 +68,9 @@ public class ActivityDetailDto {
     // Computed metrics from activity_metrics table
     private Map<String, Object> metrics;
 
+    // Post-workout scoring
+    private ActivityTrainingEffectDto trainingEffect;
+
     private Instant createdAt;
     private Instant updatedAt;
 }

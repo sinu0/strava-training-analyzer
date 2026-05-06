@@ -15,13 +15,16 @@ import pl.strava.analizator.application.dto.ActivityHeatmapDto;
 import pl.strava.analizator.application.dto.ActivityDetailDto;
 import pl.strava.analizator.application.dto.ActivitySummaryDto;
 import pl.strava.analizator.application.dto.ActivitySummaryPageDto;
+import pl.strava.analizator.application.dto.ActivityTrainingEffectDto;
 import pl.strava.analizator.application.dto.HeatmapSegmentDto;
 import pl.strava.analizator.application.dto.LapDto;
 import pl.strava.analizator.domain.model.Activity;
+import pl.strava.analizator.domain.model.ActivityTrainingEffect;
 import pl.strava.analizator.domain.model.HeatmapSegment;
 import pl.strava.analizator.domain.model.MetricResult;
 import pl.strava.analizator.domain.port.ActivityMetricRepository;
 import pl.strava.analizator.domain.port.ActivityRepository;
+import pl.strava.analizator.domain.port.ActivityTrainingEffectRepository;
 import pl.strava.analizator.domain.port.HeatmapSegmentRepository;
 import pl.strava.analizator.domain.vo.ActivityFilter;
 import pl.strava.analizator.domain.vo.ActivityPage;
@@ -48,6 +51,7 @@ public class ActivityService {
     private final ActivityMetricRepository metricRepository;
     private final HeatmapSegmentRepository heatmapSegmentRepository;
     private final HeatmapBuildService heatmapBuildService;
+    private final ActivityTrainingEffectRepository trainingEffectRepository;
 
     public ActivitySummaryPageDto findAll(String sportType, OffsetDateTime from, OffsetDateTime to,
             BigDecimal minDistanceM, BigDecimal maxDistanceM,
@@ -160,6 +164,7 @@ public class ActivityService {
     }
 
     private ActivitySummaryDto toSummary(Activity a) {
+        ActivityTrainingEffect effect = trainingEffectRepository.findByActivityId(a.getId()).orElse(null);
         return ActivitySummaryDto.builder()
                 .id(a.getId())
                 .externalId(a.getExternalId())
@@ -175,10 +180,14 @@ public class ActivityService {
                 .calories(a.getCalories())
                 .summaryPolyline(a.getSummaryPolyline())
                 .photoUrls(a.getPhotoUrls())
+                .primaryBenefit(effect != null ? effect.getPrimaryBenefit() : null)
+                .trainingScore(effect != null ? effect.getTrainingScore() : null)
                 .build();
     }
 
     private ActivityDetailDto toDetail(Activity a, Map<String, Object> metrics) {
+        ActivityTrainingEffect effect = trainingEffectRepository.findByActivityId(a.getId()).orElse(null);
+        ActivityTrainingEffectDto effectDto = effect != null ? toTrainingEffectDto(effect) : null;
         return ActivityDetailDto.builder()
                 .id(a.getId())
                 .externalId(a.getExternalId())
@@ -215,6 +224,7 @@ public class ActivityService {
                 .velocityStream(a.getVelocityStream())
                 .laps(mapLaps(a))
                 .metrics(metrics)
+                .trainingEffect(effectDto)
                 .createdAt(a.getCreatedAt())
                 .updatedAt(a.getUpdatedAt())
                 .build();
@@ -244,6 +254,24 @@ public class ActivityService {
                 .intensityClass(lap.getIntensityClass())
                 .build()
         ).toList();
+    }
+
+    private ActivityTrainingEffectDto toTrainingEffectDto(ActivityTrainingEffect effect) {
+        return ActivityTrainingEffectDto.builder()
+                .id(effect.getId())
+                .activityId(effect.getActivityId())
+                .trainingScore(effect.getTrainingScore())
+                .aerobicTe(effect.getAerobicTe())
+                .anaerobicTe(effect.getAnaerobicTe())
+                .aerobicLabel(effect.getAerobicLabel())
+                .anaerobicLabel(effect.getAnaerobicLabel())
+                .primaryBenefit(effect.getPrimaryBenefit())
+                .secondaryBenefit(effect.getSecondaryBenefit())
+                .recoveryTimeHours(effect.getRecoveryTimeHours())
+                .calculatedAt(effect.getCalculatedAt())
+                .dataQuality(effect.getDataQuality())
+                .details(effect.getDetails())
+                .build();
     }
 
     /**

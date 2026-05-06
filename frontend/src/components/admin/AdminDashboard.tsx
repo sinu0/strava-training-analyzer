@@ -1,4 +1,5 @@
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import { Box, Grid, Stack, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -32,6 +33,10 @@ export interface AdminDashboardProps {
   runAiBatchData: AiBatchResult | undefined;
   runAiBatchError: Error | null;
   onRunAiBatch: (skipToday: boolean) => void;
+  recalculateAllTePending: boolean;
+  recalculateAllTeData: { total: number; success: number; failed: number } | undefined;
+  recalculateAllTeError: Error | null;
+  onRecalculateAllTe: () => void;
 }
 
 export default function AdminDashboard({
@@ -40,9 +45,17 @@ export default function AdminDashboard({
   runAiBatchData,
   runAiBatchError,
   onRunAiBatch,
+  recalculateAllTePending,
+  recalculateAllTeData,
+  recalculateAllTeError,
+  onRecalculateAllTe,
 }: AdminDashboardProps) {
   const runAiBatchErrorMessage = runAiBatchError
     ? getApiErrorMessage(runAiBatchError, runAiBatchError.message)
+    : null;
+
+  const teErrorMessage = recalculateAllTeError
+    ? getApiErrorMessage(recalculateAllTeError, recalculateAllTeError.message)
     : null;
 
   return (
@@ -154,6 +167,84 @@ export default function AdminDashboard({
           </Box>
         </DataCard>
       </Grid>
+
+      <Grid item xs={12} md={6}>
+        <DataCard title="Training Effects">
+            <Box sx={{ py: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                <StarOutlineIcon sx={{ color: STATUS_COLORS.warning, fontSize: 28 }} />
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Przelicz scoring (Training Score, Aerobic/Anaerobic TE, Recovery Time) dla wszystkich aktywności
+                  </Typography>
+                </Box>
+              </Box>
+
+              {!!recalculateAllTeData && (
+                <Box
+                  sx={{
+                    p: 1.5,
+                    borderRadius: 1.5,
+                    mb: 2,
+                    bgcolor: recalculateAllTeData.failed > 0
+                      ? alphaColor(STATUS_COLORS.error, 0.08)
+                      : alphaColor(STATUS_COLORS.success, 0.08),
+                    border: `1px solid ${
+                      recalculateAllTeData.failed > 0
+                        ? alphaColor(STATUS_COLORS.error, 0.3)
+                        : alphaColor(STATUS_COLORS.success, 0.3)
+                    }`,
+                  }}
+                >
+                  <Stack spacing={0.5}>
+                    <Typography variant="caption" sx={{ fontWeight: 700, display: 'block' }}>
+                      Zakończono przeliczanie
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Typography variant="caption" sx={{ color: STATUS_COLORS.success }}>
+                        ✓ {recalculateAllTeData.success} sukces
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Łącznie: {recalculateAllTeData.total}
+                      </Typography>
+                      {recalculateAllTeData.failed > 0 && (
+                        <Typography variant="caption" sx={{ color: STATUS_COLORS.error }}>
+                          ✗ {recalculateAllTeData.failed} błędów
+                        </Typography>
+                      )}
+                    </Box>
+                  </Stack>
+                </Box>
+              )}
+
+              {!!teErrorMessage && (
+                <Typography variant="caption" sx={{ color: STATUS_COLORS.error, mb: 1.5, display: 'block' }}>
+                  Błąd: {teErrorMessage}
+                </Typography>
+              )}
+
+              <Button
+                variant="contained"
+                startIcon={recalculateAllTePending ? <CircularProgress size={16} color="inherit" /> : <StarOutlineIcon />}
+                onClick={onRecalculateAllTe}
+                disabled={recalculateAllTePending}
+                fullWidth
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  bgcolor: STATUS_COLORS.warning,
+                  '&:hover': { bgcolor: '#B87A1A' },
+                  '&.Mui-disabled': {
+                    bgcolor: alphaColor(COMMON_COLORS.white, 0.08),
+                    color: alphaColor(COMMON_COLORS.white, 0.3),
+                  },
+                }}
+              >
+                {recalculateAllTePending ? 'Przeliczanie...' : 'Przelicz wszystkie Training Effects'}
+              </Button>
+            </Box>
+          </DataCard>
+        </Grid>
 
       <Grid item xs={12}>
         <DataCard title="Informacje">

@@ -8,6 +8,7 @@ import {
   STALE_STATIC,
 } from '@/constants/queryConfig';
 import {
+  invalidateActivityQueries,
   invalidateAfterPhotoSync,
   invalidateAfterTrainingSync,
 } from '@/hooks/queryInvalidation';
@@ -517,7 +518,7 @@ export function useProfile() {
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (params: { ftpWatts?: number | null; weightKg?: number | null }) => {
+    mutationFn: async (params: { ftpWatts?: number | null; weightKg?: number | null; lthrBpm?: number | null; maxHrBpm?: number | null }) => {
       const { data } = await apiClient.put<AthleteProfile>('/profile', params);
       return data;
     },
@@ -587,6 +588,20 @@ export function useRebuildFtpHistory() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ftpProgress'] });
       queryClient.invalidateQueries({ queryKey: ['trends'] });
+    },
+  });
+}
+
+export function useRecalculateAllTrainingEffects() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await apiClient.post<{ status: string; total: number; success: number; failed: number }>(
+        '/admin/recalculate-all-training-effects');
+      return data;
+    },
+    onSuccess: () => {
+      invalidateActivityQueries(queryClient);
     },
   });
 }

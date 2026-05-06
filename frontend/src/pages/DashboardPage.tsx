@@ -44,6 +44,7 @@ import {
   useWeatherLocations,
 } from '@/hooks/useAnalytics';
 import { useDailyDecision } from '@/hooks/useDailyDecision';
+import { BENEFIT_COLORS, BENEFIT_LABELS } from '@/types/trainingEffect';
 import { PMC_COLORS, STATUS_COLORS, alphaColor } from '@/utils/colors';
 import { formatDistance, formatDuration } from '@/utils/formatters';
 
@@ -300,7 +301,7 @@ export default function DashboardPage() {
                       <Typography variant="h5" sx={{ fontWeight: 900, lineHeight: 1.08, mt: 0.35 }}>
                         {latestActivity.name}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+                       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
                         {new Date(latestActivity.startedAt).toLocaleDateString('pl-PL', {
                           weekday: 'long',
                           day: 'numeric',
@@ -308,6 +309,30 @@ export default function DashboardPage() {
                         })}{' '}
                         · {latestActivity.sportType}
                       </Typography>
+                      {latestActivity.primaryBenefit || latestActivity.trainingScore != null ? (
+                        <Stack direction="row" spacing={0.75} sx={{ mt: 0.75 }}>
+                          {latestActivity.trainingScore != null && (
+                            <Chip
+                              label={latestActivity.trainingScore}
+                              size="small"
+                              sx={{ fontWeight: 800, fontSize: '0.75rem' }}
+                            />
+                          )}
+                          {latestActivity.primaryBenefit && (
+                            <Chip
+                              label={BENEFIT_LABELS[latestActivity.primaryBenefit] ?? latestActivity.primaryBenefit}
+                              size="small"
+                              sx={{
+                                fontWeight: 700,
+                                fontSize: '0.7rem',
+                                bgcolor: `${BENEFIT_COLORS[latestActivity.primaryBenefit] ?? '#58A6FF'}22`,
+                                color: BENEFIT_COLORS[latestActivity.primaryBenefit] ?? '#58A6FF',
+                                border: `1px solid ${BENEFIT_COLORS[latestActivity.primaryBenefit] ?? '#58A6FF'}44`,
+                              }}
+                            />
+                          )}
+                        </Stack>
+                      ) : null}
                     </Box>
                     <Button
                       variant="contained"

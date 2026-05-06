@@ -28,7 +28,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import pl.strava.analizator.application.DailyMetricsService;
 import pl.strava.analizator.application.HeatmapBuildService;
 import pl.strava.analizator.application.StravaConfigPort;
+import pl.strava.analizator.application.WorkoutEvaluationService;
 import pl.strava.analizator.application.dto.StravaConfigDto;
+import pl.strava.analizator.domain.port.ActivityRepository;
+import pl.strava.analizator.domain.port.ActivityTrainingEffectRepository;
+import pl.strava.analizator.domain.port.AthleteProfileRepository;
+import pl.strava.analizator.domain.port.DailySummaryRepository;
 import pl.strava.analizator.infrastructure.weather.WeatherCacheScheduler;
 
 @WebMvcTest(AdminController.class)
@@ -50,6 +55,21 @@ class AdminControllerTest {
 
     @MockitoBean
     private DailyMetricsService dailyMetricsService;
+
+    @MockitoBean
+    private ActivityRepository activityRepository;
+
+    @MockitoBean
+    private ActivityTrainingEffectRepository trainingEffectRepository;
+
+    @MockitoBean
+    private WorkoutEvaluationService workoutEvaluationService;
+
+    @MockitoBean
+    private AthleteProfileRepository profileRepository;
+
+    @MockitoBean
+    private DailySummaryRepository dailySummaryRepository;
 
     @TestConfiguration
     static class TestSecurityConfig {

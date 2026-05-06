@@ -17,6 +17,7 @@ import pl.strava.analizator.application.dto.ActivityHeatmapDto;
 import pl.strava.analizator.domain.model.HeatmapSegment;
 import pl.strava.analizator.domain.port.ActivityMetricRepository;
 import pl.strava.analizator.domain.port.ActivityRepository;
+import pl.strava.analizator.domain.port.ActivityTrainingEffectRepository;
 import pl.strava.analizator.domain.port.HeatmapSegmentRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,11 +35,14 @@ class ActivityServiceHeatmapTest {
     @Mock
     private HeatmapBuildService heatmapBuildService;
 
+    @Mock
+    private ActivityTrainingEffectRepository trainingEffectRepository;
+
     private ActivityService activityService;
 
     @BeforeEach
     void setUp() {
-        activityService = new ActivityService(activityRepository, metricRepository, heatmapSegmentRepository, heatmapBuildService);
+        activityService = new ActivityService(activityRepository, metricRepository, heatmapSegmentRepository, heatmapBuildService, trainingEffectRepository);
     }
 
     @Test

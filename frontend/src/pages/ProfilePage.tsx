@@ -1,7 +1,9 @@
 import BarChartIcon from '@mui/icons-material/BarChart';
 import BoltIcon from '@mui/icons-material/Bolt';
 import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import {
@@ -89,6 +91,10 @@ export default function ProfilePage() {
   const [storyOpen, setStoryOpen] = useState(false);
   const [ftpDialogOpen, setFtpDialogOpen] = useState(false);
   const [ftpInput, setFtpInput] = useState('');
+  const [lthrDialogOpen, setLthrDialogOpen] = useState(false);
+  const [lthrInput, setLthrInput] = useState('');
+  const [hrMaxDialogOpen, setHrMaxDialogOpen] = useState(false);
+  const [hrMaxInput, setHrMaxInput] = useState('');
   const updateProfile = useUpdateProfile();
 
   // Training streak: consecutive weeks with at least one activity
@@ -250,6 +256,31 @@ export default function ProfilePage() {
               label="Waga"
               value={profile?.weightKg ? `${profile.weightKg} kg` : '—'}
             />
+            <Divider orientation="vertical" flexItem sx={{ borderColor: alphaColor(CHART_COLORS.tooltipText, 0.08) }} />
+            <Box sx={{ cursor: 'pointer' }} onClick={() => {
+              setLthrInput(String(profile?.lthrBpm ?? ''));
+              setLthrDialogOpen(true);
+            }}>
+              <StatPill
+                icon={<MonitorHeartIcon fontSize="small" />}
+                label="LTHR"
+                tooltip="Lactate Threshold HR — próg mleczanowy. Kliknij, aby edytować"
+                value={profile?.lthrBpm != null ? `${profile.lthrBpm} bpm` : '—'}
+              />
+            </Box>
+            <Divider orientation="vertical" flexItem sx={{ borderColor: alphaColor(CHART_COLORS.tooltipText, 0.08) }} />
+            <Box sx={{ cursor: 'pointer' }} onClick={() => {
+              setHrMaxInput(String(profile?.maxHrBpm ?? ''));
+              setHrMaxDialogOpen(true);
+            }}>
+              <StatPill
+                icon={<FavoriteIcon fontSize="small" />}
+                label="HRmax"
+                tooltip="Maksymalne tętno. Kliknij, aby edytować"
+                value={profile?.maxHrBpm != null ? `${profile.maxHrBpm} bpm` : '—'}
+                color={STATUS_COLORS.error}
+              />
+            </Box>
             {!!readiness && <>
               <Divider orientation="vertical" flexItem sx={{ borderColor: alphaColor(CHART_COLORS.tooltipText, 0.08) }} />
               <StatPill
@@ -346,6 +377,76 @@ export default function ProfilePage() {
                 updateProfile.mutate(
                   { ftpWatts: val },
                   { onSuccess: () => setFtpDialogOpen(false) },
+                );
+              }
+            }}
+          >
+            {updateProfile.isPending ? <CircularProgress size={18} /> : 'Zapisz'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={lthrDialogOpen} onClose={() => setLthrDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Edytuj LTHR</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            label="LTHR (bpm)"
+            type="number"
+            fullWidth
+            value={lthrInput}
+            onChange={(e) => setLthrInput(e.target.value)}
+            slotProps={{ htmlInput: { min: 80, max: 220 } }}
+            helperText="Próg mleczanowy — tętno przy FTP. Kluczowe dla klasyfikacji stref."
+            sx={{ mt: 1 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setLthrDialogOpen(false)}>Anuluj</Button>
+          <Button
+            variant="contained"
+            disabled={updateProfile.isPending}
+            onClick={() => {
+              const val = parseInt(lthrInput, 10);
+              if (val > 0) {
+                updateProfile.mutate(
+                  { lthrBpm: val },
+                  { onSuccess: () => setLthrDialogOpen(false) },
+                );
+              }
+            }}
+          >
+            {updateProfile.isPending ? <CircularProgress size={18} /> : 'Zapisz'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={hrMaxDialogOpen} onClose={() => setHrMaxDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Edytuj HRmax</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            label="HRmax (bpm)"
+            type="number"
+            fullWidth
+            value={hrMaxInput}
+            onChange={(e) => setHrMaxInput(e.target.value)}
+            slotProps={{ htmlInput: { min: 100, max: 230 } }}
+            helperText="Maksymalne tętno. Używane gdy LTHR nie jest ustawiony."
+            sx={{ mt: 1 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setHrMaxDialogOpen(false)}>Anuluj</Button>
+          <Button
+            variant="contained"
+            disabled={updateProfile.isPending}
+            onClick={() => {
+              const val = parseInt(hrMaxInput, 10);
+              if (val > 0) {
+                updateProfile.mutate(
+                  { maxHrBpm: val },
+                  { onSuccess: () => setHrMaxDialogOpen(false) },
                 );
               }
             }}
