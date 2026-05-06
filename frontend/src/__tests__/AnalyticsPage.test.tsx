@@ -47,6 +47,8 @@ vi.mock('../hooks/useAnalytics', () => ({
   useComparePeriods: () => ({ data: undefined, isLoading: false }),
   useWeeklyOptimalLoad: () => ({ data: [], isLoading: false }),
   useDailyOptimalLoad: () => ({ data: [], isLoading: false }),
+  useFatigueState: () => ({ data: undefined, isLoading: false }),
+  useLoadFocus: () => ({ data: undefined, isLoading: false }),
 }));
 
 function renderWithProviders(ui: React.ReactElement) {

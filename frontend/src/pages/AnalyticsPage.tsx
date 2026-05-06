@@ -1,4 +1,5 @@
 import BarChartIcon from '@mui/icons-material/BarChart';
+import BatteryAlertIcon from '@mui/icons-material/BatteryAlert';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
@@ -12,6 +13,7 @@ import {
   FormControl,
   Grid,
   InputLabel,
+  LinearProgress,
   MenuItem,
   Select,
   Stack,
@@ -36,16 +38,19 @@ import OptimalLoadChart from '@/components/OptimalLoadChart';
 import PMChart from '@/components/PMChart';
 import PowerCurveChart, { type PowerCurveComparisonSeries } from '@/components/PowerCurveChart';
 import SeasonComparison from '@/components/SeasonComparison';
+import TrainingLoadFocus from '@/components/TrainingLoadFocus';
 import ZoneDistributionChart from '@/components/ZoneDistributionChart';
 import {
   useDailyOptimalLoad,
+  useFatigueState,
+  useLoadFocus,
   usePmc,
   usePowerCurve,
   useTrends,
   useWeeklyOptimalLoad,
   useZoneDistribution,
 } from '@/hooks/useAnalytics';
-import { CHART_COLORS } from '@/utils/colors';
+import { CHART_COLORS, STATUS_COLORS } from '@/utils/colors';
 import { getPageHeroIllustrationPath } from '@/utils/illustrationAssets';
 
 function defaultRange(): { from: string; to: string } {
@@ -161,6 +166,8 @@ export default function AnalyticsPage() {
   const { data: dailyOptimalLoad } = useDailyOptimalLoad(pastDays, 21);
   const { data: ftpTrend } = useTrends('ftp', range);
   const { data: efTrend } = useTrends('efficiency_factor', range);
+  const { data: fatigueState } = useFatigueState();
+  const { data: loadFocus, isLoading: loadFocusLoading } = useLoadFocus(4);
 
   const powerCurveComparisonSeries = useMemo<PowerCurveComparisonSeries[]>(
     () =>
@@ -183,6 +190,7 @@ export default function AnalyticsPage() {
     { label: 'Krzywa mocy', value: 1, icon: <ShowChartIcon fontSize="small" /> },
     { label: 'Obciążenie', value: 2, icon: <BarChartIcon fontSize="small" /> },
     { label: 'Trendy', value: 3, icon: <TuneIcon fontSize="small" /> },
+    { label: 'Zmęczenie', value: 4, icon: <BatteryAlertIcon fontSize="small" /> },
   ];
 
   const filtersContent = (
@@ -343,6 +351,54 @@ export default function AnalyticsPage() {
               <Section title="Porównanie sezonów" subtitle="Zestawienie dwóch okresów" accentColor={CHART_COLORS.tertiary}>
                 <SeasonComparison />
               </Section>
+            </Stack>
+          )}
+
+          {tab === 4 && (
+            <Stack spacing={2.5}>
+              <Section title="Stan zmęczenia" subtitle="Aktualny poziom zmęczenia w rozbiciu na składowe" accentColor={STATUS_COLORS.warning}>
+                {fatigueState ? (
+                  <Box sx={{ p: 1 }}>
+                    <Stack spacing={1.5}>
+                      <Stack direction="row" spacing={3} alignItems="center">
+                        <Box>
+                          <Typography variant="h3" sx={{ fontWeight: 900, color: STATUS_COLORS.warning }}>
+                            {fatigueState.score}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">{fatigueState.level}</Typography>
+                        </Box>
+                        <Stack spacing={0.75} sx={{ flex: 1 }}>
+                          {[
+                            { label: 'ATL', value: fatigueState.atlFatigue, color: STATUS_COLORS.warning },
+                            { label: 'Metaboliczne', value: fatigueState.metabolicFatigue, color: STATUS_COLORS.info },
+                            { label: 'Obciążenie (TSB)', value: fatigueState.loadFatigue, color: STATUS_COLORS.error },
+                            { label: 'Dług regeneracyjny', value: fatigueState.recoveryDebt, color: STATUS_COLORS.accent },
+                          ].map((c) => (
+                            <Stack key={c.label} direction="row" spacing={1} alignItems="center">
+                              <Typography variant="caption" sx={{ minWidth: 120, fontSize: '0.65rem' }}>{c.label}</Typography>
+                              <Box sx={{ flex: 1 }}>
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={(c.value / 25) * 100}
+                                  sx={{ height: 6, borderRadius: 3, bgcolor: 'rgba(255,255,255,0.06)', '& .MuiLinearProgress-bar': { bgcolor: c.color, borderRadius: 3 } }}
+                                />
+                              </Box>
+                              <Typography variant="caption" sx={{ fontWeight: 700, minWidth: 20, textAlign: 'right' }}>{c.value}</Typography>
+                            </Stack>
+                          ))}
+                        </Stack>
+                      </Stack>
+                      <Stack direction="row" spacing={2}>
+                        <Typography variant="caption" color="text.secondary">Monotonia: {fatigueState.monotony.toFixed(1)}</Typography>
+                        <Typography variant="caption" color="text.secondary">Strain: {Math.round(fatigueState.strain)}</Typography>
+                        <Typography variant="caption" color="text.secondary">Energia: {fatigueState.energyBudget}</Typography>
+                        <Typography variant="caption" color="text.secondary">Max TSS: {fatigueState.maxTssToday}</Typography>
+                      </Stack>
+                    </Stack>
+                  </Box>
+                ) : null}
+              </Section>
+              <TrainingLoadFocus data={loadFocus} isLoading={loadFocusLoading} />
             </Stack>
           )}
         </SwipeableContent>

@@ -45,6 +45,7 @@ import type {
   DateRange,
   QueryToggleOptions,
 } from '@/types/query';
+import type { FatigueState, LoadFocus } from '@/types/fatigue';
 
 export function usePmc(range: DateRange) {
   return useQuery<PmcData[]>({
@@ -603,5 +604,31 @@ export function useRecalculateAllTrainingEffects() {
     onSuccess: () => {
       invalidateActivityQueries(queryClient);
     },
+  });
+}
+
+// ─── Fatigue & Energy hooks ───
+
+export function useFatigueState() {
+  return useQuery<FatigueState>({
+    queryKey: ['fatigueState'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<FatigueState>('/fatigue-energy/state');
+      return data;
+    },
+    staleTime: STALE_REALTIME,
+  });
+}
+
+export function useLoadFocus(weeks: number = 4) {
+  return useQuery<LoadFocus>({
+    queryKey: ['loadFocus', weeks],
+    queryFn: async () => {
+      const { data } = await apiClient.get<LoadFocus>('/fatigue-energy/load-focus', {
+        params: { weeks },
+      });
+      return data;
+    },
+    staleTime: STALE_SLOW,
   });
 }

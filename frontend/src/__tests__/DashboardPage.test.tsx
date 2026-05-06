@@ -16,6 +16,8 @@ beforeAll(() => {
 });
 
 vi.mock('../hooks/useAnalytics', () => ({
+  useFatigueState: () => ({ data: undefined, isLoading: false }),
+  useLoadFocus: () => ({ data: undefined, isLoading: false }),
   useWeeklySummaries: () => ({
     data: [
       {
@@ -237,6 +239,25 @@ vi.mock('../hooks/useAi', () => ({
       },
     },
   }),
+  useFatigueState: () => ({
+    data: {
+      score: 45,
+      level: 'Zmęczony',
+      atlFatigue: 15,
+      metabolicFatigue: 12,
+      loadFatigue: 10,
+      recoveryDebt: 8,
+      monotony: 1.4,
+      strain: 250,
+      weeklyRampRate: 5.2,
+      trend: 'rosnące',
+      calculatedAt: '2026-05-06T10:00:00Z',
+      energyBudget: 68,
+      maxTssToday: 80,
+    },
+    isLoading: false,
+  }),
+  useLoadFocus: () => ({ data: undefined, isLoading: false }),
   useAiPredict: () => ({ mutate: vi.fn(), isPending: false }),
   useAiNote: () => ({ data: null, isLoading: false }),
   useGenerateAiNote: () => ({ mutate: vi.fn(), isPending: false }),

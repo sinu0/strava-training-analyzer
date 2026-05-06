@@ -24,6 +24,8 @@ import DailyCheckInWidget from '@/components/home/DailyCheckInWidget';
 import PageContainer from '@/components/common/PageContainer';
 import TrainingLoadMiniChart from '@/components/TrainingLoadMiniChart';
 import BlockMiniWidget from '@/components/home/BlockMiniWidget';
+import EnergyBudgetWidget from '@/components/home/EnergyBudgetWidget';
+import FatigueWidget from '@/components/home/FatigueWidget';
 import ProgressMiniWidget from '@/components/home/ProgressMiniWidget';
 import ReadinessMiniWidget from '@/components/home/ReadinessMiniWidget';
 import WeatherMiniWidget from '@/components/home/WeatherMiniWidget';
@@ -34,6 +36,7 @@ import {
 } from '@/hooks/useAi';
 import {
   useBlockHealth,
+  useFatigueState,
   useFtpProgress,
   usePmc,
   useProgressionLevels,
@@ -81,6 +84,7 @@ export default function DashboardPage() {
   const progressionLevelsQuery = useProgressionLevels();
   const { data: progressionLevels } = progressionLevelsQuery;
   const { data: blockHealth } = useBlockHealth();
+  const { data: fatigueState, isLoading: fatigueLoading } = useFatigueState();
   const { data: todayAiTips, isLoading: isTodayAiTipsLoading } = useTodayAiTips();
   const { data: aiStatus } = useAiStatus();
   const saveCheckIn = useSaveReadinessCheckIn();
@@ -134,6 +138,8 @@ export default function DashboardPage() {
               onOpen={() => navigate('/health')}
               artTestId="dashboard-widget-art-readiness"
             />
+            <FatigueWidget data={fatigueState} isLoading={fatigueLoading} />
+            <EnergyBudgetWidget data={fatigueState} isLoading={fatigueLoading} />
             <ProgressMiniWidget
               progression={topProgression}
               subtitle="Śledzenie progresji"
