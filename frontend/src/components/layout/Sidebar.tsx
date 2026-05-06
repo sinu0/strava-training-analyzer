@@ -4,6 +4,7 @@ import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import MapIcon from '@mui/icons-material/Map';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
+import PsychologyIcon from '@mui/icons-material/Psychology';
 import ScaleIcon from '@mui/icons-material/Scale';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
@@ -66,6 +67,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Trasy', path: '/route-planner', icon: <MapIcon /> },
       { label: 'Priorytety', path: '/priorities', icon: <WhatshotIcon /> },
       { label: 'Prognoza formy', path: '/performance', icon: <SpeedIcon /> },
+      { label: 'Adaptive Coach', path: '/adaptive-coach', icon: <PsychologyIcon /> },
       { label: 'Predykcje AI', path: '/ai-predictions', icon: <SmartToyIcon /> },
     ],
   },
