@@ -24,3 +24,15 @@ export interface LoadFocus {
   zoneSeconds: Record<string, number>;
   totalSeconds: number;
 }
+
+export interface SessionSuggestion {
+  type: string;
+  label: string;
+  durationMin: number;
+  estimatedTss: number;
+  estimatedIf: number;
+  structure: string;
+  rationale: string;
+  roiScore: number;
+  impact: string;
+}

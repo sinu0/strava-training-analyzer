@@ -10,10 +10,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import pl.strava.analizator.application.FatigueAndEnergyService;
+import pl.strava.analizator.application.SessionOptimizerService;
 import pl.strava.analizator.application.dto.FatigueStateDto;
 import pl.strava.analizator.application.dto.LoadFocusDto;
+import pl.strava.analizator.application.dto.SessionSuggestionDto;
 import pl.strava.analizator.domain.model.AthleteFatigueState;
 import pl.strava.analizator.domain.model.LoadFocus;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/fatigue-energy")
@@ -21,6 +25,7 @@ import pl.strava.analizator.domain.model.LoadFocus;
 public class FatigueAndEnergyController {
 
     private final FatigueAndEnergyService service;
+    private final SessionOptimizerService sessionOptimizer;
 
     @GetMapping("/state")
     public ResponseEntity<FatigueStateDto> getState() {
@@ -59,5 +64,20 @@ public class FatigueAndEnergyController {
                 .zoneSeconds(focus.getZoneSeconds())
                 .totalSeconds(focus.getTotalSeconds())
                 .build());
+    }
+
+    @GetMapping("/suggest")
+    public ResponseEntity<List<SessionSuggestionDto>> suggestSessions(@RequestParam(defaultValue = "60") int minutes) {
+        return ResponseEntity.ok(sessionOptimizer.suggest(minutes).stream().map(s -> SessionSuggestionDto.builder()
+                .type(s.getType())
+                .label(s.getLabel())
+                .durationMin(s.getDurationMin())
+                .estimatedTss(s.getEstimatedTss())
+                .estimatedIf(s.getEstimatedIf())
+                .structure(s.getStructure())
+                .rationale(s.getRationale())
+                .roiScore(s.getRoiScore())
+                .impact(s.getImpact())
+                .build()).toList());
     }
 }

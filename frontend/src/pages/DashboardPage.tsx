@@ -29,6 +29,7 @@ import EventCountdownWidget from '@/components/home/EventCountdownWidget';
 import FatigueWidget from '@/components/home/FatigueWidget';
 import ProgressMiniWidget from '@/components/home/ProgressMiniWidget';
 import ReadinessMiniWidget from '@/components/home/ReadinessMiniWidget';
+import SessionOptimizerWidget from '@/components/home/SessionOptimizerWidget';
 import WeatherMiniWidget from '@/components/home/WeatherMiniWidget';
 import {
   useLatestAiPrediction,
@@ -206,6 +207,17 @@ export default function DashboardPage() {
               isLoading={isDecisionLoading}
               onStartWorkout={() => navigate('/training')}
             />
+
+            {/* SESSION OPTIMIZER */}
+            <Box
+              sx={{
+                ...surfaceSx,
+                p: { xs: 1, md: 1.5 },
+                background: `linear-gradient(180deg, ${alphaColor(STATUS_COLORS.warning, 0.04)}, transparent)`,
+              }}
+            >
+              <SessionOptimizerWidget />
+            </Box>
 
             {/* CHECK-IN — subiektywny sygnał, który wpływa na decyzję */}
             <Box
