@@ -9,6 +9,7 @@ export interface FatigueState {
   strain: number;
   weeklyRampRate: number;
   trend: string;
+  recoveryEfficiency: number;
   calculatedAt: string;
   energyBudget: number;
   maxTssToday: number;

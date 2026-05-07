@@ -80,7 +80,9 @@ export default function FatigueWidget({ data, isLoading }: FatigueWidgetProps) {
         </Stack>
 
         <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.6rem' }}>
-          {data.level} · trend {data.trend}{data.weeklyRampRate !== 0 ? ` · rampa ${data.weeklyRampRate > 0 ? '+' : ''}${data.weeklyRampRate}%/tydz` : ''}
+          {data.level} · trend {data.trend}
+          {data.weeklyRampRate !== 0 ? ` · rampa ${data.weeklyRampRate > 0 ? '+' : ''}${data.weeklyRampRate}%/tydz` : ''}
+          {data.recoveryEfficiency > 0 ? ` · regeneracja ${data.recoveryEfficiency} pkt/h` : ''}
         </Typography>
       </Stack>
     </Paper>

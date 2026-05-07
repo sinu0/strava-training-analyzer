@@ -51,6 +51,9 @@ public class FatigueAndEnergyService {
         double weeklyRampRate = computeWeeklyRampRate(pmc);
         String trend = computeTrend(pmc);
 
+        Double recoveryEfficiency = computeRecoveryEfficiency(date);
+        double recoveryEff = recoveryEfficiency != null ? recoveryEfficiency : 0;
+
         String level = rawScore <= 20 ? "Świeży" :
                 rawScore <= 40 ? "Lekko zmęczony" :
                         rawScore <= 60 ? "Zmęczony" :
@@ -67,6 +70,7 @@ public class FatigueAndEnergyService {
                 .strain(strain)
                 .weeklyRampRate(weeklyRampRate)
                 .trend(trend)
+                .recoveryEfficiency(recoveryEff)
                 .calculatedAt(Instant.now())
                 .build();
     }
@@ -166,6 +170,34 @@ public class FatigueAndEnergyService {
         for (int i = Math.max(0, n - 14); i < n - 7; i++) prevWeek += pmc.get(i).getCtl().doubleValue();
         if (prevWeek <= 0) return 0;
         return Math.round(((recentWeek - prevWeek) / prevWeek) * 1000.0) / 10.0;
+    }
+
+    private Double computeRecoveryEfficiency(LocalDate date) {
+        if (date == null) return null;
+        LocalDate yesterday = date.minusDays(1);
+        List<PmcDataDto> recentPmc = analyticsService.getPmc(yesterday.minusDays(1), date);
+        if (recentPmc.size() < 2) return null;
+
+        double atlToday = recentPmc.get(recentPmc.size() - 1).getAtl().doubleValue();
+        double atlYesterday = recentPmc.get(recentPmc.size() - 2).getAtl().doubleValue();
+        double ctlToday = recentPmc.get(recentPmc.size() - 1).getCtl().doubleValue();
+        double ctlYesterday = recentPmc.get(recentPmc.size() - 2).getCtl().doubleValue();
+
+        double fatigueToday = roughFatigue(atlToday, ctlToday);
+        double fatigueYesterday = roughFatigue(atlYesterday, ctlYesterday);
+        double dropped = fatigueYesterday - fatigueToday;
+
+        if (dropped <= 0) return null;
+
+        double sleepHours = readMetric(date, "sleep_duration_hours");
+        if (sleepHours <= 0) sleepHours = 7.0;
+
+        return Math.round(dropped / sleepHours * 10.0) / 10.0;
+    }
+
+    private double roughFatigue(double atl, double ctl) {
+        double ratio = ctl > 0 ? atl / ctl : 0;
+        return Math.max(0, Math.min(100, ratio * 50));
     }
 
     private String computeTrend(List<PmcDataDto> pmc) {

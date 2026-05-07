@@ -26,6 +26,7 @@ public class FatigueStateDto {
     private double strain;
     private double weeklyRampRate;
     private String trend;
+    private double recoveryEfficiency;
     private Instant calculatedAt;
     private int energyBudget;
     private int maxTssToday;

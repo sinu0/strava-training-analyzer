@@ -45,6 +45,7 @@ public class FatigueAndEnergyController {
                 .strain(fatigue.getStrain())
                 .weeklyRampRate(fatigue.getWeeklyRampRate())
                 .trend(fatigue.getTrend())
+                .recoveryEfficiency(fatigue.getRecoveryEfficiency())
                 .calculatedAt(fatigue.getCalculatedAt())
                 .energyBudget(energyBudget)
                 .maxTssToday(maxTss)
