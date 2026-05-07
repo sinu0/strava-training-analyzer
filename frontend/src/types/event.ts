@@ -22,3 +22,14 @@ export const EVENT_PRIORITY_LABELS: Record<string, string> = {
   B: 'B — ważny',
   C: 'C — uzupełniający',
 };
+
+export interface EventProjection {
+  eventName: string;
+  daysToEvent: number;
+  currentCtl: number;
+  projectedCtl: number;
+  currentTsb: number;
+  fatigueScore: number;
+  suggestedTaper: string;
+  taperStartDays: number;
+}

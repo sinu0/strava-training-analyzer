@@ -7,16 +7,16 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import type { TrainingEvent } from '@/types/event';
+import type { EventProjection } from '@/types/event';
 import { EVENT_PRIORITY_LABELS, EVENT_TYPE_LABELS } from '@/types/event';
 import { STATUS_COLORS } from '@/utils/colors';
 
 interface EventCountdownProps {
   events: TrainingEvent[] | undefined;
-  isLoading: boolean;
   onCreate: (e: { name: string; eventDate: string; type: string; priority: string }) => void;
   onDelete: (id: string) => void;
   ctlValue: number | null;
-  isLoadingCtl: boolean;
+  projection: EventProjection | null | undefined;
 }
 
 function CountdownBadge({ event, ctl }: { event: TrainingEvent; ctl: number | null }) {
@@ -64,7 +64,7 @@ function CountdownBadge({ event, ctl }: { event: TrainingEvent; ctl: number | nu
 }
 
 export default function EventCountdownWidget({
-  events, onCreate, onDelete, ctlValue,
+  events, onCreate, onDelete, ctlValue, projection,
 }: EventCountdownProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState('');
@@ -121,6 +121,25 @@ export default function EventCountdownWidget({
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.6rem' }}>
             Brak zaplanowanych wydarzeń. Kliknij + aby dodać.
           </Typography>
+        )}
+
+        {projection && projection.daysToEvent > 0 && (
+          <Box sx={{ mt: 1.5, pt: 1, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, fontSize: '0.55rem', display: 'block', mb: 0.5 }}>
+              PROJEKCJA
+            </Typography>
+            <Stack spacing={0.3}>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="caption" sx={{ fontSize: '0.55rem', color: 'text.secondary' }}>CTL dziś → event</Typography>
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', fontWeight: 700 }}>
+                  {projection.currentCtl.toFixed(0)} → {projection.projectedCtl.toFixed(0)}
+                </Typography>
+              </Stack>
+              <Typography variant="caption" sx={{ fontSize: '0.55rem', color: STATUS_COLORS.info }}>
+                {projection.suggestedTaper}
+              </Typography>
+            </Stack>
+          </Box>
         )}
       </Paper>
 

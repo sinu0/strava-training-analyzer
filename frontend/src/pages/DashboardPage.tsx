@@ -41,6 +41,7 @@ import {
   useBlockHealth,
   useCreateEvent,
   useDeleteEvent,
+  useEventProjection,
   useEvents,
   useFatigueState,
   useFtpProgress,
@@ -92,9 +93,10 @@ export default function DashboardPage() {
   const { data: progressionLevels } = progressionLevelsQuery;
   const { data: blockHealth } = useBlockHealth();
   const { data: fatigueState, isLoading: fatigueLoading } = useFatigueState();
-  const { data: events, isLoading: eventsLoading } = useEvents();
+  const { data: events } = useEvents();
   const createEvent = useCreateEvent();
   const deleteEvent = useDeleteEvent();
+  const { data: projection } = useEventProjection();
   const { data: trainingStatus, isLoading: statusLoading } = useTrainingStatus();
   const { data: todayAiTips, isLoading: isTodayAiTipsLoading } = useTodayAiTips();
   const { data: aiStatus } = useAiStatus();
@@ -153,11 +155,10 @@ export default function DashboardPage() {
             <EnergyBudgetWidget data={fatigueState} isLoading={fatigueLoading} />
             <EventCountdownWidget
               events={events}
-              isLoading={eventsLoading}
               onCreate={(e) => createEvent.mutate(e)}
               onDelete={(id) => deleteEvent.mutate(id)}
               ctlValue={latestPmc?.ctl ?? null}
-              isLoadingCtl={pmcQuery.isLoading}
+              projection={projection}
             />
             <ProgressMiniWidget
               progression={topProgression}

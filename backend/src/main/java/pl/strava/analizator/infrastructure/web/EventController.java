@@ -18,9 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import pl.strava.analizator.application.EventService;
+import pl.strava.analizator.application.TrainingStatusService;
 import pl.strava.analizator.application.dto.CreateEventRequest;
 import pl.strava.analizator.application.dto.EventDto;
+import pl.strava.analizator.application.dto.EventProjectionDto;
+import pl.strava.analizator.application.dto.TrainingStatusDto;
 import pl.strava.analizator.domain.model.Event;
+
+import java.time.temporal.ChronoUnit;
 
 @RestController
 @RequestMapping("/api/events")
@@ -28,6 +33,7 @@ import pl.strava.analizator.domain.model.Event;
 public class EventController {
 
     private final EventService eventService;
+    private final TrainingStatusService trainingStatusService;
 
     @GetMapping
     public ResponseEntity<List<EventDto>> getAll() {
@@ -67,6 +73,51 @@ public class EventController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         eventService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/active/projection")
+    public ResponseEntity<EventProjectionDto> getActiveProjection() {
+        var events = eventService.findActive();
+        if (events.isEmpty()) return ResponseEntity.noContent().build();
+
+        Event event = events.get(0);
+        TrainingStatusDto status = trainingStatusService.getTrainingStatus();
+        LocalDate today = LocalDate.now();
+        int daysToEvent = (int) ChronoUnit.DAYS.between(today, event.getEventDate());
+
+        double projectedCtl = 0;
+        String taperText = "";
+        int taperDays = 0;
+
+        if (daysToEvent > 0) {
+            double raw = status.getCurrentCtl() + status.getCtlTrend() * (daysToEvent / 7.0);
+            projectedCtl = Math.round(Math.min(raw, status.getCurrentCtl() * 1.5) * 10.0) / 10.0;
+
+            if (daysToEvent <= 14 && daysToEvent > 7) {
+                taperText = "Rozpocznij taper — redukcja TSS o 30%";
+                taperDays = daysToEvent;
+            } else if (daysToEvent <= 7) {
+                taperText = "Taper w toku — redukcja TSS o 50%";
+                taperDays = daysToEvent;
+            } else if (daysToEvent <= 21) {
+                taperText = "Ostatnie 2 tygodnie budowania przed taperem";
+                taperDays = daysToEvent - 14;
+            } else {
+                taperText = "Masz czas na budowanie formy";
+                taperDays = daysToEvent - 14;
+            }
+        }
+
+        return ResponseEntity.ok(EventProjectionDto.builder()
+                .eventName(event.getName())
+                .daysToEvent(daysToEvent)
+                .currentCtl(status.getCurrentCtl())
+                .projectedCtl(projectedCtl)
+                .currentTsb(status.getCurrentTsb())
+                .fatigueScore(status.getFatigue())
+                .suggestedTaper(taperText)
+                .taperStartDays(Math.max(0, taperDays))
+                .build());
     }
 
     private EventDto toDto(Event e) {

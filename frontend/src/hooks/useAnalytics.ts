@@ -47,6 +47,7 @@ import type {
 } from '@/types/query';
 import type { FatigueState, LoadFocus, TrainingStatus, WeeklyBrief } from '@/types/fatigue';
 import type { TrainingEvent } from '@/types/event';
+import type { EventProjection } from '@/types/event';
 
 export function usePmc(range: DateRange) {
   return useQuery<PmcData[]>({
@@ -697,5 +698,16 @@ export function useLoadFocus(weeks: number = 4) {
       return data;
     },
     staleTime: STALE_SLOW,
+  });
+}
+
+export function useEventProjection() {
+  return useQuery<EventProjection | null>({
+    queryKey: ['eventProjection'],
+    queryFn: async () => {
+      const { data, status } = await apiClient.get<EventProjection>('/events/active/projection');
+      return status === 204 ? null : data;
+    },
+    staleTime: STALE_REALTIME,
   });
 }

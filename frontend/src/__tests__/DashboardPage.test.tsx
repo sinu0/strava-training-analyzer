@@ -21,6 +21,7 @@ vi.mock('../hooks/useAnalytics', () => ({
   useEvents: () => ({ data: undefined, isLoading: false }),
   useCreateEvent: () => ({ mutate: vi.fn(), isPending: false }),
   useDeleteEvent: () => ({ mutate: vi.fn(), isPending: false }),
+  useEventProjection: () => ({ data: null, isLoading: false }),
   useTrainingStatus: () => ({ data: undefined, isLoading: false }),
   useWeeklySummaries: () => ({
     data: [
