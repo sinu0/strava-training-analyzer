@@ -25,6 +25,7 @@ import PageContainer from '@/components/common/PageContainer';
 import TrainingLoadMiniChart from '@/components/TrainingLoadMiniChart';
 import BlockMiniWidget from '@/components/home/BlockMiniWidget';
 import EnergyBudgetWidget from '@/components/home/EnergyBudgetWidget';
+import EventCountdownWidget from '@/components/home/EventCountdownWidget';
 import FatigueWidget from '@/components/home/FatigueWidget';
 import ProgressMiniWidget from '@/components/home/ProgressMiniWidget';
 import ReadinessMiniWidget from '@/components/home/ReadinessMiniWidget';
@@ -36,6 +37,9 @@ import {
 } from '@/hooks/useAi';
 import {
   useBlockHealth,
+  useCreateEvent,
+  useDeleteEvent,
+  useEvents,
   useFatigueState,
   useFtpProgress,
   usePmc,
@@ -85,6 +89,9 @@ export default function DashboardPage() {
   const { data: progressionLevels } = progressionLevelsQuery;
   const { data: blockHealth } = useBlockHealth();
   const { data: fatigueState, isLoading: fatigueLoading } = useFatigueState();
+  const { data: events, isLoading: eventsLoading } = useEvents();
+  const createEvent = useCreateEvent();
+  const deleteEvent = useDeleteEvent();
   const { data: todayAiTips, isLoading: isTodayAiTipsLoading } = useTodayAiTips();
   const { data: aiStatus } = useAiStatus();
   const saveCheckIn = useSaveReadinessCheckIn();
@@ -140,6 +147,14 @@ export default function DashboardPage() {
             />
             <FatigueWidget data={fatigueState} isLoading={fatigueLoading} />
             <EnergyBudgetWidget data={fatigueState} isLoading={fatigueLoading} />
+            <EventCountdownWidget
+              events={events}
+              isLoading={eventsLoading}
+              onCreate={(e) => createEvent.mutate(e)}
+              onDelete={(id) => deleteEvent.mutate(id)}
+              ctlValue={latestPmc?.ctl ?? null}
+              isLoadingCtl={pmcQuery.isLoading}
+            />
             <ProgressMiniWidget
               progression={topProgression}
               subtitle="Śledzenie progresji"

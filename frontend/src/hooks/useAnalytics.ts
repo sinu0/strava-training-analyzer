@@ -46,6 +46,7 @@ import type {
   QueryToggleOptions,
 } from '@/types/query';
 import type { FatigueState, LoadFocus } from '@/types/fatigue';
+import type { TrainingEvent } from '@/types/event';
 
 export function usePmc(range: DateRange) {
   return useQuery<PmcData[]>({
@@ -60,11 +61,55 @@ export function usePmc(range: DateRange) {
 export function usePowerCurve(range: DateRange, options?: QueryToggleOptions) {
   return useQuery<PowerCurve>({
     queryKey: ['powerCurve', range],
+    enabled: options?.enabled !== false,
     queryFn: async () => {
       const { data } = await apiClient.get<PowerCurve>('/analytics/power-curve', { params: range });
       return data;
     },
-    enabled: options?.enabled ?? true,
+    staleTime: STALE_SLOW,
+  });
+}
+
+export function useEvents() {
+  return useQuery<TrainingEvent[]>({
+    queryKey: ['events'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<TrainingEvent[]>('/events');
+      return data;
+    },
+    staleTime: STALE_SLOW,
+  });
+}
+
+export function useActiveEvents() {
+  return useQuery<TrainingEvent[]>({
+    queryKey: ['events', 'active'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<TrainingEvent[]>('/events/active');
+      return data;
+    },
+    staleTime: STALE_SLOW,
+  });
+}
+
+export function useCreateEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (event: { name: string; eventDate: string; type: string; priority: string }) => {
+      const { data } = await apiClient.post<TrainingEvent>('/events', event);
+      return data;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+  });
+}
+
+export function useDeleteEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/events/${id}`);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
   });
 }
 

@@ -18,6 +18,9 @@ beforeAll(() => {
 vi.mock('../hooks/useAnalytics', () => ({
   useFatigueState: () => ({ data: undefined, isLoading: false }),
   useLoadFocus: () => ({ data: undefined, isLoading: false }),
+  useEvents: () => ({ data: undefined, isLoading: false }),
+  useCreateEvent: () => ({ mutate: vi.fn(), isPending: false }),
+  useDeleteEvent: () => ({ mutate: vi.fn(), isPending: false }),
   useWeeklySummaries: () => ({
     data: [
       {

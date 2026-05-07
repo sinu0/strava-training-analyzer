@@ -4,6 +4,7 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import TimelineIcon from '@mui/icons-material/Timeline';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TuneIcon from '@mui/icons-material/Tune';
 import {
   Accordion,
@@ -39,6 +40,7 @@ import PMChart from '@/components/PMChart';
 import PowerCurveChart, { type PowerCurveComparisonSeries } from '@/components/PowerCurveChart';
 import SeasonComparison from '@/components/SeasonComparison';
 import TrainingLoadFocus from '@/components/TrainingLoadFocus';
+import WeeklyStressBudget from '@/components/WeeklyStressBudget';
 import ZoneDistributionChart from '@/components/ZoneDistributionChart';
 import {
   useDailyOptimalLoad,
@@ -48,6 +50,7 @@ import {
   usePowerCurve,
   useTrends,
   useWeeklyOptimalLoad,
+  useWeeklySummaries,
   useZoneDistribution,
 } from '@/hooks/useAnalytics';
 import { CHART_COLORS, STATUS_COLORS } from '@/utils/colors';
@@ -168,6 +171,7 @@ export default function AnalyticsPage() {
   const { data: efTrend } = useTrends('efficiency_factor', range);
   const { data: fatigueState } = useFatigueState();
   const { data: loadFocus, isLoading: loadFocusLoading } = useLoadFocus(4);
+  const { data: weeklySummaries } = useWeeklySummaries(12);
 
   const powerCurveComparisonSeries = useMemo<PowerCurveComparisonSeries[]>(
     () =>
@@ -191,6 +195,7 @@ export default function AnalyticsPage() {
     { label: 'Obciążenie', value: 2, icon: <BarChartIcon fontSize="small" /> },
     { label: 'Trendy', value: 3, icon: <TuneIcon fontSize="small" /> },
     { label: 'Zmęczenie', value: 4, icon: <BatteryAlertIcon fontSize="small" /> },
+    { label: 'Prognoza', value: 5, icon: <TrendingUpIcon fontSize="small" /> },
   ];
 
   const filtersContent = (
@@ -399,6 +404,14 @@ export default function AnalyticsPage() {
                 ) : null}
               </Section>
               <TrainingLoadFocus data={loadFocus} isLoading={loadFocusLoading} />
+            </Stack>
+          )}
+          {tab === 5 && (
+            <Stack spacing={2.5}>
+              <WeeklyStressBudget
+                weeks={weeklySummaries ?? []}
+                avgTss={weeklySummaries ? (weeklySummaries.slice(0, 4).reduce((s, w) => s + w.totalTss, 0) / Math.min(4, weeklySummaries.length)) : 0}
+              />
             </Stack>
           )}
         </SwipeableContent>
