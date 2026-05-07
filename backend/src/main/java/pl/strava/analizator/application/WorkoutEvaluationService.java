@@ -605,7 +605,15 @@ public class WorkoutEvaluationService {
         String primaryBenefit = classifyPrimaryBenefit(activity, ftpWatts, lthr, ifVal);
         String secondaryBenefit = null;
 
-        // 5. Recovery Time
+        // 6. Quality Score (how well was the session executed?)
+        Integer qualityScore = null;
+        if (hasPower) {
+            double vi = estimateVariabilityIndex(activity);
+            double powerFade = estimatePowerFade(activity);
+            qualityScore = computeQualityScore(vi, powerFade, primaryBenefit);
+        }
+
+        // 7. Recovery Time
         BigDecimal tsb = resolveTsb(daySummary);
         BigDecimal hrvCurrent = (daySummary != null && daySummary.getHrvRmssd() != null)
                 ? daySummary.getHrvRmssd() : null;
@@ -630,6 +638,7 @@ public class WorkoutEvaluationService {
                 .primaryBenefit(primaryBenefit)
                 .secondaryBenefit(secondaryBenefit)
                 .recoveryTimeHours(recoveryHours)
+                .qualityScore(qualityScore)
                 .calculatedAt(Instant.now())
                 .dataQuality(dataQuality)
                 .details(details)
@@ -1065,5 +1074,36 @@ public class WorkoutEvaluationService {
         for (int v : values) sqSum += Math.pow(v - mean, 2);
         double std = Math.sqrt(sqSum / values.length);
         return std / mean;
+    }
+
+    // ── Quality Score ──
+
+    int computeQualityScore(double vi, double powerFade, String primaryBenefit) {
+        int viScore;
+        if ("ENDURANCE".equals(primaryBenefit) || "RECOVERY".equals(primaryBenefit)) {
+            viScore = vi <= 1.08 ? 100 : vi <= 1.15 ? 75 : vi <= 1.25 ? 50 : 25;
+        } else if ("TEMPO".equals(primaryBenefit) || "SWEET_SPOT".equals(primaryBenefit) || "THRESHOLD".equals(primaryBenefit)) {
+            viScore = vi <= 1.05 ? 100 : vi <= 1.10 ? 80 : vi <= 1.18 ? 55 : 25;
+        } else {
+            viScore = vi <= 1.15 ? 100 : vi <= 1.25 ? 75 : 50;
+        }
+
+        int fadeScore = powerFade < 2 ? 100 : powerFade < 5 ? 80 : powerFade < 8 ? 55 : powerFade < 12 ? 35 : 15;
+
+        return Math.min(100, Math.round(viScore * 0.5f + fadeScore * 0.5f));
+    }
+
+    double estimatePowerFade(Activity activity) {
+        int[] power = activity.getPowerStream();
+        if (power == null || power.length < 60) return 0;
+        int mid = power.length / 2;
+        double first = 0, second = 0;
+        int c1 = 0, c2 = 0;
+        for (int i = 0; i < mid; i++) { if (power[i] > 0) { first += power[i]; c1++; } }
+        for (int i = mid; i < power.length; i++) { if (power[i] > 0) { second += power[i]; c2++; } }
+        double avg1 = c1 > 0 ? first / c1 : 0;
+        double avg2 = c2 > 0 ? second / c2 : 0;
+        if (avg1 <= 0) return 0;
+        return Math.max(0, (avg1 - avg2) / avg1 * 100.0);
     }
 }

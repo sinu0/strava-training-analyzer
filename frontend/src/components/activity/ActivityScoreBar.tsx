@@ -137,6 +137,11 @@ export default function ActivityScoreBar({ effect }: ActivityScoreBarProps) {
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 Training Score
+                {effect.qualityScore != null && (
+                  <span style={{ color: '#39D353', marginLeft: 8, fontWeight: 700 }}>
+                    · Quality {effect.qualityScore}
+                  </span>
+                )}
               </Typography>
             </Box>
           </Stack>

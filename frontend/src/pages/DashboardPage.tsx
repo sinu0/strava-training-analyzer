@@ -31,6 +31,7 @@ import ProgressMiniWidget from '@/components/home/ProgressMiniWidget';
 import ReadinessMiniWidget from '@/components/home/ReadinessMiniWidget';
 import SessionOptimizerWidget from '@/components/home/SessionOptimizerWidget';
 import TrainingStatusBadge from '@/components/TrainingStatusBadge';
+import WeeklyBriefPanel from '@/components/home/WeeklyBriefPanel';
 import WeatherMiniWidget from '@/components/home/WeatherMiniWidget';
 import {
   useLatestAiPrediction,
@@ -318,6 +319,9 @@ export default function DashboardPage() {
                 </Stack>
               </Paper>
             )}
+
+            {/* Weekly Brief Panel */}
+            <WeeklyBriefPanel />
 
             {/* Latest Activity */}
             {latestActivity ? (

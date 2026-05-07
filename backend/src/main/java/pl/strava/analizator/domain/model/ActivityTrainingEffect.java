@@ -24,6 +24,7 @@ public class ActivityTrainingEffect {
     private String primaryBenefit;
     private String secondaryBenefit;
     private int recoveryTimeHours;
+    private Integer qualityScore;
     private Instant calculatedAt;
     private String dataQuality;
     private Map<String, Object> details;

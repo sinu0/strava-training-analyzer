@@ -60,6 +60,9 @@ public class ActivityTrainingEffectEntity {
     @Column(name = "recovery_time_hours", nullable = false)
     private int recoveryTimeHours;
 
+    @Column(name = "quality_score")
+    private Integer qualityScore;
+
     @Column(name = "calculated_at", nullable = false)
     private Instant calculatedAt;
 

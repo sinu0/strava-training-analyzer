@@ -268,6 +268,7 @@ public class ActivityService {
                 .primaryBenefit(effect.getPrimaryBenefit())
                 .secondaryBenefit(effect.getSecondaryBenefit())
                 .recoveryTimeHours(effect.getRecoveryTimeHours())
+                .qualityScore(effect.getQualityScore())
                 .calculatedAt(effect.getCalculatedAt())
                 .dataQuality(effect.getDataQuality())
                 .details(effect.getDetails())

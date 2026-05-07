@@ -9,6 +9,7 @@ export interface ActivityTrainingEffect {
   primaryBenefit: string;
   secondaryBenefit: string | null;
   recoveryTimeHours: number;
+  qualityScore: number | null;
   calculatedAt: string;
   dataQuality: string;
   details: Record<string, unknown> | null;
