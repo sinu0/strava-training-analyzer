@@ -80,9 +80,10 @@ public class FatigueAndEnergyService {
         for (Map.Entry<String, Double> e : powerZones.getZones().entrySet()) {
             int zoneNum = parseZoneNumber(e.getKey());
             double secs = e.getValue();
-            if (zoneNum <= 2) low += secs;
-            else if (zoneNum <= 4) high += secs;
-            else anaerobic += secs;
+            if (zoneNum == 2) low += secs;           // Endurance only
+            else if (zoneNum == 3 || zoneNum == 4) high += secs;  // Tempo + Threshold
+            else if (zoneNum >= 5) anaerobic += secs; // VO2max+
+            // Z1 is excluded (recovery/coasting)
         }
 
         double total = low + high + anaerobic;
@@ -150,11 +151,11 @@ public class FatigueAndEnergyService {
     }
 
     private int computeRecoveryDebt(List<PmcDataDto> pmc) {
-        int daysNegative = 0;
+        int daysDeepNegative = 0;
         for (int i = Math.max(0, pmc.size() - 14); i < pmc.size(); i++) {
-            if (pmc.get(i).getTsb().doubleValue() < -5) daysNegative++;
+            if (pmc.get(i).getTsb().doubleValue() < -10) daysDeepNegative++;
         }
-        return (int) Math.max(0, Math.min(25, daysNegative * 3.0));
+        return (int) Math.max(0, Math.min(25, daysDeepNegative * 2.0));
     }
 
     private double computeWeeklyRampRate(List<PmcDataDto> pmc) {

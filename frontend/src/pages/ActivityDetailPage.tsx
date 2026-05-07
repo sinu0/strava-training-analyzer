@@ -1,6 +1,6 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SyncIcon from '@mui/icons-material/Sync';
-import { Button, CircularProgress, Stack } from '@mui/material';
+import { Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -58,7 +58,17 @@ export default function ActivityDetailPage() {
 
   const renderTabContent = () => {
     if (tabIndex === 0) return <OverviewTab activity={activity} />;
-    if (tabIndex === 1) return activity.trainingEffect ? <ActivityScoreTab effect={activity.trainingEffect} /> : null;
+    if (tabIndex === 1) {
+      if (activity.trainingEffect) return <ActivityScoreTab effect={activity.trainingEffect} />;
+      return (
+        <Box sx={{ py: 4, textAlign: 'center' }}>
+          <Typography color="text.secondary">Brak danych scoringu dla tej aktywności.</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+            Uruchom sync lub przelicz metryki w panelu Admin.
+          </Typography>
+        </Box>
+      );
+    }
     if (tabIndex === 2) return (
       <AnalysisTab
         activity={activity}

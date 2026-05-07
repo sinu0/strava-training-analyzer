@@ -410,7 +410,7 @@ export default function AnalyticsPage() {
             <Stack spacing={2.5}>
               <WeeklyStressBudget
                 weeks={weeklySummaries ?? []}
-                avgTss={weeklySummaries ? (weeklySummaries.slice(0, 4).reduce((s, w) => s + w.totalTss, 0) / Math.min(4, weeklySummaries.length)) : 0}
+                avgTss={weeklySummaries && weeklySummaries.length > 0 ? (weeklySummaries.slice(0, Math.min(4, weeklySummaries.length)).reduce((s, w) => s + w.totalTss, 0) / Math.min(4, weeklySummaries.length)) : 0}
               />
             </Stack>
           )}
