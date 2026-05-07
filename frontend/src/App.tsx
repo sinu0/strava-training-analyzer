@@ -16,7 +16,6 @@ const RoutePlannerPage = lazy(() => import('@/pages/RoutePlannerPage'));
 const WeightPage = lazy(() => import('@/pages/WeightPage'));
 const AiPredictionPage = lazy(() => import('@/pages/AiPredictionPage'));
 const PrioritiesPage = lazy(() => import('@/pages/PrioritiesPage'));
-const PerformancePredictionPage = lazy(() => import('@/pages/PerformancePredictionPage'));
 const AdaptiveCoachPage = lazy(() => import('@/pages/AdaptiveCoachPage'));
 const AdminPage = lazy(() => import('@/pages/AdminPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
@@ -48,7 +47,7 @@ export default function App() {
         <Route path="/weight" element={renderLazyPage(WeightPage)} />
         <Route path="/ai-predictions" element={renderLazyPage(AiPredictionPage)} />
         <Route path="/priorities" element={renderLazyPage(PrioritiesPage)} />
-        <Route path="/performance" element={renderLazyPage(PerformancePredictionPage)} />
+        <Route path="/performance" element={<Navigate to="/analytics" replace />} />
         <Route path="/adaptive-coach" element={renderLazyPage(AdaptiveCoachPage)} />
         <Route path="/admin" element={renderLazyPage(AdminPage)} />
         <Route path="*" element={renderLazyPage(NotFoundPage)} />

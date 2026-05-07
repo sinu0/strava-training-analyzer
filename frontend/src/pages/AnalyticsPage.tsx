@@ -3,6 +3,7 @@ import BatteryAlertIcon from '@mui/icons-material/BatteryAlert';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
+import SpeedIcon from '@mui/icons-material/Speed';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TuneIcon from '@mui/icons-material/Tune';
@@ -37,6 +38,7 @@ import EfficiencyTrend from '@/components/EfficiencyTrend';
 import FtpTrendChart from '@/components/FtpTrendChart';
 import OptimalLoadChart from '@/components/OptimalLoadChart';
 import PMChart from '@/components/PMChart';
+import PerformancePredictionPanel from '@/components/PerformancePredictionPanel';
 import PowerCurveChart, { type PowerCurveComparisonSeries } from '@/components/PowerCurveChart';
 import SeasonComparison from '@/components/SeasonComparison';
 import TrainingLoadFocus from '@/components/TrainingLoadFocus';
@@ -196,6 +198,7 @@ export default function AnalyticsPage() {
     { label: 'Trendy', value: 3, icon: <TuneIcon fontSize="small" /> },
     { label: 'Zmęczenie', value: 4, icon: <BatteryAlertIcon fontSize="small" /> },
     { label: 'Prognoza', value: 5, icon: <TrendingUpIcon fontSize="small" /> },
+    { label: 'Forma', value: 6, icon: <SpeedIcon fontSize="small" /> },
   ];
 
   const filtersContent = (
@@ -414,6 +417,8 @@ export default function AnalyticsPage() {
               />
             </Stack>
           )}
+
+          {tab === 6 && <PerformancePredictionPanel />}
         </SwipeableContent>
       </PullToRefreshPanel>
     </PageContainer>

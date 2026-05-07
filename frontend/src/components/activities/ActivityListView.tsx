@@ -38,7 +38,7 @@ import {
   type UseActivityFiltersResult,
 } from '@/hooks/useActivityFilters';
 import type { ActivitySummary, ActivitySummaryPage } from '@/types/activity';
-import { COMMON_COLORS, alphaColor, getSportColor } from '@/utils/colors';
+import { COMMON_COLORS, STATUS_COLORS, alphaColor, getSportColor } from '@/utils/colors';
 import { getApiErrorMessage } from '@/utils/errorHandling';
 import { formatDistance, formatDuration } from '@/utils/formatters';
 
@@ -124,6 +124,12 @@ const ActivityMobileCard = memo(function ActivityMobileCard({
             ) : null}
             {activity.avgPowerW != null ? (
               <Chip size="small" label={`${activity.avgPowerW} W`} sx={{ bgcolor: alphaColor('#D29922', 0.12), color: '#D29922' }} />
+            ) : null}
+            {activity.primaryBenefit ? (
+              <Chip size="small" label={activity.primaryBenefit} sx={{
+                fontWeight: 700, fontSize: '0.65rem',
+                bgcolor: alphaColor(STATUS_COLORS.accent, 0.12), color: STATUS_COLORS.accent,
+              }} />
             ) : null}
           </Stack>
         </Stack>

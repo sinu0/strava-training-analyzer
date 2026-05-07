@@ -9,7 +9,6 @@ import ScaleIcon from '@mui/icons-material/Scale';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
-import SpeedIcon from '@mui/icons-material/Speed';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import {
   Drawer,
@@ -66,7 +65,6 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Trasy', path: '/route-planner', icon: <MapIcon /> },
       { label: 'Priorytety', path: '/priorities', icon: <WhatshotIcon /> },
-      { label: 'Prognoza formy', path: '/performance', icon: <SpeedIcon /> },
       { label: 'Adaptive Coach', path: '/adaptive-coach', icon: <PsychologyIcon /> },
       { label: 'Predykcje AI', path: '/ai-predictions', icon: <SmartToyIcon /> },
     ],
