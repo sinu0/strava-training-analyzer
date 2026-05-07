@@ -36,3 +36,33 @@ export interface SessionSuggestion {
   roiScore: number;
   impact: string;
 }
+
+export interface TrainingStatus {
+  status: string;
+  label: string;
+  description: string;
+  ctlTrend: number;
+  currentCtl: number;
+  currentTsb: number;
+  fatigue: number;
+}
+
+export interface WeeklyBrief {
+  status: string;
+  statusDescription: string;
+  weeklyHours: number;
+  weeklyTss: number;
+  avg4WeekHours: number;
+  avg4WeekTss: number;
+  efTrend: number;
+  fatigueScore: number;
+  fatigueLastWeek: number;
+  fatigueTrend: string;
+  eventName: string | null;
+  daysToEvent: number;
+  projectedCtl: number;
+  suggestedFocus: string;
+  loadFocusLowPct: number;
+  loadFocusHighPct: number;
+  loadFocusAnaerobicPct: number;
+}

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import pl.strava.analizator.application.AnalyticsService;
 import pl.strava.analizator.application.BlockHealthService;
+import pl.strava.analizator.application.TrainingStatusService;
 import pl.strava.analizator.application.dto.BlockHealthDto;
 import pl.strava.analizator.application.dto.DailyOptimalLoadDto;
 import pl.strava.analizator.application.dto.DurabilityInsightDto;
@@ -26,7 +27,9 @@ import pl.strava.analizator.application.dto.ProgressionLevelDto;
 import pl.strava.analizator.application.dto.PowerCurveDto;
 import pl.strava.analizator.application.dto.ReadinessDto;
 import pl.strava.analizator.application.dto.SaveReadinessCheckInRequest;
+import pl.strava.analizator.application.dto.TrainingStatusDto;
 import pl.strava.analizator.application.dto.TrendDto;
+import pl.strava.analizator.application.dto.WeeklyBriefDto;
 import pl.strava.analizator.application.dto.WeeklyMmpDto;
 import pl.strava.analizator.application.dto.WeeklyOptimalLoadDto;
 import pl.strava.analizator.application.dto.WeeklySummaryDto;
@@ -39,6 +42,7 @@ public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
     private final BlockHealthService blockHealthService;
+    private final TrainingStatusService trainingStatusService;
 
     @GetMapping("/pmc")
     public ResponseEntity<List<PmcDataDto>> getPmc(
@@ -159,5 +163,15 @@ public class AnalyticsController {
         return ResponseEntity.ok(analyticsService.getDailyOptimalLoad(
                 Math.min(Math.max(1, pastDays), 1095),
                 Math.min(Math.max(0, futureDays), 90)));
+    }
+
+    @GetMapping("/training-status")
+    public ResponseEntity<TrainingStatusDto> getTrainingStatus() {
+        return ResponseEntity.ok(trainingStatusService.getTrainingStatus());
+    }
+
+    @GetMapping("/weekly-brief")
+    public ResponseEntity<WeeklyBriefDto> getWeeklyBrief() {
+        return ResponseEntity.ok(trainingStatusService.getWeeklyBrief());
     }
 }

@@ -45,7 +45,7 @@ import type {
   DateRange,
   QueryToggleOptions,
 } from '@/types/query';
-import type { FatigueState, LoadFocus } from '@/types/fatigue';
+import type { FatigueState, LoadFocus, TrainingStatus, WeeklyBrief } from '@/types/fatigue';
 import type { TrainingEvent } from '@/types/event';
 
 export function usePmc(range: DateRange) {
@@ -100,6 +100,28 @@ export function useCreateEvent() {
       return data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+  });
+}
+
+export function useTrainingStatus() {
+  return useQuery<TrainingStatus>({
+    queryKey: ['trainingStatus'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<TrainingStatus>('/analytics/training-status');
+      return data;
+    },
+    staleTime: STALE_REALTIME,
+  });
+}
+
+export function useWeeklyBrief() {
+  return useQuery<WeeklyBrief>({
+    queryKey: ['weeklyBrief'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<WeeklyBrief>('/analytics/weekly-brief');
+      return data;
+    },
+    staleTime: STALE_REALTIME,
   });
 }
 

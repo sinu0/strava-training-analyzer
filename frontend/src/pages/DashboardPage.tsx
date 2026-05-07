@@ -30,6 +30,7 @@ import FatigueWidget from '@/components/home/FatigueWidget';
 import ProgressMiniWidget from '@/components/home/ProgressMiniWidget';
 import ReadinessMiniWidget from '@/components/home/ReadinessMiniWidget';
 import SessionOptimizerWidget from '@/components/home/SessionOptimizerWidget';
+import TrainingStatusBadge from '@/components/TrainingStatusBadge';
 import WeatherMiniWidget from '@/components/home/WeatherMiniWidget';
 import {
   useLatestAiPrediction,
@@ -48,6 +49,7 @@ import {
   useReadiness,
   useRecentActivities,
   useSaveReadinessCheckIn,
+  useTrainingStatus,
   useWeatherGradient,
   useWeatherLocations,
 } from '@/hooks/useAnalytics';
@@ -93,6 +95,7 @@ export default function DashboardPage() {
   const { data: events, isLoading: eventsLoading } = useEvents();
   const createEvent = useCreateEvent();
   const deleteEvent = useDeleteEvent();
+  const { data: trainingStatus, isLoading: statusLoading } = useTrainingStatus();
   const { data: todayAiTips, isLoading: isTodayAiTipsLoading } = useTodayAiTips();
   const { data: aiStatus } = useAiStatus();
   const saveCheckIn = useSaveReadinessCheckIn();
@@ -207,6 +210,7 @@ export default function DashboardPage() {
               isLoading={isDecisionLoading}
               onStartWorkout={() => navigate('/training')}
             />
+            <TrainingStatusBadge data={trainingStatus} isLoading={statusLoading} />
 
             {/* SESSION OPTIMIZER */}
             <Box

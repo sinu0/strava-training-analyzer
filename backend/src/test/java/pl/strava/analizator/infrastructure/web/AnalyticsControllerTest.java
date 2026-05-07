@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import pl.strava.analizator.application.AnalyticsService;
 import pl.strava.analizator.application.BlockHealthService;
+import pl.strava.analizator.application.TrainingStatusService;
 import pl.strava.analizator.application.dto.BlockHealthDto;
 import pl.strava.analizator.application.dto.PmcDataDto;
 import pl.strava.analizator.application.dto.DurabilityInsightDto;
@@ -55,6 +56,8 @@ class AnalyticsControllerTest {
     private AnalyticsService analyticsService;
     @MockitoBean
     private BlockHealthService blockHealthService;
+    @MockitoBean
+    private TrainingStatusService trainingStatusService;
 
     @Test
     void pmc_returnsSeries() throws Exception {
