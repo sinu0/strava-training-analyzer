@@ -40,7 +40,6 @@ class StravaActivityDtoDeserializationTest {
                       "summary_polyline": null,
                       "resource_state": 2
                     },
-                    "device_name": "Garmin Edge 1030",
                     "private": false,
                     "unexpected_new_field": {
                       "nested": true

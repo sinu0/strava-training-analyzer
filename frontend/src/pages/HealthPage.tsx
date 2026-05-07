@@ -10,13 +10,16 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import {
   Alert,
   Box,
+  Button,
   CircularProgress,
   Grid,
   Stack,
+  TextField,
   Typography,
 } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
+import apiClient from '@/api/client';
 import {
   Area,
   AreaChart,
@@ -284,6 +287,29 @@ export default function HealthPage() {
   const nextTab = () => setTab((current) => Math.min(current + 1, tabs.length - 1));
   const prevTab = () => setTab((current) => Math.max(current - 1, 0));
 
+  const [hrvVal, setHrvVal] = useState('');
+  const [rhrVal, setRhrVal] = useState('');
+  const [sleepVal, setSleepVal] = useState('');
+  const [bodyBatteryVal, setBodyBatteryVal] = useState('');
+  const [stressVal, setStressVal] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const handleSaveMetrics = async () => {
+    setSaving(true);
+    const body: Record<string, number> = {};
+    const h = parseFloat(hrvVal); if (!isNaN(h)) body.hrvRmssd = h;
+    const r = parseInt(rhrVal); if (!isNaN(r)) body.restingHrBpm = r;
+    const s = parseInt(sleepVal); if (!isNaN(s)) body.sleepScore = s;
+    const b = parseInt(bodyBatteryVal); if (!isNaN(b)) body.bodyBattery = b;
+    const st = parseInt(stressVal); if (!isNaN(st)) body.stressAvg = st;
+    if (Object.keys(body).length > 0) {
+      try { await apiClient.put('/health/metrics', body); } catch {}
+    }
+    setSaving(false);
+    queryClient.invalidateQueries({ queryKey: ['healthOverview'] });
+    queryClient.invalidateQueries({ queryKey: ['healthTimeline'] });
+  };
+
   if (isLoading) {
     return (
       <PageContainer title="Zdrowie">
@@ -368,6 +394,25 @@ export default function HealthPage() {
               ))}
             </Stack>
           ) : null}
+
+          <Section title="Wprowadź metryki" subtitle="Ręczne uzupełnienie dzisiejszych danych zdrowotnych" accentColor={STATUS_COLORS.info}>
+            <Stack spacing={1.5}>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                <TextField label="HRV (ms)" size="small" type="number" value={hrvVal} onChange={e => setHrvVal(e.target.value)} sx={{ flex: 1 }} />
+                <TextField label="HR spocz. (bpm)" size="small" type="number" value={rhrVal} onChange={e => setRhrVal(e.target.value)} sx={{ flex: 1 }} />
+                <TextField label="Sen (0-100)" size="small" type="number" value={sleepVal} onChange={e => setSleepVal(e.target.value)} sx={{ flex: 1 }} />
+              </Stack>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                <TextField label="Body Battery" size="small" type="number" value={bodyBatteryVal} onChange={e => setBodyBatteryVal(e.target.value)} sx={{ flex: 1 }} />
+                <TextField label="Stres (0-100)" size="small" type="number" value={stressVal} onChange={e => setStressVal(e.target.value)} sx={{ flex: 1 }} />
+                <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+                  <Button variant="outlined" disabled={saving} onClick={handleSaveMetrics} fullWidth size="small">
+                    {saving ? <CircularProgress size={14} /> : 'Zapisz'}
+                  </Button>
+                </Box>
+              </Stack>
+            </Stack>
+          </Section>
 
           <Grid container spacing={2.5}>
             {groupCards.map((group) => (

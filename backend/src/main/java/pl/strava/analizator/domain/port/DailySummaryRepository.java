@@ -16,5 +16,4 @@ public interface DailySummaryRepository {
 
     List<DailySummary> findByDateRange(DateRange range);
 
-    Optional<Instant> findMostRecentGarminSync();
 }

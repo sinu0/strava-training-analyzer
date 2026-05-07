@@ -259,7 +259,6 @@ export default function AdminDashboard({
               Ręczne odświeżenie wymusza pobranie aktualnych danych.
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              <strong>Garmin Connect</strong> — synchronizuje dane zdrowotne z Garmin Connect (tętno spoczynkowe, sen, stres, kroki).
               Dane logowania są szyfrowane. Synchronizacja pobiera dane za wybrany okres.
             </Typography>
           </Stack>

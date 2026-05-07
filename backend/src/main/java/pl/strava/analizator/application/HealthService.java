@@ -2,10 +2,13 @@ package pl.strava.analizator.application;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -20,11 +23,27 @@ public class HealthService {
 
     private final DailySummaryRepository dailySummaryRepository;
 
+    public void updateHealthMetrics(Map<String, Object> body) {
+        LocalDate today = LocalDate.now();
+        DailySummary existing = dailySummaryRepository.findByDate(today).orElse(null);
+        DailySummary.DailySummaryBuilder builder = existing != null
+                ? existing.toBuilder()
+                : DailySummary.builder().id(UUID.randomUUID()).date(today);
+
+        if (body.containsKey("hrvRmssd")) builder.hrvRmssd(new BigDecimal(String.valueOf(body.get("hrvRmssd"))));
+        if (body.containsKey("restingHrBpm")) builder.restingHrBpm(Short.valueOf(String.valueOf(body.get("restingHrBpm"))));
+        if (body.containsKey("sleepScore")) builder.sleepScore(Short.valueOf(String.valueOf(body.get("sleepScore"))));
+        if (body.containsKey("bodyBattery")) builder.bodyBattery(Short.valueOf(String.valueOf(body.get("bodyBattery"))));
+        if (body.containsKey("stressAvg")) builder.stressAvg(Short.valueOf(String.valueOf(body.get("stressAvg"))));
+        if (body.containsKey("sleepDurationSeconds")) builder.sleepDurationSeconds(Integer.valueOf(String.valueOf(body.get("sleepDurationSeconds"))));
+        builder.healthMetricsUpdatedAt(Instant.now());
+        dailySummaryRepository.save(builder.build());
+    }
+
     public HealthOverview getOverview(LocalDate from, LocalDate to) {
         List<DailySummary> data = dailySummaryRepository.findByDateRange(DateRange.of(from, to));
 
         DailySummary latest = data.stream()
-                .filter(d -> d.getGarminSyncedAt() != null)
                 .max(Comparator.comparing(DailySummary::getDate))
                 .orElse(null);
 
@@ -39,7 +58,6 @@ public class HealthService {
     public List<HealthDay> getHealthTimeline(LocalDate from, LocalDate to) {
         List<DailySummary> data = dailySummaryRepository.findByDateRange(DateRange.of(from, to));
         return data.stream()
-                .filter(d -> d.getGarminSyncedAt() != null)
                 .sorted(Comparator.comparing(DailySummary::getDate))
                 .map(this::toHealthDay)
                 .toList();
@@ -49,20 +67,19 @@ public class HealthService {
         LocalDate from = date.minusDays(7);
         List<DailySummary> data = dailySummaryRepository.findByDateRange(DateRange.of(from, date));
 
-        List<DailySummary> garminData = data.stream()
-                .filter(d -> d.getGarminSyncedAt() != null)
+        List<DailySummary> healthData = data.stream()
                 .sorted(Comparator.comparing(DailySummary::getDate))
                 .toList();
 
-        if (garminData.isEmpty()) {
-            return new RecoveryStatus(0, "brak danych", "Brak danych zdrowotnych z Garmin.", List.of());
+        if (healthData.isEmpty()) {
+            return new RecoveryStatus(0, "brak danych", "Brak danych zdrowotnych.", List.of());
         }
 
-        DailySummary latest = garminData.getLast();
-        int score = calculateRecoveryScore(garminData, latest);
+        DailySummary latest = healthData.getLast();
+        int score = calculateRecoveryScore(healthData, latest);
         String level = recoveryLevel(score);
         String description = recoveryDescription(score, latest);
-        List<String> alerts = detectAlerts(garminData, latest);
+        List<String> alerts = detectAlerts(healthData, latest);
 
         return new RecoveryStatus(score, level, description, alerts);
     }
@@ -150,11 +167,11 @@ public class HealthService {
 
     // --- Recovery score ---
 
-    private int calculateRecoveryScore(List<DailySummary> garminData, DailySummary latest) {
+    private int calculateRecoveryScore(List<DailySummary> healthData, DailySummary latest) {
         int score = 50;
 
         if (latest.getHrvRmssd() != null) {
-            List<BigDecimal> hrvValues = garminData.stream()
+            List<BigDecimal> hrvValues = healthData.stream()
                     .filter(d -> d.getHrvRmssd() != null)
                     .map(DailySummary::getHrvRmssd)
                     .toList();

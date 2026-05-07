@@ -276,11 +276,14 @@ class FitWorkoutEncoderTest {
     // --- Manufacturer ---
 
     @Test
-    void manufacturerIsSetToInvalidForGarminCompatibility() {
-        // manufacturer = 0xFFFF (INVALID) required for third-party FIT files accepted by Garmin Connect
-        WorkoutTemplate template = buildTemplate("Garmin Compat", List.of(
-                WorkoutStep.builder().type("steady").durationSec(600).powerPctFtpLow(75).powerPctFtpHigh(75).build()
-        ));
+    void encodeAddsManufacturerBytes() {
+        WorkoutTemplate template = WorkoutTemplate.builder()
+                .id(UUID.randomUUID())
+                .name("Test Builder")
+                .targetTss(BigDecimal.valueOf(50))
+                .steps(List.of(
+                    WorkoutStep.builder().type("steady").durationSec(600).powerPctFtpLow(75).powerPctFtpHigh(75).build()
+                )).build();
 
         byte[] fit = FitWorkoutEncoder.encode(template);
 

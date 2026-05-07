@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -129,7 +130,6 @@ class HealthServiceTest {
     void detectAlertsTriggersOnHighStress() {
         DailySummary latest = dailySummary(LocalDate.of(2024, 6, 7))
                 .stressAvg((short) 75)
-                .garminSyncedAt(Instant.now())
                 .build();
 
         List<String> alerts = healthService.detectAlerts(List.of(latest), latest);
@@ -141,7 +141,6 @@ class HealthServiceTest {
     void detectAlertsTriggersOnPoorSleep() {
         DailySummary latest = dailySummary(LocalDate.of(2024, 6, 7))
                 .sleepScore((short) 30)
-                .garminSyncedAt(Instant.now())
                 .build();
 
         List<String> alerts = healthService.detectAlerts(List.of(latest), latest);
@@ -153,7 +152,6 @@ class HealthServiceTest {
     void detectAlertsTriggersOnLowBodyBattery() {
         DailySummary latest = dailySummary(LocalDate.of(2024, 6, 7))
                 .bodyBattery((short) 15)
-                .garminSyncedAt(Instant.now())
                 .build();
 
         List<String> alerts = healthService.detectAlerts(List.of(latest), latest);
@@ -164,22 +162,19 @@ class HealthServiceTest {
     // --- getHealthTimeline tests ---
 
     @Test
-    void getHealthTimelineFiltersNonGarminData() {
-        DailySummary withGarmin = dailySummary(LocalDate.of(2024, 6, 1))
-                .garminSyncedAt(Instant.now())
+    void getHealthTimelineReturnsDaysInRange() {
+        DailySummary day1 = DailySummary.builder()
+                .id(UUID.randomUUID())
+                .date(LocalDate.of(2024, 6, 1))
                 .restingHrBpm((short) 55)
                 .build();
-        DailySummary withoutGarmin = dailySummary(LocalDate.of(2024, 6, 2))
-                .garminSyncedAt(null)
-                .restingHrBpm((short) 60)
-                .build();
-        DailySummary withGarmin2 = dailySummary(LocalDate.of(2024, 6, 3))
-                .garminSyncedAt(Instant.now())
+        DailySummary day2 = DailySummary.builder()
+                .id(UUID.randomUUID())
+                .date(LocalDate.of(2024, 6, 3))
                 .restingHrBpm((short) 58)
                 .build();
-
         when(dailySummaryRepository.findByDateRange(any(DateRange.class)))
-                .thenReturn(List.of(withGarmin, withoutGarmin, withGarmin2));
+                .thenReturn(List.of(day1, day2));
 
         List<HealthService.HealthDay> timeline = healthService.getHealthTimeline(
                 LocalDate.of(2024, 6, 1), LocalDate.of(2024, 6, 3));
@@ -191,12 +186,9 @@ class HealthServiceTest {
 
     @Test
     void getHealthTimelineReturnsSortedByDate() {
-        DailySummary day3 = dailySummary(LocalDate.of(2024, 6, 3))
-                .garminSyncedAt(Instant.now()).build();
-        DailySummary day1 = dailySummary(LocalDate.of(2024, 6, 1))
-                .garminSyncedAt(Instant.now()).build();
-        DailySummary day2 = dailySummary(LocalDate.of(2024, 6, 2))
-                .garminSyncedAt(Instant.now()).build();
+        DailySummary day3 = dailySummary(LocalDate.of(2024, 6, 3)).build();
+        DailySummary day1 = dailySummary(LocalDate.of(2024, 6, 1)).build();
+        DailySummary day2 = dailySummary(LocalDate.of(2024, 6, 2)).build();
 
         when(dailySummaryRepository.findByDateRange(any(DateRange.class)))
                 .thenReturn(List.of(day3, day1, day2));
@@ -233,7 +225,6 @@ class HealthServiceTest {
                     .stressAvg((short) (30 + i))
                     .steps(8000 + i * 500)
                     .activeCalories(400 + i * 50)
-                    .garminSyncedAt(Instant.now())
                     .build());
         }
         return data;
@@ -248,7 +239,6 @@ class HealthServiceTest {
                     .sleepScore((short) 85)
                     .stressAvg((short) 20)
                     .bodyBattery((short) 80)
-                    .garminSyncedAt(Instant.now())
                     .build());
         }
         return data;
@@ -263,7 +253,6 @@ class HealthServiceTest {
                     .sleepScore((short) 35)
                     .stressAvg((short) 80)
                     .bodyBattery((short) 15)
-                    .garminSyncedAt(Instant.now())
                     .build());
         }
         return data;
@@ -275,14 +264,12 @@ class HealthServiceTest {
             data.add(DailySummary.builder()
                     .date(LocalDate.of(2024, 6, i))
                     .hrvRmssd(BigDecimal.valueOf(60))
-                    .garminSyncedAt(Instant.now())
                     .build());
         }
         // Latest day has HRV well below 80% of average (60 * 0.8 = 48)
         data.add(DailySummary.builder()
                 .date(LocalDate.of(2024, 6, 6))
                 .hrvRmssd(BigDecimal.valueOf(30))
-                .garminSyncedAt(Instant.now())
                 .build());
         return data;
     }

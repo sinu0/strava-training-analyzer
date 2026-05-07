@@ -6,7 +6,6 @@ import java.util.List;
 import pl.strava.analizator.domain.model.Activity;
 
 /**
- * Abstraction over external activity data sources (Strava, Garmin, etc.).
  */
 public interface ActivityDataSource {
 

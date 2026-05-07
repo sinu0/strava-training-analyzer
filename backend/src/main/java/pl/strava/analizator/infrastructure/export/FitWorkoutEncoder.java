@@ -13,7 +13,7 @@ import pl.strava.analizator.domain.model.WorkoutStep;
 import pl.strava.analizator.domain.model.WorkoutTemplate;
 
 /**
- * Encodes a workout template as a Garmin FIT binary workout file.
+ * Encodes a workout template as a FIT binary workout file.
  * Implements a minimal FIT encoder supporting File ID, Workout, and Workout Step messages.
  */
 public final class FitWorkoutEncoder {

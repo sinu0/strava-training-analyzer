@@ -200,8 +200,6 @@ public class WeightService {
                     .stravaAccessToken(profile.getStravaAccessToken())
                     .stravaRefreshToken(profile.getStravaRefreshToken())
                     .stravaTokenExpires(profile.getStravaTokenExpires())
-                    .garminUserId(profile.getGarminUserId())
-                    .garminToken(profile.getGarminToken())
                     .createdAt(profile.getCreatedAt())
                     .updatedAt(Instant.now())
                     .build();

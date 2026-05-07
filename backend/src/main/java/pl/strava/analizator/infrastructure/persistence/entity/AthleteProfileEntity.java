@@ -66,12 +66,6 @@ public class AthleteProfileEntity {
     @Column(name = "strava_token_expires")
     private Instant stravaTokenExpires;
 
-    @Column(name = "garmin_user_id")
-    private String garminUserId;
-
-    @Column(name = "garmin_token", columnDefinition = "TEXT")
-    private String garminToken;
-
     @Column(name = "created_at")
     private Instant createdAt;
 

@@ -22,7 +22,7 @@ public class DailySummary {
     private Integer totalTimeSec;
     private BigDecimal totalElevationM;
 
-    // Health data (Garmin Connect)
+    // Health data
     private Short restingHrBpm;
     private BigDecimal hrvRmssd;
     private Short sleepScore;
@@ -40,7 +40,7 @@ public class DailySummary {
     private Short checkInMotivation;
     private Short checkInSoreness;
     private Instant checkInUpdatedAt;
-    private Instant garminSyncedAt;
+    private Instant healthMetricsUpdatedAt;
 
     private Instant createdAt;
     private Instant updatedAt;

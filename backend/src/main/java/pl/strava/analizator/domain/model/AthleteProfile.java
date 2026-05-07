@@ -29,9 +29,6 @@ public class AthleteProfile {
     private String stravaRefreshToken;
     private Instant stravaTokenExpires;
 
-    private String garminUserId;
-    private String garminToken;
-
     private Instant createdAt;
     private Instant updatedAt;
 

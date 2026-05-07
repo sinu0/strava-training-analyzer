@@ -38,9 +38,4 @@ public class DailySummaryRepositoryAdapter implements DailySummaryRepository {
         return jpaRepository.findByDateBetweenOrderByDateAsc(range.getFrom(), range.getTo())
                 .stream().map(mapper::toDomain).toList();
     }
-
-    @Override
-    public Optional<Instant> findMostRecentGarminSync() {
-        return jpaRepository.findMostRecentGarminSyncedAt();
-    }
 }

@@ -46,8 +46,6 @@ public class AthleteProfileService {
                 .stravaAccessToken(existing.getStravaAccessToken())
                 .stravaRefreshToken(existing.getStravaRefreshToken())
                 .stravaTokenExpires(existing.getStravaTokenExpires())
-                .garminUserId(existing.getGarminUserId())
-                .garminToken(existing.getGarminToken())
                 .createdAt(existing.getCreatedAt())
                 .updatedAt(Instant.now())
                 .build();

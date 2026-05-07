@@ -49,7 +49,6 @@ app:
   encryption-key: ${ENCRYPTION_KEY:0123456789abcdef0123456789abcdef}
   frontend-url: http://localhost:5173
 
-garmin:
   enabled: ${GARMIN_ENABLED:false}
   sync-interval-hours: ${GARMIN_SYNC_INTERVAL:6}
 

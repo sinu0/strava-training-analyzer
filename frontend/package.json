@@ -11,8 +11,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
-    "garmin:bridge": "node scripts/garmin-bridge.mjs"
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@emotion/react": "^11.13.5",

@@ -96,8 +96,8 @@ public class DailySummaryEntity {
     @Column(name = "check_in_updated_at")
     private Instant checkInUpdatedAt;
 
-    @Column(name = "garmin_synced_at")
-    private Instant garminSyncedAt;
+    @Column(name = "health_metrics_updated_at")
+    private Instant healthMetricsUpdatedAt;
 
     @Column(name = "created_at")
     private Instant createdAt;

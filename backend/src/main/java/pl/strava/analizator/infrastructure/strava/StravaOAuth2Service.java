@@ -81,8 +81,6 @@ public class StravaOAuth2Service {
                 .stravaAccessToken(encryptionUtil.encrypt(tokenResponse.getAccessToken()))
                 .stravaRefreshToken(encryptionUtil.encrypt(tokenResponse.getRefreshToken()))
                 .stravaTokenExpires(Instant.ofEpochSecond(tokenResponse.getExpiresAt()))
-                .garminUserId(profile.getGarminUserId())
-                .garminToken(profile.getGarminToken())
                 .createdAt(profile.getCreatedAt())
                 .updatedAt(Instant.now())
                 .build();
@@ -176,8 +174,6 @@ public class StravaOAuth2Service {
                     .weightKg(existing.getWeightKg() != null ? existing.getWeightKg()
                             : (athlete != null && athlete.getWeight() != null ? java.math.BigDecimal.valueOf(athlete.getWeight()) : null))
                     .dateOfBirth(existing.getDateOfBirth())
-                    .garminUserId(existing.getGarminUserId())
-                    .garminToken(existing.getGarminToken())
                     .createdAt(existing.getCreatedAt());
         } else {
             builder.name(name)
