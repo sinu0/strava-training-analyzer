@@ -47,4 +47,6 @@ public interface ActivityRepository {
     int countActivitiesWithPolylines();
 
     double sumDistanceMetersForActivitiesWithPolylines();
+
+    Optional<OffsetDateTime> findLatestStartedAtBySource(String source);
 }

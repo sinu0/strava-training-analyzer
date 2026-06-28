@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -20,6 +20,7 @@ import WhatshotIcon from '@mui/icons-material/Whatshot';
 import BoltIcon from '@mui/icons-material/Bolt';
 import TimerIcon from '@mui/icons-material/Timer';
 import SpeedIcon from '@mui/icons-material/Speed';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import type {
   PerformancePredictionResponse,
   PerformancePredictionRequest,
@@ -30,7 +31,7 @@ import { usePerformancePrediction, useCurrentPerformanceState } from '@/hooks/us
 import { tokens } from '@/theme/theme';
 
 const FORM_STATE_CONFIG: Record<string, { color: string; label: string; description: string }> = {
-  PEAK: { color: tokens.status.success, label: 'Szczyt', description: 'Optymalna forma - wysokie CTL, niskie zmeczenie' },
+  PEAK: { color: tokens.status.success, label: 'Szczyt', description: 'Optymalna forma — wysokie CTL, niskie zmeczenie' },
   BUILDING: { color: tokens.chart.primary, label: 'Budowanie', description: 'Rosnace CTL, adaptacja w toku' },
   FATIGUED: { color: tokens.status.error, label: 'Zmeczony', description: 'Wysokie ATL, potrzeba regeneracji' },
   DETRAINED: { color: tokens.status.warning, label: 'Roztrenowanie', description: 'Niskie i spadajace CTL' },
@@ -40,11 +41,16 @@ function defaultNumber(value: number | undefined, fallback: number): number {
   return value != null ? value : fallback;
 }
 
-export default function PerformancePredictionPanel() {
+interface Props {
+  autoRun?: boolean;
+}
+
+export default function PerformancePredictionPanel({ autoRun = true }: Props) {
   const { mutate, isPending, isError, error } = usePerformancePrediction();
   const { data: currentState, isLoading: isLoadingState, isError: isStateError } = useCurrentPerformanceState();
   const [result, setResult] = useState<PerformancePredictionResponse | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const hasAutoTriggered = useRef(false);
 
   const [ctl, setCtl] = useState(0);
   const [atl, setAtl] = useState(0);
@@ -56,6 +62,14 @@ export default function PerformancePredictionPanel() {
   const [hrvTrend, setHrvTrend] = useState<TrendDirection>('STABLE');
   const [rhrTrend, setRhrTrend] = useState<TrendDirection>('STABLE');
   const [sleepQuality, setSleepQuality] = useState<SleepQuality>('AVERAGE');
+
+  const buildRequest = useCallback((): PerformancePredictionRequest => ({
+    trainingLoad: { ctl, atl, tsb },
+    recentTrends: { ctlTrend, fatigueTrend },
+    performanceIndicators: { ftp, ftpTrend },
+    recoverySignals: { hrvTrend, restingHrTrend: rhrTrend, sleepQuality },
+    recentWorkouts: [],
+  }), [ctl, atl, tsb, ctlTrend, fatigueTrend, ftp, ftpTrend, hrvTrend, rhrTrend, sleepQuality]);
 
   useEffect(() => {
     if (currentState && !initialized) {
@@ -73,14 +87,18 @@ export default function PerformancePredictionPanel() {
     }
   }, [currentState, initialized]);
 
+  useEffect(() => {
+    if (autoRun && initialized && !hasAutoTriggered.current && !isPending && !result) {
+      hasAutoTriggered.current = true;
+      const request = buildRequest();
+      mutate(request, {
+        onSuccess: (res) => setResult(res),
+      });
+    }
+  }, [autoRun, initialized, isPending, result, buildRequest, mutate]);
+
   const handleRun = () => {
-    const request: PerformancePredictionRequest = {
-      trainingLoad: { ctl, atl, tsb },
-      recentTrends: { ctlTrend, fatigueTrend },
-      performanceIndicators: { ftp, ftpTrend },
-      recoverySignals: { hrvTrend, restingHrTrend: rhrTrend, sleepQuality },
-      recentWorkouts: [],
-    };
+    const request = buildRequest();
     mutate(request, {
       onSuccess: (res) => setResult(res),
     });
@@ -108,51 +126,63 @@ export default function PerformancePredictionPanel() {
           Nie udalo sie pobrac aktualnych danych treningowych — uzupelnij recznie.
         </Alert>
       )}
+
+      <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+        <Typography variant="subtitle2" color="text.secondary">
+          {initialized ? (
+            <Chip
+              icon={<AutoAwesomeIcon />}
+              label="Dane z systemu"
+              size="small"
+              color="success"
+              variant="outlined"
+              sx={{ fontWeight: 600 }}
+            />
+          ) : (
+            'Ladowanie danych...'
+          )}
+        </Typography>
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={isPending ? <CircularProgress size={14} color="inherit" /> : <PlayArrowIcon />}
+          onClick={handleRun}
+          disabled={isPending}
+        >
+          {isPending ? 'Analizuje...' : result ? 'Odswiez prognoze' : 'Prognozuj forme'}
+        </Button>
+      </Stack>
+
       <Card>
         <CardHeader
           title="Dane treningowe (PMC)"
           titleTypographyProps={{ variant: 'subtitle2' }}
-          subheader={initialized ? 'Zaciagnieto z aktualnych wyliczen' : undefined}
+          subheader={initialized ? 'Zaciagnieto z aktualnych wyliczen — mozesz poprawic przed prognoza' : undefined}
           subheaderTypographyProps={{ variant: 'caption' }}
         />
         <CardContent>
           <Grid container spacing={1.5}>
             <Grid item xs={4} sm={2}>
               <TextField
-                fullWidth
-                size="small"
-                type="number"
-                label="CTL"
-                value={ctl}
-                onChange={(e) => setCtl(Number(e.target.value))}
+                fullWidth size="small" type="number" label="CTL"
+                value={ctl} onChange={(e) => setCtl(Number(e.target.value))}
               />
             </Grid>
             <Grid item xs={4} sm={2}>
               <TextField
-                fullWidth
-                size="small"
-                type="number"
-                label="ATL"
-                value={atl}
-                onChange={(e) => setAtl(Number(e.target.value))}
+                fullWidth size="small" type="number" label="ATL"
+                value={atl} onChange={(e) => setAtl(Number(e.target.value))}
               />
             </Grid>
             <Grid item xs={4} sm={2}>
               <TextField
-                fullWidth
-                size="small"
-                type="number"
-                label="TSB"
-                value={tsb}
-                onChange={(e) => setTsb(Number(e.target.value))}
+                fullWidth size="small" type="number" label="TSB"
+                value={tsb} onChange={(e) => setTsb(Number(e.target.value))}
               />
             </Grid>
             <Grid item xs={4} sm={2}>
               <TextField
-                fullWidth
-                select
-                size="small"
-                label="Trend CTL"
+                fullWidth select size="small" label="Trend CTL"
                 value={ctlTrend}
                 onChange={(e) => setCtlTrend(e.target.value as TrendDirection)}
                 slotProps={{ select: { native: true } }}
@@ -164,10 +194,7 @@ export default function PerformancePredictionPanel() {
             </Grid>
             <Grid item xs={4} sm={2}>
               <TextField
-                fullWidth
-                select
-                size="small"
-                label="Trend ATL"
+                fullWidth select size="small" label="Trend ATL"
                 value={fatigueTrend}
                 onChange={(e) => setFatigueTrend(e.target.value as TrendDirection)}
                 slotProps={{ select: { native: true } }}
@@ -190,20 +217,13 @@ export default function PerformancePredictionPanel() {
           <Grid container spacing={1.5}>
             <Grid item xs={4} sm={2}>
               <TextField
-                fullWidth
-                size="small"
-                type="number"
-                label="FTP"
-                value={ftp}
-                onChange={(e) => setFtp(Number(e.target.value))}
+                fullWidth size="small" type="number" label="FTP"
+                value={ftp} onChange={(e) => setFtp(Number(e.target.value))}
               />
             </Grid>
             <Grid item xs={4} sm={2}>
               <TextField
-                fullWidth
-                select
-                size="small"
-                label="Trend FTP"
+                fullWidth select size="small" label="Trend FTP"
                 value={ftpTrend}
                 onChange={(e) => setFtpTrend(e.target.value as TrendDirection)}
                 slotProps={{ select: { native: true } }}
@@ -215,10 +235,7 @@ export default function PerformancePredictionPanel() {
             </Grid>
             <Grid item xs={4} sm={2}>
               <TextField
-                fullWidth
-                select
-                size="small"
-                label="HRV Trend"
+                fullWidth select size="small" label="HRV Trend"
                 value={hrvTrend}
                 onChange={(e) => setHrvTrend(e.target.value as TrendDirection)}
                 slotProps={{ select: { native: true } }}
@@ -230,10 +247,7 @@ export default function PerformancePredictionPanel() {
             </Grid>
             <Grid item xs={4} sm={2}>
               <TextField
-                fullWidth
-                select
-                size="small"
-                label="Rest HR"
+                fullWidth select size="small" label="Rest HR"
                 value={rhrTrend}
                 onChange={(e) => setRhrTrend(e.target.value as TrendDirection)}
                 slotProps={{ select: { native: true } }}
@@ -245,10 +259,7 @@ export default function PerformancePredictionPanel() {
             </Grid>
             <Grid item xs={4} sm={2}>
               <TextField
-                fullWidth
-                select
-                size="small"
-                label="Sen"
+                fullWidth select size="small" label="Sen"
                 value={sleepQuality}
                 onChange={(e) => setSleepQuality(e.target.value as SleepQuality)}
                 slotProps={{ select: { native: true } }}
@@ -262,20 +273,17 @@ export default function PerformancePredictionPanel() {
         </CardContent>
       </Card>
 
-      <Button
-        variant="contained"
-        startIcon={isPending ? <CircularProgress size={16} color="inherit" /> : <PlayArrowIcon />}
-        onClick={handleRun}
-        disabled={isPending}
-        sx={{ alignSelf: 'flex-start' }}
-      >
-        {isPending ? 'Analizuje...' : 'Prognozuj forme'}
-      </Button>
-
       {isError && (
         <Alert severity="error">
           {(error as Error)?.message ?? 'Blad podczas prognozowania formy.'}
         </Alert>
+      )}
+
+      {isPending && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 3 }}>
+          <CircularProgress size={24} />
+          <Typography color="text.secondary">Analizuje dane treningowe...</Typography>
+        </Box>
       )}
 
       {result && (
@@ -364,7 +372,7 @@ export default function PerformancePredictionPanel() {
                         {result.peakWindow.startInDays}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        dni
+                        dni do startu
                       </Typography>
                     </Box>
                     <Divider orientation="vertical" flexItem />

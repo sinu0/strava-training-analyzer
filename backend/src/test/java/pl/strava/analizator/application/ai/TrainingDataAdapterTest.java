@@ -408,4 +408,50 @@ class TrainingDataAdapterTest {
 
         assertThat(context.getRecentActivities()).hasSize(1);
     }
+
+    @Test
+    void buildContext_newPredictionTypes_buildWithoutErrors() {
+        when(athleteProfileRepository.findFirst()).thenReturn(Optional.empty());
+        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(Collections.emptyList());
+        when(dailyMetricRepository.findNumericSeries(any(), any())).thenReturn(new TreeMap<>());
+
+        assertThat(adapter.buildContext(PredictionType.RACE_PACING_STRATEGY)).isNotNull();
+        assertThat(adapter.buildContext(PredictionType.NUTRITION_PLAN)).isNotNull();
+        assertThat(adapter.buildContext(PredictionType.RECOVERY_PLAN)).isNotNull();
+        assertThat(adapter.buildContext(PredictionType.INJURY_RISK)).isNotNull();
+        assertThat(adapter.buildContext(PredictionType.PEAK_TIMING)).isNotNull();
+    }
+
+    @Test
+    void buildContext_newPredictionTypes_includeExtraFields() {
+        when(athleteProfileRepository.findFirst()).thenReturn(Optional.empty());
+        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(Collections.emptyList());
+        when(dailyMetricRepository.findNumericSeries(any(), any())).thenReturn(new TreeMap<>());
+
+        TrainingContext ctx = adapter.buildContext(PredictionType.RACE_PACING_STRATEGY);
+        assertThat(ctx.getRaceProfile()).isNotNull();
+        assertThat(ctx.getRaceProfile()).containsKey("available");
+
+        ctx = adapter.buildContext(PredictionType.NUTRITION_PLAN);
+        assertThat(ctx.getPlannedActivity()).isNotNull();
+        assertThat(ctx.getWeatherConditions()).isNotNull();
+
+        ctx = adapter.buildContext(PredictionType.PEAK_TIMING);
+        assertThat(ctx.getEventDate()).isNotNull();
+        assertThat(ctx.getEventDate()).contains("not set");
+    }
+
+    @Test
+    void buildContext_allTwelveTypes_haveDaysBackMapping() {
+        when(athleteProfileRepository.findFirst()).thenReturn(Optional.empty());
+        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(Collections.emptyList());
+        when(dailyMetricRepository.findNumericSeries(any(), any())).thenReturn(new TreeMap<>());
+
+        for (PredictionType type : PredictionType.values()) {
+            TrainingContext ctx = adapter.buildContext(type);
+            assertThat(ctx).isNotNull();
+            assertThat(ctx.getAthleteProfile()).isNotNull();
+            assertThat(ctx.getTimeContext()).isNotNull();
+        }
+    }
 }

@@ -23,6 +23,7 @@ import PageContainer from '@/components/common/PageContainer';
 import Section from '@/components/common/Section';
 import { useAiStatus, useRunAiBatch } from '@/hooks/useAi';
 import {
+  useAutoSyncConfig,
   useClearSyncData,
   useProfile,
   useRebuildFtpHistory,
@@ -40,6 +41,7 @@ import {
   useSyncFull,
   useSyncRecent,
   useSyncStatus,
+  useUpdateAutoSyncConfig,
   useUpdateStravaConfig,
   useWeatherJobStatus,
   useWeatherLocations,
@@ -173,6 +175,8 @@ export default function AdminPage() {
   const { data: aiStatus } = useAiStatus();
   const runAiBatch = useRunAiBatch();
   const stravaConfigForm = useStravaConfigForm(updateConfig, connectStrava);
+  const { data: autoSyncConfig } = useAutoSyncConfig();
+  const updateAutoSyncConfig = useUpdateAutoSyncConfig();
 
   const isSyncing = syncStatus?.status === 'in_progress' || syncFull.isPending || syncRecent.isPending || syncPhotos.isPending || resyncStreams.isPending;
   const isRateLimited = syncStatus?.status === 'rate_limited';
@@ -222,10 +226,13 @@ export default function AdminPage() {
               syncPhotosPending={syncPhotos.isPending} resyncStreamsPending={resyncStreams.isPending}
               clearSyncDataPending={clearSyncData.isPending} recalculateMetricsPending={recalculateMetrics.isPending}
               recalculateActivityMetricsPending={recalculateActivityMetrics.isPending}
+              autoSyncIntervalMinutes={autoSyncConfig?.intervalMinutes}
+              updateAutoSyncPending={updateAutoSyncConfig.isPending}
               onSyncRecent={() => syncRecent.mutate()} onSyncFull={() => syncFull.mutate()}
               onSyncPhotos={() => syncPhotos.mutate()} onResyncStreams={() => resyncStreams.mutate()}
               onClearSyncData={() => clearSyncData.mutate()} onRecalculateMetrics={() => recalculateMetrics.mutate()}
               onRecalculateActivityMetrics={() => recalculateActivityMetrics.mutate()}
+              onUpdateAutoSyncInterval={(minutes) => updateAutoSyncConfig.mutate(minutes)}
             />
           </Grid>
           <Grid item xs={12} md={6}>

@@ -134,7 +134,7 @@ public class FatigueAndEnergyService {
     private int computeAtlFatigue(double atl, double ctl) {
         if (ctl <= 0) return 10;
         double ratio = atl / ctl;
-        return (int) Math.max(0, Math.min(25, (ratio - 0.3) / 0.06));
+        return (int) Math.max(0, Math.min(25, (ratio - 0.85) / 0.04));
     }
 
     private int computeMetabolicFatigue(LocalDate date, DateRange range) {

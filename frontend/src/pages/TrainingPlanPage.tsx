@@ -1,12 +1,11 @@
 import { Grid2 as Grid } from '@mui/material';
 import { useState } from 'react';
 
+import AdaptiveTrainingPanel from '../components/AdaptiveTrainingPanel';
 import EditorialHero from '../components/common/EditorialHero';
 import PageContainer from '../components/common/PageContainer';
 import TabsNav from '../components/common/TabsNav';
-import PlanGenerator from '../components/training/PlanGenerator';
-import PlanOptimizer from '../components/training/PlanOptimizer';
-import ProgramsList from '../components/training/ProgramsList';
+import PlanBuilder from '../components/training/PlanBuilder';
 import TrainingCalendar from '../components/training/TrainingCalendar';
 import WeeklyCoachCockpit from '../components/training/WeeklyCoachCockpit';
 import WorkoutLibrary from '../components/training/WorkoutLibrary';
@@ -14,10 +13,10 @@ import { STATUS_COLORS } from '../utils/colors';
 import { getPageHeroIllustrationPath } from '../utils/illustrationAssets';
 
 const tabs = [
-  { label: 'Biblioteka', value: 0 },
-  { label: 'Kalendarz', value: 1 },
-  { label: 'Programy', value: 2 },
-  { label: 'Optymalizator', value: 3 },
+  { label: 'Kalendarz', value: 0 },
+  { label: 'Biblioteka', value: 1 },
+  { label: 'Plan Builder', value: 2 },
+  { label: 'Adaptacja', value: 3 },
 ];
 
 export default function TrainingPlanPage() {
@@ -26,40 +25,33 @@ export default function TrainingPlanPage() {
   return (
     <PageContainer
       title="Planer treningowy"
-      subtitle="Biblioteka, kalendarz i programy są teraz osadzone w tym samym spokojniejszym, bardziej osobistym kierunku wizualnym."
+      subtitle="Kalendarz, biblioteka workoutów, plan builder i adaptacja."
     >
       <EditorialHero
         eyebrow="Plan tygodnia"
-        title="Program, kalendarz i biblioteka w jednym bardziej uporządkowanym flow."
-        description="Planer ma prowadzić przez tydzień jak notes trenera — z większą czytelnością, spokojniejszym obrazem i mniej przypadkowym zlepkiem modułów."
+        title="Zarządzanie treningami"
+        description="Przeglądaj kalendarz, buduj plany, korzystaj z biblioteki workoutów i adaptuj trening do aktualnego stanu."
         accentColor={STATUS_COLORS.success}
         imageSrc={getPageHeroIllustrationPath('training')}
         imageAlt="Planer hero"
         imagePosition="center 52%"
-        highlights={['Biblioteka jednostek', 'Kalendarz tygodnia', 'Programy i coach']}
+        highlights={['Kalendarz tygodniowy', 'Biblioteka workoutów', 'Plan Builder', 'Adaptacja do stanu']}
       />
       <TabsNav tabs={tabs} value={tab} onChange={setTab} />
 
-      {tab === 0 && <WorkoutLibrary />}
-      {tab === 1 && (
+      {tab === 0 && (
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 8 }}>
             <TrainingCalendar />
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
-            <Grid container spacing={3}>
-              <Grid size={12}>
-                <WeeklyCoachCockpit />
-              </Grid>
-              <Grid size={12}>
-                <PlanGenerator onGenerated={() => {}} />
-              </Grid>
-            </Grid>
+            <WeeklyCoachCockpit />
           </Grid>
         </Grid>
       )}
-      {tab === 2 && <ProgramsList />}
-      {tab === 3 && <PlanOptimizer />}
+      {tab === 1 && <WorkoutLibrary />}
+      {tab === 2 && <PlanBuilder />}
+      {tab === 3 && <AdaptiveTrainingPanel />}
     </PageContainer>
   );
 }

@@ -1,0 +1,17 @@
+# GPU override — użyj gdy nvidia-container-toolkit jest zainstalowany:
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
+#
+# Instalacja nvidia-container-toolkit (Ubuntu/Debian):
+#   sudo apt install nvidia-container-toolkit
+#   sudo nvidia-ctk runtime configure --runtime=docker
+#   sudo systemctl restart docker
+
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

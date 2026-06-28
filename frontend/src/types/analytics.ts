@@ -267,11 +267,19 @@ export interface WeeklyOptimalLoad {
   status: string;
 }
 
+export interface WeeklyBudget {
+  optimalTss: number;
+  completedTss: number;
+  remainingTss: number;
+  percentComplete: number;
+  status: string;
+  weekStart: string;
+  weekEnd: string;
+}
+
 export interface DailyOptimalLoad {
   date: string;
-  /** null for future projection days */
   actualTss: number | null;
-  /** projected target for future days; null for historical rows */
   projectedTss: number | null;
   ctl: number;
   atl: number;
@@ -280,7 +288,6 @@ export interface DailyOptimalLoad {
   optimalTarget: number;
   optimalMax: number;
   dangerThreshold: number;
-  /** INSUFFICIENT | UNDER | OPTIMAL | OVER | DANGER | NO_DATA | FUTURE */
   status: string;
   future: boolean;
 }

@@ -143,14 +143,8 @@ public class PerformancePredictionService {
             List<RecentWorkoutDto> recentWorkouts) {
         int score = 50;
 
-        // TSB component: -25 to +25
-        double tsbClamped = Math.max(-25, Math.min(25, tsb));
-        score += (int) Math.round(tsbClamped);
-
-        // ATL/CTL ratio component
-        if (atlCtlRatio > 1.50) score -= 25;
-        else if (atlCtlRatio > 1.30) score -= 15;
-        else if (atlCtlRatio > 1.15) score -= 5;
+        if (atlCtlRatio > 1.50) score -= 10;
+        else if (atlCtlRatio > 1.30) score -= 5;
         else if (atlCtlRatio < 0.70) score -= 5;
         else if (atlCtlRatio < 0.85) score += 5;
 

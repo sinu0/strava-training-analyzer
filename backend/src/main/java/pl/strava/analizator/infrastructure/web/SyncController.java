@@ -1,10 +1,14 @@
 package pl.strava.analizator.infrastructure.web;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,6 +36,11 @@ public class SyncController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(status);
     }
 
+    @GetMapping("/strava/check")
+    public ResponseEntity<SyncService.NewActivitiesCheck> checkNewActivities() {
+        return ResponseEntity.ok(syncService.checkForNewActivities());
+    }
+
     @PostMapping("/strava/photos")
     public ResponseEntity<SyncService.SyncStatus> syncActivityPhotos() {
         SyncService.SyncStatus status = syncService.syncActivityPhotos();
@@ -47,6 +56,20 @@ public class SyncController {
     @GetMapping("/status")
     public ResponseEntity<SyncService.SyncStatus> syncStatus() {
         return ResponseEntity.ok(syncService.getLastSyncStatus());
+    }
+
+    @GetMapping("/auto-sync-config")
+    public ResponseEntity<SyncService.AutoSyncConfig> getAutoSyncConfig() {
+        return ResponseEntity.ok(syncService.getAutoSyncConfig());
+    }
+
+    @PutMapping("/auto-sync-config")
+    public ResponseEntity<SyncService.AutoSyncConfig> updateAutoSyncConfig(@RequestBody Map<String, Integer> body) {
+        Integer minutes = body.get("intervalMinutes");
+        if (minutes == null || minutes < 1 || minutes > 1440) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(syncService.updateAutoSyncConfig(minutes));
     }
 
     @DeleteMapping("/data")

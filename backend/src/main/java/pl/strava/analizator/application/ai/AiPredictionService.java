@@ -154,67 +154,6 @@ public class AiPredictionService {
         return toDto(prediction, providerName);
     }
 
-    public List<PredictionResponseDto> getHistory(String predictionType, int limit) {
-        List<AiPrediction> predictions;
-        if (predictionType != null && !predictionType.isBlank()) {
-            predictions = predictionRepository.findByType(predictionType, limit);
-        } else {
-            predictions = predictionRepository.findRecent(limit);
-        }
-        return predictions.stream()
-                .map(p -> toDto(p, defaultProvider))
-                .toList();
-    }
-
-    public List<PredictionResponseDto> compareAcrossProviders(PredictionRequestDto request, List<String> providerNames) {
-        if (!enabled) {
-            throw new AiModuleDisabledException("AI module is not enabled.");
-        }
-
-        PredictionType type = PredictionType.valueOf(request.getPredictionType());
-        String modelId = request.getModelId() != null ? request.getModelId() : defaultModel;
-
-        TrainingContext context = trainingDataPort.buildContext(type);
-        PromptTemplate template = customPromptService.getActiveForType(type.name())
-                .map(cp -> PromptTemplate.builder()
-                        .type(type)
-                        .systemPrompt(cp.getSystemPrompt())
-                        .userPromptTemplate(cp.getUserPromptTemplate())
-                        .responseFormat(cp.getResponseFormat() != null ? cp.getResponseFormat()
-                                : promptRegistry.getTemplate(type).getResponseFormat())
-                        .build())
-                .orElse(promptRegistry.getTemplate(type));
-
-        Map<String, String> variables = contextToVariables(context);
-        variables.put("responseFormat", template.getResponseFormat());
-        if (request.getExtraParameters() != null) {
-            variables.putAll(request.getExtraParameters());
-        }
-        String systemPrompt = template.getSystemPrompt();
-        String userPrompt = template.resolveUserPrompt(variables);
-        String fullUserPrompt = userPrompt + "\n\nRespond ONLY with valid JSON in this format:\n" + template.getResponseFormat();
-
-        List<PredictionResponseDto> results = new java.util.ArrayList<>();
-        for (String providerName : providerNames) {
-            try {
-                LlmPort provider = providerRegistry.getProvider(providerName);
-                String rawResponse = provider.supportsToolCalling()
-                        ? toolCallingLoop.run(systemPrompt, fullUserPrompt, null, providerName, modelId)
-                        : provider.chat(systemPrompt, fullUserPrompt, modelId);
-                AiPrediction prediction = parseResponse(rawResponse, type, modelId, context);
-                try {
-                    predictionRepository.save(prediction, providerName);
-                } catch (Exception e) {
-                    log.warn("Failed to save comparison prediction: {}", e.getMessage());
-                }
-                results.add(toDto(prediction, providerName));
-            } catch (Exception e) {
-                log.warn("Comparison failed for provider {}: {}", providerName, e.getMessage());
-            }
-        }
-        return results;
-    }
-
     public AiModuleStatusDto getStatus() {
         List<String> providers = providerRegistry.getAvailableProviders();
         boolean modelAvailable = false;
@@ -267,6 +206,11 @@ public class AiPredictionService {
         vars.put("recentPredictionHistory", context.getRecentPredictionHistory() != null && !context.getRecentPredictionHistory().isEmpty()
                 ? String.join("\n", context.getRecentPredictionHistory())
                 : "No previous predictions for this type.");
+        vars.put("raceProfile", toJson(context.getRaceProfile()));
+        vars.put("plannedActivity", toJson(context.getPlannedActivity()));
+        vars.put("eventDate", context.getEventDate() != null ? context.getEventDate() : "not set");
+        vars.put("weatherConditions", toJson(context.getWeatherConditions()));
+        vars.put("knowledgeBase", ""); // Replaced by RagServiceV2 if available
         return vars;
     }
 
@@ -517,12 +461,23 @@ public class AiPredictionService {
                     data.getOrDefault("readinessScore", "?"));
             case TRAINING_COACH_SUMMARY -> String.format("Coach focus: %s",
                     data.getOrDefault("nextFocus", data.getOrDefault("summary", "?")));
+            case RACE_PACING_STRATEGY -> String.format("Pacing strategy: %s",
+                    data.getOrDefault("summary", "?"));
+            case NUTRITION_PLAN -> String.format("Nutrition: %s",
+                    data.getOrDefault("summary", "?"));
+            case RECOVERY_PLAN -> String.format("Recovery: %s",
+                    data.getOrDefault("summary", "?"));
+            case INJURY_RISK -> String.format("Injury risk: %s",
+                    data.getOrDefault("riskLevel", data.getOrDefault("summary", "?")));
+            case PEAK_TIMING -> String.format("Peak timing: %s",
+                    data.getOrDefault("summary", "?"));
         };
     }
 
     private static final List<String> ALL_PREDICTION_TYPES = List.of(
             "TRAINING_TYPE_RECOMMENDATION", "FATIGUE_PREDICTION", "OVERTRAINING_RISK",
-            "PERFORMANCE_TREND", "FTP_PREDICTION", "RACE_READINESS", "TRAINING_COACH_SUMMARY");
+            "PERFORMANCE_TREND", "FTP_PREDICTION", "RACE_READINESS", "TRAINING_COACH_SUMMARY",
+            "RACE_PACING_STRATEGY", "NUTRITION_PLAN", "RECOVERY_PLAN", "INJURY_RISK", "PEAK_TIMING");
 
     public BatchRunResultDto runBatch(boolean skipExisting) {
         log.info("Starting batch AI predictions (skipExisting={})", skipExisting);
@@ -580,51 +535,6 @@ public class AiPredictionService {
                 .map(p -> toDto(p, defaultProvider))
                 .sorted(Comparator.comparing(PredictionResponseDto::getPredictionType))
                 .toList();
-    }
-
-    public PredictionResponseDto verifyPrediction(UUID predictionId, Map<String, Object> actualData) {
-        AiPrediction prediction = predictionRepository.findById(predictionId);
-        if (prediction == null) {
-            throw new IllegalArgumentException("Prediction not found: " + predictionId);
-        }
-        double accuracy = computeAccuracy(prediction.getStructuredData(), actualData, prediction.getType());
-        AiPrediction updated = predictionRepository.updateAccuracy(predictionId, actualData, accuracy);
-        return toDto(updated, defaultProvider);
-    }
-
-    private double computeAccuracy(Map<String, Object> predicted, Map<String, Object> actual, PredictionType type) {
-        try {
-            return switch (type) {
-                case FTP_PREDICTION -> compareNumeric(predicted, actual, "currentFtpEstimate");
-                case FATIGUE_PREDICTION -> compareNumeric(predicted, actual, "fatigueLevel");
-                case OVERTRAINING_RISK -> compareNumeric(predicted, actual, "riskScore");
-                case RACE_READINESS -> compareNumeric(predicted, actual, "readinessScore");
-                default -> compareGeneric(predicted, actual);
-            };
-        } catch (Exception e) {
-            log.warn("Failed to compute accuracy: {}", e.getMessage());
-            return 0.5;
-        }
-    }
-
-    private double compareNumeric(Map<String, Object> predicted, Map<String, Object> actual, String key) {
-        if (!predicted.containsKey(key) || !actual.containsKey(key)) {
-            return compareGeneric(predicted, actual);
-        }
-        double predictedVal = ((Number) predicted.get(key)).doubleValue();
-        double actualVal = ((Number) actual.get(key)).doubleValue();
-        if (actualVal == 0) return predictedVal == 0 ? 1.0 : 0.5;
-        double error = Math.abs(predictedVal - actualVal) / actualVal;
-        return Math.max(0, 1.0 - error);
-    }
-
-    private double compareGeneric(Map<String, Object> predicted, Map<String, Object> actual) {
-        if (predicted.isEmpty() || actual.isEmpty()) return 0.5;
-        long matching = actual.keySet().stream()
-                .filter(predicted::containsKey)
-                .filter(k -> String.valueOf(predicted.get(k)).equals(String.valueOf(actual.get(k))))
-                .count();
-        return (double) matching / actual.size();
     }
 
     private PredictionResponseDto toDto(AiPrediction prediction, String providerName) {

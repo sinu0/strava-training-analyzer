@@ -14,6 +14,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,25 +25,29 @@ import pl.strava.analizator.domain.ai.LlmPort;
 import pl.strava.analizator.domain.ai.ToolCall;
 
 /**
- * LLM adapter for Ollama (local inference server).
+ * LLM adapter for Ollama (local inference server) — V1.
  * Activated when ai.provider=ollama or ai.ollama.enabled=true.
  * Ollama API: POST /api/chat with {model, messages, stream:false}
  * Supports tool calling when the loaded model has that capability.
+ *
+ * @deprecated Use {@link pl.strava.analizator.infrastructure.ai.v2.OllamaAdapterV2} instead.
  */
 @Component
 @ConditionalOnProperty(name = "ai.ollama.enabled", havingValue = "true", matchIfMissing = false)
+@Deprecated
 public class OllamaAdapter implements LlmPort {
 
     private static final Logger log = LoggerFactory.getLogger(OllamaAdapter.class);
 
-    /** Ordered preference list — first match found in Ollama wins. */
+    @Deprecated(forRemoval = true)
     private static final List<String> MODEL_PREFERENCE = List.of(
+            "qwen3.6:27b", "qwen3.6:35b",
+            "qwen3.5:27b", "qwen3.5:35b",
+            "deepseek-r1:32b", "deepseek-r1:14b", "deepseek-r1:8b",
             "qwen2.5:72b", "qwen2.5:32b", "qwen2.5:14b", "qwen2.5:7b",
-            "qwen2.5:3b", "qwen2.5:1.5b", "qwen2.5:0.5b",
-            "llama3.3:70b", "llama3.1:70b", "llama3.1:8b",
-            "llama3.2:3b", "llama3.2:1b",
-            "mistral:7b", "mistral:latest",
-            "gemma2:9b", "gemma2:2b"
+            "qwen3.5:14b", "qwen3.5:9b",
+            "llama3.3:70b", "llama3.1:8b",
+            "mistral:7b", "gemma2:9b"
     );
 
     private final String baseUrl;
@@ -58,7 +63,14 @@ public class OllamaAdapter implements LlmPort {
             RestTemplate restTemplate) {
         this.baseUrl = baseUrl;
         this.configuredModel = configuredModel;
-        this.restTemplate = restTemplate;
+        this.restTemplate = createLongTimeoutRestTemplate();
+    }
+
+    private static RestTemplate createLongTimeoutRestTemplate() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(30_000);
+        factory.setReadTimeout(600_000);
+        return new RestTemplate(factory);
     }
 
     private String effectiveModel(String modelId) {

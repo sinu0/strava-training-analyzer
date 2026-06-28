@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import StatusPill from '@/components/layout/StatusPill';
+import TopBarSyncButton from '@/components/layout/TopBarSyncButton';
 import type {
   BlockHealth,
   ReadinessData,
@@ -190,6 +191,8 @@ export default function TopBar({
               ftpProgress={ftpProgress}
               weatherGradient={weatherGradient}
             />
+
+            <TopBarSyncButton />
 
             <IconButton
               onClick={(e) => setAnchor(e.currentTarget)}

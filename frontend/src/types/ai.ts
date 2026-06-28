@@ -1,5 +1,3 @@
-import { AI_PREDICTION_COLORS } from '@/utils/colors';
-
 export interface PredictionRequest {
   predictionType: PredictionType;
   modelId?: string;
@@ -48,18 +46,6 @@ export const PREDICTION_TYPE_LABELS: Record<PredictionType, string> = {
   RACE_READINESS: 'Gotowość wyścigowa',
   TRAINING_COACH_SUMMARY: 'Podsumowanie trenera AI',
 };
-
-export const PREDICTION_TYPE_ICONS: Record<PredictionType, string> = {
-  FTP_PREDICTION: 'BoltIcon',
-  FATIGUE_PREDICTION: 'BatteryAlertIcon',
-  TRAINING_TYPE_RECOMMENDATION: 'FitnessCenterIcon',
-  PERFORMANCE_TREND: 'TrendingUpIcon',
-  OVERTRAINING_RISK: 'WarningIcon',
-  RACE_READINESS: 'EmojiEventsIcon',
-  TRAINING_COACH_SUMMARY: 'AutoAwesomeIcon',
-};
-
-export const PREDICTION_TYPE_COLORS: Record<PredictionType, string> = AI_PREDICTION_COLORS;
 
 // AI Activity Note (Coach analysis per activity)
 export interface AiActivityNote {

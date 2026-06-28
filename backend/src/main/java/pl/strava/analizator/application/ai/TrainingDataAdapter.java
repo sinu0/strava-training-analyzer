@@ -87,10 +87,14 @@ public class TrainingDataAdapter implements TrainingDataPort {
                 .coachSummary(buildCoachSummary())
                 .coachMemory(buildCoachMemory())
                 .recentPredictionHistory(buildPredictionHistory(predictionType))
+                .raceProfile(buildRaceProfile())
+                .plannedActivity(buildPlannedActivity())
+                .eventDate(buildEventDate())
+                .weatherConditions(buildWeatherConditions())
                 .build();
     }
 
-    private int getDaysBack(PredictionType type) {
+    public int getDaysBack(PredictionType type) {
         return switch (type) {
             case TRAINING_TYPE_RECOMMENDATION -> 7;
             case FATIGUE_PREDICTION -> 14;
@@ -98,6 +102,11 @@ public class TrainingDataAdapter implements TrainingDataPort {
             case PERFORMANCE_TREND -> 60;
             case RACE_READINESS -> 21;
             case TRAINING_COACH_SUMMARY -> 28;
+            case RACE_PACING_STRATEGY -> 90;
+            case NUTRITION_PLAN -> 7;
+            case RECOVERY_PLAN -> 14;
+            case INJURY_RISK -> 30;
+            case PEAK_TIMING -> 60;
         };
     }
 
@@ -216,16 +225,15 @@ public class TrainingDataAdapter implements TrainingDataPort {
     }
 
     private Map<String, Object> buildFtpHistory() {
-        // Read from daily metrics if FTP history data exists
-        Map<String, Object> history = new HashMap<>();
         LocalDate from = LocalDate.now().minusDays(365);
         DateRange range = DateRange.of(from, LocalDate.now());
         Map<LocalDate, BigDecimal> ftpSeries = dailyMetricRepository.findNumericSeries("ftp", range);
         if (!ftpSeries.isEmpty()) {
-            history.put("ftpHistory", ftpSeries.entrySet().stream()
-                    .collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue)));
+            return ftpSeries.entrySet().stream()
+                    .collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue,
+                            (a, b) -> b, LinkedHashMap::new));
         }
-        return history;
+        return Map.of();
     }
 
     private Map<String, Object> buildWeeklyVolume() {
@@ -476,7 +484,7 @@ public class TrainingDataAdapter implements TrainingDataPort {
 
     private Map<String, Object> buildReadiness() {
         Map<String, Object> readiness = new HashMap<>();
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
         DateRange range = DateRange.of(today, today);
 
         Map<LocalDate, BigDecimal> ctlSeries = dailyMetricRepository.findNumericSeries("ctl", range);
@@ -651,5 +659,30 @@ public class TrainingDataAdapter implements TrainingDataPort {
                                 ? String.format(", accuracy=%.2f", p.getAccuracyScore())
                                 : ""))
                 .toList();
+    }
+
+    private Map<String, Object> buildRaceProfile() {
+        Map<String, Object> profile = new LinkedHashMap<>();
+        profile.put("available", false);
+        profile.put("note", "Race profile not yet configured. Provide distance, elevation, target time via API.");
+        return profile;
+    }
+
+    private Map<String, Object> buildPlannedActivity() {
+        Map<String, Object> plan = new LinkedHashMap<>();
+        plan.put("available", false);
+        plan.put("note", "Planned activity details not yet configured.");
+        return plan;
+    }
+
+    private String buildEventDate() {
+        return "not set — provide via API";
+    }
+
+    private Map<String, Object> buildWeatherConditions() {
+        Map<String, Object> weather = new LinkedHashMap<>();
+        weather.put("available", false);
+        weather.put("note", "Weather data not integrated yet.");
+        return weather;
     }
 }

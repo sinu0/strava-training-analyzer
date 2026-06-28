@@ -132,4 +132,9 @@ public class ActivityRepositoryAdapter implements ActivityRepository {
     public double sumDistanceMetersForActivitiesWithPolylines() {
         return jpaRepository.sumDistanceMForActivitiesWithPolylines().orElse(0.0);
     }
+
+    @Override
+    public Optional<OffsetDateTime> findLatestStartedAtBySource(String source) {
+        return jpaRepository.findLatestStartedAtBySource(source);
+    }
 }

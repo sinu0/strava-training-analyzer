@@ -108,6 +108,13 @@ public class StravaSyncAdapter implements ActivityDataSource, SyncDataSource {
                 .toList();
     }
 
+    @Override
+    public int countNewActivities(AthleteProfile profile, long afterEpoch) {
+        setProfile(profile);
+        List<StravaActivityDto> dtos = stravaApiClient.getActivities(profile, 1, afterEpoch, 100);
+        return dtos.size();
+    }
+
     private void requireProfile() {
         if (currentProfile == null) {
             throw new IllegalStateException("AthleteProfile not set. Call setProfile() first.");

@@ -106,6 +106,8 @@ vi.mock('../hooks/useAnalytics', () => ({
       nextFocus: 'Broń jednego akcentu progowego.',
     },
   }),
+  useEvents: () => ({ data: [], isLoading: false }),
+  useCreateEvent: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('../hooks/useAi', () => ({
@@ -130,6 +132,16 @@ vi.mock('../hooks/useAi', () => ({
   useAiPredict: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
+vi.mock('../hooks/usePerformancePrediction', () => ({
+  useCurrentPerformanceState: () => ({ data: null, isLoading: false }),
+  usePerformancePrediction: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
+vi.mock('../hooks/useTrainingOptimizer', () => ({
+  useOptimizePlan: () => ({ mutate: vi.fn(), isPending: false, isError: false, error: null }),
+  useApplyOptimizedPlan: () => ({ mutate: vi.fn(), isPending: false, isError: false, error: null }),
+}));
+
 function renderWithProviders(ui: React.ReactElement) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
@@ -148,43 +160,43 @@ describe('TrainingPlanPage', () => {
     expect(screen.getByRole('img', { name: 'Planer hero' })).toBeDefined();
   });
 
-  it('shows library tab as active', () => {
+  it('shows calendar tab as active', () => {
     renderWithProviders(<TrainingPlanPage />);
-    const tab = screen.getByText('Biblioteka');
+    const tab = screen.getByText('Kalendarz');
     expect(tab).toBeDefined();
     expect(tab.closest('[role="tab"]')?.getAttribute('aria-selected')).toBe('true');
   });
 
-  it('all three tabs are clickable', () => {
+  it('all tabs are clickable', () => {
     renderWithProviders(<TrainingPlanPage />);
-    const kalTab = screen.getByText('Kalendarz');
-    const progTab = screen.getByText('Programy');
-    expect(kalTab.closest('[role="tab"]')?.classList.contains('Mui-disabled')).toBe(false);
-    expect(progTab.closest('[role="tab"]')?.classList.contains('Mui-disabled')).toBe(false);
+    const kalTab = screen.getByRole('tab', { name: 'Kalendarz' });
+    const bibTab = screen.getByRole('tab', { name: 'Biblioteka' });
+    const planTab = screen.getByRole('tab', { name: 'Plan Builder' });
+    const adaptTab = screen.getByRole('tab', { name: 'Adaptacja' });
+    expect(kalTab.classList.contains('Mui-disabled')).toBe(false);
+    expect(bibTab.classList.contains('Mui-disabled')).toBe(false);
+    expect(planTab.classList.contains('Mui-disabled')).toBe(false);
+    expect(adaptTab.classList.contains('Mui-disabled')).toBe(false);
   });
 
   it('shows workout library content', () => {
     renderWithProviders(<TrainingPlanPage />);
+    fireEvent.click(screen.getByText('Biblioteka'));
     expect(screen.getByText('Wszystkie')).toBeDefined();
   });
 
   it('shows calendar when Kalendarz tab is clicked', () => {
     renderWithProviders(<TrainingPlanPage />);
-    fireEvent.click(screen.getByText('Kalendarz'));
-    expect(screen.getByText('Wizard planu')).toBeDefined();
     expect(screen.getByText('Weekly coach cockpit')).toBeDefined();
     expect(screen.getByText('Progresja systemów')).toBeDefined();
-    expect(screen.getAllByText('Coach AI').length).toBeGreaterThan(0);
-    expect(screen.getByText('1/1 bodźców celu')).toBeDefined();
-    expect(screen.getByText('Stan bloku')).toBeDefined();
-    // Day headers visible
     expect(screen.getByText('Pn')).toBeDefined();
     expect(screen.getByText('Nd')).toBeDefined();
   });
 
-  it('shows programs list when Programy tab is clicked', () => {
+  it('shows plan builder when Plan Builder tab is clicked', () => {
     renderWithProviders(<TrainingPlanPage />);
-    fireEvent.click(screen.getByText('Programy'));
-    expect(screen.getByText('Build')).toBeDefined();
+    fireEvent.click(screen.getByRole('tab', { name: 'Plan Builder' }));
+    const elements = screen.getAllByText('Plan Builder');
+    expect(elements.length).toBeGreaterThanOrEqual(2);
   });
 });

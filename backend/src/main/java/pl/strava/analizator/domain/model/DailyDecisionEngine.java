@@ -23,8 +23,8 @@ public class DailyDecisionEngine {
     private static final double TSB_HIGH_FATIGUE = -20.0;
     private static final double TSB_MODERATE_FATIGUE = -10.0;
     private static final double READINESS_CRITICAL = 25.0;
-    private static final double READINESS_LOW = 45.0;
-    private static final double READINESS_MODERATE = 60.0;
+    private static final double READINESS_LOW = 40.0;
+    private static final double READINESS_MODERATE = 55.0;
     private static final double ATL_CTL_RATIO_CRITICAL = 1.5;
     private static final double ATL_CTL_RATIO_HIGH = 1.3;
     private static final double MONOTONY_HIGH = 2.5;
@@ -127,10 +127,10 @@ public class DailyDecisionEngine {
             double ratio = atl / ctl;
             if (ratio >= ATL_CTL_RATIO_CRITICAL) {
                 result.reasons.add(reason("SAFETY", "ATL/CTL", "ATL/CTL ratio critically high", "ratio=" + round(ratio)));
-                flags += 2;
+                if (tsb > TSB_MODERATE_FATIGUE) flags += 2;
             } else if (ratio >= ATL_CTL_RATIO_HIGH) {
                 result.reasons.add(reason("SAFETY", "ATL/CTL", "ATL/CTL ratio elevated", "ratio=" + round(ratio)));
-                flags += 1;
+                if (tsb > TSB_MODERATE_FATIGUE) flags += 1;
             }
         }
 
@@ -242,7 +242,7 @@ public class DailyDecisionEngine {
             return DecisionType.INDOOR;
         }
 
-        boolean needsModify = safety.flags >= 2
+        boolean needsModify = safety.flags >= 3
                 || !adaptation.effective
                 || !plan.hasPlan
                 || context.severeTimeShortage;
@@ -279,8 +279,10 @@ public class DailyDecisionEngine {
 
         if (decision == DecisionType.MODIFY) {
             double reductionFactor = 1.0;
-            if (safety.flags >= 2) {
+            if (safety.flags >= 4) {
                 reductionFactor = 0.4;
+            } else if (safety.flags >= 2) {
+                reductionFactor = 0.6;
             } else if (context.severeTimeShortage) {
                 reductionFactor = Math.min(0.5, (double) input.timeAvailableMin / duration);
             } else if (context.limitedTime) {
@@ -291,7 +293,7 @@ public class DailyDecisionEngine {
             int modDuration = (int) Math.round(duration * reductionFactor);
 
             String modType = input.plannedType != null ? input.plannedType : "ENDURANCE";
-            if (safety.flags >= 2) {
+            if (safety.flags >= 3) {
                 modType = "RECOVERY";
             }
 
@@ -300,7 +302,7 @@ public class DailyDecisionEngine {
                     .durationMin(Math.max(20, modDuration))
                     .targetTss(Math.max(10, modTss))
                     .difficulty(determineDifficulty(safety))
-                    .intensityDescription("Modified — reduced volume" + (safety.flags >= 2 ? " and intensity" : ""))
+                    .intensityDescription("Modified — reduced volume" + (safety.flags >= 3 ? " and intensity" : ""))
                     .description("Shortened session: " + modDuration + "min at moderate effort")
                     .isIndoor(false)
                     .build();

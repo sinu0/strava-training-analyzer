@@ -372,7 +372,7 @@ public class TrainingPrioritiesService {
         if (!ctlSeries.isEmpty()) ctl = ctlSeries.values().stream()
                 .mapToDouble(BigDecimal::doubleValue).average().orElse(50);
 
-        double atlFatigue = Math.min(100, Math.max(0, (atl - ctl) * 2.0 + 50));
+        double atlFatigue = Math.min(100, Math.max(0, (atl - ctl) * 2.0 + 25));
 
         // Muscular: power fade from recent rides
         double avgPowerFade = computeAvgPowerFade(activities);

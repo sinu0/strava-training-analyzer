@@ -33,4 +33,12 @@ public class TrainingContext {
     private Map<String, Object> coachMemory;
     /** Recent past predictions for this type — gives model historical context to avoid repetition */
     private List<String> recentPredictionHistory;
+    /** Race pacing: race distance, elevation, target time */
+    private Map<String, Object> raceProfile;
+    /** Nutrition: planned activity details */
+    private Map<String, Object> plannedActivity;
+    /** Peak timing: target event date */
+    private String eventDate;
+    /** Nutrition: weather conditions for ride */
+    private Map<String, Object> weatherConditions;
 }

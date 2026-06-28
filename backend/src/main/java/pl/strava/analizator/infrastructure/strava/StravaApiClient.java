@@ -45,8 +45,12 @@ public class StravaApiClient {
     private final ObjectMapper objectMapper;
 
     public List<StravaActivityDto> getActivities(AthleteProfile profile, int page, Long after) {
+        return getActivities(profile, page, after, PER_PAGE);
+    }
+
+    public List<StravaActivityDto> getActivities(AthleteProfile profile, int page, Long after, int perPage) {
         String token = oAuth2Service.getValidAccessToken(profile);
-        String url = stravaConfigProvider.apiBaseUrl() + "/athlete/activities?per_page=" + PER_PAGE + "&page=" + page;
+        String url = stravaConfigProvider.apiBaseUrl() + "/athlete/activities?per_page=" + perPage + "&page=" + page;
         if (after != null) {
             url += "&after=" + after;
         }

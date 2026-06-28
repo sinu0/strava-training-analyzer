@@ -1,6 +1,7 @@
 package pl.strava.analizator.application;
 
 import java.math.BigDecimal;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +21,8 @@ import pl.strava.analizator.application.dto.AdaptiveCoachResponse.FatigueDto;
 import pl.strava.analizator.application.dto.AdaptiveCoachResponse.GoalProgressDto;
 import pl.strava.analizator.application.dto.AdaptiveCoachResponse.RiskDto;
 import pl.strava.analizator.application.dto.AdaptiveCoachResponse.SessionOptionDto;
+import pl.strava.analizator.application.dto.ReadinessDto;
+import pl.strava.analizator.application.dto.ReadinessHealthSignalsDto;
 import pl.strava.analizator.domain.coach.engine.AccountabilityEngine;
 import pl.strava.analizator.domain.coach.engine.AdaptiveScoringEngine;
 import pl.strava.analizator.domain.coach.engine.AiInputInterpreter;
@@ -42,9 +45,11 @@ import pl.strava.analizator.domain.coach.model.SessionOption;
 import pl.strava.analizator.domain.coach.model.TrajectoryPhase;
 import pl.strava.analizator.domain.model.AthleteProfile;
 import pl.strava.analizator.domain.model.DailySummary;
+import pl.strava.analizator.domain.model.TrainingDayEnvironment;
 import pl.strava.analizator.domain.port.AthleteProfileRepository;
 import pl.strava.analizator.domain.port.DailyMetricRepository;
 import pl.strava.analizator.domain.port.DailySummaryRepository;
+import pl.strava.analizator.domain.port.TrainingDayEnvironmentPort;
 
 @Service
 public class AdaptiveCoachService {
@@ -57,6 +62,8 @@ public class AdaptiveCoachService {
     private final DailyMetricRepository dailyMetricRepository;
     private final DailySummaryRepository dailySummaryRepository;
     private final AthleteProfileRepository athleteProfileRepository;
+    private final AnalyticsService analyticsService;
+    private final TrainingDayEnvironmentPort trainingDayEnvironmentPort;
 
     private final GoalEngine goalEngine;
     private final AdaptiveScoringEngine scoringEngine;
@@ -68,10 +75,14 @@ public class AdaptiveCoachService {
 
     public AdaptiveCoachService(DailyMetricRepository dailyMetricRepository,
                                  DailySummaryRepository dailySummaryRepository,
-                                 AthleteProfileRepository athleteProfileRepository) {
+                                 AthleteProfileRepository athleteProfileRepository,
+                                 AnalyticsService analyticsService,
+                                 TrainingDayEnvironmentPort trainingDayEnvironmentPort) {
         this.dailyMetricRepository = dailyMetricRepository;
         this.dailySummaryRepository = dailySummaryRepository;
         this.athleteProfileRepository = athleteProfileRepository;
+        this.analyticsService = analyticsService;
+        this.trainingDayEnvironmentPort = trainingDayEnvironmentPort;
         this.goalEngine = new GoalEngine();
         this.scoringEngine = new AdaptiveScoringEngine();
         this.aiInterpreter = new AiInputInterpreter();
@@ -182,32 +193,39 @@ public class AdaptiveCoachService {
         LocalDate today = LocalDate.now();
         LocalDate yesterday = today.minusDays(1);
 
-        double ctl = getMetric(today, "ctl", yesterday, 50);
-        double atl = getMetric(today, "atl", yesterday, 45);
-        double tsb = getMetric(today, "tsb", yesterday, 5);
-        double monotony = getMetric(today, "training_monotony", yesterday, 1.2);
+        ReadinessDto readiness = analyticsService.getReadiness();
+        double ctl = readiness.getCtl();
+        double atl = readiness.getAtl();
+        double tsb = readiness.getTsb();
+        double readinessScore = readiness.getScore();
+
+        double monotony = dailyMetricRepository.findNumericValue(today, "training_monotony")
+                .or(() -> dailyMetricRepository.findNumericValue(yesterday, "training_monotony"))
+                .map(BigDecimal::doubleValue).orElse(1.2);
 
         DailySummary summary = dailySummaryRepository.findByDate(today)
                 .or(() -> dailySummaryRepository.findByDate(yesterday))
                 .orElse(null);
 
-        AthleteProfile profile = athleteProfileRepository.findFirst().orElse(null);
-
-        double sleep = summary != null && summary.getSleepScore() != null
-                ? summary.getSleepScore().doubleValue() : 75;
-        double bodyBattery = summary != null && summary.getBodyBattery() != null
-                ? summary.getBodyBattery().doubleValue() : 70;
+        ReadinessHealthSignalsDto healthSignals = readiness.getHealthSignals();
+        double sleep = healthSignals != null && healthSignals.getSleepScore() != null
+                ? healthSignals.getSleepScore().doubleValue() : 75;
+        double bodyBattery = healthSignals != null && healthSignals.getBodyBattery() != null
+                ? healthSignals.getBodyBattery().doubleValue() : 70;
         double stress = summary != null && summary.getStressAvg() != null
                 ? summary.getStressAvg().doubleValue() : 30;
         double hrv = summary != null && summary.getHrvRmssd() != null
                 ? summary.getHrvRmssd().doubleValue() : 0;
+
+        AthleteProfile profile = athleteProfileRepository.findFirst().orElse(null);
         double restingHr = profile != null && profile.getRestingHrBpm() != null
                 ? profile.getRestingHrBpm().doubleValue() : 55;
         double baselineHrv = 50;
-
         double baselineRestingHr = restingHr > 0 ? restingHr : 52;
 
-        double readiness = computeReadiness(tsb, ctl, atl, sleep, bodyBattery, stress);
+        java.util.Optional<TrainingDayEnvironment> env = trainingDayEnvironmentPort.getEnvironmentFor(today);
+        int weatherScore = env.map(TrainingDayEnvironment::getOutdoorScore).orElse(80);
+        String weatherDesc = env.map(TrainingDayEnvironment::getWeatherDescription).orElse("");
 
         Map<String, Double> metrics = new HashMap<>();
         double ftp = profile != null && profile.getFtpWatts() != null
@@ -219,16 +237,16 @@ public class AdaptiveCoachService {
         return AthleteContext.builder()
                 .ctl(ctl).atl(atl).tsb(tsb)
                 .trainingMonotony(monotony)
-                .readinessScore(readiness)
+                .readinessScore(readinessScore)
                 .hrvRmssd(hrv).baselineHrv(baselineHrv)
                 .restingHr(restingHr).baselineRestingHr(baselineRestingHr)
                 .sleepScore(sleep).bodyBattery(bodyBattery).stressAvg(stress)
                 .timeAvailableMinutes(90)
-                .weatherScore(80).weatherDescription("")
+                .weatherScore(weatherScore).weatherDescription(weatherDesc)
                 .recentSessionOutcomes(List.of())
                 .metricValues(metrics)
                 .hasHrvData(hrv > 0)
-                .hasWeatherData(true)
+                .hasWeatherData(env.isPresent())
                 .hasRecentActivities(true)
                 .completedRecentSessions(5)
                 .expectedRecentSessions(6)
@@ -271,27 +289,6 @@ public class AdaptiveCoachService {
                 .expectedRecentSessions(request.getExpectedRecentSessions() != null
                         ? request.getExpectedRecentSessions() : system.getExpectedRecentSessions())
                 .build();
-    }
-
-    private double getMetric(LocalDate today, String metric, LocalDate fallback, double defaultVal) {
-        return dailyMetricRepository.findNumericValue(today, metric)
-                .or(() -> dailyMetricRepository.findNumericValue(fallback, metric))
-                .map(BigDecimal::doubleValue)
-                .orElse(defaultVal);
-    }
-
-    private double computeReadiness(double tsb, double ctl, double atl,
-                                     double sleep, double bodyBattery, double stress) {
-        double tsbScore = Math.max(0, Math.min(60, (tsb + 30) * 2));
-        double fitnessBonus = Math.min(25, ctl * 0.5);
-        double fatiguePenalty = ctl > 0 && atl > ctl * 1.3 ? Math.min(15, (atl - ctl) * 0.5) : 0;
-        double base = Math.max(0, Math.min(100, tsbScore + fitnessBonus - fatiguePenalty));
-
-        double sleepAdj = (sleep > 0) ? (sleep - 50) * 0.3 : 0;
-        double bbAdj = (bodyBattery > 0) ? (bodyBattery - 50) * 0.2 : 0;
-        double stressAdj = (stress > 0) ? (35 - stress) * 0.3 : 0;
-
-        return Math.max(0, Math.min(100, base + sleepAdj + bbAdj + stressAdj));
     }
 
     private Goal mapGoal(AdaptiveCoachRequest request) {

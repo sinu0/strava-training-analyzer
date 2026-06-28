@@ -10,6 +10,10 @@ vi.mock('../components/layout/StatusPill', () => ({
   default: () => <div>Status pill</div>,
 }));
 
+vi.mock('../components/layout/TopBarSyncButton', () => ({
+  default: () => <div>Sync button</div>,
+}));
+
 beforeAll(() => {
   (globalThis as Record<string, unknown>).ResizeObserver = class {
     observe() {}

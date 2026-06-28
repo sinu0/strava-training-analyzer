@@ -98,6 +98,20 @@ public class GoalEngine {
     }
 
     public TrajectoryPhase determinePhase(Goal goal, double gapPercent, double consistencyRatio) {
+        if (goal.getDeadline() != null) {
+            long daysToDeadline = ChronoUnit.DAYS.between(LocalDate.now(), goal.getDeadline());
+            long daysSinceDeadline = -daysToDeadline;
+
+            if (daysSinceDeadline > 0 && daysSinceDeadline <= 14) {
+                return TrajectoryPhase.TRANSITION;
+            }
+            if (daysToDeadline >= 0 && daysToDeadline <= 7) {
+                return TrajectoryPhase.TAPER;
+            }
+            if (daysToDeadline >= 0 && daysToDeadline <= 14 && gapPercent < 10.0) {
+                return TrajectoryPhase.PEAK;
+            }
+        }
         if (gapPercent < 10.0 && consistencyRatio > 0.8) {
             return TrajectoryPhase.PEAK;
         }

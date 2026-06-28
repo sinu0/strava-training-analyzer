@@ -101,21 +101,8 @@ export function useAiPredict() {
   return useMutation<PredictionResponse, Error, PredictionRequest>({
     mutationFn: requestPredictionWithRecovery,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['aiHistory'] });
       queryClient.invalidateQueries({ queryKey: ['aiLatest'] });
       queryClient.invalidateQueries({ queryKey: ['todayAiTips'] });
-    },
-  });
-}
-
-export function useAiHistory(type?: string, limit = 20) {
-  return useQuery<PredictionResponse[]>({
-    queryKey: ['aiHistory', type, limit],
-    queryFn: async () => {
-      const params: Record<string, string | number> = { limit };
-      if (type) params.type = type;
-      const { data } = await apiClient.get<PredictionResponse[]>('/ai/predictions', { params });
-      return data;
     },
   });
 }
@@ -155,7 +142,6 @@ export function useRunAiBatch() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['todayAiTips'] });
-      queryClient.invalidateQueries({ queryKey: ['aiHistory'] });
     },
   });
 }

@@ -12,6 +12,7 @@ import java.util.UUID;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import lombok.Getter;
@@ -54,6 +55,7 @@ public class SyncService {
     private final WorkoutEvaluationService workoutEvaluationService;
     private final ActivityTrainingEffectRepository trainingEffectRepository;
     private final DailySummaryRepository dailySummaryRepository;
+    private final AutoSyncConfigPort autoSyncConfigPort;
 
     public SyncService(AthleteProfileRepository profileRepository,
                        ActivityRepository activityRepository,
@@ -69,7 +71,8 @@ public class SyncService {
                        LapMetricsService lapMetricsService,
                        WorkoutEvaluationService workoutEvaluationService,
                        ActivityTrainingEffectRepository trainingEffectRepository,
-                       DailySummaryRepository dailySummaryRepository) {
+                       DailySummaryRepository dailySummaryRepository,
+                       AutoSyncConfigPort autoSyncConfigPort) {
         this.profileRepository = profileRepository;
         this.activityRepository = activityRepository;
         this.activityMetricRepository = activityMetricRepository;
@@ -85,6 +88,7 @@ public class SyncService {
         this.workoutEvaluationService = workoutEvaluationService;
         this.trainingEffectRepository = trainingEffectRepository;
         this.dailySummaryRepository = dailySummaryRepository;
+        this.autoSyncConfigPort = autoSyncConfigPort;
     }
 
     @Getter
@@ -171,7 +175,8 @@ public class SyncService {
         persistSyncStatus(lastSyncStatus);
 
         OffsetDateTime thirtyDaysAgo = OffsetDateTime.now(ZoneOffset.UTC).minusDays(30);
-        long afterEpoch = thirtyDaysAgo.toEpochSecond();
+        OffsetDateTime latestActivity = activityRepository.findLatestStartedAtBySource("strava").orElse(null);
+        long afterEpoch = latestActivity != null ? latestActivity.toEpochSecond() : thirtyDaysAgo.toEpochSecond();
 
         int totalImported = 0;
         int totalSkipped = 0;
@@ -526,5 +531,69 @@ public class SyncService {
         });
     }
 
+    public NewActivitiesCheck checkForNewActivities() {
+        AthleteProfile profile = getProfile();
+        OffsetDateTime latestActivity = activityRepository.findLatestStartedAtBySource("strava").orElse(null);
+        long afterEpoch = latestActivity != null ? latestActivity.toEpochSecond() : 0;
+
+        int count = 0;
+        try {
+            count = syncDataSource.countNewActivities(profile, afterEpoch);
+        } catch (RateLimitException e) {
+            log.warn("Check for new activities hit rate limit, resets at {}", e.getResetsAt());
+        } catch (Exception e) {
+            log.warn("Failed to check for new activities: {}", e.getMessage());
+        }
+
+        return new NewActivitiesCheck(count > 0, count, latestActivity != null ? latestActivity.toInstant() : null);
+    }
+
+    @Scheduled(fixedDelayString = "${strava.auto-sync.interval-ms:1800000}")
+    public void autoSyncRecent() {
+        SyncStatus current = lastSyncStatus;
+        if ("in_progress".equals(current.status()) || "rate_limited".equals(current.status())) {
+            log.debug("Skipping auto-sync: current status is {}", current.status());
+            return;
+        }
+
+        try {
+            AthleteProfile profile = profileRepository.findFirst().orElse(null);
+            if (profile == null) {
+                log.debug("Skipping auto-sync: no athlete profile");
+                return;
+            }
+
+            OffsetDateTime latestActivity = activityRepository.findLatestStartedAtBySource("strava").orElse(null);
+            if (latestActivity == null) {
+                log.debug("Skipping auto-sync: no activities in DB yet, use manual sync first");
+                return;
+            }
+
+            int count = syncDataSource.countNewActivities(profile, latestActivity.toEpochSecond());
+            if (count == 0) {
+                log.debug("Auto-sync: no new activities found");
+                return;
+            }
+
+            log.info("Auto-sync: {} new activities found, starting sync", count);
+            syncRecent();
+        } catch (RateLimitException e) {
+            log.warn("Auto-sync hit rate limit, resets at {}", e.getResetsAt());
+        } catch (Exception e) {
+            log.warn("Auto-sync failed: {}", e.getMessage());
+        }
+    }
+
+    public AutoSyncConfig getAutoSyncConfig() {
+        return new AutoSyncConfig(autoSyncConfigPort.getIntervalMinutes());
+    }
+
+    public AutoSyncConfig updateAutoSyncConfig(int intervalMinutes) {
+        autoSyncConfigPort.setIntervalMinutes(intervalMinutes);
+        return new AutoSyncConfig(intervalMinutes);
+    }
+
     public record SyncStatus(String status, Instant lastSyncAt, int imported, int skipped, Instant rateLimitResetsAt) {}
+    public record NewActivitiesCheck(boolean hasNew, int count, Instant lastSyncedAt) {}
+    public record AutoSyncConfig(int intervalMinutes) {}
 }

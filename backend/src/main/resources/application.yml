@@ -42,6 +42,8 @@ strava:
   client-secret: ${STRAVA_CLIENT_SECRET:}
   redirect-uri: http://localhost:8080/api/auth/strava/callback
   webhook-verify-token: ${STRAVA_WEBHOOK_TOKEN:}
+  auto-sync:
+    interval-ms: ${STRAVA_AUTO_SYNC_INTERVAL_MS:1800000}
 
 app:
   jwt-secret: ${JWT_SECRET:dev-jwt-secret-32-chars-minimum!!}
@@ -55,7 +57,7 @@ app:
 ai:
   enabled: ${AI_ENABLED:false}
   provider: ${AI_PROVIDER:ollama}
-  model: ${AI_MODEL:}
+  model: ${AI_MODEL:qwen3.6:27b}
   ollama:
     enabled: ${AI_OLLAMA_ENABLED:false}
     base-url: ${AI_OLLAMA_URL:http://localhost:11434}
@@ -83,6 +85,12 @@ ai:
     cron: ${AI_BATCH_CRON:0 0 3 * * *}
   note-queue:
     interval-ms: ${AI_NOTE_QUEUE_INTERVAL:30000}
+  knowledge:
+    enabled: ${AI_KNOWLEDGE_ENABLED:false}
+    cron: ${AI_KNOWLEDGE_CRON:0 0 2 * * 0}
+    max-documents: ${AI_KNOWLEDGE_MAX_DOCS:1000}
+    chunk-size: ${AI_KNOWLEDGE_CHUNK_SIZE:800}
+    rag-top-k: ${AI_KNOWLEDGE_RAG_TOP_K:5}
 
 logging:
   level:

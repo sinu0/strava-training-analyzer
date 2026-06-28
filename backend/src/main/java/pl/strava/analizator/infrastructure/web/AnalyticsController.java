@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import pl.strava.analizator.application.AnalyticsService;
 import pl.strava.analizator.application.BlockHealthService;
 import pl.strava.analizator.application.TrainingStatusService;
+import pl.strava.analizator.application.WeeklyBudgetService;
 import pl.strava.analizator.application.dto.BlockHealthDto;
 import pl.strava.analizator.application.dto.DailyOptimalLoadDto;
 import pl.strava.analizator.application.dto.DurabilityInsightDto;
@@ -33,6 +34,7 @@ import pl.strava.analizator.application.dto.WeeklyBriefDto;
 import pl.strava.analizator.application.dto.WeeklyMmpDto;
 import pl.strava.analizator.application.dto.WeeklyOptimalLoadDto;
 import pl.strava.analizator.application.dto.WeeklySummaryDto;
+import pl.strava.analizator.application.dto.WeeklyBudgetDto;
 import pl.strava.analizator.application.dto.ZoneDistributionDto;
 
 @RestController
@@ -43,6 +45,7 @@ public class AnalyticsController {
     private final AnalyticsService analyticsService;
     private final BlockHealthService blockHealthService;
     private final TrainingStatusService trainingStatusService;
+    private final WeeklyBudgetService weeklyBudgetService;
 
     @GetMapping("/pmc")
     public ResponseEntity<List<PmcDataDto>> getPmc(
@@ -173,5 +176,13 @@ public class AnalyticsController {
     @GetMapping("/weekly-brief")
     public ResponseEntity<WeeklyBriefDto> getWeeklyBrief() {
         return ResponseEntity.ok(trainingStatusService.getWeeklyBrief());
+    }
+
+    @GetMapping("/weekly-budget")
+    public ResponseEntity<WeeklyBudgetDto> getWeeklyBudget(
+            @RequestParam(defaultValue = "0") double ctl,
+            @RequestParam(required = false) String eventDate) {
+        LocalDate parsedEventDate = eventDate != null ? LocalDate.parse(eventDate) : null;
+        return ResponseEntity.ok(weeklyBudgetService.getWeeklyBudget(ctl, parsedEventDate));
     }
 }

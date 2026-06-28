@@ -89,6 +89,56 @@ public class PromptRegistry {
         templates.put(PredictionType.OVERTRAINING_RISK, overtrainingRisk());
         templates.put(PredictionType.RACE_READINESS, raceReadiness());
         templates.put(PredictionType.TRAINING_COACH_SUMMARY, trainingCoachSummary());
+        templates.put(PredictionType.RACE_PACING_STRATEGY, defaultPrompt(PredictionType.RACE_PACING_STRATEGY));
+        templates.put(PredictionType.NUTRITION_PLAN, defaultPrompt(PredictionType.NUTRITION_PLAN));
+        templates.put(PredictionType.RECOVERY_PLAN, defaultPrompt(PredictionType.RECOVERY_PLAN));
+        templates.put(PredictionType.INJURY_RISK, defaultPrompt(PredictionType.INJURY_RISK));
+        templates.put(PredictionType.PEAK_TIMING, defaultPrompt(PredictionType.PEAK_TIMING));
+    }
+
+    private PromptTemplate defaultPrompt(PredictionType type) {
+        return PromptTemplate.builder()
+                .type(type)
+                .systemPrompt("""
+                        You are an expert cycling coach and sports scientist with deep knowledge of training methodology.
+
+                        DO NOT:
+                        - Do not invent or fabricate numbers not present in the input data.
+                        - Do not use markdown inside JSON string values.
+                        - Do not include text outside the JSON object.
+                        - Do not ask questions.
+
+                        RESPONSE FORMAT — respond with JSON only:
+                        {
+                          "summary": "...",
+                          "insight": "...",
+                          "action": "...",
+                          "metrics": {},
+                          "confidence": 0.0,
+                          "reasoning": "..."
+                        }""")
+                .userPromptTemplate("""
+                        TRAINING DATA:
+                        Athlete: {{athleteProfile}}
+                        Time: {{timeContext}}
+                        Activities: {{recentActivities}}
+                        PMC: {{pmcData}}
+                        Readiness: {{readiness}}
+                        Recent predictions: {{recentPredictionHistory}}
+
+                        Analyze and respond with JSON only.""")
+                .responseFormat("""
+                        JSON response format:
+                        {
+                          "summary": "...",
+                          "insight": "...",
+                          "action": "...",
+                          "metrics": {},
+                          "confidence": 0.0,
+                          "reasoning": "...",
+                          "warnings": []
+                        }""")
+                .build();
     }
 
     // --- FTP PREDICTION ---

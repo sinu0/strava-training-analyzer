@@ -16,4 +16,6 @@ public interface SyncDataSource {
     Activity fetchActivityWithStreams(AthleteProfile profile, String externalId);
 
     List<String> fetchActivityPhotoUrls(AthleteProfile profile, String externalId);
+
+    int countNewActivities(AthleteProfile profile, long afterEpoch);
 }

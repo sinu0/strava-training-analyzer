@@ -15,6 +15,44 @@ beforeAll(() => {
   };
 });
 
+vi.mock('../hooks/useCoach', () => ({
+  useCoachToday: () => ({
+    data: {
+      decision: 'TRAIN',
+      bestSession: {
+        type: 'ENDURANCE',
+        durationMinutes: 90,
+        targetTss: 75,
+        difficulty: 'MODERATE',
+        description: 'Endurance ride',
+        indoor: false,
+        score: 0.85,
+      },
+      reasoning: ['Goal: FTP', 'Phase: BUILD', 'Best session: ENDURANCE'],
+      alternatives: [
+        {
+          type: 'RECOVERY',
+          durationMinutes: 45,
+          targetTss: 20,
+          difficulty: 'EASY',
+          description: 'Easy recovery spin',
+          indoor: false,
+          score: 0.45,
+        },
+      ],
+      goalProgress: {
+        currentValue: 260,
+        targetValue: 275,
+        gapPercent: 5.5,
+        phase: 'BUILD',
+        status: 'ON_TRACK',
+      },
+      fatigue: { currentAtl: 72, currentTsb: -5 },
+    },
+    isLoading: false,
+  }),
+}));
+
 vi.mock('../hooks/useAnalytics', () => ({
   useFatigueState: () => ({ data: undefined, isLoading: false }),
   useLoadFocus: () => ({ data: undefined, isLoading: false }),
@@ -215,6 +253,10 @@ vi.mock('../hooks/useAnalytics', () => ({
     },
     isLoading: false,
   }),
+  useWeeklyBudget: () => ({
+    data: { optimalTss: 420, completedTss: 0, remainingTss: 420, percentComplete: 0, status: 'LOW', weekStart: '2024-06-03', weekEnd: '2024-06-09' },
+    isLoading: false,
+  }),
 }));
 vi.mock('../hooks/useGamification', () => ({
   useAchievements: () => ({ data: [], isLoading: false }),
@@ -268,46 +310,6 @@ vi.mock('../hooks/useAi', () => ({
   useGenerateAiNote: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
-vi.mock('../hooks/useDailyDecision', () => ({
-  useDailyDecision: () => ({
-    data: {
-      decision: 'RIDE',
-      workout: {
-        type: 'ENDURANCE',
-        durationMin: 90,
-        targetTss: 75,
-        difficulty: 'MODERATE',
-        intensityDescription: 'Full workout as planned',
-        description: '90min ENDURANCE ride',
-        indoor: false,
-      },
-      confidence: { score: 0.82, label: 'VERY_HIGH', description: 'All signals agree' },
-      risk: 'LOW',
-      reasons: [
-        { priority: 'SAFETY', signal: 'TSB', message: 'Good TSB', evidence: 'TSB=5' },
-        { priority: 'PLAN', signal: 'SCHEDULE', message: 'Endurance planned', evidence: 'type=ENDURANCE' },
-      ],
-      alternatives: [
-        {
-          label: 'Shorter version',
-          type: 'MODIFY',
-          workout: {
-            type: 'ENDURANCE',
-            durationMin: 45,
-            targetTss: 35,
-            difficulty: 'EASY',
-            intensityDescription: 'Half duration',
-            description: 'Compact 45min session',
-            indoor: false,
-          },
-          rationale: 'Time-efficient',
-        },
-      ],
-    },
-    isLoading: false,
-  }),
-}));
-
 function renderWithProviders(ui: React.ReactElement) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -340,25 +342,7 @@ describe('DashboardPage v2', () => {
     renderWithProviders(<DashboardPage />);
 
     expect(screen.getByText('Pogoda')).toBeDefined();
-    expect(screen.getByText('Gotowość')).toBeDefined();
-    expect(screen.getAllByText('Blok').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Postęp').length).toBeGreaterThan(0);
-  });
-
-  it('renders illustration artwork in widget cards', () => {
-    renderWithProviders(<DashboardPage />);
-
-    expect(screen.getByTestId('dashboard-widget-art-weather')).toBeDefined();
-    expect(screen.getByTestId('dashboard-widget-art-readiness')).toBeDefined();
-    expect(screen.getByTestId('dashboard-widget-art-block')).toBeDefined();
-    expect(screen.getByTestId('dashboard-widget-art-progress')).toBeDefined();
-  });
-
-  it('renders the latest activity section', () => {
-    renderWithProviders(<DashboardPage />);
-
-    expect(screen.getByText('Ostatni trening')).toBeDefined();
-    expect(screen.getAllByText('Morning Ride').length).toBeGreaterThan(0);
+    expect(screen.getByText(/Gotowość/)).toBeDefined();
   });
 
   it('renders PMC load chips', () => {
@@ -367,30 +351,5 @@ describe('DashboardPage v2', () => {
     expect(screen.getByText('CTL')).toBeDefined();
     expect(screen.getByText('ATL')).toBeDefined();
     expect(screen.getAllByText('TSB').length).toBeGreaterThan(0);
-  });
-
-  it('renders coach AI summary panel', () => {
-    renderWithProviders(<DashboardPage />);
-
-    expect(screen.getByText('Coach AI — podsumowanie')).toBeDefined();
-  });
-
-  it('renders quick navigation buttons', () => {
-    renderWithProviders(<DashboardPage />);
-
-    expect(screen.getByText('Aktywności')).toBeDefined();
-    expect(screen.getByText('Analityka')).toBeDefined();
-  });
-
-  it('renders the Daily Decision reasoning panel', () => {
-    renderWithProviders(<DashboardPage />);
-
-    expect(screen.getByText('Dlaczego ta decyzja?')).toBeDefined();
-  });
-
-  it('renders the Daily Decision alternatives panel', () => {
-    renderWithProviders(<DashboardPage />);
-
-    expect(screen.getByText('Alternatywy (1)')).toBeDefined();
   });
 });

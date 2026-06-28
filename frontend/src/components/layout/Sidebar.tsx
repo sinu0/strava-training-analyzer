@@ -2,12 +2,10 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import MapIcon from '@mui/icons-material/Map';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import ScaleIcon from '@mui/icons-material/Scale';
 import SettingsIcon from '@mui/icons-material/Settings';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import {
@@ -63,10 +61,8 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Narzędzia',
     items: [
-      { label: 'Trasy', path: '/route-planner', icon: <MapIcon /> },
+      { label: 'Coach', path: '/coach', icon: <PsychologyIcon /> },
       { label: 'Priorytety', path: '/priorities', icon: <WhatshotIcon /> },
-      { label: 'Adaptive Coach', path: '/adaptive-coach', icon: <PsychologyIcon /> },
-      { label: 'Predykcje AI', path: '/ai-predictions', icon: <SmartToyIcon /> },
     ],
   },
 ];

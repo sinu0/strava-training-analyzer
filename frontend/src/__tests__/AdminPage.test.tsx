@@ -125,6 +125,8 @@ vi.mock('@/hooks/useAnalytics', () => ({
   }),
   useRebuildHeatmap: () => ({ mutate: vi.fn(), isPending: false, isSuccess: false }),
   useRebuildFtpHistory: () => ({ mutate: vi.fn(), isPending: false, isSuccess: false }),
+  useAutoSyncConfig: () => ({ data: { intervalMinutes: 30 }, isLoading: false }),
+  useUpdateAutoSyncConfig: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 function renderWithProviders(ui: React.ReactElement) {

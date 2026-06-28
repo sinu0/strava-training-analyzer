@@ -107,6 +107,8 @@ public class SessionImpactModel {
             case BASE -> isEndurance ? 1.3 : isIntensity ? 0.7 : 1.0;
             case BUILD -> 1.0;
             case PEAK -> isIntensity ? 1.4 : isEndurance ? 0.6 : 1.0;
+            case TAPER -> isIntensity ? 1.1 : isEndurance ? 0.5 : 0.8;
+            case TRANSITION -> "RECOVERY".equalsIgnoreCase(sessionType) ? 1.5 : 0.5;
         };
     }
 

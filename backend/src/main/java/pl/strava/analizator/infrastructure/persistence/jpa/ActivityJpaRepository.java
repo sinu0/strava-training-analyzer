@@ -42,4 +42,7 @@ public interface ActivityJpaRepository extends JpaRepository<ActivityEntity, UUI
 
     @Query("SELECT NEW pl.strava.analizator.domain.vo.ActivityTimelineEntry(YEAR(a.startedAt), MONTH(a.startedAt), COUNT(a)) FROM ActivityEntity a GROUP BY YEAR(a.startedAt), MONTH(a.startedAt) ORDER BY YEAR(a.startedAt) DESC, MONTH(a.startedAt) DESC")
     List<ActivityTimelineEntry> findTimeline();
+
+    @Query("SELECT MAX(a.startedAt) FROM ActivityEntity a WHERE a.source = :source")
+    Optional<OffsetDateTime> findLatestStartedAtBySource(String source);
 }

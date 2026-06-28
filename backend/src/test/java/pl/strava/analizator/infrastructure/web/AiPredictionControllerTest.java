@@ -174,36 +174,4 @@ class AiPredictionControllerTest {
                 .andExpect(jsonPath("$.modelAvailable").value(false));
     }
 
-    @Test
-    void getHistory_returnsListOfPredictions() throws Exception {
-        PredictionResponseDto dto = PredictionResponseDto.builder()
-                .predictionType("FTP_PREDICTION")
-                .summary("FTP ~280W")
-                .detail("Based on recent data")
-                .confidence(0.85)
-                .modelId("llama3")
-                .providerName("ollama")
-                .structuredData(Map.of("ftp", 280))
-                .build();
-
-        when(aiPredictionService.getHistory(null, 20)).thenReturn(List.of(dto));
-
-        mockMvc.perform(get("/api/ai/predictions"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].predictionType").value("FTP_PREDICTION"))
-                .andExpect(jsonPath("$[0].summary").value("FTP ~280W"))
-                .andExpect(jsonPath("$[0].confidence").value(0.85));
-    }
-
-    @Test
-    void getHistory_withTypeFilter_passesTypeToService() throws Exception {
-        when(aiPredictionService.getHistory("FATIGUE_PREDICTION", 10)).thenReturn(List.of());
-
-        mockMvc.perform(get("/api/ai/predictions")
-                        .param("type", "FATIGUE_PREDICTION")
-                        .param("limit", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$").isEmpty());
-    }
 }

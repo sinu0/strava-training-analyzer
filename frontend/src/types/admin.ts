@@ -7,6 +7,16 @@ export interface SyncStatus {
   rateLimitResetsAt?: string | null;
 }
 
+export interface NewActivitiesCheck {
+  hasNew: boolean;
+  count: number;
+  lastSyncedAt: string | null;
+}
+
+export interface AutoSyncConfig {
+  intervalMinutes: number;
+}
+
 export interface StravaConfig {
   clientId: string;
   clientIdSource: string;

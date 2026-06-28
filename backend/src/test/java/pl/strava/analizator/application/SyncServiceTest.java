@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import pl.strava.analizator.application.ai.AiActivityNoteService;
 import pl.strava.analizator.domain.metrics.LapMetricsService;
 import pl.strava.analizator.domain.model.Activity;
 import pl.strava.analizator.domain.model.AthleteProfile;
@@ -50,6 +51,8 @@ class SyncServiceTest {
     @Mock private WorkoutEvaluationService workoutEvaluationService;
     @Mock private ActivityTrainingEffectRepository trainingEffectRepository;
     @Mock private DailySummaryRepository dailySummaryRepository;
+    @Mock private AiActivityNoteService aiActivityNoteService;
+    @Mock private AutoSyncConfigPort autoSyncConfigPort;
 
     private SyncService syncService;
 
@@ -58,8 +61,9 @@ class SyncServiceTest {
         syncService = new SyncService(profileRepository, activityRepository,
                 activityMetricRepository, dailyMetricRepository,
                 metricRegistry, metricPersistenceService, dailyMetricsService, syncDataSource,
-                syncStateRepository, null, heatmapBuildService, lapMetricsService,
-                workoutEvaluationService, trainingEffectRepository, dailySummaryRepository);
+                syncStateRepository, aiActivityNoteService, heatmapBuildService, lapMetricsService,
+                workoutEvaluationService, trainingEffectRepository, dailySummaryRepository,
+                autoSyncConfigPort);
         lenient().when(syncStateRepository.findFirst()).thenReturn(Optional.empty());
         lenient().when(lapMetricsService.enrichLaps(any(), any()))
                 .thenAnswer(i -> ((Activity) i.getArgument(0)).getLaps());

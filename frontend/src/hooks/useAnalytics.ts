@@ -14,6 +14,8 @@ import {
 } from '@/hooks/queryInvalidation';
 import type { ActivitySummary, ActivitySummaryPage } from '@/types/activity';
 import type {
+  AutoSyncConfig,
+  NewActivitiesCheck,
   StravaConfig,
   StravaConnectResponse,
   SyncStatus,
@@ -38,6 +40,7 @@ import type {
   WeatherLocation,
   FtpProgress,
   ReadinessData,
+  WeeklyBudget,
 } from '@/types/analytics';
 import type { AthleteProfile } from '@/types/profile';
 import type {
@@ -435,6 +438,19 @@ export function useDailyOptimalLoad(pastDays = 60, futureDays = 21) {
   });
 }
 
+export function useWeeklyBudget(ctl = 0, eventDate?: string) {
+  return useQuery<WeeklyBudget>({
+    queryKey: ['weeklyBudget', ctl, eventDate],
+    queryFn: async () => {
+      const params: Record<string, string | number> = { ctl };
+      if (eventDate) params.eventDate = eventDate;
+      const { data } = await apiClient.get<WeeklyBudget>('/analytics/weekly-budget', { params });
+      return data;
+    },
+    enabled: ctl > 0,
+  });
+}
+
 export function useSyncStatus() {
   return useQuery<SyncStatus>({
     queryKey: ['syncStatus'],
@@ -511,6 +527,41 @@ export function useClearSyncData() {
     },
     onSuccess: () => {
       invalidateAfterTrainingSync(queryClient);
+    },
+  });
+}
+
+export function useCheckNewActivities() {
+  return useQuery<NewActivitiesCheck>({
+    queryKey: ['newActivitiesCheck'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<NewActivitiesCheck>('/sync/strava/check');
+      return data;
+    },
+    refetchInterval: 300000,
+    enabled: true,
+  });
+}
+
+export function useAutoSyncConfig() {
+  return useQuery<AutoSyncConfig>({
+    queryKey: ['autoSyncConfig'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<AutoSyncConfig>('/sync/auto-sync-config');
+      return data;
+    },
+  });
+}
+
+export function useUpdateAutoSyncConfig() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (intervalMinutes: number) => {
+      const { data } = await apiClient.put<AutoSyncConfig>('/sync/auto-sync-config', { intervalMinutes });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['autoSyncConfig'] });
     },
   });
 }

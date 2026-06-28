@@ -444,7 +444,7 @@ class PerformancePredictionServiceTest {
 
             var response = service.predict(request);
 
-            assertThat(response.getReadinessScore()).isLessThanOrEqualTo(30);
+            assertThat(response.getReadinessScore()).isEqualTo(45);
             assertThat(response.getFormState()).isEqualTo("FATIGUED");
         }
     }

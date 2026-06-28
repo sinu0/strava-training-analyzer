@@ -1,4 +1,5 @@
 import AddIcon from '@mui/icons-material/Add';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import {
   Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle,
@@ -6,10 +7,10 @@ import {
   Stack, TextField, Typography,
 } from '@mui/material';
 import { useState } from 'react';
-import type { TrainingEvent } from '@/types/event';
-import type { EventProjection } from '@/types/event';
+import { useNavigate } from 'react-router-dom';
+import type { TrainingEvent, EventProjection } from '@/types/event';
 import { EVENT_PRIORITY_LABELS, EVENT_TYPE_LABELS } from '@/types/event';
-import { STATUS_COLORS } from '@/utils/colors';
+import { STATUS_COLORS, alphaColor } from '@/utils/colors';
 
 interface EventCountdownProps {
   events: TrainingEvent[] | undefined;
@@ -38,7 +39,7 @@ function CountdownBadge({ event, ctl }: { event: TrainingEvent; ctl: number | nu
       </Stack>
       <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
         <Chip
-          label={isPast ? 'Zakończony' : `${daysLeft} dni`}
+          label={isPast ? 'Zakonczony' : `${daysLeft} dni`}
           size="small"
           sx={{
             fontWeight: 800,
@@ -66,6 +67,7 @@ function CountdownBadge({ event, ctl }: { event: TrainingEvent; ctl: number | nu
 export default function EventCountdownWidget({
   events, onCreate, onDelete, ctlValue, projection,
 }: EventCountdownProps) {
+  const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
@@ -73,6 +75,13 @@ export default function EventCountdownWidget({
   const [priority, setPriority] = useState('B');
 
   const activeEvents = events?.filter(e => e.active).slice(0, 3) ?? [];
+  const nearestEvent = activeEvents[0] ?? null;
+  const daysToNearest = nearestEvent
+    ? Math.ceil((new Date(nearestEvent.eventDate).getTime() - Date.now()) / 86400000)
+    : null;
+
+  const needsTaper = daysToNearest != null && daysToNearest > 0 && daysToNearest <= 21 &&
+    (projection?.taperStartDays ?? 0) <= daysToNearest;
 
   const handleCreate = () => {
     if (name && date) {
@@ -119,8 +128,32 @@ export default function EventCountdownWidget({
           </Stack>
         ) : (
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.6rem' }}>
-            Brak zaplanowanych wydarzeń. Kliknij + aby dodać.
+            Brak zaplanowanych wydarzen. Kliknij + aby dodac.
           </Typography>
+        )}
+
+        {needsTaper && (
+          <Box sx={{
+            mt: 1.5, p: 1, borderRadius: 1.5,
+            bgcolor: alphaColor(STATUS_COLORS.warning, 0.08),
+            border: `1px solid ${alphaColor(STATUS_COLORS.warning, 0.2)}`,
+          }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: STATUS_COLORS.warning, fontSize: '0.58rem', display: 'block', mb: 0.5 }}>
+              CZAS NA TAPER
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.55rem', display: 'block', mb: 0.75 }}>
+              {daysToNearest} dni do {nearestEvent?.name}. Rozwaz otwarcie Plan Buildera.
+            </Typography>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<CalendarMonthIcon sx={{ fontSize: 14 }} />}
+              onClick={() => navigate('/training')}
+              sx={{ fontSize: '0.6rem', minHeight: 24, py: 0 }}
+            >
+              Plan Builder
+            </Button>
+          </Box>
         )}
 
         {projection && projection.daysToEvent > 0 && (
@@ -130,7 +163,7 @@ export default function EventCountdownWidget({
             </Typography>
             <Stack spacing={0.3}>
               <Stack direction="row" justifyContent="space-between">
-                <Typography variant="caption" sx={{ fontSize: '0.55rem', color: 'text.secondary' }}>CTL dziś → event</Typography>
+                <Typography variant="caption" sx={{ fontSize: '0.55rem', color: 'text.secondary' }}>CTL dzis → event</Typography>
                 <Typography variant="caption" sx={{ fontSize: '0.6rem', fontWeight: 700 }}>
                   {projection.currentCtl.toFixed(0)} → {projection.projectedCtl.toFixed(0)}
                 </Typography>

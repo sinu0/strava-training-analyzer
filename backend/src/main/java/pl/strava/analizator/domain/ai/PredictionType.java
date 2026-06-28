@@ -1,9 +1,5 @@
 package pl.strava.analizator.domain.ai;
 
-/**
- * Types of AI predictions available in the system.
- * Each type maps to a predefined prompt template.
- */
 public enum PredictionType {
 
     FTP_PREDICTION,
@@ -12,5 +8,10 @@ public enum PredictionType {
     PERFORMANCE_TREND,
     OVERTRAINING_RISK,
     RACE_READINESS,
-    TRAINING_COACH_SUMMARY
+    TRAINING_COACH_SUMMARY,
+    RACE_PACING_STRATEGY,
+    NUTRITION_PLAN,
+    RECOVERY_PLAN,
+    INJURY_RISK,
+    PEAK_TIMING
 }

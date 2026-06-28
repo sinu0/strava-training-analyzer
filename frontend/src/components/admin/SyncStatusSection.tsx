@@ -3,7 +3,8 @@ import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import SyncIcon from '@mui/icons-material/Sync';
 import TimerIcon from '@mui/icons-material/Timer';
-import { Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
+import UpdateIcon from '@mui/icons-material/Update';
+import { Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 
 import { formatTimestamp, StatusChip } from '@/components/admin/adminUtils';
@@ -39,6 +40,8 @@ export interface SyncStatusSectionProps {
   clearSyncDataPending: boolean;
   recalculateMetricsPending: boolean;
   recalculateActivityMetricsPending: boolean;
+  autoSyncIntervalMinutes: number | undefined;
+  updateAutoSyncPending: boolean;
   onSyncRecent: () => void;
   onSyncFull: () => void;
   onSyncPhotos: () => void;
@@ -46,6 +49,7 @@ export interface SyncStatusSectionProps {
   onClearSyncData: () => void;
   onRecalculateMetrics: () => void;
   onRecalculateActivityMetrics: () => void;
+  onUpdateAutoSyncInterval: (minutes: number) => void;
 }
 
 export default function SyncStatusSection({
@@ -61,6 +65,8 @@ export default function SyncStatusSection({
   clearSyncDataPending,
   recalculateMetricsPending,
   recalculateActivityMetricsPending,
+  autoSyncIntervalMinutes,
+  updateAutoSyncPending,
   onSyncRecent,
   onSyncFull,
   onSyncPhotos,
@@ -68,8 +74,10 @@ export default function SyncStatusSection({
   onClearSyncData,
   onRecalculateMetrics,
   onRecalculateActivityMetrics,
+  onUpdateAutoSyncInterval,
 }: SyncStatusSectionProps) {
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
+  const [intervalInput, setIntervalInput] = useState(String(autoSyncIntervalMinutes ?? 30));
 
   const handleConfirmClear = () => {
     onClearSyncData();
@@ -276,6 +284,65 @@ export default function SyncStatusSection({
               {syncErrorMessage}
             </Typography>
           )}
+
+          <Box
+            sx={{
+              mt: 2,
+              p: 1.5,
+              borderRadius: 1.5,
+              bgcolor: alphaColor(STATUS_COLORS.accent, 0.04),
+              border: `1px solid ${SURFACE_COLORS.border}`,
+            }}
+          >
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+              <UpdateIcon sx={{ fontSize: 18, color: STATUS_COLORS.accent }} />
+              <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                Auto-sync w tle
+              </Typography>
+            </Stack>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+              Aplikacja automatycznie sprawdza nowe aktywności co X minut.
+            </Typography>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <TextField
+                size="small"
+                type="number"
+                value={intervalInput}
+                onChange={(e) => setIntervalInput(e.target.value)}
+                inputProps={{ min: 1, max: 1440, style: { textAlign: 'center', width: 60 } }}
+                disabled={updateAutoSyncPending}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    fontSize: '0.8rem',
+                    borderRadius: 1.5,
+                  },
+                }}
+              />
+              <Typography variant="caption" color="text.secondary">
+                minut
+              </Typography>
+              <Button
+                size="small"
+                variant="outlined"
+                disabled={updateAutoSyncPending}
+                onClick={() => {
+                  const v = parseInt(intervalInput, 10);
+                  if (v >= 1 && v <= 1440) {
+                    onUpdateAutoSyncInterval(v);
+                  }
+                }}
+                sx={{
+                  textTransform: 'none',
+                  fontSize: '0.75rem',
+                  borderColor: STATUS_COLORS.accent,
+                  color: STATUS_COLORS.accent,
+                  '&:hover': { bgcolor: alphaColor(STATUS_COLORS.accent, 0.1) },
+                }}
+              >
+                {updateAutoSyncPending ? 'Zapisywanie...' : 'Zapisz'}
+              </Button>
+            </Stack>
+          </Box>
         </Box>
       </DataCard>
 
