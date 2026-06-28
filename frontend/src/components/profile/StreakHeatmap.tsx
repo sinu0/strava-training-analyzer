@@ -1,17 +1,24 @@
-import { Box, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 
 import { useStreakCalendar, useStreakStats } from '@/hooks/useStreak';
 
 const LEVEL_COLORS = [
-  'rgba(255,255,255,0.05)',
-  '#14432A',
-  '#1A6B3A',
-  '#22A34A',
-  '#3FB950',
+  '#1e2936',
+  '#0e4429',
+  '#006d32',
+  '#26a641',
+  '#39d353',
 ];
 
-const MONTHS = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
-const DAYS = ['Pn', '', 'Śr', '', 'Pt', '', 'Nd'];
+const MONTH_LABELS = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
+const DAY_LABELS_SHORT = ['Pon', '', 'Śro', '', 'Pią', '', 'Nie'];
+
+const CELL_SIZE = 13;
+const CELL_GAP = 3;
+const CELL_RX = 3;
+const LEFT_PAD = 36;
+const TOP_PAD = 20;
+const BOTTOM_PAD = 10;
 
 export default function StreakHeatmap() {
   const currentYear = new Date().getFullYear();
@@ -20,59 +27,106 @@ export default function StreakHeatmap() {
 
   if (!calendar || !stats) return null;
 
+  const weekCount = calendar.weeks.length;
+  const step = CELL_SIZE + CELL_GAP;
+  const svgWidth = LEFT_PAD + weekCount * step + 10;
+  const svgHeight = TOP_PAD + 7 * step + BOTTOM_PAD + 28;
+
   return (
     <Box>
-      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+      <Stack direction="row" spacing={3} sx={{ mb: 2 }}>
         <Box>
-          <Typography variant="h5" fontWeight={900} color="warning.main">{stats.currentStreak}</Typography>
-          <Typography variant="caption" color="text.secondary">obecna seria</Typography>
+          <Typography variant="h5" fontWeight={900} color="warning.main">
+            {stats.currentStreak}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">obecna seria (dni)</Typography>
         </Box>
         <Box>
-          <Typography variant="h5" fontWeight={900} color="primary.main">{stats.longestStreak}</Typography>
+          <Typography variant="h5" fontWeight={900} color="primary.main">
+            {stats.longestStreak}
+          </Typography>
           <Typography variant="caption" color="text.secondary">najdłuższa seria</Typography>
         </Box>
         <Box>
-          <Typography variant="h5" fontWeight={900} color="success.main">{stats.totalActiveDays}</Typography>
+          <Typography variant="h5" fontWeight={900} color="success.main">
+            {stats.totalActiveDays}
+          </Typography>
           <Typography variant="caption" color="text.secondary">aktywnych dni</Typography>
         </Box>
       </Stack>
 
-      <Box sx={{ overflowX: 'auto' }}>
-        <svg width={calendar.weeks.length * 14 + 40} height={120}>
-          {MONTHS.filter((_, i) => i % 3 === 0).map((m, i) => (
-            <text key={m} x={40 + i * (calendar.weeks.length * 14 / 4)} y={12} fill="rgba(255,255,255,0.4)" fontSize={10}>
-              {m}
+      <Box sx={{ overflowX: 'auto', pb: 1 }}>
+        <svg width={svgWidth} height={svgHeight} style={{ minWidth: svgWidth }}>
+          {/* Month labels */}
+          {(() => {
+            const elements: React.ReactNode[] = [];
+            let lastMonth = '';
+            calendar.weeks.forEach((week, wi) => {
+              const date = week.days[0]?.date;
+              if (!date) return;
+              const monthLabel = MONTH_LABELS[Number.parseInt(date.slice(5, 7), 10) - 1];
+              if (monthLabel && monthLabel !== lastMonth) {
+                lastMonth = monthLabel;
+                elements.push(
+                  <text
+                    key={`m-${wi}`}
+                    x={LEFT_PAD + wi * step}
+                    y={TOP_PAD - 6}
+                    fill="rgba(255,255,255,0.7)"
+                    fontSize={11}
+                    fontWeight={600}
+                  >
+                    {monthLabel}
+                  </text>
+                );
+              }
+            });
+            return elements;
+          })()}
+
+          {/* Day labels */}
+          {DAY_LABELS_SHORT.map((label, i) => (
+            <text
+              key={`d-${i}`}
+              x={LEFT_PAD - 6}
+              y={TOP_PAD + i * step + CELL_SIZE - 3}
+              textAnchor="end"
+              fill={i % 2 === 1 ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.55)'}
+              fontSize={10}
+            >
+              {label}
             </text>
           ))}
-          {DAYS.map((d, i) => (
-            <text key={i} x={4} y={36 + i * 14} fill="rgba(255,255,255,0.4)" fontSize={9} textAnchor="end">
-              {d}
-            </text>
-          ))}
+
+          {/* Grid cells */}
           {calendar.weeks.map((week, wi) =>
             week.days.map((day, di) => (
-              <Tooltip key={`${wi}-${di}`} title={day.date} arrow>
+              <g key={`${wi}-${di}`}>
+                <title>{`${day.date} — ${day.level > 0 ? day.level : 0} jazd`}</title>
                 <rect
-                  x={28 + wi * 14}
-                  y={24 + di * 14}
-                  width={12}
-                  height={12}
-                  rx={2}
+                  x={LEFT_PAD + wi * step}
+                  y={TOP_PAD + di * step}
+                  width={CELL_SIZE}
+                  height={CELL_SIZE}
+                  rx={CELL_RX}
                   fill={LEVEL_COLORS[day.level] ?? LEVEL_COLORS[0]}
+                  stroke={day.level === 0 ? 'rgba(255,255,255,0.04)' : 'transparent'}
+                  strokeWidth={day.level === 0 ? 1 : 0}
                 />
-              </Tooltip>
+              </g>
             ))
           )}
+
+          {/* Legend */}
+          <g transform={`translate(${LEFT_PAD}, ${svgHeight - BOTTOM_PAD})`}>
+            <text x={0} y={-6} fill="rgba(255,255,255,0.5)" fontSize={10}>Mniej</text>
+            {LEVEL_COLORS.map((c, i) => (
+              <rect key={i} x={28 + i * (CELL_SIZE + 2)} y={-CELL_SIZE} width={CELL_SIZE} height={CELL_SIZE} rx={2} fill={c} stroke="rgba(255,255,255,0.06)" strokeWidth={1} />
+            ))}
+            <text x={28 + LEVEL_COLORS.length * (CELL_SIZE + 2) + 4} y={-6} fill="rgba(255,255,255,0.5)" fontSize={10}>Więcej</text>
+          </g>
         </svg>
       </Box>
-
-      <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
-        <Typography variant="caption" color="text.secondary">Mniej</Typography>
-        {LEVEL_COLORS.slice(1).map((c, i) => (
-          <Box key={i} sx={{ width: 10, height: 10, borderRadius: 1, bgcolor: c }} />
-        ))}
-        <Typography variant="caption" color="text.secondary">Więcej</Typography>
-      </Stack>
     </Box>
   );
 }
