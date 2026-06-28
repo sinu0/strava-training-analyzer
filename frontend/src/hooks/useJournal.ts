@@ -30,10 +30,10 @@ export function useJournalForActivity(activityId: string | undefined) {
 }
 
 export function useLatestJournalEntry() {
-  return useQuery<JournalEntry>({
+  return useQuery<JournalEntry | null>({
     queryKey: ['journal-latest'],
     queryFn: async () => {
-      const { data } = await apiClient.get<JournalEntry>('/journal/latest');
+      const { data } = await apiClient.get<JournalEntry | null>('/journal/latest');
       return data;
     },
   });

@@ -52,7 +52,7 @@ public class JournalController {
     @GetMapping("/latest")
     public ResponseEntity<JournalEntryDto> getLatest() {
         var entry = journalService.getLatestEntry();
-        return entry != null ? ResponseEntity.ok(entry) : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(entry);
     }
 
     @GetMapping("/mood-correlation")
