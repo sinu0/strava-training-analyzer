@@ -1,7 +1,6 @@
 package pl.strava.analizator.infrastructure.persistence.entity;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -45,9 +44,9 @@ public class JournalEntryEntity {
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 
-    @JdbcTypeCode(SqlTypes.ARRAY)
     @Column(name = "tags", columnDefinition = "text[]")
-    private List<String> tags;
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    private String[] tags;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;

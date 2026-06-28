@@ -12,9 +12,13 @@ public interface JournalEntryMapper {
 
     @Mapping(target = "mood",
             expression = "java(entity.getMood() != null ? pl.strava.analizator.domain.journal.JournalMood.valueOf(entity.getMood()) : null)")
+    @Mapping(target = "tags",
+            expression = "java(entity.getTags() != null ? java.util.Arrays.asList(entity.getTags()) : java.util.List.of())")
     JournalEntry toDomain(JournalEntryEntity entity);
 
     @Mapping(target = "mood",
             expression = "java(domain.getMood() != null ? domain.getMood().name() : null)")
+    @Mapping(target = "tags",
+            expression = "java(domain.getTags() != null ? domain.getTags().toArray(new String[0]) : null)")
     JournalEntryEntity toEntity(JournalEntry domain);
 }
