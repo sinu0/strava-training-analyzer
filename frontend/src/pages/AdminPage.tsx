@@ -19,6 +19,7 @@ import AdminDashboard from '@/components/admin/AdminDashboard';
 import StravaConfigSection from '@/components/admin/StravaConfigSection';
 import SyncStatusSection from '@/components/admin/SyncStatusSection';
 import WeatherJobSection from '@/components/admin/WeatherJobSection';
+import EquipmentSection from '@/components/admin/EquipmentSection';
 import PageContainer from '@/components/common/PageContainer';
 import Section from '@/components/common/Section';
 import { useAiStatus, useRunAiBatch } from '@/hooks/useAi';
@@ -261,6 +262,10 @@ export default function AdminPage() {
             recalculateAllTeError={recalculateAllTe.error} onRecalculateAllTe={() => recalculateAllTe.mutate()}
           />
         </Grid>
+      </AdminGroup>
+
+      <AdminGroup title="Sprzęt" subtitle="Zarządzaj rowerem i komponentami — śledź przebieg i terminy wymian." icon={<SettingsSuggestIcon />} defaultExpanded={true}>
+        <EquipmentSection />
       </AdminGroup>
     </PageContainer>
   );

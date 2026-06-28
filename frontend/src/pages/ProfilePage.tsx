@@ -17,6 +17,9 @@ import ErrorBoundary from '../components/common/ErrorBoundary';
 import PageContainer from '../components/common/PageContainer';
 import Section from '../components/common/Section';
 import AchievementsSection from '../components/profile/AchievementsSection';
+import PersonalRecordWall from '../components/profile/PersonalRecordWall';
+import StreakHeatmap from '../components/profile/StreakHeatmap';
+import SeasonWrappedModal from '../components/SeasonWrappedModal';
 import FourWeekCyclingSummary from '../components/profile/FourWeekCyclingSummary';
 import ProfileGallery from '../components/profile/ProfileGallery';
 import SummaryStoryModal from '../components/profile/SummaryStoryModal';
@@ -95,6 +98,7 @@ export default function ProfilePage() {
   const [lthrInput, setLthrInput] = useState('');
   const [hrMaxDialogOpen, setHrMaxDialogOpen] = useState(false);
   const [hrMaxInput, setHrMaxInput] = useState('');
+  const [wrappedYear, setWrappedYear] = useState<number | null>(null);
   const updateProfile = useUpdateProfile();
 
   // Training streak: consecutive weeks with at least one activity
@@ -228,6 +232,14 @@ export default function ProfilePage() {
             >
               Podsumowanie tygodnia
             </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => setWrappedYear(new Date().getFullYear())}
+              sx={{ flexShrink: 0, alignSelf: 'flex-start' }}
+            >
+              Season Wrapped
+            </Button>
           </Box>
 
           {/* Stats band */}
@@ -320,6 +332,11 @@ export default function ProfilePage() {
         <FourWeekCyclingSummary />
       </Section>
 
+      {/* ── Streak heatmap ──────────────────────────────── */}
+      <Section title="Kalendarz aktywności" subtitle="Historia Twoich dni na rowerze" accentColor={STATUS_COLORS.success}>
+        <StreakHeatmap />
+      </Section>
+
       {/* ── Gallery ──────────────────────────────────── */}
       <Section title="Galeria zdjęć">
         <ProfileGallery />
@@ -344,6 +361,10 @@ export default function ProfilePage() {
         <AchievementsSection />
       </Section>
 
+      <Section title="Rekordy osobiste" subtitle="Twoje najlepsze wyniki" accentColor={STATUS_COLORS.warning}>
+        <PersonalRecordWall />
+      </Section>
+
       <SummaryStoryModal
         open={storyOpen}
         onClose={() => setStoryOpen(false)}
@@ -351,6 +372,10 @@ export default function ProfilePage() {
         readiness={readiness}
         streak={streak}
       />
+
+      {wrappedYear != null && (
+        <SeasonWrappedModal year={wrappedYear} onClose={() => setWrappedYear(null)} />
+      )}
 
       <Dialog open={ftpDialogOpen} onClose={() => setFtpDialogOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle>Edytuj FTP</DialogTitle>

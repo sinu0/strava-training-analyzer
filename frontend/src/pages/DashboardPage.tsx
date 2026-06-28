@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import ActivityMediaCarousel from '@/components/ActivityMediaCarousel';
@@ -24,6 +25,7 @@ import WeatherMiniWidget from '@/components/home/WeatherMiniWidget';
 import JournalWidget from '@/components/journal/JournalWidget';
 import ChallengeWidget from '@/components/challenge/ChallengeWidget';
 import NudgeBanner from '@/components/layout/NudgeBanner';
+import DashboardLayoutEditor, { useDashboardWidgets } from '@/components/dashboard/DashboardLayoutEditor';
 import OnboardingOverlay from '@/components/onboarding/OnboardingOverlay';
 import {
   useCreateEvent,
@@ -58,6 +60,10 @@ export default function DashboardPage() {
   const queryClient = useQueryClient();
 
   const { data: coachData, isLoading: isDecisionLoading } = useCoachToday();
+
+  const { widgets, toggle: toggleWidget, moveUp, moveDown, reset: resetWidgets } = useDashboardWidgets();
+  const [layoutOpen, setLayoutOpen] = useState(false);
+  const widgetVisible = (id: string) => widgets.find((w) => w.id === id)?.visible ?? true;
 
   const decision: DailyDecisionDto | undefined = coachData ? {
     decision: (coachData.decision === 'TRAIN' ? 'RIDE' :
@@ -144,12 +150,15 @@ export default function DashboardPage() {
         {/* LEFT SIDEBAR — Context widgets */}
         <Grid item xs={12} md={6} xl={3} order={{ xs: 3, xl: 1 }}>
           <Stack spacing={1.5} sx={{ position: { xs: 'static', xl: 'sticky' }, top: { xl: 24 }, alignSelf: 'flex-start' }}>
-            <WeatherMiniWidget gradient={weatherGradient} onOpen={() => navigate('/weather')} artTestId="dashboard-widget-art-weather" />
-            <ReadinessWidget readiness={readiness} onSave={handleCheckInSave} isSaving={checkInSaving} />
-            <RecoveryWidget data={fatigueState} isLoading={fatigueLoading} />
-            <JournalWidget />
-            <ChallengeWidget />
-            <EventCountdownWidget events={events} onCreate={(e) => createEvent.mutate(e)} onDelete={(id) => deleteEvent.mutate(id)} ctlValue={latestPmc?.ctl ?? null} projection={projection} />
+            {widgetVisible('weather') && <WeatherMiniWidget gradient={weatherGradient} onOpen={() => navigate('/weather')} artTestId="dashboard-widget-art-weather" />}
+            {widgetVisible('readiness') && <ReadinessWidget readiness={readiness} onSave={handleCheckInSave} isSaving={checkInSaving} />}
+            {widgetVisible('recovery') && <RecoveryWidget data={fatigueState} isLoading={fatigueLoading} />}
+            {widgetVisible('journal') && <JournalWidget />}
+            {widgetVisible('challenge') && <ChallengeWidget />}
+            {widgetVisible('event') && <EventCountdownWidget events={events} onCreate={(e) => createEvent.mutate(e)} onDelete={(id) => deleteEvent.mutate(id)} ctlValue={latestPmc?.ctl ?? null} projection={projection} />}
+            <Button size="small" variant="text" onClick={() => setLayoutOpen(true)} sx={{ alignSelf: 'flex-end', fontSize: '0.7rem', opacity: 0.6 }}>
+              Edytuj layout
+            </Button>
           </Stack>
         </Grid>
 
@@ -227,6 +236,15 @@ export default function DashboardPage() {
           </Stack>
         </Grid>
       </Grid>
+      <DashboardLayoutEditor
+        open={layoutOpen}
+        onClose={() => setLayoutOpen(false)}
+        widgets={widgets}
+        onToggle={toggleWidget}
+        onMoveUp={moveUp}
+        onMoveDown={moveDown}
+        onReset={resetWidgets}
+      />
     </PageContainer>
   );
 }
