@@ -37,6 +37,9 @@ Recommend the optimal training session for today. The recommendation must be spe
 ### RECENT ACTIVITIES (last 7 days, detailed session data)
 {{recentActivities}}
 
+### RECENT MOOD & MOTIVATION (journal mood trend)
+{{journalMoodTrend}}
+
 ### RECENT PREDICTION HISTORY (this type)
 {{recentPredictionHistory}}
 

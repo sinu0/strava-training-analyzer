@@ -56,6 +56,7 @@ public class SyncService {
     private final ActivityTrainingEffectRepository trainingEffectRepository;
     private final DailySummaryRepository dailySummaryRepository;
     private final AutoSyncConfigPort autoSyncConfigPort;
+    private final PersonalRecordService personalRecordService;
 
     public SyncService(AthleteProfileRepository profileRepository,
                        ActivityRepository activityRepository,
@@ -72,7 +73,8 @@ public class SyncService {
                        WorkoutEvaluationService workoutEvaluationService,
                        ActivityTrainingEffectRepository trainingEffectRepository,
                        DailySummaryRepository dailySummaryRepository,
-                       AutoSyncConfigPort autoSyncConfigPort) {
+                       AutoSyncConfigPort autoSyncConfigPort,
+                       PersonalRecordService personalRecordService) {
         this.profileRepository = profileRepository;
         this.activityRepository = activityRepository;
         this.activityMetricRepository = activityMetricRepository;
@@ -89,6 +91,7 @@ public class SyncService {
         this.trainingEffectRepository = trainingEffectRepository;
         this.dailySummaryRepository = dailySummaryRepository;
         this.autoSyncConfigPort = autoSyncConfigPort;
+        this.personalRecordService = personalRecordService;
     }
 
     @Getter
@@ -161,6 +164,7 @@ public class SyncService {
         }
 
         recalculateDailyMetrics();
+        detectPersonalRecords();
         lastSyncStatus = new SyncStatus("completed", Instant.now(), totalImported, totalSkipped, null);
         persistSyncStatus(lastSyncStatus);
         log.info("Full sync completed: {} imported, {} skipped", totalImported, totalSkipped);
@@ -213,6 +217,7 @@ public class SyncService {
         }
 
         recalculateDailyMetrics();
+        detectPersonalRecords();
         lastSyncStatus = new SyncStatus("completed", Instant.now(), totalImported, totalSkipped, null);
         persistSyncStatus(lastSyncStatus);
         log.info("Recent sync completed: {} imported, {} skipped", totalImported, totalSkipped);
@@ -591,6 +596,14 @@ public class SyncService {
     public AutoSyncConfig updateAutoSyncConfig(int intervalMinutes) {
         autoSyncConfigPort.setIntervalMinutes(intervalMinutes);
         return new AutoSyncConfig(intervalMinutes);
+    }
+
+    private void detectPersonalRecords() {
+        try {
+            personalRecordService.detectNewRecords();
+        } catch (Exception e) {
+            log.warn("Personal record detection failed (non-critical): {}", e.getMessage());
+        }
     }
 
     public record SyncStatus(String status, Instant lastSyncAt, int imported, int skipped, Instant rateLimitResetsAt) {}

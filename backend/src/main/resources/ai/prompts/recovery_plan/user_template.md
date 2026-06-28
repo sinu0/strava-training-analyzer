@@ -22,6 +22,9 @@ Assess this cyclist's current recovery status and prescribe an appropriate recov
 ### WEEKLY TRAINING VOLUME (last 4 weeks, current week partial)
 {{weeklyVolume}}
 
+### ATHLETE'S SELF-REPORTED STATE (journal entries: mood, notes, tags)
+{{journalEntries}}
+
 ### RECENT PREDICTION HISTORY (this type)
 {{recentPredictionHistory}}
 

@@ -2,6 +2,7 @@ package pl.strava.analizator.application.ai;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -28,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import pl.strava.analizator.application.AnalyticsService;
 import pl.strava.analizator.application.BlockHealthService;
+import pl.strava.analizator.application.JournalService;
 import pl.strava.analizator.application.TrainingPlanService;
 import pl.strava.analizator.application.dto.BlockHealthDto;
 import pl.strava.analizator.application.dto.CoachMemoryPreferenceDto;
@@ -58,6 +60,7 @@ class TrainingDataAdapterTest {
     @Mock private AnalyticsService analyticsService;
     @Mock private BlockHealthService blockHealthService;
     @Mock private TrainingPlanService trainingPlanService;
+    @Mock private JournalService journalService;
 
     private TrainingDataAdapter adapter;
 
@@ -66,7 +69,7 @@ class TrainingDataAdapterTest {
         adapter = new TrainingDataAdapter(
                 activityRepository, activityMetricRepository,
                 athleteProfileRepository, dailyMetricRepository,
-                aiPredictionRepository, analyticsService, blockHealthService, trainingPlanService);
+                aiPredictionRepository, analyticsService, blockHealthService, trainingPlanService, journalService);
         lenient().when(analyticsService.getDurabilityInsights()).thenReturn(DurabilityInsightDto.builder()
                 .trend("stable")
                 .label("Stabilna")
@@ -113,6 +116,8 @@ class TrainingDataAdapterTest {
                 .keySignals(List.of("Bodziec celu: 1/1"))
                 .nextFocus("Broń głównego akcentu.")
                 .build());
+        lenient().when(journalService.getJournalContextForAi(anyInt())).thenReturn("");
+        lenient().when(journalService.getJournalMoodTrend(anyInt())).thenReturn("No mood trend data");
     }
 
     @Test

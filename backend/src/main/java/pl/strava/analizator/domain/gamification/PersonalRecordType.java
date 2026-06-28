@@ -1,0 +1,18 @@
+package pl.strava.analizator.domain.gamification;
+
+public enum PersonalRecordType {
+    BEST_5S_POWER,
+    BEST_1MIN_POWER,
+    BEST_5MIN_POWER,
+    BEST_20MIN_POWER,
+    LONGEST_RIDE,
+    MOST_ELEVATION_SINGLE,
+    MOST_ELEVATION_WEEK,
+    FASTEST_AVG_SPEED,
+    FASTEST_40KM,
+    LONGEST_DURATION,
+    MOST_WEEKLY_HOURS,
+    LONGEST_STREAK_DAYS,
+    LONGEST_STREAK_WEEKS,
+    HIGHEST_TSS_SESSION
+}

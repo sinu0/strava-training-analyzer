@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import pl.strava.analizator.application.JournalService;
 import pl.strava.analizator.application.dto.AiActivityNoteDto;
 import pl.strava.analizator.application.dto.AiNoteAskRequest;
 import pl.strava.analizator.application.dto.AiNoteAskResponse;
@@ -47,6 +48,7 @@ public class AiActivityNoteService {
     private final AiNoteJobRepository jobRepository;
     private final LlmProviderRegistry providerRegistry;
     private final ToolCallingLoop toolCallingLoop;
+    private final JournalService journalService;
     private final String defaultProvider;
     private final String defaultModel;
     private final boolean enabled;
@@ -59,6 +61,7 @@ public class AiActivityNoteService {
                                   AiNoteJobRepository jobRepository,
                                   LlmProviderRegistry providerRegistry,
                                   ToolCallingLoop toolCallingLoop,
+                                  JournalService journalService,
                                   @Value("${ai.provider:ollama}") String defaultProvider,
                                   @Value("${ai.model:llama3}") String defaultModel,
                                   @Value("${ai.enabled:false}") boolean enabled) {
@@ -70,6 +73,7 @@ public class AiActivityNoteService {
         this.jobRepository = jobRepository;
         this.providerRegistry = providerRegistry;
         this.toolCallingLoop = toolCallingLoop;
+        this.journalService = journalService;
         this.defaultProvider = defaultProvider;
         this.defaultModel = defaultModel;
         this.enabled = enabled;
@@ -338,6 +342,19 @@ public class AiActivityNoteService {
 
         sb.append("## ACTIVITY DATA\n");
         sb.append(buildActivityContext(activity));
+
+        // Include athlete's journal entry if present
+        var journalEntry = journalService.getByActivityId(activity.getId());
+        if (journalEntry != null) {
+            sb.append("\n\n## ATHLETE'S OWN NOTES\n");
+            sb.append(String.format("Mood: %s\n", journalEntry.getMood()));
+            if (journalEntry.getNote() != null && !journalEntry.getNote().isBlank()) {
+                sb.append(String.format("Note: %s\n", journalEntry.getNote()));
+            }
+            if (journalEntry.getTags() != null && !journalEntry.getTags().isEmpty()) {
+                sb.append(String.format("Tags: %s\n", String.join(", ", journalEntry.getTags())));
+            }
+        }
 
         sb.append("\n\n## HISTORICAL CONTEXT\n");
         sb.append(buildHistoricalContext(activity));

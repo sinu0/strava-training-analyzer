@@ -53,6 +53,7 @@ class SyncServiceTest {
     @Mock private DailySummaryRepository dailySummaryRepository;
     @Mock private AiActivityNoteService aiActivityNoteService;
     @Mock private AutoSyncConfigPort autoSyncConfigPort;
+    @Mock private PersonalRecordService personalRecordService;
 
     private SyncService syncService;
 
@@ -63,7 +64,7 @@ class SyncServiceTest {
                 metricRegistry, metricPersistenceService, dailyMetricsService, syncDataSource,
                 syncStateRepository, aiActivityNoteService, heatmapBuildService, lapMetricsService,
                 workoutEvaluationService, trainingEffectRepository, dailySummaryRepository,
-                autoSyncConfigPort);
+                autoSyncConfigPort, personalRecordService);
         lenient().when(syncStateRepository.findFirst()).thenReturn(Optional.empty());
         lenient().when(lapMetricsService.enrichLaps(any(), any()))
                 .thenAnswer(i -> ((Activity) i.getArgument(0)).getLaps());

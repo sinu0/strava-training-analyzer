@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import pl.strava.analizator.application.AnalyticsService;
 import pl.strava.analizator.application.BlockHealthService;
+import pl.strava.analizator.application.JournalService;
 import pl.strava.analizator.application.TrainingPlanService;
 import pl.strava.analizator.application.dto.BlockHealthDto;
 import pl.strava.analizator.application.dto.CalendarDayDto;
@@ -60,6 +61,7 @@ public class TrainingDataAdapter implements TrainingDataPort {
     private final AnalyticsService analyticsService;
     private final BlockHealthService blockHealthService;
     private final TrainingPlanService trainingPlanService;
+    private final JournalService journalService;
 
     @Override
     public TrainingContext buildContext(PredictionType predictionType) {
@@ -91,6 +93,8 @@ public class TrainingDataAdapter implements TrainingDataPort {
                 .plannedActivity(buildPlannedActivity())
                 .eventDate(buildEventDate())
                 .weatherConditions(buildWeatherConditions())
+                .journalEntries(journalService.getJournalContextForAi(daysBack))
+                .journalMoodTrend(journalService.getJournalMoodTrend(daysBack))
                 .build();
     }
 

@@ -15,6 +15,7 @@ import LapsTab from '@/components/activity/LapsTab';
 import OverviewTab from '@/components/activity/OverviewTab';
 import AiCoachSection from '@/components/AiCoachSection';
 import ErrorState from '@/components/common/ErrorState';
+import JournalEntryForm from '@/components/journal/JournalEntryForm';
 import LoadingState from '@/components/common/LoadingState';
 import PageContainer from '@/components/common/PageContainer';
 import PullToRefreshPanel from '@/components/common/PullToRefreshPanel';
@@ -98,7 +99,14 @@ export default function ActivityDetailPage() {
       />
     );
     if (tabIndex === advancedIdx) return <AdvancedStatsTab activity={activity} />;
-    if (tabIndex === aiIdx) return <AiCoachSection activityId={activity.id} />;
+    if (tabIndex === aiIdx) return (
+      <>
+        <AiCoachSection activityId={activity.id} />
+        <Box sx={{ mt: 3 }}>
+          <JournalEntryForm activityId={activity.id} />
+        </Box>
+      </>
+    );
     return null;
   };
 

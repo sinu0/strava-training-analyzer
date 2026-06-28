@@ -210,6 +210,8 @@ public class AiPredictionService {
         vars.put("plannedActivity", toJson(context.getPlannedActivity()));
         vars.put("eventDate", context.getEventDate() != null ? context.getEventDate() : "not set");
         vars.put("weatherConditions", toJson(context.getWeatherConditions()));
+        vars.put("journalEntries", context.getJournalEntries() != null ? context.getJournalEntries() : "No journal data");
+        vars.put("journalMoodTrend", context.getJournalMoodTrend() != null ? context.getJournalMoodTrend() : "No mood trend data");
         vars.put("knowledgeBase", ""); // Replaced by RagServiceV2 if available
         return vars;
     }

@@ -22,6 +22,9 @@ Assess the current fatigue level of this cyclist. Determine whether the athlete 
 ### RECENT ACTIVITIES (last 14 days, with TSS, IF, and duration per session)
 {{recentActivities}}
 
+### SUBJECTIVE FEEL (journal mood trend over last 14 days)
+{{journalMoodTrend}}
+
 ### RECENT PREDICTION HISTORY (this type)
 {{recentPredictionHistory}}
 

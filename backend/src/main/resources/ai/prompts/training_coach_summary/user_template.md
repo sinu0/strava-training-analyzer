@@ -31,6 +31,9 @@ Produce a comprehensive coaching summary of this athlete's current training week
 ### COACH MEMORY (athlete response patterns to previous recommendations)
 {{coachMemory}}
 
+### ATHLETE'S PERSONAL JOURNAL (self-reported mood and notes from last 2-4 weeks)
+{{journalEntries}}
+
 ### RECENT PREDICTION HISTORY (this type)
 {{recentPredictionHistory}}
 

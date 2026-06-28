@@ -21,6 +21,7 @@ import RecoveryWidget from '@/components/home/RecoveryWidget';
 import EventCountdownWidget from '@/components/home/EventCountdownWidget';
 import CoachWidget from '@/components/home/CoachWidget';
 import WeatherMiniWidget from '@/components/home/WeatherMiniWidget';
+import JournalWidget from '@/components/journal/JournalWidget';
 import OnboardingOverlay from '@/components/onboarding/OnboardingOverlay';
 import {
   useCreateEvent,
@@ -143,6 +144,7 @@ export default function DashboardPage() {
             <WeatherMiniWidget gradient={weatherGradient} onOpen={() => navigate('/weather')} artTestId="dashboard-widget-art-weather" />
             <ReadinessWidget readiness={readiness} onSave={handleCheckInSave} isSaving={checkInSaving} />
             <RecoveryWidget data={fatigueState} isLoading={fatigueLoading} />
+            <JournalWidget />
             <EventCountdownWidget events={events} onCreate={(e) => createEvent.mutate(e)} onDelete={(id) => deleteEvent.mutate(id)} ctlValue={latestPmc?.ctl ?? null} projection={projection} />
           </Stack>
         </Grid>

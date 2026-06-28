@@ -41,4 +41,8 @@ public class TrainingContext {
     private String eventDate;
     /** Nutrition: weather conditions for ride */
     private Map<String, Object> weatherConditions;
+    /** Athlete's personal journal entries */
+    private String journalEntries;
+    /** Mood trend from journal */
+    private String journalMoodTrend;
 }
