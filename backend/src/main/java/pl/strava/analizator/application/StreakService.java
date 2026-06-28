@@ -42,7 +42,7 @@ public class StreakService {
         for (var a : activities) {
             if (a.getStartedAt() != null) {
                 LocalDate day = a.getStartedAt().toLocalDate();
-                tssByDay.merge(day, 0.0, (old, val) -> old + 1);
+                tssByDay.merge(day, 1.0, Double::sum);
             }
         }
 
