@@ -57,6 +57,7 @@ public class SyncService {
     private final DailySummaryRepository dailySummaryRepository;
     private final AutoSyncConfigPort autoSyncConfigPort;
     private final PersonalRecordService personalRecordService;
+    private final ChallengeService challengeService;
 
     public SyncService(AthleteProfileRepository profileRepository,
                        ActivityRepository activityRepository,
@@ -74,7 +75,8 @@ public class SyncService {
                        ActivityTrainingEffectRepository trainingEffectRepository,
                        DailySummaryRepository dailySummaryRepository,
                        AutoSyncConfigPort autoSyncConfigPort,
-                       PersonalRecordService personalRecordService) {
+                       PersonalRecordService personalRecordService,
+                       ChallengeService challengeService) {
         this.profileRepository = profileRepository;
         this.activityRepository = activityRepository;
         this.activityMetricRepository = activityMetricRepository;
@@ -92,6 +94,7 @@ public class SyncService {
         this.dailySummaryRepository = dailySummaryRepository;
         this.autoSyncConfigPort = autoSyncConfigPort;
         this.personalRecordService = personalRecordService;
+        this.challengeService = challengeService;
     }
 
     @Getter
@@ -603,6 +606,11 @@ public class SyncService {
             personalRecordService.detectNewRecords();
         } catch (Exception e) {
             log.warn("Personal record detection failed (non-critical): {}", e.getMessage());
+        }
+        try {
+            challengeService.updateAllProgress();
+        } catch (Exception e) {
+            log.warn("Challenge progress update failed (non-critical): {}", e.getMessage());
         }
     }
 

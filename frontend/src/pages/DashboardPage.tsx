@@ -22,6 +22,8 @@ import EventCountdownWidget from '@/components/home/EventCountdownWidget';
 import CoachWidget from '@/components/home/CoachWidget';
 import WeatherMiniWidget from '@/components/home/WeatherMiniWidget';
 import JournalWidget from '@/components/journal/JournalWidget';
+import ChallengeWidget from '@/components/challenge/ChallengeWidget';
+import NudgeBanner from '@/components/layout/NudgeBanner';
 import OnboardingOverlay from '@/components/onboarding/OnboardingOverlay';
 import {
   useCreateEvent,
@@ -137,6 +139,7 @@ export default function DashboardPage() {
       maxWidth={1480}
     >
       <OnboardingOverlay profile={profile} ftpProgress={ftpProgress} />
+      <NudgeBanner />
       <Grid container spacing={{ xs: 2, md: 2.5 }}>
         {/* LEFT SIDEBAR — Context widgets */}
         <Grid item xs={12} md={6} xl={3} order={{ xs: 3, xl: 1 }}>
@@ -145,6 +148,7 @@ export default function DashboardPage() {
             <ReadinessWidget readiness={readiness} onSave={handleCheckInSave} isSaving={checkInSaving} />
             <RecoveryWidget data={fatigueState} isLoading={fatigueLoading} />
             <JournalWidget />
+            <ChallengeWidget />
             <EventCountdownWidget events={events} onCreate={(e) => createEvent.mutate(e)} onDelete={(id) => deleteEvent.mutate(id)} ctlValue={latestPmc?.ctl ?? null} projection={projection} />
           </Stack>
         </Grid>
