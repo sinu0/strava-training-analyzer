@@ -8,6 +8,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from '@/App';
 import { STALE_STANDARD } from '@/constants/queryConfig';
 import { AppUiProvider } from '@/context/AppUiContext';
+import '@/styles/animations.css';
 import theme from '@/theme/theme';
 
 const queryClient = new QueryClient({

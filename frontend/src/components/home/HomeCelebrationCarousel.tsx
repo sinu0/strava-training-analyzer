@@ -21,6 +21,7 @@ import {
   readHomeCelebrationSnapshot,
   writeHomeCelebrationSnapshot,
 } from '@/utils/homeCelebrations';
+import { fireConfetti } from '@/utils/confetti';
 
 /**
  * Fullscreen editorial carousel that celebrates newly detected milestones on Home.
@@ -90,6 +91,12 @@ export default function HomeCelebrationCarousel({
     setCurrentIndex(0);
     setOpen(true);
   }, [ready, activityKey, ftpKey, achievementKey, progressionKey, latestActivity, ftpProgress, progressionLevels, achievements]);
+
+  useEffect(() => {
+    if (open && slides.length > 0) {
+      fireConfetti();
+    }
+  }, [open, slides.length]);
 
   if (!open || slides.length === 0) {
     return null;
