@@ -7,6 +7,7 @@ import PsychologyIcon from '@mui/icons-material/Psychology';
 import ScaleIcon from '@mui/icons-material/Scale';
 import SettingsIcon from '@mui/icons-material/Settings';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
+import TimelineIcon from '@mui/icons-material/Timeline';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import {
   Drawer,
@@ -63,6 +64,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Coach', path: '/coach', icon: <PsychologyIcon /> },
       { label: 'Priorytety', path: '/priorities', icon: <WhatshotIcon /> },
+      { label: 'Oś czasu', path: '/timeline', icon: <TimelineIcon /> },
     ],
   },
 ];

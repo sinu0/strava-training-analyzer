@@ -1,4 +1,4 @@
-import { Grid2 as Grid } from '@mui/material';
+import { Box, Grid2 as Grid } from '@mui/material';
 import { useState } from 'react';
 
 import AdaptiveTrainingPanel from '../components/AdaptiveTrainingPanel';
@@ -9,6 +9,7 @@ import PlanBuilder from '../components/training/PlanBuilder';
 import TrainingCalendar from '../components/training/TrainingCalendar';
 import WeeklyCoachCockpit from '../components/training/WeeklyCoachCockpit';
 import WorkoutLibrary from '../components/training/WorkoutLibrary';
+import WorkoutCompanion from '../components/WorkoutCompanion';
 import { STATUS_COLORS } from '../utils/colors';
 import { getPageHeroIllustrationPath } from '../utils/illustrationAssets';
 
@@ -46,6 +47,9 @@ export default function TrainingPlanPage() {
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
             <WeeklyCoachCockpit />
+            <Box sx={{ mt: 2 }}>
+              <WorkoutCompanion />
+            </Box>
           </Grid>
         </Grid>
       )}

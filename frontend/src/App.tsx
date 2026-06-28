@@ -15,6 +15,7 @@ const WeightPage = lazy(() => import('@/pages/WeightPage'));
 const WeatherPage = lazy(() => import('@/pages/WeatherPage'));
 const PrioritiesPage = lazy(() => import('@/pages/PrioritiesPage'));
 const CoachPage = lazy(() => import('@/pages/CoachPage'));
+const TrainingTimelinePage = lazy(() => import('@/pages/TrainingTimelinePage'));
 const AdminPage = lazy(() => import('@/pages/AdminPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="/weight" element={renderLazyPage(WeightPage)} />
         <Route path="/priorities" element={renderLazyPage(PrioritiesPage)} />
         <Route path="/coach" element={renderLazyPage(CoachPage)} />
+        <Route path="/timeline" element={renderLazyPage(TrainingTimelinePage)} />
         <Route path="/performance" element={<Navigate to="/coach" replace />} />
         <Route path="/adaptive-coach" element={<Navigate to="/coach" replace />} />
         <Route path="/ai-v2" element={<Navigate to="/coach" replace />} />
