@@ -2,6 +2,7 @@ package pl.strava.analizator.domain.model;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import lombok.Getter;
  * or a complex JSON-serializable object (for structured metrics like time_in_zones).
  */
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class MetricResult {
 
@@ -21,12 +22,15 @@ public class MetricResult {
     private final BigDecimal numericValue;
     private final Map<String, Object> jsonValue;
     private final String calculatorVersion;
+    private final String inputFingerprint;
+    private final LocalDate asOf;
     private final Instant calculatedAt;
 
     public static MetricResult numeric(String name, double value) {
         return MetricResult.builder()
                 .metricName(name)
                 .numericValue(BigDecimal.valueOf(value))
+                .calculatorVersion("legacy-v1")
                 .calculatedAt(Instant.now())
                 .build();
     }
@@ -35,6 +39,7 @@ public class MetricResult {
         return MetricResult.builder()
                 .metricName(name)
                 .numericValue(value)
+                .calculatorVersion("legacy-v1")
                 .calculatedAt(Instant.now())
                 .build();
     }
@@ -43,11 +48,20 @@ public class MetricResult {
         return MetricResult.builder()
                 .metricName(name)
                 .jsonValue(value)
+                .calculatorVersion("legacy-v1")
                 .calculatedAt(Instant.now())
                 .build();
     }
 
     public boolean isNumeric() {
         return numericValue != null;
+    }
+
+    public MetricResult withProvenance(String version, String fingerprint, LocalDate effectiveDate) {
+        return toBuilder()
+                .calculatorVersion(version)
+                .inputFingerprint(fingerprint)
+                .asOf(effectiveDate)
+                .build();
     }
 }

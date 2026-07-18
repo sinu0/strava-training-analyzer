@@ -3,7 +3,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import {
   AppBar,
   Box,
-  Chip,
   IconButton,
   Avatar,
   Popover,
@@ -17,60 +16,48 @@ import {
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import StatusPill from '@/components/layout/StatusPill';
 import TopBarSyncButton from '@/components/layout/TopBarSyncButton';
-import type {
-  BlockHealth,
-  ReadinessData,
-  FtpProgress,
-  WeatherGradient,
-} from '@/types/analytics';
 
 import type { Theme } from '@mui/material/styles';
 
 interface TopBarProps {
   onToggleSidebar: () => void;
-  readiness?: ReadinessData;
-  blockHealth?: BlockHealth;
-  ftpProgress?: FtpProgress;
-  weatherGradient?: WeatherGradient;
-  profileName?: string;
 }
 
 function getPageContext(pathname: string) {
   if (pathname === '/' || pathname.startsWith('/dashboard')) {
     return {
-      eyebrow: 'Home',
-      title: 'Ostatni trening',
-      subtitle: 'Twoja ostatnia aktywność, AI i najbliższy kontekst dnia.',
+      eyebrow: 'Dzisiaj',
+      title: 'Decyzja treningowa',
+      subtitle: 'Wniosek, dowody, jakość danych i kontekst kolejnej sesji.',
     };
   }
   if (pathname.startsWith('/weather')) {
     return {
       eyebrow: 'Pogoda',
-      title: 'Studio pogody',
-      subtitle: 'Klikane punkty, pełna analiza tygodnia i sterowanie algorytmem pod ręką.',
+      title: 'Pełna pogoda',
+      subtitle: 'Warunki godzinowe, prognoza tygodnia, lokalizacje i ustawienia.',
     };
   }
   if (pathname.startsWith('/training')) {
     return {
-      eyebrow: 'Planner',
-      title: 'Tydzień i blok',
-      subtitle: 'Cele tygodnia, rola sesji i korekty planu.',
+      eyebrow: 'Plan',
+      title: 'Kalendarz treningowy',
+      subtitle: 'Planowane i wykonane sesje oraz scenariusz obciążenia.',
     };
   }
   if (pathname.startsWith('/activities')) {
     return {
-      eyebrow: 'Aktywności',
-      title: 'Review i historia',
-      subtitle: 'Szczegóły wykonania i analiza pojedynczych sesji.',
+      eyebrow: 'Historia',
+      title: 'Aktywności',
+      subtitle: 'Lista, kalendarz, mapa i szczegół wykonanej sesji.',
     };
   }
   if (pathname.startsWith('/analytics')) {
     return {
-      eyebrow: 'Analityka',
-      title: 'Głębsze trendy',
-      subtitle: 'Power curve, strefy i długofalowe wskaźniki.',
+      eyebrow: 'Analiza',
+      title: 'Porównania i trendy',
+      subtitle: 'Obciążenie, regeneracja, moc i trwałość.',
     };
   }
   if (pathname.startsWith('/health')) {
@@ -78,6 +65,13 @@ function getPageContext(pathname: string) {
       eyebrow: 'Zdrowie',
       title: 'Regeneracja',
       subtitle: 'Sygnały wellness i codzienna gotowość.',
+    };
+  }
+  if (pathname.startsWith('/more')) {
+    return {
+      eyebrow: 'Więcej',
+      title: 'Dane i ustawienia',
+      subtitle: 'Profil, zdrowie, integracje, jakość danych i zadania.',
     };
   }
   return {
@@ -92,25 +86,11 @@ function getPageContext(pathname: string) {
  */
 export default function TopBar({
   onToggleSidebar,
-  readiness,
-  blockHealth,
-  ftpProgress,
-  weatherGradient,
-  profileName,
 }: TopBarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const pageContext = getPageContext(location.pathname);
-
-  const initials = profileName
-    ? profileName
-        .split(' ')
-        .map((w) => w[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase()
-    : '?';
 
   return (
     <>
@@ -152,11 +132,6 @@ export default function TopBar({
             </Typography>
           </Box>
 
-          <Box sx={{ display: { xs: 'none', lg: 'flex' }, gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-            {!!readiness?.dayLabel && <Chip label={readiness.dayLabel} size="small" variant="outlined" />}
-            {!!blockHealth?.label && <Chip label={blockHealth.label} size="small" variant="outlined" />}
-          </Box>
-
           <Box
             data-testid="topbar-floating-cluster"
             sx={{
@@ -186,12 +161,6 @@ export default function TopBar({
               },
             }}
           >
-            <StatusPill
-              readiness={readiness}
-              ftpProgress={ftpProgress}
-              weatherGradient={weatherGradient}
-            />
-
             <TopBarSyncButton />
 
             <IconButton
@@ -209,7 +178,7 @@ export default function TopBar({
                   boxShadow: '0 0 0 2px rgba(255,255,255,0.10), 0 14px 28px rgba(0,0,0,0.22)',
                 }}
               >
-                {initials}
+                ?
               </Avatar>
             </IconButton>
           </Box>
@@ -238,7 +207,7 @@ export default function TopBar({
       >
         <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {profileName ?? 'Użytkownik'}
+            Użytkownik
           </Typography>
         </Box>
         <List disablePadding sx={{ py: 0.5 }}>

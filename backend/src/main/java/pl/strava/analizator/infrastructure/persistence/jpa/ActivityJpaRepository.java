@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import pl.strava.analizator.domain.vo.ActivityTimelineEntry;
@@ -45,4 +46,52 @@ public interface ActivityJpaRepository extends JpaRepository<ActivityEntity, UUI
 
     @Query("SELECT MAX(a.startedAt) FROM ActivityEntity a WHERE a.source = :source")
     Optional<OffsetDateTime> findLatestStartedAtBySource(String source);
+
+    @Query(value = """
+            SELECT a.id AS id, a.externalId AS externalId, a.source AS source,
+                   a.sportType AS sportType, a.name AS name, a.description AS description,
+                   a.startedAt AS startedAt, a.elapsedTimeSec AS elapsedTimeSec,
+                   a.movingTimeSec AS movingTimeSec, a.distanceM AS distanceM,
+                   a.elevationGainM AS elevationGainM, a.elevationLossM AS elevationLossM,
+                   a.avgSpeedMs AS avgSpeedMs, a.maxSpeedMs AS maxSpeedMs,
+                   a.avgHeartrate AS avgHeartrate, a.maxHeartrate AS maxHeartrate,
+                   a.avgPowerW AS avgPowerW, a.maxPowerW AS maxPowerW,
+                   a.avgCadence AS avgCadence, a.maxCadence AS maxCadence,
+                   a.calories AS calories, a.avgTempC AS avgTempC,
+                   a.summaryPolyline AS summaryPolyline, a.createdAt AS createdAt,
+                   a.updatedAt AS updatedAt
+            FROM ActivityEntity a
+            WHERE (:sportType IS NULL OR a.sportType = :sportType)
+              AND a.startedAt >= :fromDate
+              AND a.startedAt <= :toDate
+            ORDER BY a.startedAt DESC
+            """,
+            countQuery = """
+            SELECT COUNT(a) FROM ActivityEntity a
+            WHERE (:sportType IS NULL OR a.sportType = :sportType)
+              AND a.startedAt >= :fromDate
+              AND a.startedAt <= :toDate
+            """)
+    Page<ActivityCoreProjection> findV2Summaries(
+            @Param("sportType") String sportType,
+            @Param("fromDate") OffsetDateTime from,
+            @Param("toDate") OffsetDateTime to,
+            Pageable pageable);
+
+    @Query("""
+            SELECT a.id AS id, a.externalId AS externalId, a.source AS source,
+                   a.sportType AS sportType, a.name AS name, a.description AS description,
+                   a.startedAt AS startedAt, a.elapsedTimeSec AS elapsedTimeSec,
+                   a.movingTimeSec AS movingTimeSec, a.distanceM AS distanceM,
+                   a.elevationGainM AS elevationGainM, a.elevationLossM AS elevationLossM,
+                   a.avgSpeedMs AS avgSpeedMs, a.maxSpeedMs AS maxSpeedMs,
+                   a.avgHeartrate AS avgHeartrate, a.maxHeartrate AS maxHeartrate,
+                   a.avgPowerW AS avgPowerW, a.maxPowerW AS maxPowerW,
+                   a.avgCadence AS avgCadence, a.maxCadence AS maxCadence,
+                   a.calories AS calories, a.avgTempC AS avgTempC,
+                   a.summaryPolyline AS summaryPolyline, a.createdAt AS createdAt,
+                   a.updatedAt AS updatedAt
+            FROM ActivityEntity a WHERE a.id = :id
+            """)
+    Optional<ActivityCoreProjection> findV2CoreById(@Param("id") UUID id);
 }

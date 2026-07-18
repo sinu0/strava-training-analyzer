@@ -359,7 +359,7 @@ public class DailyMetricsService {
      * For each date D, FTP is estimated from all activities on or before D.
      * This gives a meaningful trend line in the FTP chart instead of a flat line.
      */
-    public void backfillFtpHistory(List<Activity> allActivities, double profileFtpFloor) {
+    public void backfillFtpHistory(List<Activity> allActivities, double currentProfileFtp) {
         // Collect unique dates (one per calendar day), sorted ascending
         List<LocalDate> activityDates = allActivities.stream()
                 .filter(a -> a.getStartedAt() != null)
@@ -407,7 +407,10 @@ public class DailyMetricsService {
             if (cp > 0) estimates.add(cp);
 
             if (!estimates.isEmpty()) {
-                double ftp = Math.max(median(estimates), profileFtpFloor);
+                // Historical points may only use evidence available on that date.
+                // The current profile FTP has no effective date, so applying it here
+                // would leak today's knowledge into the past.
+                double ftp = median(estimates);
                 if (ftp != prev) {
                     dailyMetricRepository.save(date, MetricResult.numeric("ftp", ftp));
                     prev = ftp;
@@ -415,8 +418,9 @@ public class DailyMetricsService {
             }
         }
         // Always write today's value
-        if (prev > 0) {
-            dailyMetricRepository.save(LocalDate.now(ZoneOffset.UTC), MetricResult.numeric("ftp", prev));
+        double currentFtp = Math.max(prev, currentProfileFtp);
+        if (currentFtp > 0) {
+            dailyMetricRepository.save(LocalDate.now(ZoneOffset.UTC), MetricResult.numeric("ftp", currentFtp));
         }
     }
 

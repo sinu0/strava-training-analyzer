@@ -1,7 +1,10 @@
 package pl.strava.analizator.infrastructure.persistence.adapter;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -21,6 +24,16 @@ public class ActivityTrainingEffectRepositoryAdapter implements ActivityTraining
     @Override
     public Optional<ActivityTrainingEffect> findByActivityId(UUID activityId) {
         return jpa.findByActivityId(activityId).map(mapper::toDomain);
+    }
+
+    @Override
+    public Map<UUID, ActivityTrainingEffect> findByActivityIds(List<UUID> activityIds) {
+        if (activityIds == null || activityIds.isEmpty()) {
+            return Map.of();
+        }
+        return jpa.findByActivityIdIn(activityIds).stream()
+                .map(mapper::toDomain)
+                .collect(Collectors.toMap(ActivityTrainingEffect::getActivityId, effect -> effect));
     }
 
     @Override

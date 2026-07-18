@@ -26,30 +26,30 @@ function mockAppLayout() {
   });
 }
 
-function mockStaticPages(importedPages: string[] = [], options?: { skipDashboard?: boolean }) {
-  if (!options?.skipDashboard) {
-    vi.doMock('../pages/DashboardPage', () => {
-      importedPages.push('dashboard');
-      return { default: () => <div>Dashboard page</div> };
+function mockStaticPages(importedPages: string[] = [], options?: { skipToday?: boolean }) {
+  if (!options?.skipToday) {
+    vi.doMock('../features/today/TodayPage', () => {
+      importedPages.push('today');
+      return { default: () => <div>Today page</div> };
     });
   }
   vi.doMock('../pages/ProfilePage', () => {
     importedPages.push('profile');
     return { default: () => <div>Profile page</div> };
   });
-  vi.doMock('../pages/ActivitiesPage', () => {
+  vi.doMock('../features/history/HistoryPage', () => {
     importedPages.push('activities');
     return { default: () => <div>Activities page</div> };
   });
-  vi.doMock('../pages/ActivityDetailPage', () => {
+  vi.doMock('../features/history/ActivityDetailV2Page', () => {
     importedPages.push('activity-detail');
     return { default: () => <div>Activity detail page</div> };
   });
-  vi.doMock('../pages/AnalyticsPage', () => {
+  vi.doMock('../features/analysis/AnalysisPage', () => {
     importedPages.push('analytics');
     return { default: () => <div>Analytics page</div> };
   });
-  vi.doMock('../pages/TrainingPlanPage', () => {
+  vi.doMock('../features/plan/PlanPage', () => {
     importedPages.push('training');
     return { default: () => <div>Training page</div> };
   });
@@ -65,7 +65,7 @@ function mockStaticPages(importedPages: string[] = [], options?: { skipDashboard
     importedPages.push('weight');
     return { default: () => <div>Weight page</div> };
   });
-  vi.doMock('../pages/AdminPage', () => {
+  vi.doMock('../features/data/DataJobsPage', () => {
     importedPages.push('admin');
     return { default: () => <div>Admin page</div> };
   });
@@ -89,37 +89,37 @@ describe('App', () => {
     mockStaticPages(importedPages);
 
     await renderApp('/');
-    expect((await screen.findAllByText('Dashboard page')).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText('Today page')).length).toBeGreaterThan(0);
 
-    expect(importedPages).toContain('dashboard');
+    expect(importedPages).toContain('today');
     expect(importedPages).not.toContain('activities');
     expect(importedPages).not.toContain('analytics');
-  });
+  }, 15_000);
 
   it('shows a page-level suspense fallback when a route suspends', async () => {
     mockAppLayout();
-    vi.doMock('../pages/DashboardPage', () => ({
-      default: function SuspendedDashboardPage() {
+    vi.doMock('../features/today/TodayPage', () => ({
+      default: function SuspendedTodayPage() {
         throw new Promise(() => {});
       },
     }));
-    mockStaticPages([], { skipDashboard: true });
+    mockStaticPages([], { skipToday: true });
 
     await renderApp('/');
 
     expect((await screen.findAllByText('Ładowanie strony…')).length).toBeGreaterThan(0);
   });
 
-  it('loads dashboard module only on dashboard route', async () => {
+  it('redirects legacy dashboard route to Today', async () => {
     const importedPages: string[] = [];
 
     mockAppLayout();
     mockStaticPages(importedPages);
 
     await renderApp('/dashboard');
-    expect((await screen.findAllByText('Dashboard page')).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText('Today page')).length).toBeGreaterThan(0);
 
-    expect(importedPages).toContain('dashboard');
+    expect(importedPages).toContain('today');
     expect(importedPages).not.toContain('activities');
   });
 

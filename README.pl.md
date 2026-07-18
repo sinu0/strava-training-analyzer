@@ -283,40 +283,15 @@ Po imporcie aktywności, metryki (NP, TSS, IF, strefy, krzywa mocy, CTL/ATL/TSB)
 
 ## 8. Nawigacja w aplikacji
 
-Aplikacja ma trzy główne sekcje dostępne z paska bocznego:
+V2 ma pięć głównych obszarów:
 
-### Dashboard (`/`)
+- **Dzisiaj** (`/`) — jeden wniosek treningowy, jego dowody, jakość danych, obciążenie, ostatnia aktywność i kolejny trening.
+- **Historia** (`/activities`) — Lista/Kalendarz/Mapa ze wspólnymi filtrami zapisanymi w URL; strumienie aktywności są pobierane dopiero po otwarciu Analizy.
+- **Analiza** (`/analytics`) — porównanie okresów, obciążenie i regeneracja oraz zweryfikowane dane mocy.
+- **Plan** (`/training`) — kalendarz, biblioteka treningów i deterministyczny scenariusz przyszłego obciążenia.
+- **Więcej** (`/more`) — pełny widok Pogody, profil, zdrowie, masa oraz centrum Danych i zadań.
 
-- **Podsumowanie tygodnia** — dystans, czas, TSS, wzniesienie
-- **Obciążenie treningowe (30d)** — wykres PMC (CTL/ATL/TSB)
-- **Ostatnie aktywności** — 5 ostatnich z linkami do szczegółów
-- **Gotowość** — placeholder (przyszła integracja z Garmin)
-- **Rekomendacja na dziś** — placeholder (przyszły advisor)
-
-### Aktywności (`/activities`)
-
-- **Lista aktywności** — tabela z filtrowaniem po typie sportu
-- **Kliknięcie w wiersz** → strona szczegółowa aktywności
-- **Szczegóły aktywności** (`/activities/:id`):
-  - Mapa trasy (Leaflet + CARTO dark tiles)
-  - Metryki: moc, tętno, kadencja, dystans, czas, wzniesienie
-  - Wykresy strumieni (power, HR, kadencja, wysokość)
-  - Strefy mocy i tętna (poziome paski)
-
-### Analityka (`/analytics`)
-
-6 zakładek:
-
-| Zakładka | Opis |
-|----------|------|
-| **PMC** | Performance Management Chart — CTL (fitness), ATL (zmęczenie), TSB (forma) |
-| **Krzywa mocy** | Najlepsze wysiłki 1s–120min, skala logarytmiczna |
-| **Strefy** | Rozkład czasu w strefach mocy (wykres słupkowy) |
-| **Obciążenie** | TSS tygodniowo (wykres słupkowy) |
-| **Trendy** | FTP w czasie + Efficiency Factor (scatter plot) |
-| **Porównanie** | Zestawienie dwóch dowolnych okresów (dystans, czas, wzniesienie) |
-
-Każda zakładka ma **date range picker** do wyboru zakresu dat.
+Pełny ekran **Pogoda** pozostaje dostępny pod `/weather`; jego kontekst jest także używany na ekranie Dzisiaj.
 
 ---
 

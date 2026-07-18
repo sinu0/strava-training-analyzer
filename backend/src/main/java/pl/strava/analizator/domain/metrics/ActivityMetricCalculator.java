@@ -9,6 +9,7 @@ import pl.strava.analizator.domain.model.AthleteProfile;
  */
 public interface ActivityMetricCalculator<T> {
     String metricName();
+    default String calculatorVersion() { return "1"; }
     T calculate(Activity activity, AthleteProfile profile);
     boolean supports(Activity activity);
 }

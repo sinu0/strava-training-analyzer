@@ -10,5 +10,6 @@ import pl.strava.analizator.domain.model.AthleteProfile;
  */
 public interface TimeSeriesMetricCalculator<T> {
     String metricName();
+    default String calculatorVersion() { return "1"; }
     T calculate(List<DailyTrainingLoad> history, AthleteProfile profile);
 }

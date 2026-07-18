@@ -36,6 +36,8 @@ public class ActivityMetricRepositoryAdapter implements ActivityMetricRepository
             entity.setValueNumeric(result.getNumericValue());
             entity.setValueJson(result.getJsonValue());
             entity.setCalculatorVersion(result.getCalculatorVersion());
+            entity.setInputFingerprint(result.getInputFingerprint());
+            entity.setAsOf(result.getAsOf());
             entity.setCalculatedAt(result.getCalculatedAt());
         } else {
             entity = mapper.toEntity(result);

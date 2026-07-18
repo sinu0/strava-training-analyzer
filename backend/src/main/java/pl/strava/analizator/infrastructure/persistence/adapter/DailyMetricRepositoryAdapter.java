@@ -37,10 +37,13 @@ public class DailyMetricRepositoryAdapter implements DailyMetricRepository {
             entity.setValueNumeric(result.getNumericValue());
             entity.setValueJson(result.getJsonValue());
             entity.setCalculatorVersion(result.getCalculatorVersion());
+            entity.setInputFingerprint(result.getInputFingerprint());
+            entity.setAsOf(result.getAsOf() != null ? result.getAsOf() : date);
             entity.setCalculatedAt(result.getCalculatedAt());
         } else {
             entity = mapper.toEntity(result);
             entity.setDate(date);
+            if (entity.getAsOf() == null) entity.setAsOf(date);
         }
         jpaRepository.save(entity);
     }

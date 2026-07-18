@@ -27,12 +27,15 @@ import pl.strava.analizator.application.dto.PowerPhenotypeDto;
 import pl.strava.analizator.application.dto.TrainingPrioritiesDto;
 import pl.strava.analizator.application.dto.TrainingPriorityDto;
 import pl.strava.analizator.domain.model.Activity;
+import pl.strava.analizator.domain.model.ActivityDataQualityPolicy;
 import pl.strava.analizator.domain.model.AthleteProfile;
+import pl.strava.analizator.domain.model.DailySummary;
 import pl.strava.analizator.domain.model.MetricResult;
 import pl.strava.analizator.domain.port.ActivityMetricRepository;
 import pl.strava.analizator.domain.port.ActivityRepository;
 import pl.strava.analizator.domain.port.AthleteProfileRepository;
 import pl.strava.analizator.domain.port.DailyMetricRepository;
+import pl.strava.analizator.domain.port.DailySummaryRepository;
 import pl.strava.analizator.domain.vo.DateRange;
 
 @Service
@@ -44,6 +47,7 @@ public class TrainingPrioritiesService {
     private final ActivityMetricRepository activityMetricRepository;
     private final DailyMetricRepository dailyMetricRepository;
     private final AthleteProfileRepository athleteProfileRepository;
+    private final DailySummaryRepository dailySummaryRepository;
 
     private static final String POWER_CURVE_METRIC = "power_curve";
     private static final String TSS_METRIC = "training_stress_score";
@@ -127,9 +131,9 @@ public class TrainingPrioritiesService {
 
         if (points.size() < 2) {
             return CpModelDto.builder()
-                    .cp(ftp * 0.76).wPrime(15000).rSquared(0)
-                    .cpPerKg(ftp * 0.76 / weight).dataPoints(0).cpConfidence(0)
-                    .currentFtp(ftp).ftpVsCpPct(100).build();
+                    .cp(0).wPrime(0).rSquared(0)
+                    .cpPerKg(0).dataPoints(0).cpConfidence(0)
+                    .currentFtp(ftp).ftpVsCpPct(0).build();
         }
 
         int n = points.size();
@@ -138,10 +142,10 @@ public class TrainingPrioritiesService {
             sumT += p[0]; sumE += p[1]; sumT2 += p[0] * p[0]; sumTE += p[0] * p[1];
         }
         double denom = n * sumT2 - sumT * sumT;
-        double cp = denom > 1e-9 ? (n * sumTE - sumT * sumE) / denom : ftp * 0.76;
-        double wPrime = denom > 1e-9 ? (sumE * sumT2 - sumT * sumTE) / denom : 15000;
-        cp = Math.max(0, cp);
-        wPrime = Math.max(0, wPrime);
+        double cp = denom > 1e-9 ? (n * sumTE - sumT * sumE) / denom : 0;
+        double wPrime = denom > 1e-9 ? (sumE * sumT2 - sumT * sumTE) / denom : 0;
+        cp = Double.isFinite(cp) ? Math.max(0, cp) : 0;
+        wPrime = Double.isFinite(wPrime) ? Math.max(0, wPrime) : 0;
 
         double meanE = sumE / n;
         double ssRes = 0, ssTot = 0;
@@ -151,6 +155,7 @@ public class TrainingPrioritiesService {
             ssTot += (p[1] - meanE) * (p[1] - meanE);
         }
         double rSquared = ssTot > 1e-9 ? 1 - ssRes / ssTot : 0;
+        rSquared = Double.isFinite(rSquared) ? Math.max(0, Math.min(1, rSquared)) : 0;
 
         int confidence = points.size() >= 4 ? 90 :
                 points.size() >= 3 ? 70 : 50;
@@ -174,7 +179,9 @@ public class TrainingPrioritiesService {
                         for (Map.Entry<?, ?> e : effortsMap.entrySet()) {
                             int dur = Integer.parseInt(String.valueOf(e.getKey()));
                             double watts = Double.parseDouble(String.valueOf(e.getValue()));
-                            best.merge(dur, watts, (cur, cand) -> Math.max(cur, cand));
+                            if (ActivityDataQualityPolicy.isPlausiblePower(watts, dur)) {
+                                best.merge(dur, watts, Math::max);
+                            }
                         }
                     }
                 }
@@ -197,6 +204,7 @@ public class TrainingPrioritiesService {
             if (blocks.isEmpty()) continue;
 
             String type = classifyIntervalType(blocks, ftp);
+            if (!isStructuredIntervalSession(type, blocks)) continue;
             int intervalCount = blocks.size();
             int avgDuration = (int) blocks.stream().mapToInt(b -> b.durationSec).average().orElse(0);
             double avgPowerPct = blocks.stream().mapToDouble(b -> b.avgPowerPctOfFtp).average().orElse(0);
@@ -272,7 +280,7 @@ public class TrainingPrioritiesService {
 
     private List<SustainedEffortBlock> findSustainedEfforts(int[] power, double ftp) {
         List<SustainedEffortBlock> blocks = new ArrayList<>();
-        int minBlockSec = 30;
+        int minBlockSec = 5;
         double thresholdPct = 0.85;
 
         int i = 0;
@@ -326,6 +334,16 @@ public class TrainingPrioritiesService {
         return "ENDURANCE";
     }
 
+    private boolean isStructuredIntervalSession(String type, List<SustainedEffortBlock> blocks) {
+        int totalWorkSeconds = blocks.stream().mapToInt(SustainedEffortBlock::durationSec).sum();
+        return switch (type) {
+            case "NEUROMUSCULAR" -> blocks.size() >= 3;
+            case "ANAEROBIC", "VO2MAX" -> blocks.size() >= 2;
+            case "THRESHOLD" -> blocks.size() >= 2 || totalWorkSeconds >= 8 * 60;
+            default -> false;
+        };
+    }
+
     private int calculateIntervalQuality(String type, List<SustainedEffortBlock> blocks, double ftp, double restRatio) {
         double targetPct = switch (type) {
             case "THRESHOLD" -> 95; case "VO2MAX" -> 108;
@@ -363,7 +381,7 @@ public class TrainingPrioritiesService {
         DateRange lastWeek = new DateRange(today.minusDays(7), today);
         DateRange lastSixWeeks = new DateRange(today.minusDays(42), today);
 
-        Map<LocalDate, BigDecimal> tssSeries = dailyMetricRepository.findNumericSeries("tss", lastSixWeeks);
+        Map<LocalDate, BigDecimal> tssSeries = dailyMetricRepository.findNumericSeries("daily_tss", lastSixWeeks);
         Map<LocalDate, BigDecimal> ctlSeries = dailyMetricRepository.findNumericSeries("ctl", lastWeek);
         Map<LocalDate, BigDecimal> atlSeries = dailyMetricRepository.findNumericSeries("atl", lastWeek);
 
@@ -376,27 +394,29 @@ public class TrainingPrioritiesService {
 
         // Muscular: power fade from recent rides
         double avgPowerFade = computeAvgPowerFade(activities);
-        double muscularFatigue = Math.min(100, avgPowerFade * 6.0 + atlFatigue * 0.3);
+        double muscularFatigue = clampScore(avgPowerFade * 6.0 + atlFatigue * 0.3);
 
         // Metabolic: recent TSS accumulation
         double weeklyTss = tssSeries.values().stream()
                 .mapToDouble(BigDecimal::doubleValue).sum() / 6.0;
-        double metabolicFatigue = Math.min(100, (weeklyTss / 500.0) * 70 + atlFatigue * 0.2);
+        double metabolicFatigue = clampScore((weeklyTss / 500.0) * 70 + atlFatigue * 0.2);
 
         // ANS: check for HRV drift / resting HR trend
-        Map<LocalDate, BigDecimal> restingHrSeries = dailyMetricRepository.findNumericSeries("resting_hr", lastSixWeeks);
+        List<DailySummary> healthSummaries = dailySummaryRepository.findByDateRange(lastSixWeeks);
+        List<DailySummary> restingHrSeries = healthSummaries.stream()
+                .filter(summary -> summary.getRestingHrBpm() != null)
+                .sorted(Comparator.comparing(DailySummary::getDate))
+                .toList();
         double ansFatigue = 30;
         if (restingHrSeries.size() >= 5) {
-            List<Map.Entry<LocalDate, BigDecimal>> sorted = restingHrSeries.entrySet().stream()
-                    .sorted(Map.Entry.comparingByKey()).toList();
-            double first = sorted.getFirst().getValue().doubleValue();
-            double last = sorted.getLast().getValue().doubleValue();
+            double first = restingHrSeries.getFirst().getRestingHrBpm();
+            double last = restingHrSeries.getLast().getRestingHrBpm();
             double trend = (last - first) / first;
-            ansFatigue = Math.min(100, 50 + trend * 500);
+            ansFatigue = clampScore(50 + trend * 500);
         }
 
-        int compositeScore = (int) Math.round(atlFatigue * 0.3 + muscularFatigue * 0.25
-                + metabolicFatigue * 0.25 + ansFatigue * 0.2);
+        int compositeScore = (int) Math.round(clampScore(atlFatigue * 0.3 + muscularFatigue * 0.25
+                + metabolicFatigue * 0.25 + ansFatigue * 0.2));
         String statusLabel;
         String description;
         if (compositeScore >= 70) {
@@ -417,6 +437,10 @@ public class TrainingPrioritiesService {
                 .metabolicFatigue(metabolicFatigue).ansFatigue(ansFatigue)
                 .compositeScore(compositeScore).statusLabel(statusLabel).description(description)
                 .build();
+    }
+
+    private double clampScore(double value) {
+        return Math.max(0, Math.min(100, value));
     }
 
     private double computeAvgPowerFade(List<Activity> activities) {
@@ -525,7 +549,7 @@ public class TrainingPrioritiesService {
         Map<Integer, Double> bestEfforts = aggregatePowerCurve(poweredActivities);
 
         Map<String, Double> profileWkg = new LinkedHashMap<>();
-        Map<String, Integer> percentiles = new LinkedHashMap<>();
+        Map<String, Integer> referenceScores = new LinkedHashMap<>();
         Map<String, Double> gapByLabel = new LinkedHashMap<>();
 
         for (Map.Entry<Integer, String> entry : DURATION_LABELS.entrySet()) {
@@ -537,27 +561,27 @@ public class TrainingPrioritiesService {
 
             Double ref = REFERENCE_WKG.get(dur);
             int pct = (ref != null && ref > 0) ? (int) Math.min(100, (wkg / ref) * 100) : 0;
-            percentiles.put(label, pct);
+            referenceScores.put(label, pct);
             if (ref != null && ref > 0) {
                 gapByLabel.put(label, Math.max(0, ref - wkg));
             }
         }
 
-        String bestLabel = percentiles.entrySet().stream()
+        String bestLabel = referenceScores.entrySet().stream()
                 .max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse("?");
-        String worstLabel = percentiles.entrySet().stream()
+        String worstLabel = referenceScores.entrySet().stream()
                 .min(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse("?");
         double weaknessGap = gapByLabel.getOrDefault(worstLabel, 0.0);
 
         String primaryType = classifyPhenotype(profileWkg);
-        String secondaryType = findSecondary(percentiles, primaryType);
+        String secondaryType = findSecondary(referenceScores, primaryType);
 
         String description = buildPhenotypeDescription(primaryType, bestLabel, worstLabel);
         String recommendation = buildPhenotypeRecommendation(primaryType, worstLabel, weaknessGap);
 
         return PowerPhenotypeDto.builder()
                 .primaryType(primaryType).secondaryType(secondaryType)
-                .powerProfileWkg(profileWkg).percentiles(percentiles)
+                .powerProfileWkg(profileWkg).referenceScores(referenceScores)
                 .bestDuration(bestLabel).worstDuration(worstLabel)
                 .weaknessGapWkg(weaknessGap).description(description)
                 .recommendation(recommendation).build();

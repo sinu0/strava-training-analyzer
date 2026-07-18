@@ -81,12 +81,13 @@ class HealthServiceTest {
     // --- getRecoveryStatus tests ---
 
     @Test
-    void getRecoveryStatusWithNoData_returnsZeroScoreAndBrakDanych() {
+    void getRecoveryStatusWithNoData_returnsUnknownInsteadOfZeroScore() {
         when(dailySummaryRepository.findByDateRange(any(DateRange.class))).thenReturn(List.of());
 
         HealthService.RecoveryStatus status = healthService.getRecoveryStatus(LocalDate.of(2024, 6, 7));
 
-        assertThat(status.score()).isZero();
+        assertThat(status.score()).isNull();
+        assertThat(status.availability()).isEqualTo("UNKNOWN");
         assertThat(status.level()).isEqualTo("brak danych");
         assertThat(status.description()).contains("Brak danych");
         assertThat(status.alerts()).isEmpty();

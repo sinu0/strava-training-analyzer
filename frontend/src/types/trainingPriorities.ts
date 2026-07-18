@@ -59,7 +59,7 @@ export interface PowerPhenotypeData {
   primaryType: string;
   secondaryType: string | null;
   powerProfileWkg: Record<string, number>;
-  percentiles: Record<string, number>;
+  referenceScores: Record<string, number>;
   bestDuration: string;
   worstDuration: string;
   weaknessGapWkg: number;

@@ -2,6 +2,15 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 const RECHARTS_PACKAGES = ['recharts', 'recharts-scale', 'react-smooth', 'victory-vendor'];
+const VENDOR_CHUNKS: Record<string, string[]> = {
+  react: ['react', 'react-dom', 'react-router', 'react-router-dom', 'scheduler'],
+  mui: ['@mui', '@emotion'],
+  data: ['@tanstack', 'axios'],
+};
+
+function belongsToPackage(normalizedId: string, packageName: string) {
+  return normalizedId.includes(`/node_modules/${packageName}/`);
+}
 
 export default defineConfig({
   plugins: [react()],
@@ -10,8 +19,13 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           const normalizedId = id.replaceAll('\\', '/');
-          if (RECHARTS_PACKAGES.some((packageName) => normalizedId.includes(`/node_modules/${packageName}/`))) {
+          if (RECHARTS_PACKAGES.some((packageName) => belongsToPackage(normalizedId, packageName))) {
             return 'recharts';
+          }
+          for (const [chunkName, packageNames] of Object.entries(VENDOR_CHUNKS)) {
+            if (packageNames.some((packageName) => belongsToPackage(normalizedId, packageName))) {
+              return chunkName;
+            }
           }
 
           return undefined;

@@ -256,7 +256,7 @@ class TrainingDataAdapterTest {
         when(athleteProfileRepository.findFirst()).thenReturn(Optional.empty());
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(Collections.emptyList());
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
         TreeMap<LocalDate, BigDecimal> ctlSeries = new TreeMap<>();
         ctlSeries.put(today, BigDecimal.valueOf(70));
         TreeMap<LocalDate, BigDecimal> atlSeries = new TreeMap<>();

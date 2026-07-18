@@ -125,4 +125,25 @@ describe('HealthPage', () => {
     expect(screen.getByText('HRV poniżej 80% średniej')).toBeDefined();
     expect(screen.getByText('Wysoki stres')).toBeDefined();
   });
+
+  it('renders unknown recovery without presenting a zero score', () => {
+    const overview = {
+      latest: null,
+      hrvTrend: { current: null, periodAvg: null, sevenDayAvg: null, direction: 'brak danych' },
+      sleepTrend: { latestScore: null, avgScore: null, avgDurationSeconds: null },
+      stressTrend: { current: null, avg: null },
+      restingHrTrend: { current: null, avg: null, direction: 'brak danych' },
+    };
+    vi.mocked(useHealthModule.useHealthOverview).mockReturnValue({ data: overview, isLoading: false } as any);
+    vi.mocked(useHealthModule.useHealthTimeline).mockReturnValue({ data: [], isLoading: false } as any);
+    vi.mocked(useHealthModule.useRecoveryStatus).mockReturnValue({
+      data: { score: null, availability: 'UNKNOWN', level: 'brak danych', description: 'Brak danych zdrowotnych.', alerts: [] },
+      isLoading: false,
+    } as any);
+
+    renderPage();
+
+    expect(screen.getByText('Brak danych do oceny')).toBeDefined();
+    expect(screen.queryByText('0')).toBeNull();
+  });
 });

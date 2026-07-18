@@ -283,40 +283,15 @@ After importing activities, metrics (NP, TSS, IF, zones, power curve, CTL/ATL/TS
 
 ## 8. Navigating the App
 
-The application has three main sections accessible from the sidebar:
+V2 has five primary areas:
 
-### Dashboard (`/`)
+- **Today** (`/`) — one training conclusion, its evidence, data quality, load, latest activity, and next workout.
+- **History** (`/activities`) — List/Calendar/Map with shared URL filters; activity streams load only after opening Analysis.
+- **Analysis** (`/analytics`) — period comparison, load and recovery, and validated power data.
+- **Plan** (`/training`) — calendar, workout library, and a deterministic future-load scenario.
+- **More** (`/more`) — the full Weather view, profile, health, weight, and the Data and jobs center.
 
-- **Weekly summary** — distance, time, TSS, elevation
-- **Training load (30d)** — PMC chart (CTL/ATL/TSB)
-- **Recent activities** — last 5 with links to details
-- **Readiness** — placeholder (future Garmin integration)
-- **Today's recommendation** — placeholder (future advisor)
-
-### Activities (`/activities`)
-
-- **Activity list** — table with sport type filtering
-- **Click a row** → activity detail page
-- **Activity details** (`/activities/:id`):
-  - Route map (Leaflet + CARTO dark tiles)
-  - Metrics: power, heart rate, cadence, distance, time, elevation
-  - Stream charts (power, HR, cadence, altitude)
-  - Power and HR zones (horizontal bars)
-
-### Analytics (`/analytics`)
-
-6 tabs:
-
-| Tab | Description |
-|-----|-------------|
-| **PMC** | Performance Management Chart — CTL (fitness), ATL (fatigue), TSB (form) |
-| **Power Curve** | Best efforts 1s–120min, logarithmic scale |
-| **Zones** | Time distribution across power zones (bar chart) |
-| **Load** | Weekly TSS (bar chart) |
-| **Trends** | FTP over time + Efficiency Factor (scatter plot) |
-| **Compare** | Side-by-side comparison of two arbitrary periods (distance, time, elevation) |
-
-Each tab has a **date range picker** for selecting the date range.
+The complete **Weather** screen remains available at `/weather`; its context is also used by Today.
 
 ---
 

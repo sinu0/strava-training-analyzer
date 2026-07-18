@@ -35,9 +35,10 @@ public class StravaAuthController {
     @GetMapping("/callback")
     public ResponseEntity<Void> callback(
             @RequestParam("code") String code,
+            @RequestParam("state") String state,
             @RequestParam(value = "scope", required = false) String scope) {
-        
-        AthleteProfile profile = oAuth2Service.exchangeCodeForTokens(code);
+
+        AthleteProfile profile = oAuth2Service.exchangeCodeForTokens(code, state);
 
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(frontendUrl + "/?strava=connected"))

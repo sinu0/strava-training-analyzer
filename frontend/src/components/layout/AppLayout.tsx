@@ -1,17 +1,9 @@
 import { Alert, Box, Snackbar } from '@mui/material';
-import { alpha, useTheme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
-import {
-  useFtpProgress,
-  useProfile,
-  useReadiness,
-  useBlockHealth,
-  useWeatherGradient,
-  useWeatherLocations,
-} from '@/hooks/useAnalytics';
 import { STATUS_COLORS, alphaColor } from '@/utils/colors';
 
 import MobileBottomNav from './MobileBottomNav';
@@ -49,15 +41,6 @@ export default function AppLayout() {
     }
   };
 
-  // Lightweight queries for TopBar status pill (shared cache with DashboardPage)
-  const { data: readiness } = useReadiness();
-  const { data: blockHealth } = useBlockHealth();
-  const { data: ftpProgress } = useFtpProgress();
-  const { data: profile } = useProfile();
-  const { data: weatherLocations } = useWeatherLocations();
-  const activeLocation = weatherLocations?.find(l => l.active);
-  const { data: weatherGradient } = useWeatherGradient(activeLocation?.name);
-
   useEffect(() => {
     setSidebarOpen(!isMobile);
   }, [isMobile]);
@@ -93,14 +76,7 @@ export default function AppLayout() {
         }}
       />
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        <TopBar
-          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
-          readiness={readiness}
-          blockHealth={blockHealth}
-          ftpProgress={ftpProgress}
-          weatherGradient={weatherGradient}
-          profileName={profile?.name}
-        />
+        <TopBar onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
         <Box
           component="main"
           sx={{
@@ -108,11 +84,7 @@ export default function AppLayout() {
             p: { xs: 2, sm: 3, md: 3.5 },
             pt: { xs: 5, sm: 6, md: 7 },
             pb: { xs: 12, md: 3.5 },
-            backgroundImage: `linear-gradient(${alpha(theme.palette.background.default, 0.93)}, ${alpha(theme.palette.background.default, 0.93)}), url('/illustrations/bg-main.jpg')`,
-            backgroundSize: 'cover',
-            backgroundAttachment: 'fixed',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
+            bgcolor: 'background.default',
           }}
         >
           <Outlet />

@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.util.List;
 import java.util.Map;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 import org.junit.jupiter.api.Test;
 
@@ -98,5 +100,23 @@ class MetricRegistryTest {
         Map<String, MetricResult> results = registry.calculateAllActivityMetrics(activity, AthleteProfile.builder().build());
         assertThat(results).doesNotContainKey("broken_metric");
         assertThat(results).containsKey("time_in_zones");
+    }
+
+    @Test
+    void calculateAllActivityMetrics_attachesVersionedProvenance() {
+        NormalizedPowerCalculator calculator = new NormalizedPowerCalculator();
+        MetricRegistry registry = new MetricRegistry(List.of(calculator), new ObjectMapper());
+        Activity activity = Activity.builder()
+                .startedAt(OffsetDateTime.of(2026, 7, 18, 8, 0, 0, 0, ZoneOffset.UTC))
+                .powerStream(new int[]{200, 210, 190, 205, 215, 195})
+                .build();
+
+        MetricResult result = registry.calculateAllActivityMetrics(
+                activity, AthleteProfile.builder().build()).get("normalized_power");
+
+        assertThat(result.getCalculatorVersion()).isEqualTo(calculator.calculatorVersion());
+        assertThat(result.getInputFingerprint()).hasSize(64);
+        assertThat(result.getAsOf()).isEqualTo(activity.getStartedAt().toLocalDate());
+        assertThat(result.getCalculatedAt()).isNotNull();
     }
 }

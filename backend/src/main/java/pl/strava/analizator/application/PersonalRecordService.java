@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import pl.strava.analizator.domain.gamification.PersonalRecord;
 import pl.strava.analizator.domain.gamification.PersonalRecordType;
 import pl.strava.analizator.domain.model.Activity;
+import pl.strava.analizator.domain.model.ActivityDataQualityPolicy;
 import pl.strava.analizator.domain.port.ActivityMetricRepository;
 import pl.strava.analizator.domain.port.ActivityRepository;
 import pl.strava.analizator.domain.port.PersonalRecordRepository;
@@ -36,7 +37,10 @@ public class PersonalRecordService {
     public List<PersonalRecord> detectNewRecords() {
         List<PersonalRecord> existingRecords = recordRepository.findAll();
         Map<PersonalRecordType, Double> currentBests = existingRecords.stream()
-                .collect(Collectors.toMap(PersonalRecord::getRecordType, PersonalRecord::getRecordValue));
+                .collect(Collectors.toMap(
+                        PersonalRecord::getRecordType,
+                        PersonalRecord::getRecordValue,
+                        Math::max));
 
         List<Activity> activities = activityRepository.findAll();
         List<PersonalRecord> newRecords = new ArrayList<>();
@@ -44,6 +48,7 @@ public class PersonalRecordService {
         List<Activity> bikeActivities = activities.stream()
                 .filter(a -> a.getStartedAt() != null)
                 .filter(a -> a.getSportType() == null || !a.getSportType().equalsIgnoreCase("VirtualRide"))
+                .sorted(Comparator.comparing(Activity::getStartedAt))
                 .toList();
 
         checkPowerRecords(bikeActivities, currentBests, newRecords);
@@ -79,13 +84,13 @@ public class PersonalRecordService {
     private void checkPowerRecords(List<Activity> activities, Map<PersonalRecordType, Double> bests,
                                    List<PersonalRecord> newRecords) {
         checkSingleActivityRecord(activities, bests, newRecords, PersonalRecordType.BEST_5S_POWER,
-                a -> a.getMaxPowerW() != null ? a.getMaxPowerW().doubleValue() : null, "max power");
+                a -> findPowerCurveEffort(a, 5), "best 5s power");
         checkSingleActivityRecord(activities, bests, newRecords, PersonalRecordType.BEST_1MIN_POWER,
-                a -> findMetric(a, "BEST_1MIN_POWER"), "best 1min power");
+                a -> findPowerCurveEffort(a, 60), "best 1min power");
         checkSingleActivityRecord(activities, bests, newRecords, PersonalRecordType.BEST_5MIN_POWER,
-                a -> findMetric(a, "BEST_5MIN_POWER"), "best 5min power");
+                a -> findPowerCurveEffort(a, 300), "best 5min power");
         checkSingleActivityRecord(activities, bests, newRecords, PersonalRecordType.BEST_20MIN_POWER,
-                a -> findMetric(a, "BEST_20MIN_POWER"), "best 20min power");
+                a -> findPowerCurveEffort(a, 1200), "best 20min power");
     }
 
     private void checkDistanceRecords(List<Activity> activities, Map<PersonalRecordType, Double> bests,
@@ -245,7 +250,7 @@ public class PersonalRecordService {
     private void checkTssRecords(List<Activity> activities, Map<PersonalRecordType, Double> bests,
                                  List<PersonalRecord> newRecords) {
         var activityIds = activities.stream().map(Activity::getId).toList();
-        var tssMap = metricRepository.findNumericValues(activityIds, "TSS");
+        var tssMap = metricRepository.findNumericValues(activityIds, "training_stress_score");
 
         for (var a : activities) {
             var tss = tssMap.get(a.getId());
@@ -274,7 +279,7 @@ public class PersonalRecordService {
 
         for (var a : activities) {
             Double val = extractor.apply(a);
-            if (val == null || val <= previous) continue;
+            if (val == null || val <= previous || !isPlausible(type, val)) continue;
             newRecords.add(PersonalRecord.builder()
                     .recordType(type)
                     .recordValue(Math.round(val * 10.0) / 10.0)
@@ -288,20 +293,58 @@ public class PersonalRecordService {
         }
     }
 
-    private Double estimate40kmSpeed(Activity activity) {
-        if (activity.getDistanceM() == null || activity.getMovingTimeSec() == null) return null;
-        double km = activity.getDistanceM().doubleValue() / 1000.0;
-        if (km < 35) return null;
-        double hours = activity.getMovingTimeSec() / 3600.0;
-        double speed = km / hours;
-        return speed * (40.0 / km);
+    private boolean isPlausible(PersonalRecordType type, double value) {
+        return switch (type) {
+            case BEST_5S_POWER -> ActivityDataQualityPolicy.isPlausiblePower(value, 5);
+            case BEST_1MIN_POWER -> ActivityDataQualityPolicy.isPlausiblePower(value, 60);
+            case BEST_5MIN_POWER -> ActivityDataQualityPolicy.isPlausiblePower(value, 300);
+            case BEST_20MIN_POWER -> ActivityDataQualityPolicy.isPlausiblePower(value, 1200);
+            case FASTEST_AVG_SPEED, FASTEST_40KM -> ActivityDataQualityPolicy.isPlausibleSpeedKmh(value);
+            case LONGEST_RIDE -> ActivityDataQualityPolicy.isPlausiblePositive(value, 1_500);
+            case MOST_ELEVATION_SINGLE, MOST_ELEVATION_WEEK ->
+                    ActivityDataQualityPolicy.isPlausiblePositive(value, 30_000);
+            case LONGEST_DURATION -> ActivityDataQualityPolicy.isPlausiblePositive(value, 48 * 60);
+            case MOST_WEEKLY_HOURS -> ActivityDataQualityPolicy.isPlausiblePositive(value, 168);
+            case LONGEST_STREAK_DAYS, LONGEST_STREAK_WEEKS ->
+                    ActivityDataQualityPolicy.isPlausiblePositive(value, 20_000);
+            case HIGHEST_TSS_SESSION -> ActivityDataQualityPolicy.isPlausiblePositive(value, 1_000);
+        };
     }
 
-    private Double findMetric(Activity activity, String metricName) {
+    private Double estimate40kmSpeed(Activity activity) {
+        double[] distance = activity.getDistanceStream();
+        int[] time = activity.getTimeStream();
+        if (distance == null || time == null || distance.length != time.length || distance.length < 2) {
+            return null;
+        }
+
+        double bestKmh = 0;
+        int end = 1;
+        for (int start = 0; start < distance.length - 1; start++) {
+            if (end <= start) end = start + 1;
+            while (end < distance.length && distance[end] - distance[start] < 40_000) {
+                end++;
+            }
+            if (end >= distance.length) break;
+            int durationSeconds = time[end] - time[start];
+            if (durationSeconds > 0) {
+                bestKmh = Math.max(bestKmh, 40.0 / (durationSeconds / 3600.0));
+            }
+        }
+        return bestKmh > 0 ? bestKmh : null;
+    }
+
+    private Double findPowerCurveEffort(Activity activity, int durationSeconds) {
         try {
-            var val = metricRepository.findNumericValue(activity.getId(), metricName);
-            return val.map(BigDecimal::doubleValue).orElse(null);
-        } catch (Exception e) {
+            Optional<Map<String, Object>> curve = metricRepository.findJsonValue(activity.getId(), "power_curve");
+            if (curve.isEmpty()) return null;
+            Object effortsValue = curve.get().get("efforts");
+            if (!(effortsValue instanceof Map<?, ?> efforts)) return null;
+            Object value = efforts.get(String.valueOf(durationSeconds));
+            if (value == null) value = efforts.get(durationSeconds);
+            return value instanceof Number number ? number.doubleValue() : null;
+        } catch (RuntimeException exception) {
+            log.debug("Could not read power curve for activity {}: {}", activity.getId(), exception.getMessage());
             return null;
         }
     }

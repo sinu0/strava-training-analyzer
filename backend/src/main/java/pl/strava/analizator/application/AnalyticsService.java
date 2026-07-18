@@ -31,6 +31,8 @@ import pl.strava.analizator.application.dto.DurabilityInsightDto;
 import pl.strava.analizator.application.dto.DurabilityWorkoutDto;
 import pl.strava.analizator.application.dto.FtpProgressDto;
 import pl.strava.analizator.application.dto.PmcDataDto;
+import pl.strava.analizator.application.dto.PeriodComparisonDto;
+import pl.strava.analizator.application.dto.PeriodSummaryDto;
 import pl.strava.analizator.application.dto.PowerCurveDto;
 import pl.strava.analizator.application.dto.ProgressionLevelDto;
 import pl.strava.analizator.application.dto.RaceReadinessProjection;
@@ -311,6 +313,39 @@ public class AnalyticsService {
         Map<String, Object> period1 = getSummaryForRange(p1From, p1To);
         Map<String, Object> period2 = getSummaryForRange(p2From, p2To);
         return Map.of("period1", period1, "period2", period2);
+    }
+
+    public PeriodComparisonDto comparePeriodsTyped(
+            LocalDate p1From, LocalDate p1To, LocalDate p2From, LocalDate p2To) {
+        PeriodSummaryDto period1 = getTypedSummaryForRange(p1From, p1To);
+        PeriodSummaryDto period2 = getTypedSummaryForRange(p2From, p2To);
+        String availability = period1.getActivityCount() == 0 && period2.getActivityCount() == 0
+                ? "UNKNOWN" : "AVAILABLE";
+        return PeriodComparisonDto.builder()
+                .period1(period1)
+                .period2(period2)
+                .availability(availability)
+                .build();
+    }
+
+    private PeriodSummaryDto getTypedSummaryForRange(LocalDate from, LocalDate to) {
+        List<Activity> activities = findActivitiesBetween(from, to);
+        BigDecimal totalDist = BigDecimal.ZERO;
+        int totalTime = 0;
+        BigDecimal totalElev = BigDecimal.ZERO;
+        for (Activity activity : activities) {
+            if (activity.getDistanceM() != null) totalDist = totalDist.add(activity.getDistanceM());
+            if (activity.getMovingTimeSec() != null) totalTime += activity.getMovingTimeSec();
+            if (activity.getElevationGainM() != null) totalElev = totalElev.add(activity.getElevationGainM());
+        }
+        return PeriodSummaryDto.builder()
+                .from(from)
+                .to(to)
+                .activityCount(activities.size())
+                .totalDistanceM(totalDist)
+                .totalTimeSec(totalTime)
+                .totalElevationM(totalElev)
+                .build();
     }
 
     private Map<String, Object> getSummaryForRange(LocalDate from, LocalDate to) {

@@ -15,7 +15,7 @@ public class PowerPhenotypeDto {
     private String primaryType;
     private String secondaryType;
     private Map<String, Double> powerProfileWkg;
-    private Map<String, Integer> percentiles;
+    private Map<String, Integer> referenceScores;
     private String bestDuration;
     private String worstDuration;
     private double weaknessGapWkg;

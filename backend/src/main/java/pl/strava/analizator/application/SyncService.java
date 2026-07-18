@@ -56,6 +56,7 @@ public class SyncService {
     private final ActivityTrainingEffectRepository trainingEffectRepository;
     private final DailySummaryRepository dailySummaryRepository;
     private final AutoSyncConfigPort autoSyncConfigPort;
+    private final ActivityDataQualityService dataQualityService;
     private final PersonalRecordService personalRecordService;
     private final ChallengeService challengeService;
 
@@ -75,6 +76,7 @@ public class SyncService {
                        ActivityTrainingEffectRepository trainingEffectRepository,
                        DailySummaryRepository dailySummaryRepository,
                        AutoSyncConfigPort autoSyncConfigPort,
+                       @org.springframework.lang.Nullable ActivityDataQualityService dataQualityService,
                        PersonalRecordService personalRecordService,
                        ChallengeService challengeService) {
         this.profileRepository = profileRepository;
@@ -93,12 +95,14 @@ public class SyncService {
         this.trainingEffectRepository = trainingEffectRepository;
         this.dailySummaryRepository = dailySummaryRepository;
         this.autoSyncConfigPort = autoSyncConfigPort;
+        this.dataQualityService = dataQualityService;
         this.personalRecordService = personalRecordService;
         this.challengeService = challengeService;
     }
 
     @Getter
     private volatile SyncStatus lastSyncStatus = new SyncStatus("idle", null, 0, 0, null);
+    private volatile Instant lastAutoSyncCheckAt;
 
     @PostConstruct
     public void loadSyncStateFromDb() {
@@ -114,6 +118,10 @@ public class SyncService {
     }
 
     public SyncStatus syncFull() {
+        return syncFull(stage -> { });
+    }
+
+    public synchronized SyncStatus syncFull(SyncProgressListener progress) {
         AthleteProfile profile = getProfile();
         log.info("Starting full Strava sync for athlete {}", profile.getStravaAthleteId());
 
@@ -126,6 +134,7 @@ public class SyncService {
 
         try {
             while (true) {
+                progress.onStage(SyncStage.FETCH_SUMMARY);
                 List<Activity> activities = syncDataSource.fetchActivitiesPage(profile, page, null);
                 if (activities.isEmpty()) {
                     break;
@@ -133,7 +142,7 @@ public class SyncService {
 
                 for (Activity activity : activities) {
                     try {
-                        boolean imported = importActivity(profile, activity);
+                        boolean imported = importActivity(profile, activity, progress);
                         if (imported) {
                             totalImported++;
                         } else {
@@ -166,8 +175,11 @@ public class SyncService {
             throw e;
         }
 
+        progress.onStage(SyncStage.UPDATE_DAILY);
         recalculateDailyMetrics();
+        progress.onStage(SyncStage.DERIVE_INSIGHTS);
         detectPersonalRecords();
+        progress.onStage(SyncStage.COMPLETE);
         lastSyncStatus = new SyncStatus("completed", Instant.now(), totalImported, totalSkipped, null);
         persistSyncStatus(lastSyncStatus);
         log.info("Full sync completed: {} imported, {} skipped", totalImported, totalSkipped);
@@ -175,6 +187,10 @@ public class SyncService {
     }
 
     public SyncStatus syncRecent() {
+        return syncRecent(stage -> { });
+    }
+
+    public synchronized SyncStatus syncRecent(SyncProgressListener progress) {
         AthleteProfile profile = getProfile();
         log.info("Starting recent Strava sync for athlete {}", profile.getStravaAthleteId());
 
@@ -189,10 +205,11 @@ public class SyncService {
         int totalSkipped = 0;
 
         try {
+            progress.onStage(SyncStage.FETCH_SUMMARY);
             List<Activity> activities = syncDataSource.fetchActivitiesPage(profile, 1, afterEpoch);
             for (Activity activity : activities) {
                 try {
-                    boolean imported = importActivity(profile, activity);
+                    boolean imported = importActivity(profile, activity, progress);
                     if (imported) {
                         totalImported++;
                     } else {
@@ -219,8 +236,11 @@ public class SyncService {
             throw e;
         }
 
+        progress.onStage(SyncStage.UPDATE_DAILY);
         recalculateDailyMetrics();
+        progress.onStage(SyncStage.DERIVE_INSIGHTS);
         detectPersonalRecords();
+        progress.onStage(SyncStage.COMPLETE);
         lastSyncStatus = new SyncStatus("completed", Instant.now(), totalImported, totalSkipped, null);
         persistSyncStatus(lastSyncStatus);
         log.info("Recent sync completed: {} imported, {} skipped", totalImported, totalSkipped);
@@ -274,69 +294,57 @@ public class SyncService {
         return lastSyncStatus;
     }
 
-    private boolean importActivity(AthleteProfile profile, Activity summaryActivity) {
-        // Skip activities already in the database to avoid unnecessary API calls (rate limiting)
-        if (activityRepository.existsByExternalIdAndSource(summaryActivity.getExternalId(), "strava")) {
-            log.debug("Activity {} already exists, skipping", summaryActivity.getExternalId());
+    private boolean importActivity(AthleteProfile profile, Activity summaryActivity,
+                                   SyncProgressListener progress) {
+        boolean exists = activityRepository.existsByExternalIdAndSource(
+                summaryActivity.getExternalId(), "strava");
+        Activity existing = exists
+                ? activityRepository.findByExternalIdAndSource(summaryActivity.getExternalId(), "strava")
+                        .orElse(null)
+                : null;
+
+        if (exists && existing == null) {
+            log.warn("Activity {} exists but could not be loaded; leaving it for a repair job",
+                    summaryActivity.getExternalId());
             return false;
         }
 
-        // Fetch full detail with streams only for new activities
-        Activity fullActivity = syncDataSource.fetchActivityWithStreams(
-                profile, summaryActivity.getExternalId());
-
-        List<Lap> enrichedLaps = lapMetricsService.enrichLaps(fullActivity, profile.getFtpWatts());
-
-        Activity.ActivityBuilder builder = Activity.builder()
-                .externalId(fullActivity.getExternalId())
-                .source("strava")
-                .sportType(fullActivity.getSportType())
-                .name(fullActivity.getName())
-                .description(fullActivity.getDescription())
-                .startedAt(fullActivity.getStartedAt())
-                .elapsedTimeSec(fullActivity.getElapsedTimeSec())
-                .movingTimeSec(fullActivity.getMovingTimeSec())
-                .distanceM(fullActivity.getDistanceM())
-                .elevationGainM(fullActivity.getElevationGainM())
-                .elevationLossM(fullActivity.getElevationLossM())
-                .avgSpeedMs(fullActivity.getAvgSpeedMs())
-                .maxSpeedMs(fullActivity.getMaxSpeedMs())
-                .avgHeartrate(fullActivity.getAvgHeartrate())
-                .maxHeartrate(fullActivity.getMaxHeartrate())
-                .avgPowerW(fullActivity.getAvgPowerW())
-                .maxPowerW(fullActivity.getMaxPowerW())
-                .avgCadence(fullActivity.getAvgCadence())
-                .maxCadence(fullActivity.getMaxCadence())
-                .calories(fullActivity.getCalories())
-                .avgTempC(fullActivity.getAvgTempC())
-                .summaryPolyline(fullActivity.getSummaryPolyline())
-                .photoUrls(fullActivity.getPhotoUrls())
-                .powerStream(fullActivity.getPowerStream())
-                .heartrateStream(fullActivity.getHeartrateStream())
-                .cadenceStream(fullActivity.getCadenceStream())
-                .altitudeStream(fullActivity.getAltitudeStream())
-                .timeStream(fullActivity.getTimeStream())
-                .latStream(fullActivity.getLatStream())
-                .lngStream(fullActivity.getLngStream())
-                .distanceStream(fullActivity.getDistanceStream())
-                .velocityStream(fullActivity.getVelocityStream())
-                .laps(enrichedLaps)
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now());
-
-        Activity saved = activityRepository.save(builder.build());
-
-        // Calculate and save metrics
-        try {
-            Map<String, MetricResult> metrics = metricRegistry.calculateAllActivityMetrics(saved, profile);
-            if (!metrics.isEmpty()) {
-                metricPersistenceService.saveActivityMetrics(saved.getId(), metrics);
-            }
-        } catch (Exception e) {
-            log.warn("Failed to calculate metrics for activity {}: {}", saved.getExternalId(), e.getMessage(), e);
+        if (existing != null && hasFullData(existing) && hasDerivedData(existing)) {
+            log.debug("Activity {} is complete, skipping", summaryActivity.getExternalId());
+            return false;
         }
 
-        // Enqueue AI note generation (non-blocking, processed in background)
+        Activity saved = existing;
+        if (existing == null || !hasFullData(existing)) {
+            progress.onStage(SyncStage.FETCH_DETAIL);
+            Activity fullActivity = syncDataSource.fetchActivityWithStreams(
+                    profile, summaryActivity.getExternalId());
+            List<Lap> enrichedLaps = lapMetricsService.enrichLaps(fullActivity, profile.getFtpWatts());
+            Instant now = Instant.now();
+            progress.onStage(SyncStage.STORE_ACTIVITY);
+            saved = activityRepository.save(fullActivity.toBuilder()
+                    .id(existing != null ? existing.getId() : null)
+                    .source("strava")
+                    .laps(enrichedLaps)
+                    .createdAt(existing != null ? existing.getCreatedAt() : now)
+                    .updatedAt(now)
+                    .build());
+
+            try {
+                heatmapBuildService.updateForActivity(saved.getSummaryPolyline());
+            } catch (Exception e) {
+                log.debug("Could not update heatmap for activity {}: {}", saved.getExternalId(), e.getMessage());
+            }
+        }
+
+        progress.onStage(SyncStage.CALCULATE_METRICS);
+        calculateActivityMetrics(saved, profile);
+        progress.onStage(SyncStage.DERIVE_INSIGHTS);
+        calculateTrainingEffect(saved, profile);
+        if (dataQualityService != null) {
+            dataQualityService.assessAndSave(saved);
+        }
+
         try {
             if (aiActivityNoteService != null) {
                 aiActivityNoteService.enqueueNoteGeneration(saved.getId());
@@ -345,26 +353,44 @@ public class SyncService {
             log.debug("Could not enqueue AI note for activity {}: {}", saved.getExternalId(), e.getMessage());
         }
 
-        // Update heatmap incrementally (non-blocking)
-        try {
-            heatmapBuildService.updateForActivity(saved.getSummaryPolyline());
-        } catch (Exception e) {
-            log.debug("Could not update heatmap for activity {}: {}", saved.getExternalId(), e.getMessage());
-        }
+        return true;
+    }
 
-        // Auto-calculate training effect for the newly imported activity
+    private boolean hasDerivedData(Activity activity) {
+        if (activity.getId() == null) {
+            return false;
+        }
+        try {
+            return !activityMetricRepository.findAllByActivityId(activity.getId()).isEmpty()
+                    && trainingEffectRepository.findByActivityId(activity.getId()).isPresent();
+        } catch (Exception e) {
+            log.debug("Could not verify derived data for activity {}: {}", activity.getExternalId(), e.getMessage());
+            return false;
+        }
+    }
+
+    private void calculateActivityMetrics(Activity activity, AthleteProfile profile) {
+        try {
+            Map<String, MetricResult> metrics = metricRegistry.calculateAllActivityMetrics(activity, profile);
+            if (!metrics.isEmpty()) {
+                metricPersistenceService.saveActivityMetrics(activity.getId(), metrics);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to calculate metrics for activity {}: {}", activity.getExternalId(), e.getMessage(), e);
+        }
+    }
+
+    private void calculateTrainingEffect(Activity activity, AthleteProfile profile) {
         try {
             DailySummary daySummary = dailySummaryRepository
-                    .findByDate(saved.getStartedAt().toLocalDate()).orElse(null);
+                    .findByDate(activity.getStartedAt().toLocalDate()).orElse(null);
             ActivityTrainingEffect effect = workoutEvaluationService
-                    .calculateTrainingEffect(saved, profile, daySummary);
+                    .calculateTrainingEffect(activity, profile, daySummary);
             trainingEffectRepository.save(effect);
         } catch (Exception e) {
             log.warn("Failed to calculate training effect for activity {}: {}",
-                    saved.getExternalId(), e.getMessage());
+                    activity.getExternalId(), e.getMessage());
         }
-
-        return true;
     }
 
     private AthleteProfile getProfile() {
@@ -435,7 +461,7 @@ public class SyncService {
      * Re-sync streams (GPS, distance, velocity), laps, and elevation for existing activities.
      * Respects Strava rate limits.
      */
-    public SyncStatus resyncStreams() {
+    public synchronized SyncStatus resyncStreams() {
         AthleteProfile profile = getProfile();
         log.info("Starting stream re-sync for athlete {}", profile.getStravaAthleteId());
 
@@ -509,19 +535,27 @@ public class SyncService {
     }
 
     private boolean hasFullData(Activity activity) {
-        if (activity.getLatStream() == null) return false;
-        if (activity.getAltitudeStream() == null) return false;
-        if (activity.getPowerStream() == null) return false;
-        if (activity.getSummaryPolyline() == null) return false;
-        if (activity.getLaps() == null) return false;
+        boolean hasTime = activity.getTimeStream() != null && activity.getTimeStream().length > 0;
+        boolean hasTrainingStream = hasValues(activity.getPowerStream())
+                || hasValues(activity.getHeartrateStream())
+                || hasValues(activity.getCadenceStream())
+                || hasValues(activity.getDistanceStream())
+                || hasValues(activity.getVelocityStream());
+        boolean hasLatitude = hasValues(activity.getLatStream());
+        boolean hasLongitude = hasValues(activity.getLngStream());
+        boolean hasPolyline = activity.getSummaryPolyline() != null
+                && !activity.getSummaryPolyline().isBlank();
+        boolean routeIsConsistent = (!hasLatitude && !hasLongitude && !hasPolyline)
+                || (hasLatitude && hasLongitude && hasPolyline);
+        return hasTime && hasTrainingStream && routeIsConsistent;
+    }
 
-        for (pl.strava.analizator.domain.vo.Lap lap : activity.getLaps()) {
-            if (lap.getStartIndex() == null || lap.getEndIndex() == null
-                    || lap.getTotalElevationGain() == null) {
-                return false;
-            }
-        }
-        return true;
+    private boolean hasValues(int[] values) {
+        return values != null && values.length > 0;
+    }
+
+    private boolean hasValues(double[] values) {
+        return values != null && values.length > 0;
     }
 
     private void persistSyncStatus(SyncStatus status) {
@@ -556,13 +590,22 @@ public class SyncService {
         return new NewActivitiesCheck(count > 0, count, latestActivity != null ? latestActivity.toInstant() : null);
     }
 
-    @Scheduled(fixedDelayString = "${strava.auto-sync.interval-ms:1800000}")
-    public void autoSyncRecent() {
+    @Scheduled(fixedDelayString = "${strava.auto-sync.poll-ms:60000}")
+    public synchronized void autoSyncRecent() {
         SyncStatus current = lastSyncStatus;
         if ("in_progress".equals(current.status()) || "rate_limited".equals(current.status())) {
             log.debug("Skipping auto-sync: current status is {}", current.status());
             return;
         }
+
+        int intervalMinutes = Math.max(1, autoSyncConfigPort.getIntervalMinutes());
+        Instant now = Instant.now();
+        if (lastAutoSyncCheckAt != null
+                && now.isBefore(lastAutoSyncCheckAt.plusSeconds(intervalMinutes * 60L))) {
+            log.debug("Skipping auto-sync poll: configured interval is {} minutes", intervalMinutes);
+            return;
+        }
+        lastAutoSyncCheckAt = now;
 
         try {
             AthleteProfile profile = profileRepository.findFirst().orElse(null);
@@ -598,6 +641,7 @@ public class SyncService {
 
     public AutoSyncConfig updateAutoSyncConfig(int intervalMinutes) {
         autoSyncConfigPort.setIntervalMinutes(intervalMinutes);
+        lastAutoSyncCheckAt = null;
         return new AutoSyncConfig(intervalMinutes);
     }
 
@@ -617,4 +661,19 @@ public class SyncService {
     public record SyncStatus(String status, Instant lastSyncAt, int imported, int skipped, Instant rateLimitResetsAt) {}
     public record NewActivitiesCheck(boolean hasNew, int count, Instant lastSyncedAt) {}
     public record AutoSyncConfig(int intervalMinutes) {}
+
+    public enum SyncStage {
+        FETCH_SUMMARY,
+        FETCH_DETAIL,
+        STORE_ACTIVITY,
+        CALCULATE_METRICS,
+        UPDATE_DAILY,
+        DERIVE_INSIGHTS,
+        COMPLETE
+    }
+
+    @FunctionalInterface
+    public interface SyncProgressListener {
+        void onStage(SyncStage stage);
+    }
 }

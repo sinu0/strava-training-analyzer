@@ -2,6 +2,7 @@ package pl.strava.analizator.infrastructure.persistence.entity;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
 
@@ -50,6 +51,12 @@ public class ActivityMetricEntity {
 
     @Column(name = "calculator_version", length = 20)
     private String calculatorVersion;
+
+    @Column(name = "input_fingerprint", length = 64)
+    private String inputFingerprint;
+
+    @Column(name = "as_of")
+    private LocalDate asOf;
 
     @Column(name = "calculated_at")
     private Instant calculatedAt;

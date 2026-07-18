@@ -1,6 +1,7 @@
 package pl.strava.analizator.infrastructure.web;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -90,5 +91,11 @@ class SyncControllerTest {
         mockMvc.perform(get("/api/sync/status"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("idle"));
+    }
+
+    @Test
+    void legacyDestructiveClearIsRetired() throws Exception {
+        mockMvc.perform(delete("/api/sync/data"))
+                .andExpect(status().isGone());
     }
 }

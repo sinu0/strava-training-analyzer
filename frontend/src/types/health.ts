@@ -61,7 +61,8 @@ export interface HealthDay {
 }
 
 export interface RecoveryStatus {
-  score: number;
+  score: number | null;
+  availability: 'UNKNOWN' | 'PARTIAL' | 'AVAILABLE';
   level: string;
   description: string;
   alerts: string[];

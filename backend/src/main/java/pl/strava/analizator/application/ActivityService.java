@@ -68,7 +68,11 @@ public class ActivityService {
             page, size
         );
         ActivityPage activityPage = activityRepository.findFiltered(filter);
-        List<ActivitySummaryDto> items = activityPage.items().stream().map(this::toSummary).toList();
+        Map<UUID, ActivityTrainingEffect> effects = trainingEffectRepository.findByActivityIds(
+                activityPage.items().stream().map(Activity::getId).toList());
+        List<ActivitySummaryDto> items = activityPage.items().stream()
+                .map(activity -> toSummary(activity, effects.get(activity.getId())))
+                .toList();
         return ActivitySummaryPageDto.builder()
                 .items(items)
                 .total(activityPage.total())
@@ -163,8 +167,7 @@ public class ActivityService {
         return new ActivityHeatmapBoundsDto(south, west, north, east);
     }
 
-    private ActivitySummaryDto toSummary(Activity a) {
-        ActivityTrainingEffect effect = trainingEffectRepository.findByActivityId(a.getId()).orElse(null);
+    private ActivitySummaryDto toSummary(Activity a, ActivityTrainingEffect effect) {
         return ActivitySummaryDto.builder()
                 .id(a.getId())
                 .externalId(a.getExternalId())

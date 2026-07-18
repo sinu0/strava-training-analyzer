@@ -74,8 +74,10 @@ public class SyncController {
 
     @DeleteMapping("/data")
     public ResponseEntity<Void> clearData() {
-        syncService.clearAllData();
-        return ResponseEntity.noContent().build();
+        // The legacy implementation removed only a subset of related records and could
+        // fail mid-operation on foreign keys. Data removal is deliberately unavailable
+        // until it is implemented as an explicit, backed-up processing job.
+        return ResponseEntity.status(HttpStatus.GONE).build();
     }
 
     @PostMapping("/recalculate-metrics")

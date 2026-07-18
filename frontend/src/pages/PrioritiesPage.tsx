@@ -373,8 +373,8 @@ function PhenotypeSection({ data }: { data: PowerPhenotypeData }) {
       </Stack>
 
       <Box sx={{ mb: 1.5 }}>
-        {durationOrder.filter(d => data.percentiles[d] !== undefined).map((dur) => {
-          const pct = data.percentiles[dur] ?? 0;
+        {durationOrder.filter(d => data.referenceScores[d] !== undefined).map((dur) => {
+          const pct = data.referenceScores[dur] ?? 0;
           const wkg = data.powerProfileWkg[dur] ?? 0;
           const isBest = dur === data.bestDuration;
           const isWorst = dur === data.worstDuration;

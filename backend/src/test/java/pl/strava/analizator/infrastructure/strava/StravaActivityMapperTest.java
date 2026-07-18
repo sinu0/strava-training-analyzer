@@ -116,6 +116,7 @@ class StravaActivityMapperTest {
         assertThat(mapSport("Ride")).isEqualTo("cycling");
         assertThat(mapSport("MountainBikeRide")).isEqualTo("cycling");
         assertThat(mapSport("GravelRide")).isEqualTo("cycling");
+        assertThat(mapSport("VirtualRide")).isEqualTo("virtual_ride");
         assertThat(mapSport("Run")).isEqualTo("running");
         assertThat(mapSport("TrailRun")).isEqualTo("running");
         assertThat(mapSport("Swim")).isEqualTo("swimming");

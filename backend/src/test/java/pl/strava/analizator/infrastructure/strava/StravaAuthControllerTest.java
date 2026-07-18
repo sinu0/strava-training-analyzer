@@ -61,12 +61,20 @@ class StravaAuthControllerTest {
                 .name("Jan Kowalski")
                 .build();
 
-        when(oAuth2Service.exchangeCodeForTokens(anyString())).thenReturn(profile);
+        when(oAuth2Service.exchangeCodeForTokens(anyString(), anyString())).thenReturn(profile);
 
         mockMvc.perform(get("/api/auth/strava/callback")
                         .param("code", "auth-code-xyz")
+                        .param("state", "csrf-state")
                         .param("scope", "read,activity:read_all"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", "http://localhost:5173/?strava=connected"));
+    }
+
+    @Test
+    void callbackRequiresOauthState() throws Exception {
+        mockMvc.perform(get("/api/auth/strava/callback")
+                        .param("code", "auth-code-xyz"))
+                .andExpect(status().isBadRequest());
     }
 }

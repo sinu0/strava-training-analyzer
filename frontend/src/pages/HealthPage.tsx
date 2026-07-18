@@ -19,7 +19,6 @@ import {
 } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-import apiClient from '@/api/client';
 import {
   Area,
   AreaChart,
@@ -34,6 +33,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import apiClient from '@/api/client';
 import PageContainer from '@/components/common/PageContainer';
 import PullToRefreshPanel from '@/components/common/PullToRefreshPanel';
 import Section from '@/components/common/Section';
@@ -293,9 +293,11 @@ export default function HealthPage() {
   const [bodyBatteryVal, setBodyBatteryVal] = useState('');
   const [stressVal, setStressVal] = useState('');
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const handleSaveMetrics = async () => {
     setSaving(true);
+    setSaveError(null);
     const body: Record<string, number> = {};
     const h = parseFloat(hrvVal); if (!isNaN(h)) body.hrvRmssd = h;
     const r = parseInt(rhrVal); if (!isNaN(r)) body.restingHrBpm = r;
@@ -303,7 +305,11 @@ export default function HealthPage() {
     const b = parseInt(bodyBatteryVal); if (!isNaN(b)) body.bodyBattery = b;
     const st = parseInt(stressVal); if (!isNaN(st)) body.stressAvg = st;
     if (Object.keys(body).length > 0) {
-      try { await apiClient.put('/health/metrics', body); } catch {}
+      try {
+        await apiClient.put('/health/metrics', body);
+      } catch (error) {
+        setSaveError(error instanceof Error ? error.message : 'Nie udało się zapisać danych zdrowotnych.');
+      }
     }
     setSaving(false);
     queryClient.invalidateQueries({ queryKey: ['healthOverview'] });
@@ -369,7 +375,14 @@ export default function HealthPage() {
               }}
             >
               <Box sx={{ display: 'flex', justifyContent: 'center', flex: '0 0 auto', width: { xs: '100%', md: 'auto' } }}>
-                {recovery ? <RecoveryGauge score={recovery.score} /> : null}
+                {recovery?.score != null ? (
+                  <RecoveryGauge score={recovery.score} />
+                ) : (
+                  <Box sx={{ minWidth: 150, textAlign: 'center', p: 2 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Brak danych do oceny</Typography>
+                    <Typography variant="body2" color="text.secondary">Dodaj check-in, aby obliczyć regenerację.</Typography>
+                  </Box>
+                )}
               </Box>
               <Stack spacing={1.25} sx={{ flex: 1, minWidth: 240 }}>
                 <Typography variant="h5" sx={{ fontWeight: 800 }}>
@@ -387,6 +400,7 @@ export default function HealthPage() {
 
           {recovery?.alerts.length ? (
             <Stack spacing={1}>
+              {saveError ? <Alert severity="error">{saveError}</Alert> : null}
               {recovery.alerts.map((alert) => (
                 <Alert key={alert} severity="warning" icon={<WarningAmberIcon />}>
                   {alert}

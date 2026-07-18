@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -211,5 +212,26 @@ class DailyMetricsServiceTest {
         // No FTP should be saved if estimation returns 0 and no profile FTP
         verify(dailyMetricRepository, never()).save(any(),
                 argThat(m -> "ftp".equals(m.getMetricName())));
+    }
+
+    @Test
+    void backfillFtpHistory_doesNotLeakCurrentProfileFtpIntoHistoricalDates() {
+        UUID activityId = UUID.randomUUID();
+        LocalDate historicalDate = LocalDate.of(2024, 6, 1);
+        Activity activity = Activity.builder()
+                .id(activityId)
+                .startedAt(historicalDate.atStartOfDay().atOffset(ZoneOffset.UTC))
+                .build();
+        when(activityMetricRepository.findJsonValue(activityId, "power_curve"))
+                .thenReturn(Optional.of(Map.of("efforts", Map.of("1200", 300.0))));
+
+        service.backfillFtpHistory(List.of(activity), 320.0);
+
+        verify(dailyMetricRepository).save(eq(historicalDate), argThat(metric ->
+                "ftp".equals(metric.getMetricName())
+                        && metric.getNumericValue().doubleValue() < 300.0));
+        verify(dailyMetricRepository).save(eq(LocalDate.now(ZoneOffset.UTC)), argThat(metric ->
+                "ftp".equals(metric.getMetricName())
+                        && metric.getNumericValue().doubleValue() == 320.0));
     }
 }

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -53,6 +54,7 @@ class SyncServiceTest {
     @Mock private DailySummaryRepository dailySummaryRepository;
     @Mock private AiActivityNoteService aiActivityNoteService;
     @Mock private AutoSyncConfigPort autoSyncConfigPort;
+    @Mock private ActivityDataQualityService dataQualityService;
     @Mock private PersonalRecordService personalRecordService;
     @Mock private ChallengeService challengeService;
 
@@ -65,7 +67,7 @@ class SyncServiceTest {
                 metricRegistry, metricPersistenceService, dailyMetricsService, syncDataSource,
                 syncStateRepository, aiActivityNoteService, heatmapBuildService, lapMetricsService,
                 workoutEvaluationService, trainingEffectRepository, dailySummaryRepository,
-                autoSyncConfigPort, personalRecordService, challengeService);
+                autoSyncConfigPort, dataQualityService, personalRecordService, challengeService);
         lenient().when(syncStateRepository.findFirst()).thenReturn(Optional.empty());
         lenient().when(lapMetricsService.enrichLaps(any(), any()))
                 .thenAnswer(i -> ((Activity) i.getArgument(0)).getLaps());
@@ -141,6 +143,43 @@ class SyncServiceTest {
         assertThat(status.status()).isEqualTo("completed");
         assertThat(status.imported()).isEqualTo(0);
         assertThat(status.skipped()).isEqualTo(1);
+    }
+
+    @Test
+    void syncRecentRepairsExistingActivityAfterPartialProcessingFailure() {
+        AthleteProfile profile = AthleteProfile.builder()
+                .id(UUID.randomUUID())
+                .stravaAthleteId(123L)
+                .ftpWatts((short) 280)
+                .build();
+        UUID existingId = UUID.randomUUID();
+        Activity summary = Activity.builder().externalId("100").source("strava").build();
+        Activity partial = Activity.builder()
+                .id(existingId)
+                .externalId("100")
+                .source("strava")
+                .build();
+        Activity repaired = Activity.builder()
+                .externalId("100")
+                .source("strava")
+                .timeStream(new int[]{0, 1})
+                .heartrateStream(new int[]{130, 132})
+                .build();
+
+        when(profileRepository.findFirst()).thenReturn(Optional.of(profile));
+        when(syncDataSource.fetchActivitiesPage(any(), anyInt(), any())).thenReturn(List.of(summary));
+        when(activityRepository.existsByExternalIdAndSource("100", "strava")).thenReturn(true);
+        when(activityRepository.findByExternalIdAndSource("100", "strava")).thenReturn(Optional.of(partial));
+        when(syncDataSource.fetchActivityWithStreams(profile, "100")).thenReturn(repaired);
+        when(activityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(metricRegistry.calculateAllActivityMetrics(any(), any())).thenReturn(Map.of());
+
+        SyncService.SyncStatus status = syncService.syncRecent();
+
+        assertThat(status.imported()).isEqualTo(1);
+        verify(activityRepository).save(argThat(activity -> existingId.equals(activity.getId())
+                && activity.getTimeStream() != null));
+        verify(metricRegistry).calculateAllActivityMetrics(any(), any());
     }
 
     @Test
@@ -247,13 +286,11 @@ class SyncServiceTest {
                 .latStream(new double[]{50.0, 50.1})
                 .lngStream(new double[]{20.0, 20.1})
                 .altitudeStream(new double[]{100.0, 101.0})
-                .powerStream(new int[]{200, 210})
-                .laps(List.of(pl.strava.analizator.domain.vo.Lap.builder()
-                        .startIndex(0)
-                        .endIndex(1)
-                        .totalElevationGain(BigDecimal.ONE)
-                        .movingTimeSec(60)
-                        .build()))
+                .timeStream(new int[]{0, 1})
+                .heartrateStream(new int[]{130, 132})
+                .distanceStream(new double[]{0, 8.2})
+                .powerStream(null)
+                .laps(List.of())
                 .elevationGainM(BigDecimal.valueOf(100))
                 .summaryPolyline("alreadypresent")
                 .build();
@@ -359,5 +396,24 @@ class SyncServiceTest {
 
         verify(metricRegistry).calculateAllActivityMetrics(activity1, profile);
         verify(metricRegistry).calculateAllActivityMetrics(activity2, profile);
+    }
+
+    @Test
+    void autoSyncUsesRuntimeIntervalInsteadOfRunningOnEverySchedulerPoll() {
+        AthleteProfile profile = AthleteProfile.builder()
+                .id(UUID.randomUUID())
+                .stravaAthleteId(123L)
+                .build();
+        OffsetDateTime latest = OffsetDateTime.now().minusHours(1);
+
+        when(autoSyncConfigPort.getIntervalMinutes()).thenReturn(60);
+        when(profileRepository.findFirst()).thenReturn(Optional.of(profile));
+        when(activityRepository.findLatestStartedAtBySource("strava")).thenReturn(Optional.of(latest));
+        when(syncDataSource.countNewActivities(profile, latest.toEpochSecond())).thenReturn(0);
+
+        syncService.autoSyncRecent();
+        syncService.autoSyncRecent();
+
+        verify(syncDataSource).countNewActivities(profile, latest.toEpochSecond());
     }
 }

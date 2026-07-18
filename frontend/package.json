@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test --config=e2e/playwright.config.ts",
+    "test:e2e:critical": "playwright test --config=e2e/playwright.config.ts e2e/tests/v2-critical-flows.spec.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.13.5",

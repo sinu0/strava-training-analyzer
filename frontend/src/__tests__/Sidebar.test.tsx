@@ -6,7 +6,7 @@ import { it, expect } from 'vitest';
 import Sidebar from '../components/layout/Sidebar';
 import theme from '../theme/theme';
 
-it('renders grouped navigation with Home and groups', () => {
+it('renders the V2 decision-first navigation and keeps full weather accessible', () => {
   render(
     <ThemeProvider theme={theme}>
       <MemoryRouter>
@@ -15,12 +15,10 @@ it('renders grouped navigation with Home and groups', () => {
     </ThemeProvider>,
   );
 
-  expect(screen.getByText('Home')).toBeDefined();
-  expect(screen.getByText('Aktywności')).toBeDefined();
-  expect(screen.getByText('Analityka')).toBeDefined();
-  expect(screen.getByText('Ustawienia')).toBeDefined();
-  // "Trening" and "Zdrowie" appear as both group labels and nav items
-  expect(screen.getAllByText('Trening').length).toBeGreaterThanOrEqual(1);
-  expect(screen.getAllByText('Zdrowie').length).toBeGreaterThanOrEqual(1);
-  expect(screen.getByText('Narzędzia')).toBeDefined();
+  expect(screen.getByText('Dzisiaj')).toBeDefined();
+  expect(screen.getByText('Historia')).toBeDefined();
+  expect(screen.getByText('Analiza')).toBeDefined();
+  expect(screen.getByText('Plan')).toBeDefined();
+  expect(screen.getByText('Pełna pogoda')).toBeDefined();
+  expect(screen.getByText('Dane i zadania')).toBeDefined();
 });

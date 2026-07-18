@@ -165,7 +165,8 @@ public class StravaActivityMapper {
             return "unknown";
         }
         return switch (stravaSportType) {
-            case "Ride", "MountainBikeRide", "GravelRide", "EBikeRide", "VirtualRide" -> "cycling";
+            case "Ride", "MountainBikeRide", "GravelRide", "EBikeRide" -> "cycling";
+            case "VirtualRide" -> "virtual_ride";
             case "Run", "TrailRun", "VirtualRun" -> "running";
             case "Swim" -> "swimming";
             case "Walk", "Hike" -> "walking";

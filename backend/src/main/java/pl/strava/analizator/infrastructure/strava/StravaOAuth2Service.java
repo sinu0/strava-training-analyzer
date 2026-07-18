@@ -1,7 +1,11 @@
 package pl.strava.analizator.infrastructure.strava;
 
+import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,24 +34,46 @@ import pl.strava.analizator.infrastructure.strava.dto.StravaTokenResponse;
 public class StravaOAuth2Service {
 
     private static final Logger log = LoggerFactory.getLogger(StravaOAuth2Service.class);
+    private static final Duration OAUTH_STATE_TTL = Duration.ofMinutes(10);
 
     private final StravaConfigProvider stravaConfigProvider;
     private final AthleteProfileRepository profileRepository;
     private final EncryptionUtil encryptionUtil;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final SecureRandom secureRandom = new SecureRandom();
+    private final Map<String, Instant> pendingOauthStates = new ConcurrentHashMap<>();
 
     public String getAuthorizationUrl() {
-        return stravaConfigProvider.authorizationUrl();
+        removeExpiredOauthStates();
+        byte[] stateBytes = new byte[32];
+        secureRandom.nextBytes(stateBytes);
+        String state = Base64.getUrlEncoder().withoutPadding().encodeToString(stateBytes);
+        pendingOauthStates.put(state, Instant.now());
+        return stravaConfigProvider.authorizationUrl() + "&state=" + state;
     }
 
-    public AthleteProfile exchangeCodeForTokens(String code) {
+    public AthleteProfile exchangeCodeForTokens(String code, String state) {
+        validateOauthState(state);
         StravaTokenResponse tokenResponse = requestToken(Map.of(
                 "grant_type", "authorization_code",
                 "code", code
         ));
 
         return saveTokensAndProfile(tokenResponse);
+    }
+
+    private void validateOauthState(String state) {
+        removeExpiredOauthStates();
+        Instant issuedAt = state != null ? pendingOauthStates.remove(state) : null;
+        if (issuedAt == null || issuedAt.plus(OAUTH_STATE_TTL).isBefore(Instant.now())) {
+            throw new StravaApiException("Invalid or expired OAuth state");
+        }
+    }
+
+    private void removeExpiredOauthStates() {
+        Instant oldestAccepted = Instant.now().minus(OAUTH_STATE_TTL);
+        pendingOauthStates.entrySet().removeIf(entry -> entry.getValue().isBefore(oldestAccepted));
     }
 
     public String getValidAccessToken(AthleteProfile profile) {

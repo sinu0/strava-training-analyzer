@@ -28,17 +28,6 @@ function renderTopBar(pathname: string) {
       <MemoryRouter initialEntries={[pathname]}>
         <TopBar
           onToggleSidebar={vi.fn()}
-          readiness={{ score: 70, level: 'high', tsb: 5, ctl: 60, atl: 55, description: 'good', dayLabel: 'Tempo' }}
-          blockHealth={{
-            status: 'STABLE_PRODUCTIVE',
-            label: 'Blok stabilny',
-            description: 'ok',
-            adjustmentDays: 1,
-            missedStimulusDays: 0,
-            overloadDays: 0,
-            keySignals: [],
-          }}
-          profileName="Jan Test"
         />
       </MemoryRouter>
     </ThemeProvider>,
@@ -46,19 +35,17 @@ function renderTopBar(pathname: string) {
 }
 
 describe('TopBar', () => {
-  it('shows home context on root route', () => {
+  it('shows Today context on root route', () => {
     renderTopBar('/');
 
-    expect(screen.getByText('Home')).toBeDefined();
-    expect(screen.getByText('Ostatni trening')).toBeDefined();
-    expect(screen.getByText('Tempo')).toBeDefined();
-    expect(screen.getByText('Blok stabilny')).toBeDefined();
+    expect(screen.getByText('Dzisiaj')).toBeDefined();
+    expect(screen.getByText('Decyzja treningowa')).toBeDefined();
   });
 
-  it('shows home context on dashboard route', () => {
+  it('shows Today context on legacy dashboard route', () => {
     renderTopBar('/dashboard');
 
-    expect(screen.getByText('Home')).toBeDefined();
-    expect(screen.getByText('Ostatni trening')).toBeDefined();
+    expect(screen.getByText('Dzisiaj')).toBeDefined();
+    expect(screen.getByText('Decyzja treningowa')).toBeDefined();
   });
 });

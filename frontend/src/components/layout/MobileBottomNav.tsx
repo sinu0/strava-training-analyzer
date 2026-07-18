@@ -1,18 +1,18 @@
 import BarChartIcon from '@mui/icons-material/BarChart';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
-import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import TodayIcon from '@mui/icons-material/Today';
 import WidgetsIcon from '@mui/icons-material/Widgets';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const NAV_ITEMS = [
-  { label: 'Dashboard', value: '/', path: '/', icon: <DashboardIcon /> },
-  { label: 'Trening', value: '/activities', path: '/activities', icon: <DirectionsBikeIcon /> },
+  { label: 'Dzisiaj', value: '/', path: '/', icon: <TodayIcon /> },
+  { label: 'Historia', value: '/activities', path: '/activities', icon: <DirectionsBikeIcon /> },
   { label: 'Analiza', value: '/analytics', path: '/analytics', icon: <BarChartIcon /> },
-  { label: 'Zdrowie', value: '/health', path: '/health', icon: <MonitorHeartIcon /> },
-  { label: 'Więcej', value: '/profile', path: '/profile', icon: <WidgetsIcon /> },
+  { label: 'Plan', value: '/training', path: '/training', icon: <FitnessCenterIcon /> },
+  { label: 'Więcej', value: '/more', path: '/more', icon: <WidgetsIcon /> },
 ] as const;
 
 function resolveCurrentValue(pathname: string) {
@@ -20,7 +20,7 @@ function resolveCurrentValue(pathname: string) {
     item.path === '/' ? pathname === '/' : pathname.startsWith(item.path),
   );
 
-  return matched?.value ?? '/';
+  return matched?.value ?? '/more';
 }
 
 /**

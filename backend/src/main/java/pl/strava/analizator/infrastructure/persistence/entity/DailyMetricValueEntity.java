@@ -52,6 +52,12 @@ public class DailyMetricValueEntity {
     @Column(name = "calculator_version", length = 20)
     private String calculatorVersion;
 
+    @Column(name = "input_fingerprint", length = 64)
+    private String inputFingerprint;
+
+    @Column(name = "as_of")
+    private LocalDate asOf;
+
     @Column(name = "calculated_at")
     private Instant calculatedAt;
 }

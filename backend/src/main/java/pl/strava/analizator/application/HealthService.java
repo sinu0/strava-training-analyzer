@@ -72,7 +72,7 @@ public class HealthService {
                 .toList();
 
         if (healthData.isEmpty()) {
-            return new RecoveryStatus(0, "brak danych", "Brak danych zdrowotnych.", List.of());
+            return new RecoveryStatus(null, "UNKNOWN", "brak danych", "Brak danych zdrowotnych.", List.of());
         }
 
         DailySummary latest = healthData.getLast();
@@ -81,7 +81,8 @@ public class HealthService {
         String description = recoveryDescription(score, latest);
         List<String> alerts = detectAlerts(healthData, latest);
 
-        return new RecoveryStatus(score, level, description, alerts);
+        String availability = healthData.size() >= 3 ? "AVAILABLE" : "PARTIAL";
+        return new RecoveryStatus(score, availability, level, description, alerts);
     }
 
     // --- Trend calculations ---
@@ -337,5 +338,5 @@ public class HealthService {
             Integer steps,
             Integer activeCalories) {}
 
-    public record RecoveryStatus(int score, String level, String description, List<String> alerts) {}
+    public record RecoveryStatus(Integer score, String availability, String level, String description, List<String> alerts) {}
 }

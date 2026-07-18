@@ -56,6 +56,14 @@ class StravaOAuth2ServiceTest {
         assertThat(url).contains("client_id=test-client-id");
         assertThat(url).contains("response_type=code");
         assertThat(url).contains("scope=");
+        assertThat(url).contains("&state=");
+    }
+
+    @Test
+    void exchangeCodeRejectsUnknownOauthStateBeforeCallingStrava() {
+        assertThatThrownBy(() -> service.exchangeCodeForTokens("auth-code-xyz", "unknown-state"))
+                .isInstanceOf(StravaApiException.class)
+                .hasMessageContaining("OAuth state");
     }
 
     @Test
@@ -85,7 +93,7 @@ class StravaOAuth2ServiceTest {
         when(profileRepository.save(any(AthleteProfile.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
-        AthleteProfile profile = service.exchangeCodeForTokens("auth-code-xyz");
+        AthleteProfile profile = service.exchangeCodeForTokens("auth-code-xyz", newOauthState());
 
         assertThat(profile.getStravaAthleteId()).isEqualTo(12345L);
         assertThat(profile.getName()).isEqualTo("Jan Kowalski");
@@ -127,7 +135,7 @@ class StravaOAuth2ServiceTest {
         when(profileRepository.save(any(AthleteProfile.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
-        AthleteProfile saved = service.exchangeCodeForTokens("auth-code-xyz");
+        AthleteProfile saved = service.exchangeCodeForTokens("auth-code-xyz", newOauthState());
 
         assertThat(saved.getId()).isEqualTo(existing.getId());
         assertThat(saved.getStravaAthleteId()).isEqualTo(12345L);
@@ -139,7 +147,7 @@ class StravaOAuth2ServiceTest {
         when(restTemplate.postForObject(anyString(), any(), same(String.class)))
                 .thenThrow(new RestClientException("Connection refused"));
 
-        assertThatThrownBy(() -> service.exchangeCodeForTokens("bad-code"))
+        assertThatThrownBy(() -> service.exchangeCodeForTokens("bad-code", newOauthState()))
                 .isInstanceOf(StravaApiException.class)
                 .hasMessageContaining("Failed to exchange token");
     }
@@ -201,8 +209,13 @@ class StravaOAuth2ServiceTest {
                         }
                         """);
 
-        assertThatThrownBy(() -> service.exchangeCodeForTokens("bad-code"))
+        assertThatThrownBy(() -> service.exchangeCodeForTokens("bad-code", newOauthState()))
                 .isInstanceOf(StravaApiException.class)
                 .hasMessageContaining("Authorization code invalid");
+    }
+
+    private String newOauthState() {
+        String url = service.getAuthorizationUrl();
+        return url.substring(url.indexOf("&state=") + 7);
     }
 }

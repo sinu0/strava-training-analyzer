@@ -1,13 +1,11 @@
 import BarChartIcon from '@mui/icons-material/BarChart';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
-import PsychologyIcon from '@mui/icons-material/Psychology';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import ScaleIcon from '@mui/icons-material/Scale';
 import SettingsIcon from '@mui/icons-material/Settings';
-import WhatshotIcon from '@mui/icons-material/Whatshot';
-import TimelineIcon from '@mui/icons-material/Timeline';
+import TodayIcon from '@mui/icons-material/Today';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import {
   Drawer,
@@ -40,36 +38,29 @@ interface NavGroup {
   items: NavItem[];
 }
 
-const HERO_ITEM: NavItem = { label: 'Home', path: '/', icon: <DashboardIcon /> };
+const HERO_ITEM: NavItem = { label: 'Dzisiaj', path: '/', icon: <TodayIcon /> };
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: 'Trening',
+    label: 'Główne',
     items: [
-      { label: 'Pogoda', path: '/weather', icon: <WbSunnyOutlinedIcon /> },
-      { label: 'Aktywności', path: '/activities', icon: <DirectionsBikeIcon /> },
-      { label: 'Analityka', path: '/analytics', icon: <BarChartIcon /> },
-      { label: 'Planer', path: '/training', icon: <FitnessCenterIcon /> },
+      { label: 'Historia', path: '/activities', icon: <DirectionsBikeIcon /> },
+      { label: 'Analiza', path: '/analytics', icon: <BarChartIcon /> },
+      { label: 'Plan', path: '/training', icon: <FitnessCenterIcon /> },
     ],
   },
   {
-    label: 'Zdrowie',
+    label: 'Więcej',
     items: [
+      { label: 'Pełna pogoda', path: '/weather', icon: <WbSunnyOutlinedIcon /> },
+      { label: 'Profil i strefy', path: '/profile', icon: <PersonOutlineIcon /> },
       { label: 'Zdrowie', path: '/health', icon: <MonitorHeartIcon /> },
-      { label: 'Waga', path: '/weight', icon: <ScaleIcon /> },
-    ],
-  },
-  {
-    label: 'Narzędzia',
-    items: [
-      { label: 'Coach', path: '/coach', icon: <PsychologyIcon /> },
-      { label: 'Priorytety', path: '/priorities', icon: <WhatshotIcon /> },
-      { label: 'Oś czasu', path: '/timeline', icon: <TimelineIcon /> },
+      { label: 'Masa ciała', path: '/weight', icon: <ScaleIcon /> },
     ],
   },
 ];
 
-const BOTTOM_ITEM: NavItem = { label: 'Ustawienia', path: '/admin', icon: <SettingsIcon /> };
+const BOTTOM_ITEM: NavItem = { label: 'Dane i zadania', path: '/admin', icon: <SettingsIcon /> };
 
 function NavButton({ item, selected, onClick }: { item: NavItem; selected: boolean; onClick: () => void }) {
   return (
@@ -205,7 +196,7 @@ export default function Sidebar({ width, open, onNavigateComplete }: SidebarProp
         </Typography>
       </Toolbar>
 
-      {/* Dashboard hero item */}
+      {/* Primary daily decision */}
       <List sx={{ px: 0 }}>
         <NavButton
           item={HERO_ITEM}
