@@ -43,7 +43,14 @@ export default function PageContainer({
               : undefined;
 
   return (
-    <Box sx={{ maxWidth: mw, mx: mw ? 'auto' : undefined }}>
+    <Box
+      sx={{
+        maxWidth: mw,
+        mx: mw ? 'auto' : undefined,
+        width: '100%',
+        animation: 'sectionFadeInUp 260ms ease both',
+      }}
+    >
       {!!breadcrumbs?.length && (
         <Breadcrumbs
           separator={<ChevronRightIcon fontSize="small" />}
@@ -82,17 +89,17 @@ export default function PageContainer({
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: 1.5,
-            mb: 3,
+            mb: { xs: 2.5, md: 3.5 },
           }}
         >
-          <Box>
+          <Box sx={{ minWidth: 0 }}>
             {!!title && (
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>
+              <Typography variant="h4" sx={{ fontWeight: 820, letterSpacing: '-0.03em' }}>
                 {title}
               </Typography>
             )}
             {!!subtitle && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, maxWidth: 720 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75, maxWidth: 760, lineHeight: 1.55 }}>
                 {subtitle}
               </Typography>
             )}

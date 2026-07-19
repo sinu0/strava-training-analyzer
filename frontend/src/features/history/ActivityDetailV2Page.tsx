@@ -4,7 +4,6 @@ import {
   Button,
   Chip,
   Grid,
-  Paper,
   Stack,
   Tab,
   Table,
@@ -17,11 +16,14 @@ import {
 } from '@mui/material';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
+import ActivityRoutePreview from '@/components/activity/ActivityRoutePreview';
 import ActivityStreamsChart from '@/components/ActivityStreamsChart';
 import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
 import PageContainer from '@/components/common/PageContainer';
+import MetricReadout from '@/components/v2/MetricReadout';
+import PerformanceSurface from '@/components/v2/PerformanceSurface';
 
 import { useActivityLaps, useActivityStreams, useV2Activity } from './useHistory';
 
@@ -61,20 +63,19 @@ export default function ActivityDetailV2Page() {
       breadcrumbs={[{ label: 'Historia', href: '/activities' }, { label: data.name }]}
       actions={<Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/activities')}>Historia</Button>}
     >
-      <Paper sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
+      <PerformanceSurface accent>
         <Box sx={{ p: { xs: 2, md: 3 } }}>
           <Grid container spacing={2}>
             {[
-              ['Dystans', data.distanceM != null ? `${(data.distanceM / 1000).toFixed(1)} km` : '—'],
-              ['Czas', data.movingTimeSec != null ? `${Math.round(data.movingTimeSec / 60)} min` : '—'],
-              ['Moc', metric(data.avgPowerW, ' W')],
-              ['Tętno', metric(data.avgHeartrate, ' bpm')],
-              ['Przewyższenie', metric(data.elevationGainM, ' m')],
-              ['Kadencja', metric(data.avgCadence, ' rpm')],
-            ].map(([label, value]) => (
+              { label: 'Dystans', value: data.distanceM != null ? `${(data.distanceM / 1000).toFixed(1)} km` : '—' },
+              { label: 'Czas', value: data.movingTimeSec != null ? `${Math.round(data.movingTimeSec / 60)} min` : '—' },
+              { label: 'Moc', value: metric(data.avgPowerW, ' W') },
+              { label: 'Tętno', value: metric(data.avgHeartrate, ' bpm') },
+              { label: 'Przewyższenie', value: metric(data.elevationGainM, ' m') },
+              { label: 'Kadencja', value: metric(data.avgCadence, ' rpm') },
+            ].map(({ label, value }) => (
               <Grid item xs={6} sm={4} md={2} key={label}>
-                <Typography variant="caption" color="text.secondary">{label}</Typography>
-                <Typography variant="h6" fontWeight={750}>{value}</Typography>
+                <MetricReadout label={label} value={value} tone={label === 'Moc' ? 'primary' : undefined} />
               </Grid>
             ))}
           </Grid>
@@ -84,34 +85,44 @@ export default function ActivityDetailV2Page() {
           <Tab value="analysis" label="Analiza" />
           <Tab value="laps" label="Okrążenia" />
         </Tabs>
-      </Paper>
+      </PerformanceSurface>
 
       <Box sx={{ mt: 2.5 }}>
         {tab === 'overview' && (
           <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <PerformanceSurface>
+                <ActivityRoutePreview
+                  activityName={data.name}
+                  summaryPolyline={data.summaryPolyline}
+                  height={380}
+                  priority
+                />
+              </PerformanceSurface>
+            </Grid>
             <Grid item xs={12} md={7}>
-              <Paper sx={{ p: 2.5, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+              <PerformanceSurface sx={{ p: 2.5 }}>
                 <Typography variant="h6" fontWeight={750}>Podsumowanie</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, whiteSpace: 'pre-wrap' }}>
                   {data.description || 'Brak opisu aktywności.'}
                 </Typography>
-              </Paper>
+              </PerformanceSurface>
             </Grid>
             <Grid item xs={12} md={5}>
-              <Paper sx={{ p: 2.5, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+              <PerformanceSurface sx={{ p: 2.5 }}>
                 <Typography variant="h6" fontWeight={750}>Metryki i jakość</Typography>
                 <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1.5 }}>
                   {data.metrics.length > 0 ? data.metrics.filter(item => item.numericValue != null).slice(0, 8).map(item => (
                     <Chip key={item.name} label={`${item.name}: ${metric(item.numericValue)}`} variant="outlined" />
                   )) : <Typography variant="body2" color="text.secondary">Brak policzonych metryk.</Typography>}
                 </Stack>
-              </Paper>
+              </PerformanceSurface>
             </Grid>
           </Grid>
         )}
 
         {tab === 'analysis' && (
-          <Paper sx={{ p: { xs: 1.5, md: 2.5 }, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+          <PerformanceSurface sx={{ p: { xs: 1.5, md: 2.5 } }}>
             {streams.isLoading ? <LoadingState message="Ładowanie zredukowanych strumieni…" /> : null}
             {streams.isError ? <ErrorState message="Nie udało się pobrać strumieni." onRetry={() => void streams.refetch()} /> : null}
             {streamData != null && streamData.returnedPoints > 0 ? (
@@ -129,11 +140,11 @@ export default function ActivityDetailV2Page() {
                 />
               </>
             ) : streamData ? <EmptyState title="Brak strumieni" description="Aktywność nie zawiera danych czasowych do analizy." /> : null}
-          </Paper>
+          </PerformanceSurface>
         )}
 
         {tab === 'laps' && (
-          <Paper sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
+          <PerformanceSurface>
             {laps.isLoading ? <LoadingState message="Ładowanie okrążeń…" /> : null}
             {laps.isError ? <ErrorState message="Nie udało się pobrać okrążeń." onRetry={() => void laps.refetch()} /> : null}
             {lapData.length > 0 ? (
@@ -146,7 +157,7 @@ export default function ActivityDetailV2Page() {
                 ))}</TableBody>
               </Table>
             ) : laps.data ? <EmptyState title="Brak okrążeń" /> : null}
-          </Paper>
+          </PerformanceSurface>
         )}
       </Box>
     </PageContainer>

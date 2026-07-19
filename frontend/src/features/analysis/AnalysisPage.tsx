@@ -1,7 +1,11 @@
 import CompareArrowsOutlinedIcon from '@mui/icons-material/CompareArrowsOutlined';
+import DirectionsBikeOutlinedIcon from '@mui/icons-material/DirectionsBikeOutlined';
+import LandscapeOutlinedIcon from '@mui/icons-material/LandscapeOutlined';
 import ShowChartOutlinedIcon from '@mui/icons-material/ShowChartOutlined';
+import StraightenOutlinedIcon from '@mui/icons-material/StraightenOutlined';
 import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined';
-import { Box, Grid, Paper, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
+import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined';
+import { Box, Grid, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
 
 import EmptyState from '@/components/common/EmptyState';
@@ -10,6 +14,8 @@ import LoadingState from '@/components/common/LoadingState';
 import PageContainer from '@/components/common/PageContainer';
 import PMChart from '@/components/PMChart';
 import PowerCurveChart from '@/components/PowerCurveChart';
+import MetricReadout from '@/components/v2/MetricReadout';
+import PerformanceSurface from '@/components/v2/PerformanceSurface';
 
 import { useLoadAnalytics, usePeriodComparison, usePowerAnalytics } from './useV2Analytics';
 
@@ -29,6 +35,12 @@ function formatSummary(value: number, kind: 'distance' | 'time' | 'elevation') {
   if (kind === 'distance') return `${(value / 1000).toFixed(1)} km`;
   if (kind === 'time') return `${Math.round(value / 3600)} h`;
   return `${Math.round(value)} m`;
+}
+
+function changeLabel(current: number, previous: number) {
+  if (previous === 0) return 'brak porównywalnej bazy';
+  const change = ((current - previous) / previous) * 100;
+  return `${change >= 0 ? '+' : ''}${change.toFixed(0)}% vs poprzedni okres`;
 }
 
 export default function AnalysisPage() {
@@ -67,16 +79,35 @@ export default function AnalysisPage() {
         <Grid container spacing={2}>
           {[comparison.data.period1, comparison.data.period2].map((period, index) => (
             <Grid item xs={12} md={6} key={period.from}>
-              <Paper sx={{ p: 2.5, border: '1px solid', borderColor: index === 0 ? 'primary.main' : 'divider', borderRadius: 3 }}>
+              <PerformanceSurface accent={index === 0} sx={{ p: { xs: 2, md: 2.75 }, height: '100%' }}>
                 <Typography variant="overline" color="text.secondary">{index === 0 ? 'Wybrany okres' : 'Poprzedni okres'}</Typography>
                 <Typography variant="h6" fontWeight={750}>{period.from} — {period.to}</Typography>
-                <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                  <Grid item xs={6}><Typography variant="h5" fontWeight={800}>{period.activityCount}</Typography><Typography variant="caption" color="text.secondary">aktywności</Typography></Grid>
-                  <Grid item xs={6}><Typography variant="h5" fontWeight={800}>{formatSummary(period.totalDistanceM, 'distance')}</Typography><Typography variant="caption" color="text.secondary">dystans</Typography></Grid>
-                  <Grid item xs={6}><Typography variant="h5" fontWeight={800}>{formatSummary(period.totalTimeSec, 'time')}</Typography><Typography variant="caption" color="text.secondary">czas</Typography></Grid>
-                  <Grid item xs={6}><Typography variant="h5" fontWeight={800}>{formatSummary(period.totalElevationM, 'elevation')}</Typography><Typography variant="caption" color="text.secondary">przewyższenie</Typography></Grid>
+                <Grid container spacing={2.25} sx={{ mt: 0.75 }}>
+                  <Grid item xs={6}>
+                    <MetricReadout
+                      icon={<DirectionsBikeOutlinedIcon />}
+                      label="Aktywności"
+                      value={period.activityCount}
+                      hint={index === 0 ? changeLabel(period.activityCount, comparison.data.period2.activityCount) : undefined}
+                      tone={index === 0 ? 'primary' : undefined}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <MetricReadout
+                      icon={<StraightenOutlinedIcon />}
+                      label="Dystans"
+                      value={formatSummary(period.totalDistanceM, 'distance')}
+                      hint={index === 0 ? changeLabel(period.totalDistanceM, comparison.data.period2.totalDistanceM) : undefined}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <MetricReadout icon={<TimerOutlinedIcon />} label="Czas" value={formatSummary(period.totalTimeSec, 'time')} />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <MetricReadout icon={<LandscapeOutlinedIcon />} label="Przewyższenie" value={formatSummary(period.totalElevationM, 'elevation')} />
+                  </Grid>
                 </Grid>
-              </Paper>
+              </PerformanceSurface>
             </Grid>
           ))}
         </Grid>
@@ -86,20 +117,20 @@ export default function AnalysisPage() {
     if (tab === 'load' && load.data) {
       return load.data.availability === 'UNKNOWN'
         ? <EmptyState title="Brak obciążenia" description="Brak danych nie jest prezentowany jako zerowa forma." />
-        : <Paper sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}><PMChart data={load.data.points} /></Paper>;
+        : <PerformanceSurface sx={{ p: { xs: 1.25, md: 2.25 } }}><PMChart data={load.data.points} /></PerformanceSurface>;
     }
 
     if (tab === 'power' && power.data) {
       return power.data.availability === 'UNKNOWN'
         ? <EmptyState title="Brak krzywej mocy" description="Wybierz okres z aktywnościami zawierającymi pomiar mocy." />
-        : <Paper sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}><PowerCurveChart data={power.data.curve} /></Paper>;
+        : <PerformanceSurface sx={{ p: { xs: 1.25, md: 2.25 } }}><PowerCurveChart data={power.data.curve} /></PerformanceSurface>;
     }
     return null;
   };
 
   return (
-    <PageContainer title="Analiza" subtitle="Porównania, obciążenie i moc są ładowane dopiero po otwarciu wybranego obszaru." maxWidth={1280}>
-      <Paper sx={{ mb: 2.5, border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
+    <PageContainer title="Laboratorium wydolności" subtitle="Porównuj okresy, obserwuj obciążenie i analizuj moc bez ukrywania jakości danych." maxWidth={1320}>
+      <PerformanceSurface sx={{ mb: 2.5 }}>
         <Tabs value={tab} onChange={(_, value: AnalysisTab) => update('tab', value)} variant="scrollable" scrollButtons="auto">
           <Tab value="compare" icon={<CompareArrowsOutlinedIcon />} iconPosition="start" label="Porównaj" />
           <Tab value="load" icon={<TimelineOutlinedIcon />} iconPosition="start" label="Obciążenie i regeneracja" />
@@ -111,7 +142,7 @@ export default function AnalysisPage() {
           <Box sx={{ flex: 1 }} />
           <Typography variant="caption" color="text.secondary" alignSelf="center">Zakres jest zapisany w URL</Typography>
         </Stack>
-      </Paper>
+      </PerformanceSurface>
       {renderContent()}
     </PageContainer>
   );

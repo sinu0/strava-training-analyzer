@@ -1,8 +1,10 @@
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
+import PedalBikeOutlinedIcon from '@mui/icons-material/PedalBikeOutlined';
 import {
   AppBar,
   Box,
+  Chip,
   IconButton,
   Avatar,
   Popover,
@@ -95,17 +97,18 @@ export default function TopBar({
   return (
     <>
       <AppBar
-        position="static"
+        position="sticky"
         elevation={0}
         sx={{
-          bgcolor: (t) => t.tokens.surfaceElevated,
+          bgcolor: 'rgba(8, 13, 19, 0.82)',
           borderBottom: '1px solid',
           borderColor: (t) => t.tokens.surfaceBorder,
+          backdropFilter: 'blur(18px)',
           overflow: 'visible',
           zIndex: (theme) => theme.zIndex.appBar + 1,
         }}
       >
-        <Toolbar sx={{ minHeight: { xs: 72, sm: 80 }, gap: 1, alignItems: 'flex-start', pt: 1.2, pb: 1.8 }}>
+        <Toolbar sx={{ minHeight: { xs: 64, sm: 68 }, gap: 1.25 }}>
           <IconButton
             edge="start"
             color="inherit"
@@ -116,69 +119,64 @@ export default function TopBar({
             <MenuIcon />
           </IconButton>
 
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'baseline', gap: 1.1 }}>
+            <Typography
+              variant="caption"
+              color="primary"
+              sx={{ display: { xs: 'none', sm: 'block' }, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}
+            >
               {pageContext.eyebrow}
             </Typography>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 760, lineHeight: 1.2 }}>
               {pageContext.title}
             </Typography>
             <Typography
               variant="caption"
               color="text.secondary"
-              sx={{ display: { xs: 'none', md: 'block' }, maxWidth: 560 }}
+              sx={{ display: { xs: 'none', lg: 'block' }, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
             >
               {pageContext.subtitle}
             </Typography>
           </Box>
 
           <Box
-            data-testid="topbar-floating-cluster"
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: 1,
-              ml: 0.5,
-              pl: 1.05,
-              pr: 0.75,
-              py: 0.75,
-              mt: 0.3,
-              mb: -2.75,
-              borderRadius: 999,
-              bgcolor: 'rgba(17, 24, 39, 0.88)',
-              border: '1px solid',
-              borderColor: (theme) => theme.tokens.surfaceStrongBorder,
-              boxShadow: '0 18px 38px rgba(0,0,0,0.28), 0 3px 8px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(18px)',
-              position: 'relative',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                inset: 1,
-                borderRadius: 999,
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 60%, rgba(255,255,255,0) 100%)',
-                pointerEvents: 'none',
-              },
+              gap: 0.6,
             }}
           >
+            <Chip
+              size="small"
+              label="LOCAL"
+              variant="outlined"
+              sx={{
+                display: { xs: 'none', sm: 'flex' },
+                height: 27,
+                fontSize: '0.66rem',
+                letterSpacing: '0.08em',
+                color: 'success.main',
+                borderColor: 'rgba(63,185,80,0.34)',
+                bgcolor: 'rgba(63,185,80,0.06)',
+              }}
+            />
             <TopBarSyncButton />
 
             <IconButton
               onClick={(e) => setAnchor(e.currentTarget)}
-              sx={{ p: 0.25, position: 'relative', zIndex: 1 }}
+              sx={{ p: 0.25 }}
               aria-label="profil"
             >
               <Avatar
                 sx={{
-                  width: 48,
-                  height: 48,
-                  fontSize: '0.92rem',
-                  fontWeight: 800,
-                  bgcolor: 'primary.main',
-                  boxShadow: '0 0 0 2px rgba(255,255,255,0.10), 0 14px 28px rgba(0,0,0,0.22)',
+                  width: 38,
+                  height: 38,
+                  bgcolor: 'rgba(255,107,53,0.13)',
+                  color: 'primary.main',
+                  border: '1px solid rgba(255,107,53,0.34)',
                 }}
               >
-                ?
+                <PedalBikeOutlinedIcon fontSize="small" />
               </Avatar>
             </IconButton>
           </Box>

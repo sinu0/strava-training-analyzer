@@ -1,10 +1,10 @@
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
+import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined';
+import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import {
-  Box,
   Button,
-  Chip,
   FormControl,
   Grid,
   InputLabel,
@@ -21,6 +21,7 @@ import {
 import { lazy, Suspense } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
+import ActivityListCardV2 from '@/components/activity/ActivityListCardV2';
 import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
@@ -101,27 +102,20 @@ export default function HistoryPage() {
     }
 
     return (
-      <Stack spacing={1.25}>
-        {activities.data.items.map(activity => (
-          <Paper
+      <Stack spacing={2}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ px: 0.5 }}>
+          <Typography variant="body2" color="text.secondary">
+            {activities.data.total} aktywności · mapy wykorzystują lekką geometrię podsumowania
+          </Typography>
+          <Typography variant="caption" color="text.secondary">Strona {page + 1} z {activities.data.totalPages}</Typography>
+        </Stack>
+        {activities.data.items.map((activity, index) => (
+          <ActivityListCardV2
             key={activity.id}
-            component="article"
-            sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}
-          >
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }}>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="h6" fontWeight={750}>{activity.name}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {new Date(activity.startedAt).toLocaleString('pl-PL')} · {(activity.distanceM / 1000).toFixed(1)} km · {Math.round(activity.movingTimeSec / 60)} min
-                </Typography>
-              </Box>
-              <Stack direction="row" spacing={1} alignItems="center">
-                {activity.avgPowerW != null && <Chip size="small" label={`${activity.avgPowerW} W`} />}
-                {activity.trainingScore != null && <Chip size="small" color="primary" label={`Score ${activity.trainingScore}`} />}
-                <Button onClick={() => navigate(`/activities/${activity.id}`)}>Szczegóły</Button>
-              </Stack>
-            </Stack>
-          </Paper>
+            activity={activity}
+            priority={index < 2}
+            onOpen={activityId => navigate(`/activities/${activityId}`)}
+          />
         ))}
         {activities.data.totalPages > 1 && (
           <Pagination
@@ -136,9 +130,27 @@ export default function HistoryPage() {
   };
 
   return (
-    <PageContainer title="Historia" subtitle="Jeden zestaw filtrów dla listy, kalendarza i mapy." maxWidth={1280}>
-      <Paper sx={{ p: 2, mb: 2.5, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5}>
+    <PageContainer
+      title="Historia treningów"
+      subtitle="Trasy, liczby i kontekst każdej sesji. Mapa jest widoczna od razu, strumienie dopiero w szczególe."
+      maxWidth={1320}
+    >
+      <Paper
+        elevation={0}
+        sx={{
+          p: { xs: 1.5, md: 2 },
+          mb: 2.5,
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 3,
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012))',
+        }}
+      >
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
+          <TuneOutlinedIcon color="primary" fontSize="small" />
+          <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>Widok i filtry</Typography>
+        </Stack>
+        <Stack direction={{ xs: 'column', lg: 'row' }} spacing={1.5}>
           <ToggleButtonGroup
             exclusive
             value={view}
@@ -160,6 +172,15 @@ export default function HistoryPage() {
           </FormControl>
           <TextField size="small" type="date" label="Od" value={from} onChange={event => updateParam('from', event.target.value)} InputLabelProps={{ shrink: true }} />
           <TextField size="small" type="date" label="Do" value={to} onChange={event => updateParam('to', event.target.value)} InputLabelProps={{ shrink: true }} />
+          {(sportType || from || to) ? (
+            <Button
+              startIcon={<RestartAltOutlinedIcon />}
+              onClick={() => setParams(view === 'list' ? {} : { view })}
+              sx={{ ml: { lg: 'auto' } }}
+            >
+              Wyczyść filtry
+            </Button>
+          ) : null}
         </Stack>
       </Paper>
       {content()}

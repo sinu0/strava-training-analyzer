@@ -10,15 +10,17 @@ import {
   Button,
   Chip,
   Grid,
-  Paper,
   Stack,
   Typography,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
+import ActivityRoutePreview from '@/components/activity/ActivityRoutePreview';
 import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
 import PageContainer from '@/components/common/PageContainer';
+import MetricReadout from '@/components/v2/MetricReadout';
+import PerformanceSurface from '@/components/v2/PerformanceSurface';
 
 import { useToday } from './useToday';
 
@@ -32,13 +34,6 @@ const confidenceLabels = {
   LOW: 'Podstawa danych: niska',
   MEDIUM: 'Podstawa danych: częściowa',
   HIGH: 'Podstawa danych: pełna',
-} as const;
-
-const panelSx = {
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 3,
-  bgcolor: 'background.paper',
 } as const;
 
 function formatDuration(seconds?: number | null) {
@@ -91,16 +86,14 @@ export default function TodayPage() {
 
       <Grid container spacing={2.5}>
         <Grid item xs={12} lg={8}>
-          <Paper
+          <PerformanceSurface
+            accent
             sx={{
-              ...panelSx,
               p: { xs: 2.5, md: 4 },
-              minHeight: 310,
+              minHeight: 330,
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              borderColor: 'primary.main',
-              background: (theme) => `linear-gradient(135deg, ${theme.palette.background.paper} 20%, ${theme.palette.action.hover} 100%)`,
             }}
           >
             <Box>
@@ -130,11 +123,11 @@ export default function TodayPage() {
                 Otwórz plan
               </Button>
             </Stack>
-          </Paper>
+          </PerformanceSurface>
         </Grid>
 
         <Grid item xs={12} lg={4}>
-          <Paper sx={{ ...panelSx, p: 2.5, height: '100%' }}>
+          <PerformanceSurface sx={{ p: 2.5, height: '100%' }}>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
               <InfoOutlinedIcon color="primary" />
               <Typography variant="h6" fontWeight={750}>Dlaczego</Typography>
@@ -153,15 +146,16 @@ export default function TodayPage() {
                 </Typography>
               )}
             </Stack>
-          </Paper>
+          </PerformanceSurface>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Paper sx={{ ...panelSx, p: 2.25, height: '100%' }}>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <DirectionsBikeOutlinedIcon color="primary" />
-              <Typography variant="subtitle1" fontWeight={750}>Ostatni trening</Typography>
-            </Stack>
+          <PerformanceSurface sx={{ p: 0, height: '100%' }}>
+            <Box sx={{ p: 2.25 }}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <DirectionsBikeOutlinedIcon color="primary" />
+                <Typography variant="subtitle1" fontWeight={750}>Ostatni trening</Typography>
+              </Stack>
             {data.lastActivity ? (
               <>
                 <Typography variant="h6" sx={{ mt: 2, fontWeight: 750 }}>{data.lastActivity.name}</Typography>
@@ -173,27 +167,36 @@ export default function TodayPage() {
                 </Button>
               </>
             ) : <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>Brak zsynchronizowanej aktywności.</Typography>}
-          </Paper>
+            </Box>
+            {data.lastActivity ? (
+              <ActivityRoutePreview
+                activityName={data.lastActivity.name}
+                summaryPolyline={data.lastActivity.summaryPolyline}
+                height={190}
+                priority
+              />
+            ) : null}
+          </PerformanceSurface>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Paper sx={{ ...panelSx, p: 2.25, height: '100%' }}>
+          <PerformanceSurface sx={{ p: 2.25, height: '100%' }}>
             <Stack direction="row" spacing={1} alignItems="center">
               <DataUsageOutlinedIcon color="primary" />
               <Typography variant="subtitle1" fontWeight={750}>Obciążenie 7/42 dni</Typography>
             </Stack>
             {data.load ? (
               <Stack direction="row" spacing={3} sx={{ mt: 2 }}>
-                <Box><Typography variant="h5" fontWeight={800}>{data.load.ctl42.toFixed(1)}</Typography><Typography variant="caption" color="text.secondary">CTL</Typography></Box>
-                <Box><Typography variant="h5" fontWeight={800}>{data.load.atl7.toFixed(1)}</Typography><Typography variant="caption" color="text.secondary">ATL</Typography></Box>
-                <Box><Typography variant="h5" fontWeight={800}>{data.load.form.toFixed(1)}</Typography><Typography variant="caption" color="text.secondary">Forma</Typography></Box>
+                <MetricReadout label="CTL 42 dni" value={data.load.ctl42.toFixed(1)} tone="primary" />
+                <MetricReadout label="ATL 7 dni" value={data.load.atl7.toFixed(1)} tone="warning" />
+                <MetricReadout label="Forma" value={data.load.form.toFixed(1)} tone={data.load.form < -10 ? 'warning' : 'success'} />
               </Stack>
             ) : <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>Brak historii wymaganej do obliczenia obciążenia.</Typography>}
-          </Paper>
+          </PerformanceSurface>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Paper sx={{ ...panelSx, p: 2.25, height: '100%' }}>
+          <PerformanceSurface sx={{ p: 2.25, height: '100%' }}>
             <Stack direction="row" spacing={1} alignItems="center">
               <EventOutlinedIcon color="primary" />
               <Typography variant="subtitle1" fontWeight={750}>Następny trening</Typography>
@@ -206,18 +209,18 @@ export default function TodayPage() {
                 </Typography>
               </>
             ) : <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>Brak zaplanowanej sesji.</Typography>}
-          </Paper>
+          </PerformanceSurface>
         </Grid>
 
         <Grid item xs={12}>
-          <Paper sx={{ ...panelSx, p: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+          <PerformanceSurface sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
             <CloudOutlinedIcon color="primary" />
             <Box sx={{ flex: 1, minWidth: 220 }}>
               <Typography variant="subtitle2" fontWeight={750}>Pogoda jako pełny kontekst treningu</Typography>
               <Typography variant="body2" color="text.secondary">Widok godzinowy, tygodniowy, lokalizacje i ustawienia pozostają dostępne.</Typography>
             </Box>
             <Button variant="outlined" onClick={() => navigate('/weather')}>Otwórz pełną pogodę</Button>
-          </Paper>
+          </PerformanceSurface>
         </Grid>
       </Grid>
     </PageContainer>

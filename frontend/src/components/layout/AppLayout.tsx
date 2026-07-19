@@ -10,7 +10,7 @@ import MobileBottomNav from './MobileBottomNav';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 
-const SIDEBAR_WIDTH = 240;
+const SIDEBAR_WIDTH = 260;
 
 /**
  * Composes the app shell with the sidebar, top bar, routed content, and Strava notice.
@@ -75,16 +75,26 @@ export default function AppLayout() {
           }
         }}
       />
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ flexGrow: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <TopBar onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
         <Box
           component="main"
           sx={{
             flexGrow: 1,
-            p: { xs: 2, sm: 3, md: 3.5 },
-            pt: { xs: 5, sm: 6, md: 7 },
-            pb: { xs: 12, md: 3.5 },
+            position: 'relative',
+            p: { xs: 1.5, sm: 2.5, md: 3.5, xl: 4.5 },
+            pt: { xs: 3, sm: 3.5, md: 4 },
+            pb: { xs: 11, md: 4 },
             bgcolor: 'background.default',
+            '&::before': {
+              content: '""',
+              position: 'fixed',
+              inset: 0,
+              zIndex: 0,
+              pointerEvents: 'none',
+              background: 'radial-gradient(circle at 88% 8%, rgba(255,107,53,0.045), transparent 26%), radial-gradient(circle at 55% 92%, rgba(78,205,196,0.025), transparent 28%)',
+            },
+            '& > *': { position: 'relative', zIndex: 1 },
           }}
         >
           <Outlet />

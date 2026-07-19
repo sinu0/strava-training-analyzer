@@ -8,7 +8,6 @@ import {
   Chip,
   Grid,
   LinearProgress,
-  Paper,
   Stack,
   Typography,
 } from '@mui/material';
@@ -17,6 +16,8 @@ import { useState } from 'react';
 import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
 import PageContainer from '@/components/common/PageContainer';
+import MetricReadout from '@/components/v2/MetricReadout';
+import PerformanceSurface from '@/components/v2/PerformanceSurface';
 
 import {
   useCreateImportJob,
@@ -48,26 +49,26 @@ export default function DataJobsPage() {
     || importJob.isPending || recalculation.isPending || retry.isPending;
 
   return (
-    <PageContainer title="Dane i zadania" subtitle="Jakość danych, obserwowalny import i wznawialne przeliczenia." maxWidth={1100}>
+    <PageContainer title="Dane i zadania" subtitle="Kontroluj kompletność danych, import oraz bezpieczne przeliczanie metryk." maxWidth={1180}>
       <Grid container spacing={2.5}>
         <Grid item xs={12} md={5}>
-          <Paper sx={{ p: 2.5, border: '1px solid', borderColor: 'divider', borderRadius: 3, height: '100%' }}>
+          <PerformanceSurface accent sx={{ p: 2.5, height: '100%' }}>
             <Stack direction="row" spacing={1} alignItems="center"><DataObjectOutlinedIcon color="primary" /><Typography variant="h6" fontWeight={750}>Jakość danych</Typography></Stack>
             {quality.isLoading ? <LoadingState message="Sprawdzanie jakości…" /> : null}
             {quality.isError ? <ErrorState message="Nie udało się pobrać jakości danych." onRetry={() => void quality.refetch()} /> : null}
             {quality.data ? (
               <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                <Grid item xs={6}><Typography variant="h4" fontWeight={800}>{quality.data.assessedActivities}/{quality.data.totalActivities}</Typography><Typography variant="caption" color="text.secondary">ocenionych</Typography></Grid>
-                <Grid item xs={6}><Typography variant="h4" fontWeight={800} color="success.main">{quality.data.available}</Typography><Typography variant="caption" color="text.secondary">dostępnych</Typography></Grid>
-                <Grid item xs={6}><Typography variant="h4" fontWeight={800} color="warning.main">{quality.data.partial}</Typography><Typography variant="caption" color="text.secondary">częściowych</Typography></Grid>
-                <Grid item xs={6}><Typography variant="h4" fontWeight={800}>{quality.data.unknown}</Typography><Typography variant="caption" color="text.secondary">nieznanych</Typography></Grid>
+                <Grid item xs={6}><MetricReadout label="Ocenionych" value={`${quality.data.assessedActivities}/${quality.data.totalActivities}`} tone="primary" /></Grid>
+                <Grid item xs={6}><MetricReadout label="Dostępnych" value={quality.data.available} tone="success" /></Grid>
+                <Grid item xs={6}><MetricReadout label="Częściowych" value={quality.data.partial} tone="warning" /></Grid>
+                <Grid item xs={6}><MetricReadout label="Nieznanych" value={quality.data.unknown} /></Grid>
               </Grid>
             ) : null}
-          </Paper>
+          </PerformanceSurface>
         </Grid>
 
         <Grid item xs={12} md={7}>
-          <Paper sx={{ p: 2.5, border: '1px solid', borderColor: 'divider', borderRadius: 3, height: '100%' }}>
+          <PerformanceSurface sx={{ p: 2.5, height: '100%' }}>
             <Stack direction="row" spacing={1} alignItems="center"><SyncOutlinedIcon color="primary" /><Typography variant="h6" fontWeight={750}>Uruchom zadanie</Typography></Stack>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Każde zadanie zapisuje etap, próbę i błąd. Import nie uruchomi się równolegle drugi raz.</Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} sx={{ mt: 2.5 }}>
@@ -75,12 +76,12 @@ export default function DataJobsPage() {
               <Button variant="outlined" disabled={busy} onClick={() => startImport('FULL')}>Pełny import</Button>
               <Button variant="outlined" startIcon={<RefreshOutlinedIcon />} disabled={busy} onClick={startRecalculation}>Przelicz metryki</Button>
             </Stack>
-          </Paper>
+          </PerformanceSurface>
         </Grid>
 
         {activeJob ? (
           <Grid item xs={12}>
-            <Paper sx={{ p: 2.5, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+            <PerformanceSurface sx={{ p: 2.5 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
                 <Box><Typography variant="overline" color="text.secondary">{activeJob.jobType} · próba {activeJob.attempt}</Typography><Typography variant="h6" fontWeight={750}>{activeJob.stage}</Typography></Box>
                 <Chip label={activeJob.status} color={activeJob.status === 'COMPLETED' ? 'success' : activeJob.status === 'FAILED' ? 'error' : 'primary'} variant="outlined" />
@@ -90,7 +91,7 @@ export default function DataJobsPage() {
               {activeJob.status === 'FAILED' || activeJob.status === 'RETRYABLE' ? (
                 <Button sx={{ mt: 2 }} disabled={retry.isPending} onClick={() => retry.mutate(activeJob.id, { onSuccess: updated => setJobId(updated.id) })}>Wznów od niezakończonego etapu</Button>
               ) : null}
-            </Paper>
+            </PerformanceSurface>
           </Grid>
         ) : null}
       </Grid>

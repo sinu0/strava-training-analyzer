@@ -1,13 +1,15 @@
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import CloudOutlinedIcon from '@mui/icons-material/CloudOutlined';
 import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
 import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import ScaleOutlinedIcon from '@mui/icons-material/ScaleOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
-import { List, ListItemButton, ListItemIcon, ListItemText, Paper } from '@mui/material';
+import { Box, ButtonBase, Grid, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 import PageContainer from '@/components/common/PageContainer';
+import PerformanceSurface from '@/components/v2/PerformanceSurface';
 
 const items = [
   { label: 'Pełna pogoda', description: 'Prognoza, lokalizacje i ustawienia', path: '/weather', icon: <CloudOutlinedIcon /> },
@@ -21,17 +23,41 @@ const items = [
 export default function MorePage() {
   const navigate = useNavigate();
   return (
-    <PageContainer title="Więcej" subtitle="Profil, pogoda, zdrowie, integracje i jakość danych." maxWidth="md">
-      <Paper sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
-        <List disablePadding>
-          {items.map((item) => (
-            <ListItemButton key={`${item.path}-${item.label}`} onClick={() => navigate(item.path)} divider>
-              <ListItemIcon sx={{ color: 'primary.main' }}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} secondary={item.description} />
-            </ListItemButton>
-          ))}
-        </List>
-      </Paper>
+    <PageContainer title="Więcej" subtitle="Pełna pogoda, profil sportowy, zdrowie oraz kontrola danych w jednym miejscu." maxWidth={1100}>
+      <Grid container spacing={2}>
+        {items.map((item, index) => (
+          <Grid item xs={12} sm={6} key={`${item.path}-${item.label}`}>
+            <PerformanceSurface interactive accent={index === 0} sx={{ height: '100%' }}>
+              <ButtonBase
+                onClick={() => navigate(item.path)}
+                sx={{ width: '100%', height: '100%', p: { xs: 2, md: 2.5 }, textAlign: 'left', alignItems: 'stretch' }}
+              >
+                <Stack direction="row" spacing={1.6} sx={{ width: '100%' }}>
+                  <Box
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      flexShrink: 0,
+                      display: 'grid',
+                      placeItems: 'center',
+                      borderRadius: 2,
+                      color: index === 0 ? '#fff' : 'primary.main',
+                      bgcolor: index === 0 ? 'primary.main' : 'rgba(255,107,53,0.09)',
+                    }}
+                  >
+                    {item.icon}
+                  </Box>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 760 }}>{item.label}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.35 }}>{item.description}</Typography>
+                  </Box>
+                  <ArrowForwardRoundedIcon sx={{ color: 'text.secondary', alignSelf: 'center' }} />
+                </Stack>
+              </ButtonBase>
+            </PerformanceSurface>
+          </Grid>
+        ))}
+      </Grid>
     </PageContainer>
   );
 }

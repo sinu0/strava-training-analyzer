@@ -13,6 +13,7 @@ export interface TodayActivity {
   avgPowerW?: number | null;
   trainingScore?: number | null;
   primaryBenefit?: string | null;
+  summaryPolyline?: string | null;
 }
 
 export interface TodayRecommendation {

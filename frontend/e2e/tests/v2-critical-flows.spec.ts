@@ -16,6 +16,7 @@ const activity = {
   avgSpeedMs: 8.5,
   avgPowerW: 210,
   avgHeartrate: 142,
+  summaryPolyline: '_p~iF~ps|U_ulLnnqC_mqNvxq`@',
   photoUrls: [],
   laps: [],
   metrics: {},
@@ -124,8 +125,16 @@ test.beforeEach(async ({ page }) => {
 });
 
 async function openApp(page: Page, path: string) {
-  await page.goto(path);
-  await page.locator('main').waitFor({ state: 'visible', timeout: 20_000 });
+  await page.goto(path, { waitUntil: 'domcontentloaded' });
+  try {
+    await page.locator('main').waitFor({ state: 'visible', timeout: 20_000 });
+  } catch {
+    // On a cold Vite start the dependency optimizer can replace a vendor chunk
+    // after the first navigation. A single reload is the same recovery the
+    // browser performs during development and keeps this baseline deterministic.
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.locator('main').waitFor({ state: 'visible', timeout: 20_000 });
+  }
 }
 
 test('Dzisiaj pokazuje jedną decyzję i status synchronizacji', async ({ page }) => {
@@ -133,23 +142,26 @@ test('Dzisiaj pokazuje jedną decyzję i status synchronizacji', async ({ page }
   const main = page.locator('main:visible');
   await expect(main.getByRole('heading', { name: 'Dzisiaj' }).first()).toBeVisible();
   await expect(main.getByText(/ENDURANCE/i).first()).toBeVisible();
+  await expect(main.getByLabel('Mapa trasy: Jazda kontrolna V2')).toBeVisible();
 });
 
 test('Historia prowadzi do lekkiego szczegółu aktywności', async ({ page }) => {
   await openApp(page, '/activities');
   await expect(page.locator('main:visible').getByText('Jazda kontrolna V2').first()).toBeVisible();
+  await expect(page.locator('main:visible').getByLabel('Mapa trasy: Jazda kontrolna V2')).toBeVisible();
   await openApp(page, `/activities/${activityId}`);
   await expect(page.locator('main:visible').getByText('Jazda kontrolna V2').first()).toBeVisible();
+  await expect(page.locator('main:visible').getByLabel('Mapa trasy: Jazda kontrolna V2')).toBeVisible();
 });
 
 test('Analiza otwiera podstawowy widok', async ({ page }) => {
   await openApp(page, '/analytics');
-  await expect(page.locator('main:visible').getByRole('heading', { name: 'Analiza' }).first()).toBeVisible();
+  await expect(page.locator('main:visible').getByRole('heading', { name: 'Laboratorium wydolności' }).first()).toBeVisible();
 });
 
 test('Plan otwiera kalendarz', async ({ page }) => {
   await openApp(page, '/training');
-  await expect(page.locator('main:visible').getByText(/Plan|Trening/i).first()).toBeVisible();
+  await expect(page.locator('main:visible').getByRole('heading', { name: 'Plan treningowy' }).first()).toBeVisible();
 });
 
 test('Pełny widok pogody pozostaje dostępny', async ({ page }) => {

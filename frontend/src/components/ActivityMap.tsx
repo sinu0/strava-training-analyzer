@@ -19,6 +19,9 @@ interface ActivityMapProps {
   lngStream?: number[] | null;
   summaryPolyline?: string | null;
   minHeight?: number;
+  interactive?: boolean;
+  showAttribution?: boolean;
+  preview?: boolean;
 }
 
 function MapLifecycleSync({ positions }: { positions: [number, number][] }) {
@@ -55,6 +58,9 @@ export default function ActivityMap({
   lngStream,
   summaryPolyline,
   minHeight = 300,
+  interactive = true,
+  showAttribution = interactive,
+  preview = false,
 }: ActivityMapProps) {
   const positions = useMemo(
     () => extractActivityRoutePositions({ geoJson, latStream, lngStream, summaryPolyline }),
@@ -82,7 +88,12 @@ export default function ActivityMap({
       sx={{
         height: minHeight > 0 ? minHeight : '100%',
         minHeight: minHeight > 0 ? minHeight : 0,
-        '.leaflet-container': { height: '100%', borderRadius: 1 },
+        '.leaflet-container': { height: '100%', borderRadius: preview ? 0 : 1 },
+        ...(preview ? {
+          '.leaflet-tile': {
+            filter: 'contrast(1.18) saturate(0.78) brightness(0.72)',
+          },
+        } : {}),
       }}
     >
       <MapContainer
@@ -90,12 +101,27 @@ export default function ActivityMap({
         zoom={13}
         style={{ height: '100%', width: '100%' }}
         preferCanvas={true}
+        zoomControl={interactive}
+        dragging={interactive}
+        touchZoom={interactive}
+        doubleClickZoom={interactive}
+        scrollWheelZoom={interactive}
+        boxZoom={interactive}
+        keyboard={interactive}
+        attributionControl={showAttribution}
       >
         <TileLayer
           attribution={MAP_TILE_CONFIG[DEFAULT_MAP_TILE_VARIANT].attribution}
           url={MAP_TILE_CONFIG[DEFAULT_MAP_TILE_VARIANT].url}
         />
-        <Polyline positions={positions} pathOptions={{ color: ROUTE_COLORS.path, weight: 4, opacity: 0.92 }} />
+        <Polyline
+          positions={positions}
+          pathOptions={{
+            color: ROUTE_COLORS.path,
+            weight: preview ? 4.5 : 4,
+            opacity: 0.96,
+          }}
+        />
         <MapLifecycleSync positions={positions} />
       </MapContainer>
     </Box>

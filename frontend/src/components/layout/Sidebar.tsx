@@ -5,6 +5,7 @@ import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import ScaleIcon from '@mui/icons-material/Scale';
 import SettingsIcon from '@mui/icons-material/Settings';
+import SpeedOutlinedIcon from '@mui/icons-material/SpeedOutlined';
 import TodayIcon from '@mui/icons-material/Today';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import {
@@ -16,6 +17,7 @@ import {
   Toolbar,
   Typography,
   Box,
+  Stack,
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -68,12 +70,23 @@ function NavButton({ item, selected, onClick }: { item: NavItem; selected: boole
       selected={selected}
       onClick={onClick}
       sx={{
-        mx: 1,
-        borderRadius: 2.5,
-        mb: 0.25,
-        py: 0.85,
+        mx: 1.25,
+        borderRadius: 2,
+        mb: 0.35,
+        py: 0.95,
+        position: 'relative',
         '&.Mui-selected': {
-          bgcolor: (theme) => theme.tokens.activeOverlay,
+          bgcolor: (theme) => alpha(theme.tokens.chart.primary, 0.115),
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            left: 0,
+            top: 9,
+            bottom: 9,
+            width: 3,
+            borderRadius: 4,
+            bgcolor: 'primary.main',
+          },
           '&:hover': { bgcolor: (theme) => alpha(theme.tokens.chart.primary, 0.16) },
         },
       }}
@@ -84,8 +97,8 @@ function NavButton({ item, selected, onClick }: { item: NavItem; selected: boole
       <ListItemText
         primary={item.label}
         primaryTypographyProps={{
-          fontSize: '0.9rem',
-          fontWeight: selected ? 600 : 400,
+          fontSize: '0.88rem',
+          fontWeight: selected ? 700 : 500,
         }}
       />
     </ListItemButton>
@@ -98,15 +111,15 @@ function GroupLabel({ label }: { label: string }) {
       variant="caption"
       sx={{
         display: 'block',
-        px: 2.5,
-        pt: 2,
+        px: 2.75,
+        pt: 2.25,
         pb: 0.5,
         fontSize: '0.68rem',
         fontWeight: 600,
         color: 'text.secondary',
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
-        opacity: 0.7,
+        opacity: 0.76,
       }}
     >
       {label}
@@ -147,28 +160,17 @@ export default function Sidebar({ width, open, onNavigateComplete }: SidebarProp
           boxSizing: 'border-box',
           borderRight: '1px solid',
           borderColor: (t) => t.tokens.surfaceBorder,
-          bgcolor: '#0d1117',
+          bgcolor: '#0A1017',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: "url('/illustrations/bg-sidebar.jpg')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            opacity: 0.14,
-            filter: 'saturate(0.6) contrast(0.85) brightness(0.65) blur(1px)',
-            transform: 'scale(1.04)',
-          },
           '&::after': {
             content: '""',
             position: 'absolute',
             inset: 0,
             background:
-              'linear-gradient(180deg, rgba(13,17,23,0.72) 0%, rgba(13,17,23,0.88) 45%, rgba(13,17,23,0.97) 100%), radial-gradient(circle at 20% 10%, rgba(78,205,196,0.06), transparent 32%), radial-gradient(circle at 90% 90%, rgba(255,107,53,0.05), transparent 30%)',
+              'radial-gradient(circle at 10% 5%, rgba(255,107,53,0.09), transparent 32%), radial-gradient(circle at 95% 85%, rgba(78,205,196,0.045), transparent 28%)',
             pointerEvents: 'none',
           },
           '& > *': {
@@ -179,21 +181,29 @@ export default function Sidebar({ width, open, onNavigateComplete }: SidebarProp
       }}
     >
       {/* Header */}
-      <Toolbar sx={{ gap: 1, px: 2 }}>
+      <Toolbar sx={{ gap: 1.25, px: 2.25, minHeight: 78 }}>
         <Box
-          component="img"
-          src="/illustrations/logo.png"
-          alt="Strava Analizator"
-          sx={{ width: 44, height: 44, objectFit: 'contain' }}
-        />
-        <Typography
-          variant="subtitle1"
-          color="primary"
-          noWrap
-          sx={{ fontWeight: 700, fontSize: '0.95rem' }}
+          sx={{
+            width: 40,
+            height: 40,
+            display: 'grid',
+            placeItems: 'center',
+            borderRadius: 2.2,
+            color: '#fff',
+            background: 'linear-gradient(135deg, #FC4C02, #FF7A3D)',
+            boxShadow: '0 10px 28px rgba(252,76,2,0.24)',
+          }}
         >
-          Strava Analizator
-        </Typography>
+          <SpeedOutlinedIcon />
+        </Box>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography color="text.primary" noWrap sx={{ fontWeight: 800, fontSize: '0.92rem', letterSpacing: '0.055em' }}>
+            TRAINING LAB
+          </Typography>
+          <Typography variant="caption" color="text.secondary" noWrap sx={{ fontSize: '0.68rem' }}>
+            cycling performance
+          </Typography>
+        </Box>
       </Toolbar>
 
       {/* Primary daily decision */}
@@ -229,8 +239,8 @@ export default function Sidebar({ width, open, onNavigateComplete }: SidebarProp
         sx={{
           borderTop: '1px solid',
           borderColor: (t) => t.tokens.surfaceBorder,
-          pb: 1,
-          pt: 0.5,
+          pb: 1.25,
+          pt: 0.75,
         }}
       >
         <List disablePadding>
@@ -240,6 +250,12 @@ export default function Sidebar({ width, open, onNavigateComplete }: SidebarProp
             onClick={() => navigateTo(BOTTOM_ITEM.path)}
           />
         </List>
+        <Stack direction="row" spacing={0.8} alignItems="center" sx={{ px: 2.75, pt: 0.75 }}>
+          <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: 'success.main', boxShadow: '0 0 10px rgba(63,185,80,0.55)' }} />
+          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.68rem' }}>
+            Local-only · dane prywatne
+          </Typography>
+        </Stack>
       </Box>
     </Drawer>
   );

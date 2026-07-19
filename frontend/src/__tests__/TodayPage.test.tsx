@@ -2,6 +2,10 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('../components/ActivityMap', () => ({
+  default: () => <div data-testid="today-route-map" />,
+}));
+
 vi.mock('../features/today/useToday', () => ({
   useToday: vi.fn(),
 }));
@@ -45,7 +49,7 @@ describe('TodayPage', () => {
     expect(screen.getByRole('button', { name: 'Otwórz pełną pogodę' })).toBeDefined();
   });
 
-  it('shows one recommendation together with its evidence', () => {
+  it('shows one recommendation together with its evidence', async () => {
     vi.mocked(useToday).mockReturnValue({
       data: {
         asOf: '2026-07-18',
@@ -59,7 +63,15 @@ describe('TodayPage', () => {
         },
         evidence: [{ code: 'LOAD', message: 'Obciążenie jest stabilne', source: 'daily_metrics', asOf: '2026-07-18' }],
         confidence: { level: 'HIGH', reasons: ['Aktualne źródła'] },
-        lastActivity: null,
+        lastActivity: {
+          id: 'activity-1',
+          sportType: 'cycling',
+          name: 'Morning Ride',
+          startedAt: '2026-07-18T07:01:16Z',
+          movingTimeSec: 7566,
+          distanceM: 57526,
+          summaryPolyline: '_p~iF~ps|U_ulLnnqC_mqNvxq`@',
+        },
         load: { ctl42: 42, atl7: 45, form: -3, asOf: '2026-07-18' },
         nextTraining: null,
         sync: { status: 'completed', imported: 1, skipped: 0 },
@@ -73,5 +85,7 @@ describe('TodayPage', () => {
     expect(screen.getByRole('heading', { name: 'ENDURANCE' })).toBeDefined();
     expect(screen.getByText('Spokojna jazda Z2.')).toBeDefined();
     expect(screen.getByText('Obciążenie jest stabilne')).toBeDefined();
+    expect(screen.getByLabelText('Mapa trasy: Morning Ride')).toBeDefined();
+    expect(await screen.findByTestId('today-route-map')).toBeDefined();
   });
 });

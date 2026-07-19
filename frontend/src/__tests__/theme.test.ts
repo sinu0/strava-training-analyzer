@@ -16,8 +16,8 @@ describe('theme', () => {
   });
 
   it('has correct background colors', () => {
-    expect(theme.palette.background.default).toBe('#0D1117');
-    expect(theme.palette.background.paper).toBe('#161B22');
+    expect(theme.palette.background.default).toBe('#080D13');
+    expect(theme.palette.background.paper).toBe('#111821');
   });
 
   it('includes semantic status, chart, sport, and weather token groups', () => {
@@ -32,8 +32,8 @@ describe('theme', () => {
   });
 
   it('keeps palette and shared neutrals aligned', () => {
-    expect(theme.palette.text.primary).toBe('#E6EDF3');
-    expect(theme.palette.text.secondary).toBe('#9DA5B0');
+    expect(theme.palette.text.primary).toBe('#F2F5F8');
+    expect(theme.palette.text.secondary).toBe('#98A4B3');
     expect(theme.palette.text.secondary).toBe(theme.tokens.status.neutral);
     expect(theme.palette.divider).toBe(theme.tokens.chart.grid);
   });

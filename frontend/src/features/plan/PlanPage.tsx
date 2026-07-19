@@ -1,7 +1,7 @@
 import AutoGraphOutlinedIcon from '@mui/icons-material/AutoGraphOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import FitnessCenterOutlinedIcon from '@mui/icons-material/FitnessCenterOutlined';
-import { Box, List, ListItem, ListItemText, Paper, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Grid, List, ListItem, ListItemText, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
@@ -11,6 +11,8 @@ import LoadingState from '@/components/common/LoadingState';
 import PageContainer from '@/components/common/PageContainer';
 import TrainingCalendar from '@/components/training/TrainingCalendar';
 import WorkoutLibrary from '@/components/training/WorkoutLibrary';
+import MetricReadout from '@/components/v2/MetricReadout';
+import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import { PMC_COLORS } from '@/utils/colors';
 
 import { useLoadScenario } from './useLoadScenario';
@@ -26,6 +28,7 @@ export default function PlanPage() {
   scenarioTo.setUTCDate(scenarioTo.getUTCDate() + 41);
   const to = params.get('to') ?? scenarioTo.toISOString().slice(0, 10);
   const scenario = useLoadScenario(from, to, tab === 'scenario');
+  const lastPoint = scenario.data?.points[scenario.data.points.length - 1];
 
   const changeTab = (next: PlanTab) => {
     const updated = new URLSearchParams(params);
@@ -33,20 +36,35 @@ export default function PlanPage() {
     setParams(updated);
   };
 
+  const changeRange = (key: 'from' | 'to', value: string) => {
+    const updated = new URLSearchParams(params);
+    updated.set('tab', 'scenario');
+    updated.set(key, value);
+    setParams(updated);
+  };
+
   return (
-    <PageContainer title="Plan" subtitle="Kalendarz, biblioteka treningów i jawny scenariusz przyszłego obciążenia." maxWidth={1320}>
-      <Paper sx={{ mb: 2.5, border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
+    <PageContainer title="Plan treningowy" subtitle="Zbuduj tydzień, wybierz jednostkę i zobacz matematyczny scenariusz obciążenia." maxWidth={1320}>
+      <PerformanceSurface sx={{ mb: 2.5 }}>
         <Tabs value={tab} onChange={(_, value: PlanTab) => changeTab(value)} variant="fullWidth">
           <Tab value="calendar" icon={<CalendarMonthOutlinedIcon />} iconPosition="start" label="Kalendarz" />
           <Tab value="library" icon={<FitnessCenterOutlinedIcon />} iconPosition="start" label="Biblioteka" />
           <Tab value="scenario" icon={<AutoGraphOutlinedIcon />} iconPosition="start" label="Scenariusz obciążenia" />
         </Tabs>
-      </Paper>
+      </PerformanceSurface>
 
       {tab === 'calendar' && <TrainingCalendar />}
       {tab === 'library' && <WorkoutLibrary />}
       {tab === 'scenario' && (
-        <Paper sx={{ p: { xs: 1.5, md: 2.5 }, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+        <PerformanceSurface accent sx={{ p: { xs: 1.5, md: 2.75 } }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} alignItems={{ sm: 'center' }} sx={{ mb: 2.5 }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="h6" fontWeight={780}>Scenariusz przyszłego obciążenia</Typography>
+              <Typography variant="body2" color="text.secondary">Zakres pozostaje w URL i może zostać odtworzony po powrocie.</Typography>
+            </Box>
+            <TextField size="small" type="date" label="Od" value={from} onChange={event => changeRange('from', event.target.value)} InputLabelProps={{ shrink: true }} />
+            <TextField size="small" type="date" label="Do" value={to} onChange={event => changeRange('to', event.target.value)} InputLabelProps={{ shrink: true }} />
+          </Stack>
           {scenario.isLoading ? <LoadingState message="Liczenie scenariusza…" /> : null}
           {scenario.isError ? <ErrorState message="Nie udało się policzyć scenariusza." onRetry={() => void scenario.refetch()} /> : null}
           {scenario.data?.availability === 'UNKNOWN' ? (
@@ -58,6 +76,13 @@ export default function PlanPage() {
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                 To scenariusz matematyczny CTL/ATL, a nie obietnica wyniku sportowego.
               </Typography>
+              {lastPoint ? (
+                <Grid container spacing={2} sx={{ mt: 1 }}>
+                  <Grid item xs={4}><MetricReadout label="CTL na końcu" value={lastPoint.ctl.toFixed(1)} tone="primary" /></Grid>
+                  <Grid item xs={4}><MetricReadout label="ATL na końcu" value={lastPoint.atl.toFixed(1)} tone="warning" /></Grid>
+                  <Grid item xs={4}><MetricReadout label="Forma" value={lastPoint.form.toFixed(1)} tone={lastPoint.form < -10 ? 'warning' : 'success'} /></Grid>
+                </Grid>
+              ) : null}
               <Box sx={{ height: 400, mt: 2 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={scenario.data.points}>
@@ -77,7 +102,7 @@ export default function PlanPage() {
               </List>
             </>
           ) : null}
-        </Paper>
+        </PerformanceSurface>
       )}
     </PageContainer>
   );

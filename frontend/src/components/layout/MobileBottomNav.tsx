@@ -36,16 +36,16 @@ export default function MobileBottomNav() {
       sx={{
         display: { xs: 'block', md: 'none' },
         position: 'fixed',
-        left: 12,
-        right: 12,
-        bottom: 12,
+        left: 8,
+        right: 8,
+        bottom: 8,
         zIndex: (theme) => theme.zIndex.appBar,
-        borderRadius: 4,
+        borderRadius: 3.25,
         border: '1px solid',
         borderColor: (theme) => theme.tokens.surfaceBorder,
         boxShadow: (theme) => theme.tokens.cardShadowHover,
-        bgcolor: (theme) => alpha(theme.palette.background.paper, 0.92),
-        backdropFilter: 'blur(18px)',
+        bgcolor: (theme) => alpha(theme.palette.background.paper, 0.95),
+        backdropFilter: 'blur(22px)',
         overflow: 'hidden',
       }}
     >
@@ -54,7 +54,7 @@ export default function MobileBottomNav() {
         value={resolveCurrentValue(location.pathname)}
         onChange={(_, nextValue) => navigate(nextValue)}
         sx={{
-          height: 66,
+          height: 64,
           bgcolor: 'transparent',
           '& .MuiBottomNavigationAction-root': {
             minWidth: 0,
@@ -68,6 +68,9 @@ export default function MobileBottomNav() {
           },
           '& .Mui-selected': {
             color: 'primary.main',
+            '& .MuiSvgIcon-root': {
+              filter: 'drop-shadow(0 0 8px rgba(255,107,53,0.32))',
+            },
           },
         }}
       >

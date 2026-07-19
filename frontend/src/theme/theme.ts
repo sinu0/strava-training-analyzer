@@ -3,15 +3,15 @@ import { createTheme, type Theme } from '@mui/material/styles';
 /* ── Custom design tokens ── */
 
 export const tokens = {
-  surfaceBorder: 'rgba(255,255,255,0.09)',
-  surfaceSubtle: 'rgba(255,255,255,0.03)',
-  surfaceStrongBorder: 'rgba(48,54,61,0.8)',
+  surfaceBorder: 'rgba(255,255,255,0.085)',
+  surfaceSubtle: 'rgba(255,255,255,0.025)',
+  surfaceStrongBorder: 'rgba(65,76,91,0.76)',
   hoverOverlay: 'rgba(255,255,255,0.04)',
   activeOverlay: 'rgba(255,107,53,0.10)',
-  surfaceElevated: '#1c2129',
-  surfaceMuted: '#21262D',
-  cardShadow: '0 1px 3px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.16)',
-  cardShadowHover: '0 4px 12px rgba(0,0,0,0.32), 0 2px 4px rgba(0,0,0,0.2)',
+  surfaceElevated: '#121923',
+  surfaceMuted: '#18212D',
+  cardShadow: '0 12px 34px rgba(0,0,0,0.18)',
+  cardShadowHover: '0 20px 48px rgba(0,0,0,0.28)',
   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
   status: {
     accent: '#FF6B35',
@@ -21,7 +21,7 @@ export const tokens = {
     warningStrong: '#E3B341',
     error: '#F85149',
     info: '#58A6FF',
-    neutral: '#9DA5B0',
+    neutral: '#98A4B3',
     muted: '#484F58',
     secondary: '#4ECDC4',
     highlight: '#BC8CFF',
@@ -33,10 +33,10 @@ export const tokens = {
     primary: '#FF6B35',
     secondary: '#4ECDC4',
     tertiary: '#58A6FF',
-    grid: '#30363D',
+    grid: '#27313D',
     tooltip: '#161B22',
-    tooltipText: '#E6EDF3',
-    tick: '#9DA5B0',
+    tooltipText: '#F2F5F8',
+    tick: '#98A4B3',
     surface: '#21262D',
     zone: {
       Z1: '#58A6FF',
@@ -118,14 +118,14 @@ const theme = createTheme({
     primary: { main: '#FF6B35' },
     secondary: { main: '#4ECDC4' },
     background: {
-      default: '#0D1117',
-      paper: '#161B22',
+      default: '#080D13',
+      paper: '#111821',
     },
     text: {
-      primary: '#E6EDF3',
-      secondary: '#9DA5B0',
+      primary: '#F2F5F8',
+      secondary: '#98A4B3',
     },
-    divider: '#30363D',
+    divider: '#27313D',
     success: { main: '#3FB950', light: '#56D364' },
     warning: { main: '#D29922', dark: '#E3B341' },
     error: { main: '#F85149' },
@@ -134,8 +134,8 @@ const theme = createTheme({
 
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-    h3: { fontWeight: 700, fontSize: 'clamp(1.5rem, 1.22rem + 1.1vw, 1.95rem)', letterSpacing: '-0.02em', lineHeight: 1.2 },
-    h4: { fontWeight: 700, fontSize: 'clamp(1.35rem, 1.12rem + 0.8vw, 1.7rem)', letterSpacing: '-0.01em', lineHeight: 1.25 },
+    h3: { fontWeight: 800, fontSize: 'clamp(1.75rem, 1.35rem + 1.35vw, 2.35rem)', letterSpacing: '-0.035em', lineHeight: 1.14 },
+    h4: { fontWeight: 800, fontSize: 'clamp(1.5rem, 1.18rem + 0.95vw, 1.95rem)', letterSpacing: '-0.025em', lineHeight: 1.2 },
     h5: { fontWeight: 600, fontSize: 'clamp(1.1rem, 1rem + 0.45vw, 1.35rem)', lineHeight: 1.3 },
     h6: { fontWeight: 600, lineHeight: 1.4 },
     subtitle1: { fontWeight: 500, lineHeight: 1.5 },
@@ -145,14 +145,20 @@ const theme = createTheme({
     caption: { fontSize: 'clamp(0.75rem, 0.72rem + 0.16vw, 0.82rem)', lineHeight: 1.45, letterSpacing: '0.01em' },
   },
 
-  shape: { borderRadius: 16 },
+  shape: { borderRadius: 14 },
 
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: '#0D1117',
-          scrollbarColor: '#30363D #0D1117',
+          backgroundColor: '#080D13',
+          backgroundImage: 'radial-gradient(circle at 72% -20%, rgba(255,107,53,0.055), transparent 30%)',
+          backgroundAttachment: 'fixed',
+          scrollbarColor: '#27313D #080D13',
+        },
+        '::selection': {
+          backgroundColor: 'rgba(255,107,53,0.32)',
+          color: '#fff',
         },
         '@keyframes sectionFadeInUp': {
           from: { opacity: 0, transform: 'translateY(8px)' },
@@ -187,6 +193,7 @@ const theme = createTheme({
           textTransform: 'none' as const,
           fontWeight: 600,
           transition: tokens.transition,
+          minHeight: 40,
         },
       },
     },
@@ -194,8 +201,8 @@ const theme = createTheme({
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
-          fontWeight: 500,
+          borderRadius: 999,
+          fontWeight: 650,
         },
       },
     },
@@ -207,6 +214,8 @@ const theme = createTheme({
           fontWeight: 500,
           letterSpacing: 0,
           minHeight: 40,
+          paddingLeft: 18,
+          paddingRight: 18,
         },
       },
     },
@@ -234,6 +243,18 @@ const theme = createTheme({
         tooltip: {
           borderRadius: 10,
           fontSize: '0.85rem',
+        },
+      },
+    },
+
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(255,255,255,0.018)',
+          borderRadius: 11,
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: 'rgba(255,255,255,0.22)',
+          },
         },
       },
     },
