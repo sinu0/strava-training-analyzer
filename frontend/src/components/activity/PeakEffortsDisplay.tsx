@@ -15,7 +15,12 @@ interface PeakColumnProps {
 
 function PeakColumn({ label, color, unit, values }: PeakColumnProps) {
   return (
-    <Grid item xs={12} sm={6} md={4}>
+    <Grid
+      size={{
+        xs: 12,
+        sm: 6,
+        md: 4
+      }}>
       <Typography sx={{ color, fontSize: '0.8rem', fontWeight: 700, mb: 1 }}>{label}</Typography>
       {Object.entries(values).map(([duration, value]) => (
         <Box

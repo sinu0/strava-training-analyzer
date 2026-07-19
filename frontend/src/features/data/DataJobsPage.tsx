@@ -51,23 +51,31 @@ export default function DataJobsPage() {
   return (
     <PageContainer title="Dane i zadania" subtitle="Kontroluj kompletność danych, import oraz bezpieczne przeliczanie metryk." maxWidth={1180}>
       <Grid container spacing={2.5}>
-        <Grid item xs={12} md={5}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 5
+          }}>
           <PerformanceSurface accent sx={{ p: 2.5, height: '100%' }}>
             <Stack direction="row" spacing={1} alignItems="center"><DataObjectOutlinedIcon color="primary" /><Typography variant="h6" fontWeight={750}>Jakość danych</Typography></Stack>
             {quality.isLoading ? <LoadingState message="Sprawdzanie jakości…" /> : null}
             {quality.isError ? <ErrorState message="Nie udało się pobrać jakości danych." onRetry={() => void quality.refetch()} /> : null}
             {quality.data ? (
               <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                <Grid item xs={6}><MetricReadout label="Ocenionych" value={`${quality.data.assessedActivities}/${quality.data.totalActivities}`} tone="primary" /></Grid>
-                <Grid item xs={6}><MetricReadout label="Dostępnych" value={quality.data.available} tone="success" /></Grid>
-                <Grid item xs={6}><MetricReadout label="Częściowych" value={quality.data.partial} tone="warning" /></Grid>
-                <Grid item xs={6}><MetricReadout label="Nieznanych" value={quality.data.unknown} /></Grid>
+                <Grid size={6}><MetricReadout label="Ocenionych" value={`${quality.data.assessedActivities}/${quality.data.totalActivities}`} tone="primary" /></Grid>
+                <Grid size={6}><MetricReadout label="Dostępnych" value={quality.data.available} tone="success" /></Grid>
+                <Grid size={6}><MetricReadout label="Częściowych" value={quality.data.partial} tone="warning" /></Grid>
+                <Grid size={6}><MetricReadout label="Nieznanych" value={quality.data.unknown} /></Grid>
               </Grid>
             ) : null}
           </PerformanceSurface>
         </Grid>
 
-        <Grid item xs={12} md={7}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 7
+          }}>
           <PerformanceSurface sx={{ p: 2.5, height: '100%' }}>
             <Stack direction="row" spacing={1} alignItems="center"><SyncOutlinedIcon color="primary" /><Typography variant="h6" fontWeight={750}>Uruchom zadanie</Typography></Stack>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Każde zadanie zapisuje etap, próbę i błąd. Import nie uruchomi się równolegle drugi raz.</Typography>
@@ -80,7 +88,7 @@ export default function DataJobsPage() {
         </Grid>
 
         {activeJob ? (
-          <Grid item xs={12}>
+          <Grid size={12}>
             <PerformanceSurface sx={{ p: 2.5 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
                 <Box><Typography variant="overline" color="text.secondary">{activeJob.jobType} · próba {activeJob.attempt}</Typography><Typography variant="h6" fontWeight={750}>{activeJob.stage}</Typography></Box>

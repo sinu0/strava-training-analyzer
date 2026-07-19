@@ -84,7 +84,13 @@ export default function HistoryPage() {
       return (
         <Grid container spacing={1.5}>
           {Array.from(grouped.entries()).map(([date, items]) => (
-            <Grid item xs={12} sm={6} lg={4} key={date}>
+            <Grid
+              key={date}
+              size={{
+                xs: 12,
+                sm: 6,
+                lg: 4
+              }}>
               <Paper sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 3, height: '100%' }}>
                 <Typography variant="overline" color="text.secondary">{new Date(date).toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}</Typography>
                 <Stack spacing={1} sx={{ mt: 1 }}>

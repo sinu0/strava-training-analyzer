@@ -45,7 +45,7 @@ export default function ElevationProfile({ points, onHover }: ElevationProfilePr
           margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
           onMouseMove={(e) => {
             if (onHover && e?.activeTooltipIndex != null) {
-              onHover(e.activeTooltipIndex);
+              onHover(Number(e.activeTooltipIndex));
             }
           }}
           onMouseLeave={() => onHover?.(null)}
@@ -71,10 +71,12 @@ export default function ElevationProfile({ points, onHover }: ElevationProfilePr
               border: `1px solid ${CHART_COLORS.grid}`,
               borderRadius: 8,
             }}
-            labelFormatter={(v) => formatDistance(v * 1000)}
-            formatter={(value: number, name: string) => {
-              if (name === 'elevation') return [`${Math.round(value)} m`, 'Wysokość'];
-              return [value, name];
+            labelFormatter={(value) => formatDistance(Number(value ?? 0) * 1000)}
+            formatter={(value, name) => {
+              const numericValue = Number(value ?? 0);
+              const seriesName = String(name ?? '');
+              if (seriesName === 'elevation') return [`${Math.round(numericValue)} m`, 'Wysokość'];
+              return [numericValue, seriesName];
             }}
           />
           <Area

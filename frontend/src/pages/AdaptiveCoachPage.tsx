@@ -6,7 +6,7 @@ import {
   CircularProgress,
   FormControl,
   FormControlLabel,
-  Grid2 as Grid,
+  Grid,
   IconButton,
   InputLabel,
   MenuItem,
@@ -150,7 +150,7 @@ export default function AdaptiveCoachPage() {
       setQueryAiInput(undefined);
       setQueryOverride(undefined);
     }
-  }, [quickMode]);
+  }, [fatigueState?.level, profile?.ftpWatts, quickMode, readiness]);
 
   return (
     <PageContainer

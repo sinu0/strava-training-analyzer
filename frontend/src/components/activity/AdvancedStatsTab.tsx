@@ -18,6 +18,8 @@ interface AdvancedStatsTabProps {
   activity: ActivityDetail;
 }
 
+const PEAK_DURATIONS = [1, 5, 30, 60, 300, 1200, 3600];
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <Box
@@ -115,9 +117,8 @@ export default function AdvancedStatsTab({ activity }: AdvancedStatsTabProps) {
   const hrStats = useMemo(() => hasHr ? computeQuartiles(activity.heartrateStream!) : null, [activity.heartrateStream, hasHr]);
   const cadStats = useMemo(() => hasCadence ? computeQuartiles(activity.cadenceStream!) : null, [activity.cadenceStream, hasCadence]);
 
-  const durations = [1, 5, 30, 60, 300, 1200, 3600];
-  const powerPeaks = useMemo(() => hasPower ? computePeaks(activity.powerStream!, durations) : [], [activity.powerStream, hasPower]);
-  const hrPeaks = useMemo(() => hasHr ? computePeaks(activity.heartrateStream!, durations) : [], [activity.heartrateStream, hasHr]);
+  const powerPeaks = useMemo(() => hasPower ? computePeaks(activity.powerStream!, PEAK_DURATIONS) : [], [activity.powerStream, hasPower]);
+  const hrPeaks = useMemo(() => hasHr ? computePeaks(activity.heartrateStream!, PEAK_DURATIONS) : [], [activity.heartrateStream, hasHr]);
 
   const powerHist = useMemo(() => hasPower ? buildHistogram(activity.powerStream!.filter(v => v > 0), 25) : [], [activity.powerStream, hasPower]);
   const hrHist = useMemo(() => hasHr ? buildHistogram(activity.heartrateStream!.filter(v => v > 0), 20) : [], [activity.heartrateStream, hasHr]);
@@ -157,13 +158,21 @@ export default function AdvancedStatsTab({ activity }: AdvancedStatsTabProps) {
         <Section title="Najlepsze wysiłki (Peak Efforts)">
           <Grid container spacing={3}>
             {powerPeaks.length > 0 && (
-              <Grid item xs={12} md={6}>
+              <Grid
+                size={{
+                  xs: 12,
+                  md: 6
+                }}>
                 <Typography sx={{ color: '#8B949E', fontSize: '0.8rem', mb: 1, fontWeight: 600 }}>⚡ Moc (W)</Typography>
                 {powerPeaks.map(p => <StatRow key={p.duration} label={p.duration} value={p.value} unit="W" />)}
               </Grid>
             )}
             {hrPeaks.length > 0 && (
-              <Grid item xs={12} md={6}>
+              <Grid
+                size={{
+                  xs: 12,
+                  md: 6
+                }}>
                 <Typography sx={{ color: '#8B949E', fontSize: '0.8rem', mb: 1, fontWeight: 600 }}>❤ Tętno (bpm)</Typography>
                 {hrPeaks.map(p => <StatRow key={p.duration} label={p.duration} value={p.value} unit="bpm" />)}
               </Grid>
@@ -171,12 +180,15 @@ export default function AdvancedStatsTab({ activity }: AdvancedStatsTabProps) {
           </Grid>
         </Section>
       )}
-
       {/* Quartile Analysis */}
       <Section title="Analiza statystyczna">
         <Grid container spacing={3}>
           {!!powerStats && (
-            <Grid item xs={12} md={4}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 4
+              }}>
               <Typography sx={{ color: '#FF6B35', fontSize: '0.8rem', mb: 1, fontWeight: 600 }}>⚡ Moc (W)</Typography>
               <StatRow label="Średnia" value={powerStats.mean} unit="W" />
               <StatRow label="Mediana" value={powerStats.median} unit="W" />
@@ -188,7 +200,11 @@ export default function AdvancedStatsTab({ activity }: AdvancedStatsTabProps) {
             </Grid>
           )}
           {!!hrStats && (
-            <Grid item xs={12} md={4}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 4
+              }}>
               <Typography sx={{ color: '#F85149', fontSize: '0.8rem', mb: 1, fontWeight: 600 }}>❤ Tętno (bpm)</Typography>
               <StatRow label="Średnia" value={hrStats.mean} unit="bpm" />
               <StatRow label="Mediana" value={hrStats.median} unit="bpm" />
@@ -200,7 +216,11 @@ export default function AdvancedStatsTab({ activity }: AdvancedStatsTabProps) {
             </Grid>
           )}
           {!!cadStats && (
-            <Grid item xs={12} md={4}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 4
+              }}>
               <Typography sx={{ color: '#4ECDC4', fontSize: '0.8rem', mb: 1, fontWeight: 600 }}>🔄 Kadencja (rpm)</Typography>
               <StatRow label="Średnia" value={cadStats.mean} unit="rpm" />
               <StatRow label="Mediana" value={cadStats.median} unit="rpm" />
@@ -211,13 +231,16 @@ export default function AdvancedStatsTab({ activity }: AdvancedStatsTabProps) {
           )}
         </Grid>
       </Section>
-
       {/* Distribution Histograms */}
       {(powerHist.length > 0 || hrHist.length > 0) && (
         <Section title="Rozkład danych">
           <Grid container spacing={3}>
             {powerHist.length > 0 && (
-              <Grid item xs={12} md={6}>
+              <Grid
+                size={{
+                  xs: 12,
+                  md: 6
+                }}>
                 <Typography sx={{ color: '#8B949E', fontSize: '0.75rem', mb: 1 }}>Rozkład mocy (W)</Typography>
                 <Box sx={{ height: 200 }}>
                   <ResponsiveContainer width="100%" height="100%">
@@ -233,7 +256,11 @@ export default function AdvancedStatsTab({ activity }: AdvancedStatsTabProps) {
               </Grid>
             )}
             {hrHist.length > 0 && (
-              <Grid item xs={12} md={6}>
+              <Grid
+                size={{
+                  xs: 12,
+                  md: 6
+                }}>
                 <Typography sx={{ color: '#8B949E', fontSize: '0.75rem', mb: 1 }}>Rozkład tętna (bpm)</Typography>
                 <Box sx={{ height: 200 }}>
                   <ResponsiveContainer width="100%" height="100%">
@@ -251,7 +278,6 @@ export default function AdvancedStatsTab({ activity }: AdvancedStatsTabProps) {
           </Grid>
         </Section>
       )}
-
       {/* Cardiac Drift */}
       {driftData.length > 2 && (
         <Section title="Dryfowanie sercowe (Cardiac Drift)">

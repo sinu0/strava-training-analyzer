@@ -1,4 +1,4 @@
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 
 import PageContainer from '@/components/common/PageContainer';
 import RouteElevationChart from '@/components/route-planner/RouteElevationChart';

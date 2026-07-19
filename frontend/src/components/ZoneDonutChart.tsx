@@ -69,7 +69,7 @@ export default function ZoneDonutChart({ data, title }: ZoneDonutChartProps) {
                 }}
                 labelStyle={{ color: CHART_COLORS.tooltipText }}
                 itemStyle={{ color: CHART_COLORS.tooltipText }}
-                formatter={(value: number) => [`${value.toFixed(1)}%`]}
+                formatter={(value) => [`${Number(value ?? 0).toFixed(1)}%`]}
               />
             </PieChart>
           </ResponsiveContainer>

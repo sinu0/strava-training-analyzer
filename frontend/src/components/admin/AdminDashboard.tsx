@@ -60,7 +60,11 @@ export default function AdminDashboard({
 
   return (
     <>
-      <Grid item xs={12} md={6}>
+      <Grid
+        size={{
+          xs: 12,
+          md: 6
+        }}>
         <DataCard title="Predykcje AI">
             <Box sx={{ py: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
@@ -167,8 +171,11 @@ export default function AdminDashboard({
           </Box>
         </DataCard>
       </Grid>
-
-      <Grid item xs={12} md={6}>
+      <Grid
+        size={{
+          xs: 12,
+          md: 6
+        }}>
         <DataCard title="Training Effects">
             <Box sx={{ py: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
@@ -245,8 +252,7 @@ export default function AdminDashboard({
             </Box>
           </DataCard>
         </Grid>
-
-      <Grid item xs={12}>
+      <Grid size={12}>
         <DataCard title="Informacje">
           <Stack spacing={1} sx={{ py: 1 }}>
             <Typography variant="body2" color="text.secondary">

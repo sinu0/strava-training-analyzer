@@ -125,7 +125,6 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
           Nie udalo sie pobrac aktualnych danych treningowych — uzupelnij recznie.
         </Alert>
       )}
-
       <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
         <Typography variant="subtitle2" color="text.secondary">
           {initialized ? (
@@ -151,7 +150,6 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
           {isPending ? 'Analizuje...' : result ? 'Odswiez prognoze' : 'Prognozuj forme'}
         </Button>
       </Stack>
-
       <Card>
         <CardHeader
           title="Dane treningowe (PMC)"
@@ -161,25 +159,41 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
         />
         <CardContent>
           <Grid container spacing={1.5}>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth size="small" type="number" label="CTL"
                 value={ctl} onChange={(e) => setCtl(Number(e.target.value))}
               />
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth size="small" type="number" label="ATL"
                 value={atl} onChange={(e) => setAtl(Number(e.target.value))}
               />
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth size="small" type="number" label="TSB"
                 value={tsb} onChange={(e) => setTsb(Number(e.target.value))}
               />
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth select size="small" label="Trend CTL"
                 value={ctlTrend}
@@ -191,7 +205,11 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
                 <option value="DOWN">DOWN</option>
               </TextField>
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth select size="small" label="Trend ATL"
                 value={fatigueTrend}
@@ -206,7 +224,6 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
           </Grid>
         </CardContent>
       </Card>
-
       <Card>
         <CardHeader
           title="Wskazniki wydajnosci i sygnaly recovery"
@@ -214,13 +231,21 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
         />
         <CardContent>
           <Grid container spacing={1.5}>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth size="small" type="number" label="FTP"
                 value={ftp} onChange={(e) => setFtp(Number(e.target.value))}
               />
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth select size="small" label="Trend FTP"
                 value={ftpTrend}
@@ -232,7 +257,11 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
                 <option value="DOWN">DOWN</option>
               </TextField>
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth select size="small" label="HRV Trend"
                 value={hrvTrend}
@@ -244,7 +273,11 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
                 <option value="DOWN">DOWN</option>
               </TextField>
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth select size="small" label="Rest HR"
                 value={rhrTrend}
@@ -256,7 +289,11 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
                 <option value="DOWN">DOWN</option>
               </TextField>
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth select size="small" label="Sen"
                 value={sleepQuality}
@@ -271,20 +308,17 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
           </Grid>
         </CardContent>
       </Card>
-
       {!!isError && (
         <Alert severity="error">
           {(error as Error)?.message ?? 'Blad podczas prognozowania formy.'}
         </Alert>
       )}
-
       {!!isPending && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 3 }}>
           <CircularProgress size={24} />
           <Typography color="text.secondary">Analizuje dane treningowe...</Typography>
         </Box>
       )}
-
       {!!result && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Card>
@@ -318,7 +352,11 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
           </Card>
 
           <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 6
+              }}>
               <Card>
                 <CardHeader
                   title="Gotowosc"
@@ -357,7 +395,11 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
               </Card>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 6
+              }}>
               <Card>
                 <CardHeader
                   title="Okno peak"
@@ -388,7 +430,11 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
               </Card>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 6
+              }}>
               <Card>
                 <CardHeader
                   title="Prognoza wydajnosci"
@@ -419,7 +465,11 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
               </Card>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 6
+              }}>
               <Card>
                 <CardHeader
                   title="Pewnosc prognozy"

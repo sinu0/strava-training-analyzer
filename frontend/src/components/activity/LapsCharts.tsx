@@ -136,6 +136,18 @@ function ProportionalLapChart({
     return () => ro.disconnect();
   }, []);
 
+  const handleMouseMove = useCallback((e: React.MouseEvent<SVGGElement>, datum: LapChartDatum) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setTooltip({ datum, x: e.clientX - rect.left, y: e.clientY - rect.top });
+    onBarHover?.(datum.midIndex);
+  }, [onBarHover]);
+
+  const handleMouseLeave = useCallback(() => {
+    setTooltip(null);
+    onBarHover?.(null);
+  }, [onBarHover]);
+
   const hasMetricData = data.some((lap) => lap[metric.key] != null);
   if (!hasMetricData) return null;
 
@@ -189,18 +201,6 @@ function ProportionalLapChart({
     const fillPath = `${strokePath} L ${toX(last[0])} ${MARGIN.top + contentH} L ${toX(d0[0])} ${MARGIN.top + contentH} Z`;
     return { strokePath, fillPath, altMin, altMax, toAltY };
   })();
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<SVGGElement>, datum: LapChartDatum) => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setTooltip({ datum, x: e.clientX - rect.left, y: e.clientY - rect.top });
-    onBarHover?.(datum.midIndex);
-  }, [onBarHover]);
-
-  const handleMouseLeave = useCallback(() => {
-    setTooltip(null);
-    onBarHover?.(null);
-  }, [onBarHover]);
 
   return (
     <Box

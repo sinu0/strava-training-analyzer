@@ -96,7 +96,13 @@ export default function OverviewTab({ activity }: OverviewTabProps) {
           <SectionTitle>Metryki treningowe</SectionTitle>
           <Grid container spacing={2}>
             {simpleMetrics.map(([key, val]) => (
-              <Grid item xs={6} sm={4} md={3} key={key}>
+              <Grid
+                key={key}
+                size={{
+                  xs: 6,
+                  sm: 4,
+                  md: 3
+                }}>
                 <MetricCard
                   label={METRIC_LABELS[key] ?? key}
                   value={typeof val === 'number' ? val.toFixed(1) : String(val)}
@@ -106,7 +112,6 @@ export default function OverviewTab({ activity }: OverviewTabProps) {
           </Grid>
         </Box>
       )}
-
       {/* Peak Efforts */}
       {!!hasPeakEfforts && (
         <Box
@@ -122,7 +127,6 @@ export default function OverviewTab({ activity }: OverviewTabProps) {
           <PeakEffortsDisplay data={peakEffortsMetric} />
         </Box>
       )}
-
       {/* Power Curve */}
       {!!hasPowerCurve && (
         <Box
@@ -138,7 +142,6 @@ export default function OverviewTab({ activity }: OverviewTabProps) {
           <PowerCurveChart data={powerCurveMetric as { efforts: Record<number, number> }} />
         </Box>
       )}
-
       {/* Zone Distribution */}
       {!!hasZones && (
         <Box
@@ -154,7 +157,6 @@ export default function OverviewTab({ activity }: OverviewTabProps) {
           <ActivityZonesBar zonesJson={zonesMetric as string | Record<string, number>} />
         </Box>
       )}
-
       {/* Empty state */}
       {simpleMetrics.length === 0 && !hasPowerCurve && !hasZones && !hasPeakEfforts && (
         <Box sx={{ textAlign: 'center', py: 6 }}>

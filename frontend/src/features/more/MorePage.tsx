@@ -26,7 +26,12 @@ export default function MorePage() {
     <PageContainer title="Więcej" subtitle="Pełna pogoda, profil sportowy, zdrowie oraz kontrola danych w jednym miejscu." maxWidth={1100}>
       <Grid container spacing={2}>
         {items.map((item, index) => (
-          <Grid item xs={12} sm={6} key={`${item.path}-${item.label}`}>
+          <Grid
+            key={`${item.path}-${item.label}`}
+            size={{
+              xs: 12,
+              sm: 6
+            }}>
             <PerformanceSurface interactive accent={index === 0} sx={{ height: '100%' }}>
               <ButtonBase
                 onClick={() => navigate(item.path)}

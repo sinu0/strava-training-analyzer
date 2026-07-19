@@ -133,7 +133,7 @@ const theme = createTheme({
   },
 
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     h3: { fontWeight: 800, fontSize: 'clamp(1.75rem, 1.35rem + 1.35vw, 2.35rem)', letterSpacing: '-0.035em', lineHeight: 1.14 },
     h4: { fontWeight: 800, fontSize: 'clamp(1.5rem, 1.18rem + 0.95vw, 1.95rem)', letterSpacing: '-0.025em', lineHeight: 1.2 },
     h5: { fontWeight: 600, fontSize: 'clamp(1.1rem, 1rem + 0.45vw, 1.35rem)', lineHeight: 1.3 },
@@ -155,6 +155,11 @@ const theme = createTheme({
           backgroundImage: 'radial-gradient(circle at 72% -20%, rgba(255,107,53,0.055), transparent 30%)',
           backgroundAttachment: 'fixed',
           scrollbarColor: '#27313D #080D13',
+          scrollPaddingBottom: 'calc(88px + env(safe-area-inset-bottom))',
+        },
+        ':focus-visible': {
+          outline: '3px solid rgba(88,166,255,0.9)',
+          outlineOffset: 3,
         },
         '::selection': {
           backgroundColor: 'rgba(255,107,53,0.32)',
@@ -163,6 +168,14 @@ const theme = createTheme({
         '@keyframes sectionFadeInUp': {
           from: { opacity: 0, transform: 'translateY(8px)' },
           to: { opacity: 1, transform: 'translateY(0)' },
+        },
+        '@media (prefers-reduced-motion: reduce)': {
+          '*, *::before, *::after': {
+            animationDuration: '0.01ms !important',
+            animationIterationCount: '1 !important',
+            scrollBehavior: 'auto !important',
+            transitionDuration: '0.01ms !important',
+          },
         },
       },
     },

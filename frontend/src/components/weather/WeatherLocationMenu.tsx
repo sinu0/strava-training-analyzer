@@ -193,7 +193,6 @@ export default function WeatherLocationMenu({
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             fullWidth
-            autoFocus
             InputProps={{
               endAdornment: searching ? <CircularProgress size={16} /> : null,
             }}

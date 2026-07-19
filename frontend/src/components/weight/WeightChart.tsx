@@ -38,7 +38,7 @@ export default function WeightChart({
   }));
 
   return (
-    <Grid item xs={12}>
+    <Grid size={12}>
       <ChartContainer
         title="Historia wagi"
         empty={chartData.length === 0}
@@ -73,7 +73,7 @@ export default function WeightChart({
                 contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
                 labelStyle={CHART_TOOLTIP_LABEL_STYLE}
                 itemStyle={CHART_TOOLTIP_ITEM_STYLE}
-                formatter={(value: number | string) => [`${Number(value).toFixed(1)} kg`, 'Waga']}
+                formatter={(value) => [`${Number(value ?? 0).toFixed(1)} kg`, 'Waga']}
                 labelFormatter={(value) => new Date(String(value)).toLocaleDateString('pl-PL')}
               />
               {!!goal && (

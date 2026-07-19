@@ -177,7 +177,11 @@ export default function WeatherPage() {
 
         <Grid container spacing={2.5}>
           {/* Główna kolumna — mapa i forecast */}
-          <Grid item xs={12} xl={8}>
+          <Grid
+            size={{
+              xs: 12,
+              xl: 8
+            }}>
             <Stack spacing={2.5}>
               <Section
                 title="Punkt fokusowy"
@@ -217,7 +221,11 @@ export default function WeatherPage() {
           </Grid>
 
           {/* Boczna szyna — decyzja, algorytm, akcje */}
-          <Grid item xs={12} xl={4}>
+          <Grid
+            size={{
+              xs: 12,
+              xl: 4
+            }}>
             <Stack
               spacing={2.5}
               sx={{
@@ -267,7 +275,11 @@ export default function WeatherPage() {
                       </Alert>
                     )}
                     <Grid container spacing={1.5}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid
+                        size={{
+                          xs: 12,
+                          sm: 6
+                        }}>
                         <Box
                           sx={{
                             p: 1.5,
@@ -288,7 +300,11 @@ export default function WeatherPage() {
                           </Typography>
                         </Box>
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid
+                        size={{
+                          xs: 12,
+                          sm: 6
+                        }}>
                         <Box
                           sx={{
                             p: 1.5,

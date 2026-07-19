@@ -120,7 +120,7 @@ export default function YearMonthSidebar({ externalYM, onNavigate }: Props) {
       dragOffsetRef.current = 0;
       setDragOffset(0);
     }
-  }, [items]);
+  }, [animateToIdx, centeredKey, items]);
 
   const commitSnap = useCallback((velocity = 0) => {
     const its = itemsRef.current;

@@ -324,19 +324,31 @@ export default function HealthPage() {
             <CircularProgress />
           </Box>
           <Grid container spacing={2.5}>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <SkeletonCard height={240} />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 4
+              }}>
               <SkeletonCard height={220} />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 4
+              }}>
               <SkeletonCard height={220} />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 4
+              }}>
               <SkeletonCard height={220} />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <SkeletonCard height={360} />
             </Grid>
           </Grid>
@@ -430,7 +442,12 @@ export default function HealthPage() {
 
           <Grid container spacing={2.5}>
             {groupCards.map((group) => (
-              <Grid item xs={12} md={4} key={group.title}>
+              <Grid
+                key={group.title}
+                size={{
+                  xs: 12,
+                  md: 4
+                }}>
                 <Section title={group.title} accentColor={group.accentColor}>
                   {group.items}
                 </Section>
@@ -443,7 +460,11 @@ export default function HealthPage() {
           <SwipeableContent onSwipeLeft={nextTab} onSwipeRight={prevTab}>
             {tab === 0 && (
               <Grid container spacing={2.5}>
-                <Grid item xs={12} md={6}>
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 6
+                  }}>
                   <Section title="HRV (RMSSD) — 30 dni" accentColor={STATUS_COLORS.successLight}>
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
@@ -479,7 +500,11 @@ export default function HealthPage() {
                     </Box>
                   </Section>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 6
+                  }}>
                   <Section title="Tętno spoczynkowe — 30 dni" accentColor={STATUS_COLORS.error}>
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
@@ -520,7 +545,11 @@ export default function HealthPage() {
 
             {tab === 1 && (
               <Grid container spacing={2.5}>
-                <Grid item xs={12} md={6}>
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 6
+                  }}>
                   <Section title="Wynik snu — 30 dni" accentColor={STATUS_COLORS.info}>
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
@@ -554,7 +583,11 @@ export default function HealthPage() {
                     </Box>
                   </Section>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 6
+                  }}>
                   <Section title="Fazy snu — 30 dni" accentColor={STATUS_COLORS.highlight}>
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
@@ -581,7 +614,11 @@ export default function HealthPage() {
 
             {tab === 2 && (
               <Grid container spacing={2.5}>
-                <Grid item xs={12} md={6}>
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 6
+                  }}>
                   <Section title="Body Battery — 30 dni" accentColor={STATUS_COLORS.warningStrong}>
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
@@ -615,7 +652,11 @@ export default function HealthPage() {
                     </Box>
                   </Section>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 6
+                  }}>
                   <Section title="Stres — 30 dni" accentColor={STATUS_COLORS.warning}>
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">

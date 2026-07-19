@@ -119,8 +119,14 @@ const PowerCurveChart = memo(function PowerCurveChart({
              contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
              labelStyle={CHART_TOOLTIP_LABEL_STYLE}
              itemStyle={CHART_TOOLTIP_ITEM_STYLE}
-             formatter={(value: number, name: string) => [`${value} W`, series.find((item) => item.key === name)?.label ?? name]}
-             labelFormatter={(v) => DURATION_LABELS[v] ?? `${v}s`}
+             formatter={(value, name) => {
+               const seriesName = String(name ?? '');
+               return [`${Number(value ?? 0)} W`, series.find((item) => item.key === seriesName)?.label ?? seriesName];
+             }}
+             labelFormatter={(value) => {
+               const seconds = Number(value ?? 0);
+               return DURATION_LABELS[seconds] ?? `${seconds}s`;
+             }}
            />
            <Legend
              wrapperStyle={CHART_LEGEND_STYLE}

@@ -103,11 +103,14 @@ export default function AiV2Page() {
         value={tab}
         onChange={setTab}
       />
-
       {tab === 0 && (
         <Grid container spacing={3}>
           {/* Status + Knowledge */}
-          <Grid item xs={12} md={4}>
+          <Grid
+            size={{
+              xs: 12,
+              md: 4
+            }}>
             <Stack spacing={2}>
               <Section title="Status modułu AI">
                 <AiStatusWidget status={aiStatus} />
@@ -167,7 +170,11 @@ export default function AiV2Page() {
           </Grid>
 
           {/* Prediction panel */}
-          <Grid item xs={12} md={8}>
+          <Grid
+            size={{
+              xs: 12,
+              md: 8
+            }}>
             <Section title="Nowa predykcja V2">
               {!!isDisabled && (
                 <Alert severity="warning" sx={{ mb: 2 }}>
@@ -228,7 +235,7 @@ export default function AiV2Page() {
 
           {/* Results */}
           {results.length > 0 && (
-            <Grid item xs={12}>
+            <Grid size={12}>
               <Section title={`Wyniki (${results.length})`}>
                 <Stack spacing={2}>
                   {results.map((prediction) => (
@@ -240,7 +247,6 @@ export default function AiV2Page() {
           )}
         </Grid>
       )}
-
       {tab === 1 && (
         <Box>
           <Box sx={{ mb: 2 }}>

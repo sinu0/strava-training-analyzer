@@ -128,7 +128,6 @@ export default function PlanOptimizer() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {!!isLoadingState && <LinearProgress sx={{ borderRadius: 2 }} />}
-
       <Card>
         <CardHeader
           title="Parametry planu"
@@ -138,49 +137,77 @@ export default function PlanOptimizer() {
         />
         <CardContent>
           <Grid container spacing={1.5}>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth size="small" type="number" label="Tygodnie"
                 value={weeks} onChange={(e) => setWeeks(Number(e.target.value))}
                 error={!weeksValid} helperText={!weeksValid ? '1-16' : undefined}
               />
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth size="small" type="number" label="Dni/tydz."
                 value={daysPerWeek} onChange={(e) => setDaysPerWeek(Number(e.target.value))}
                 error={!daysValid} helperText={!daysValid ? '3-7' : undefined}
               />
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth size="small" type="number" label="TSS/tydz."
                 value={weeklyTss} onChange={(e) => setWeeklyTss(Number(e.target.value))}
                 error={!tssValid} helperText={!tssValid ? '100-1500' : undefined}
               />
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth size="small" type="number" label="CTL"
                 value={currentCtl} onChange={(e) => setCurrentCtl(Number(e.target.value))}
                 error={!ctlValid}
               />
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth size="small" type="number" label="ATL"
                 value={currentAtl} onChange={(e) => setCurrentAtl(Number(e.target.value))}
                 error={!atlValid}
               />
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth size="small" type="number" label="FTP"
                 value={ftp} onChange={(e) => setFtp(Number(e.target.value))}
                 error={!ftpValid} helperText={!ftpValid ? '100-500' : undefined}
               />
             </Grid>
-            <Grid item xs={4} sm={3}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 3
+              }}>
               <TextField
                 fullWidth size="small" type="date" label="Data eventu"
                 value={eventDate}
@@ -188,7 +215,11 @@ export default function PlanOptimizer() {
                 slotProps={{ inputLabel: { shrink: true } }}
               />
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid
+              size={{
+                xs: 4,
+                sm: 2
+              }}>
               <TextField
                 fullWidth select size="small" label="Priorytet"
                 value={goalPriority} onChange={(e) => setGoalPriority(e.target.value)}
@@ -202,7 +233,6 @@ export default function PlanOptimizer() {
           </Grid>
         </CardContent>
       </Card>
-
       <Button
         variant="contained"
         startIcon={isPending ? <CircularProgress size={16} color="inherit" /> : <PlayArrowIcon />}
@@ -212,13 +242,11 @@ export default function PlanOptimizer() {
       >
         {isPending ? 'Optymalizuje...' : 'Generuj zoptymalizowany plan'}
       </Button>
-
       {!!isError && (
         <Alert severity="error">
           {(error as Error)?.message ?? 'Blad podczas optymalizacji planu.'}
         </Alert>
       )}
-
       {!!result && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {/* Apply success */}
@@ -263,7 +291,12 @@ export default function PlanOptimizer() {
                 {result.plans.map((plan) => {
                   const isSelected = plan.type === selectedType;
                   return (
-                    <Grid item xs={12} md={4} key={plan.type}>
+                    <Grid
+                      key={plan.type}
+                      size={{
+                        xs: 12,
+                        md: 4
+                      }}>
                       <Box
                         onClick={() => { setSelectedType(plan.type); setApplied(false); }}
                         sx={{

@@ -38,7 +38,7 @@ export default function MobileBottomNav() {
         position: 'fixed',
         left: 8,
         right: 8,
-        bottom: 8,
+        bottom: 'max(8px, env(safe-area-inset-bottom))',
         zIndex: (theme) => theme.zIndex.appBar,
         borderRadius: 3.25,
         border: '1px solid',

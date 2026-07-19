@@ -85,7 +85,7 @@ export default function ActivityStreamsChart({
               border: `1px solid ${CHART_COLORS.grid}`,
               borderRadius: 8,
             }}
-            labelFormatter={formatTime}
+            labelFormatter={(label) => formatTime(Number(label ?? 0))}
           />
 
           {!!altitudeStream && (

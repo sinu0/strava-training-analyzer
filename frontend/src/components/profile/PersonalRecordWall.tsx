@@ -4,7 +4,7 @@ import {
   Card,
   CardContent,
   Chip,
-  Grid2 as Grid,
+  Grid,
   Typography,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';

@@ -50,7 +50,7 @@ const ZoneDistributionChart = memo(function ZoneDistributionChart({
               contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
               labelStyle={CHART_TOOLTIP_LABEL_STYLE}
               itemStyle={CHART_TOOLTIP_ITEM_STYLE}
-              formatter={(value: number) => [`${value} min`, 'Czas']}
+              formatter={(value) => [`${Number(value ?? 0)} min`, 'Czas']}
             />
             <Bar dataKey="minutes" radius={[4, 4, 0, 0]}>
               {chartData.map((entry) => (

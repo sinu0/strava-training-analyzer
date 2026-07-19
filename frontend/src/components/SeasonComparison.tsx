@@ -26,7 +26,11 @@ export default function SeasonComparison() {
   return (
     <Box>
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={6}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 6
+          }}>
           <Typography variant="subtitle2" gutterBottom>Okres 1</Typography>
           <DateRangePicker
             startDate={period1.from}
@@ -34,7 +38,11 @@ export default function SeasonComparison() {
             onChange={(from, to) => setPeriod1({ from, to })}
           />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 6
+          }}>
           <Typography variant="subtitle2" gutterBottom>Okres 2</Typography>
           <DateRangePicker
             startDate={period2.from}
@@ -43,7 +51,6 @@ export default function SeasonComparison() {
           />
         </Grid>
       </Grid>
-
       {p1 && p2 ? (
         <Grid container spacing={2}>
           {[
@@ -52,7 +59,12 @@ export default function SeasonComparison() {
             { label: 'Czas', v1: formatDuration(p1.totalTimeSec), v2: formatDuration(p2.totalTimeSec) },
             { label: 'Wzniesienie', v1: `${Math.round(p1.totalElevationM)} m`, v2: `${Math.round(p2.totalElevationM)} m` },
           ].map(({ label, v1, v2 }) => (
-            <Grid item xs={6} md={3} key={label}>
+            <Grid
+              key={label}
+              size={{
+                xs: 6,
+                md: 3
+              }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="caption" color="text.secondary">{label}</Typography>
                 <Typography variant="body1">{v1}</Typography>

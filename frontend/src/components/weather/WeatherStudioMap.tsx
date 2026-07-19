@@ -52,13 +52,14 @@ export default function WeatherStudioMap({
         style={{ width: '100%', height: '100%' }}
       >
         <TileLayer
+          key="base-map"
           attribution='&copy; OpenStreetMap'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <ClickHandler onSelectPoint={onSelectPoint} />
+        <ClickHandler key="click-handler" onSelectPoint={onSelectPoint} />
         {locations.map((location) => (
           <CircleMarker
-            key={location.id}
+            key={`${location.id ?? location.name}-${location.latitude}-${location.longitude}`}
             center={[location.latitude, location.longitude]}
             radius={location.active ? 8 : 6}
             pathOptions={{
@@ -77,6 +78,7 @@ export default function WeatherStudioMap({
           />
         ))}
         <CircleMarker
+          key={`selected-${selectedPoint.lat}-${selectedPoint.lon}`}
           center={[selectedPoint.lat, selectedPoint.lon]}
           radius={10}
           pathOptions={{

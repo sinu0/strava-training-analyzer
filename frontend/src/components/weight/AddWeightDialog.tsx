@@ -44,7 +44,6 @@ export default function AddWeightDialog({
           onChange={(event) => setValue('weightKg', event.target.value)}
           inputProps={{ step: '0.1', min: '30', max: '300' }}
           fullWidth
-          autoFocus
         />
         <TextField
           label="Data"

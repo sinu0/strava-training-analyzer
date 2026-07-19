@@ -147,7 +147,13 @@ export default function DashboardPage() {
       <NudgeBanner />
       <Grid container spacing={{ xs: 2, md: 2.5 }}>
         {/* LEFT SIDEBAR — Context widgets */}
-        <Grid item xs={12} md={6} xl={3} order={{ xs: 3, xl: 1 }}>
+        <Grid
+          order={{ xs: 3, xl: 1 }}
+          size={{
+            xs: 12,
+            md: 6,
+            xl: 3
+          }}>
           <Stack spacing={1.5} sx={{ position: { xs: 'static', xl: 'sticky' }, top: { xl: 24 }, alignSelf: 'flex-start' }}>
             {widgetVisible('weather') && <WeatherMiniWidget gradient={weatherGradient} onOpen={() => navigate('/weather')} artTestId="dashboard-widget-art-weather" />}
             {widgetVisible('readiness') && <ReadinessWidget readiness={readiness} onSave={handleCheckInSave} isSaving={checkInSaving} />}
@@ -162,7 +168,12 @@ export default function DashboardPage() {
         </Grid>
 
         {/* CENTER — Decision + PMC + Latest Activity */}
-        <Grid item xs={12} xl={6} order={{ xs: 1, xl: 2 }}>
+        <Grid
+          order={{ xs: 1, xl: 2 }}
+          size={{
+            xs: 12,
+            xl: 6
+          }}>
           <Stack spacing={2.5}>
             <DailyDecisionHeroCard decision={decision} isLoading={isDecisionLoading} onStartWorkout={() => navigate('/training')} />
             <CoachWidget />
@@ -220,7 +231,13 @@ export default function DashboardPage() {
         </Grid>
 
         {/* RIGHT SIDEBAR — FTP + W/kg */}
-        <Grid item xs={12} md={6} xl={3} order={{ xs: 2, xl: 3 }}>
+        <Grid
+          order={{ xs: 2, xl: 3 }}
+          size={{
+            xs: 12,
+            md: 6,
+            xl: 3
+          }}>
           <Stack spacing={1.5} sx={{ position: { xs: 'static', xl: 'sticky' }, top: { xl: 24 }, alignSelf: 'flex-start' }}>
             {!!ftpProgress && (
               <Paper sx={{ ...surfaceSx, p: 1.75, bgcolor: alphaColor(PMC_COLORS.CTL, 0.06) }}>

@@ -116,27 +116,43 @@ const WeeklySummaryCard = memo(function WeeklySummaryCard({
 }: WeeklySummaryCardProps) {
   return (
     <Grid container spacing={2}>
-      <Grid item xs={6} md={3}>
+      <Grid
+        size={{
+          xs: 6,
+          md: 3
+        }}>
         <MetricTile
           label="Dystans"
           value={summary ? formatDistance(summary.totalDistanceM) : '-'}
           icon={<DirectionsBikeIcon fontSize="small" />}
         />
       </Grid>
-      <Grid item xs={6} md={3}>
+      <Grid
+        size={{
+          xs: 6,
+          md: 3
+        }}>
         <MetricTile
           label="Czas"
           value={summary ? formatDuration(summary.totalTimeSec) : '-'}
           icon={<TimerIcon fontSize="small" />}
         />
       </Grid>
-      <Grid item xs={6} md={3}>
+      <Grid
+        size={{
+          xs: 6,
+          md: 3
+        }}>
         <TssTile
           tss={summary ? Math.round(summary.totalTss) : '-'}
           optimalLoad={optimalLoad}
         />
       </Grid>
-      <Grid item xs={6} md={3}>
+      <Grid
+        size={{
+          xs: 6,
+          md: 3
+        }}>
         <MetricTile
           label="Wzniesienie"
           value={summary ? `${Math.round(summary.totalElevationM)} m` : '-'}

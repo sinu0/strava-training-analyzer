@@ -1,6 +1,6 @@
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { Box, IconButton, Typography, Grid2 as Grid } from '@mui/material';
+import { Box, IconButton, Typography, Grid } from '@mui/material';
 import { useState, useMemo } from 'react';
 
 import CalendarDayCell from './CalendarDayCell';

@@ -43,7 +43,6 @@ export default function WeightGoalDialog({
           onChange={(event) => setValue('targetWeightKg', event.target.value)}
           inputProps={{ step: '0.1', min: '30', max: '300' }}
           fullWidth
-          autoFocus
         />
         <TextField
           label="Data docelowa"

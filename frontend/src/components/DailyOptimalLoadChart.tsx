@@ -176,7 +176,7 @@ const DailyOptimalLoadChart = memo(function DailyOptimalLoadChart({
               contentStyle={{ backgroundColor: CHART_COLORS.tooltip, border: `1px solid ${CHART_COLORS.grid}`, borderRadius: 8 }}
               labelStyle={{ color: CHART_COLORS.tooltipText, fontWeight: 600 }}
               itemStyle={{ color: CHART_COLORS.tickText, fontSize: 12 }}
-              formatter={(value: number, name: string) => {
+              formatter={(value, name) => {
                 const labels: Record<string, string> = {
                   tss: 'TSS dzienny',
                   projectedTss: 'Projekcja TSS',
@@ -185,10 +185,11 @@ const DailyOptimalLoadChart = memo(function DailyOptimalLoadChart({
                   dangerLine: 'Próg ryzyka',
                   ctl: 'CTL (forma)',
                 };
-                return [value, labels[name] ?? name];
+                const seriesName = String(name ?? '');
+                return [Number(value ?? 0), labels[seriesName] ?? seriesName];
               }}
-              labelFormatter={(label: string) => {
-                const d = new Date(label + 'T00:00:00');
+              labelFormatter={(label) => {
+                const d = new Date(`${String(label ?? '')}T00:00:00`);
                 return d.toLocaleDateString('pl-PL', { weekday: 'short', day: 'numeric', month: 'long' });
               }}
             />

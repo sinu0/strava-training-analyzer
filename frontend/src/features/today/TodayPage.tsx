@@ -83,9 +83,12 @@ export default function TodayPage() {
           {data.confidence.reasons.join(' · ')}
         </Alert>
       )}
-
       <Grid container spacing={2.5}>
-        <Grid item xs={12} lg={8}>
+        <Grid
+          size={{
+            xs: 12,
+            lg: 8
+          }}>
           <PerformanceSurface
             accent
             sx={{
@@ -126,7 +129,11 @@ export default function TodayPage() {
           </PerformanceSurface>
         </Grid>
 
-        <Grid item xs={12} lg={4}>
+        <Grid
+          size={{
+            xs: 12,
+            lg: 4
+          }}>
           <PerformanceSurface sx={{ p: 2.5, height: '100%' }}>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
               <InfoOutlinedIcon color="primary" />
@@ -149,7 +156,11 @@ export default function TodayPage() {
           </PerformanceSurface>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 4
+          }}>
           <PerformanceSurface sx={{ p: 0, height: '100%' }}>
             <Box sx={{ p: 2.25 }}>
               <Stack direction="row" spacing={1} alignItems="center">
@@ -179,7 +190,11 @@ export default function TodayPage() {
           </PerformanceSurface>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 4
+          }}>
           <PerformanceSurface sx={{ p: 2.25, height: '100%' }}>
             <Stack direction="row" spacing={1} alignItems="center">
               <DataUsageOutlinedIcon color="primary" />
@@ -195,7 +210,11 @@ export default function TodayPage() {
           </PerformanceSurface>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 4
+          }}>
           <PerformanceSurface sx={{ p: 2.25, height: '100%' }}>
             <Stack direction="row" spacing={1} alignItems="center">
               <EventOutlinedIcon color="primary" />
@@ -212,7 +231,7 @@ export default function TodayPage() {
           </PerformanceSurface>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid size={12}>
           <PerformanceSurface sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
             <CloudOutlinedIcon color="primary" />
             <Box sx={{ flex: 1, minWidth: 220 }}>

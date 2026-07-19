@@ -55,9 +55,11 @@ export default function WeeklyLoadBarChart({ data, optimalLoad }: WeeklyLoadBarC
               border: `1px solid ${CHART_COLORS.grid}`,
               borderRadius: 8,
             }}
-            formatter={(value: number, name: string) => {
-              if (name === 'TSS') return [`${value}`, 'TSS'];
-              return [value, name];
+            formatter={(value, name) => {
+              const seriesName = String(name ?? '');
+              const numericValue = Number(value ?? 0);
+              if (seriesName === 'TSS') return [`${numericValue}`, 'TSS'];
+              return [numericValue, seriesName];
             }}
           />
           {optMin != null && optMax != null && (

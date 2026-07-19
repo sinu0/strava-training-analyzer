@@ -381,7 +381,6 @@ export default function ProfilePage() {
         <DialogTitle>Edytuj FTP</DialogTitle>
         <DialogContent>
           <TextField
-            autoFocus
             label="FTP (W)"
             type="number"
             fullWidth
@@ -415,7 +414,6 @@ export default function ProfilePage() {
         <DialogTitle>Edytuj LTHR</DialogTitle>
         <DialogContent>
           <TextField
-            autoFocus
             label="LTHR (bpm)"
             type="number"
             fullWidth
@@ -450,7 +448,6 @@ export default function ProfilePage() {
         <DialogTitle>Edytuj HRmax</DialogTitle>
         <DialogContent>
           <TextField
-            autoFocus
             label="HRmax (bpm)"
             type="number"
             fullWidth

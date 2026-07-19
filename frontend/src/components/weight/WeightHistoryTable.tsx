@@ -13,17 +13,18 @@ export default function WeightHistoryTable({
 }: WeightHistoryTableProps) {
   const [page, setPage] = useState(1);
 
+  const reversedHistory = useMemo(() => [...history].reverse(), [history]);
+
   if (history.length === 0) {
     return null;
   }
 
-  const reversedHistory = useMemo(() => [...history].reverse(), [history]);
   const pageSize = 10;
   const pageCount = Math.max(1, Math.ceil(reversedHistory.length / pageSize));
   const pageItems = reversedHistory.slice((page - 1) * pageSize, page * pageSize);
 
   return (
-    <Grid item xs={12}>
+    <Grid size={12}>
       <Section title="Pomiary">
         <Stack spacing={2}>
           <Box sx={{ maxHeight: 360, overflowY: 'auto' }}>

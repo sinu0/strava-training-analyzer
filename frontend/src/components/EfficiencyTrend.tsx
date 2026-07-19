@@ -14,14 +14,6 @@ interface EfficiencyTrendProps {
 const EfficiencyTrend = memo(function EfficiencyTrend({
   data,
 }: EfficiencyTrendProps) {
-  if (!data.length) {
-    return (
-      <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-        Brak danych efektywności.
-      </Typography>
-    );
-  }
-
   const chartData = useMemo(
     () =>
       data.map((d, i) => ({
@@ -31,6 +23,14 @@ const EfficiencyTrend = memo(function EfficiencyTrend({
       })),
     [data],
   );
+
+  if (!data.length) {
+    return (
+      <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+        Brak danych efektywności.
+      </Typography>
+    );
+  }
 
   return (
     <Box sx={{ width: '100%', height: 400 }}>
@@ -57,7 +57,7 @@ const EfficiencyTrend = memo(function EfficiencyTrend({
             contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
             labelStyle={CHART_TOOLTIP_LABEL_STYLE}
             itemStyle={CHART_TOOLTIP_ITEM_STYLE}
-            formatter={(value: number) => [value.toFixed(3), 'EF']}
+            formatter={(value) => [Number(value ?? 0).toFixed(3), 'EF']}
             labelFormatter={(i) => {
               const d = chartData[Number(i)];
               return d ? new Date(d.date).toLocaleDateString('pl-PL') : '';

@@ -120,9 +120,9 @@ vi.mock('@/components/route-planner/RouteMap', () => ({
     onSelectAlternative: (index: number) => void;
   }) => (
     <div>
-      <div data-testid="route-map" onClick={() => onAddWaypoint([50.06, 19.94])}>
+      <button type="button" data-testid="route-map" onClick={() => onAddWaypoint([50.06, 19.94])}>
         MapMock
-      </div>
+      </button>
       {generatedAlternatives.length > 0 && (
         <div>
           <div>{generatedAlternatives[selectedAlternativeIndex]?.sourceName}</div>

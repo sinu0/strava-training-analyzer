@@ -54,6 +54,6 @@ describe('ActivityMap', () => {
     const styles = window.getComputedStyle(shell);
 
     expect(styles.height).toBe('100%');
-    expect(styles.minHeight).toBe('0');
+    expect(styles.minHeight).toBe('0px');
   });
 });

@@ -125,6 +125,8 @@ export function AppUiProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appUiReducer, initialState);
   const activeQueryCount = useOptionalIsFetching();
   const isGlobalLoading = state.manualLoadingCount > 0 || activeQueryCount > 0;
+  const currentNotification = state.current;
+  const notificationQueue = state.queue;
 
   const notify = useCallback((message: string, severity: NotificationSeverity = 'info') => {
     notificationId += 1;
@@ -144,12 +146,12 @@ export function AppUiProvider({ children }: { children: ReactNode }) {
   }, [notify]);
 
   useEffect(() => {
-    if (state.current || state.queue.length === 0) {
+    if (currentNotification || notificationQueue.length === 0) {
       return;
     }
 
     dispatch({ type: 'show-next-notification' });
-  }, [state.current, state.queue]);
+  }, [currentNotification, notificationQueue]);
 
   const handleCloseNotification = useCallback(() => {
     dispatch({ type: 'close-notification' });

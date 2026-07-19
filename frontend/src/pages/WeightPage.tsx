@@ -128,16 +128,28 @@ export default function WeightPage() {
         ]}
       >
         <Grid container spacing={3}>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <SkeletonCard height={220} />
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid
+            size={{
+              xs: 12,
+              md: 4
+            }}>
             <SkeletonCard height={260} />
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid
+            size={{
+              xs: 12,
+              md: 4
+            }}>
             <SkeletonCard height={260} />
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid
+            size={{
+              xs: 12,
+              md: 4
+            }}>
             <SkeletonCard height={260} />
           </Grid>
         </Grid>
@@ -196,7 +208,7 @@ export default function WeightPage() {
         }}
       >
         <Grid container spacing={3}>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Section title="Stan dziś" subtitle="Najważniejszy status: aktualna waga, tempo zmian i cel." accentColor="primary.main">
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
@@ -235,7 +247,6 @@ export default function WeightPage() {
           <WeightHistoryTable history={history} />
         </Grid>
       </PullToRefreshPanel>
-
       <AddWeightDialog
         dialog={addWeightDialog}
         pending={addWeight.isPending}

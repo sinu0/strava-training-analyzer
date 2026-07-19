@@ -119,7 +119,11 @@ export default function WeightOverviewCards({
 
   return (
     <>
-      <Grid item xs={12} md={4}>
+      <Grid
+        size={{
+          xs: 12,
+          md: 4
+        }}>
         <Section title="Aktualna waga">
           <Box sx={{ textAlign: 'center', py: 1 }}>
             <Box
@@ -163,8 +167,11 @@ export default function WeightOverviewCards({
           </Box>
         </Section>
       </Grid>
-
-      <Grid item xs={12} md={4}>
+      <Grid
+        size={{
+          xs: 12,
+          md: 4
+        }}>
         <Section
           title="Cel wagowy"
           action={goal ? (
@@ -258,8 +265,11 @@ export default function WeightOverviewCards({
           )}
         </Section>
       </Grid>
-
-      <Grid item xs={12} md={4}>
+      <Grid
+        size={{
+          xs: 12,
+          md: 4
+        }}>
         <Section title="Zapotrzebowanie kaloryczne">
           {dailyCaloricNeed != null && goal ? (
             <Box sx={{ py: 1 }}>
@@ -364,8 +374,12 @@ export default function WeightOverviewCards({
           )}
         </Section>
       </Grid>
-
-      <Grid item xs={12} sm={6} md={3}>
+      <Grid
+        size={{
+          xs: 12,
+          sm: 6,
+          md: 3
+        }}>
         <Section title="Kalorie z treningów (7 dni)">
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Typography variant="h5" sx={{ fontWeight: 700, color: STATUS_COLORS.warning }}>
@@ -379,8 +393,12 @@ export default function WeightOverviewCards({
           </Box>
         </Section>
       </Grid>
-
-      <Grid item xs={12} sm={6} md={3}>
+      <Grid
+        size={{
+          xs: 12,
+          sm: 6,
+          md: 3
+        }}>
         <Section title="Zalecane spożycie">
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Typography variant="h5" sx={{ fontWeight: 700, color: STATUS_COLORS.success }}>
@@ -394,8 +412,12 @@ export default function WeightOverviewCards({
           </Box>
         </Section>
       </Grid>
-
-      <Grid item xs={12} sm={6} md={3}>
+      <Grid
+        size={{
+          xs: 12,
+          sm: 6,
+          md: 3
+        }}>
         <Section title="Tygodniowa zmiana wagi">
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
@@ -420,8 +442,12 @@ export default function WeightOverviewCards({
           </Box>
         </Section>
       </Grid>
-
-      <Grid item xs={12} sm={6} md={3}>
+      <Grid
+        size={{
+          xs: 12,
+          sm: 6,
+          md: 3
+        }}>
         <Section title="Pewność modelu">
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Chip

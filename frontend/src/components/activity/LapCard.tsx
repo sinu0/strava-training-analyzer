@@ -386,16 +386,18 @@ export default function LapCard({
                       color: '#E6EDF3',
                       padding: '4px 8px',
                     }}
-                    formatter={(value: number, name: string) => {
-                      switch (name) {
-                        case 'power': return [`${Math.round(value)} W`, 'Moc'];
-                        case 'hr': return [`${Math.round(value)} bpm`, 'Tętno'];
-                        case 'speed': return [`${value.toFixed(1)} km/h`, 'Prędkość'];
-                        case 'alt': return [`${Math.round(value)} m`, 'Wysokość'];
-                        default: return [value, name];
+                    formatter={(value, name) => {
+                      const numericValue = Number(value ?? 0);
+                      const seriesName = String(name ?? '');
+                      switch (seriesName) {
+                        case 'power': return [`${Math.round(numericValue)} W`, 'Moc'];
+                        case 'hr': return [`${Math.round(numericValue)} bpm`, 'Tętno'];
+                        case 'speed': return [`${numericValue.toFixed(1)} km/h`, 'Prędkość'];
+                        case 'alt': return [`${Math.round(numericValue)} m`, 'Wysokość'];
+                        default: return [numericValue, seriesName];
                       }
                     }}
-                    labelFormatter={(v: number) => `${v.toFixed(1)} min`}
+                    labelFormatter={(value) => `${Number(value ?? 0).toFixed(1)} min`}
                   />
 
                   {/* Elevation area (background layer) */}

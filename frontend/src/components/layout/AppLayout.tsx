@@ -47,6 +47,27 @@ export default function AppLayout() {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Box
+        component="a"
+        href="#main-content"
+        sx={{
+          position: 'fixed',
+          left: 16,
+          top: 12,
+          zIndex: (currentTheme) => currentTheme.zIndex.tooltip + 1,
+          px: 2,
+          py: 1,
+          borderRadius: 2,
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText',
+          fontWeight: 800,
+          textDecoration: 'none',
+          transform: 'translateY(-160%)',
+          '&:focus': { transform: 'translateY(0)' },
+        }}
+      >
+        Przejdź do treści
+      </Box>
       <Snackbar
         open={showStravaConnected}
         autoHideDuration={5000}
@@ -79,6 +100,8 @@ export default function AppLayout() {
         <TopBar onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
         <Box
           component="main"
+          id="main-content"
+          tabIndex={-1}
           sx={{
             flexGrow: 1,
             position: 'relative',

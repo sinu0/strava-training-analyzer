@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { useState } from 'react';
 
 import AdaptiveTrainingPanel from '../components/AdaptiveTrainingPanel';

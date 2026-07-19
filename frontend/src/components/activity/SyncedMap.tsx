@@ -16,6 +16,8 @@ interface SyncedMapProps {
   selection: BrushRange | null;
 }
 
+const EMPTY_STREAM: number[] = [];
+
 function FitBounds({ bounds }: { bounds: LatLngBoundsExpression }) {
   const map = useMap();
   useEffect(() => {
@@ -25,17 +27,8 @@ function FitBounds({ bounds }: { bounds: LatLngBoundsExpression }) {
 }
 
 export default function SyncedMap({ latStream, lngStream, powerStream, hoverIndex, selection }: SyncedMapProps) {
-  if (!latStream || !lngStream || latStream.length < 2) {
-    return (
-      <Box sx={{ height: 350, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Typography color="text.secondary">Brak danych GPS</Typography>
-      </Box>
-    );
-  }
-
-  // After the null check above, latStream and lngStream are guaranteed non-null
-  const lat = latStream;
-  const lng = lngStream;
+  const lat = latStream ?? EMPTY_STREAM;
+  const lng = lngStream ?? EMPTY_STREAM;
 
   // Build a sampled route and sampled power values (when available)
   const sampled = useMemo(() => {
@@ -56,7 +49,7 @@ export default function SyncedMap({ latStream, lngStream, powerStream, hoverInde
     }
 
     return { positions, powerSamples, indices };
-  }, [lat, lng, powerStream]);
+  }, [lat, lng]);
 
   // now populate powerSamples based on provided powerStream (matching sampled indices)
   const sampledWithPower = useMemo(() => {
@@ -139,6 +132,14 @@ export default function SyncedMap({ latStream, lngStream, powerStream, hoverInde
     }
     return points;
   }, [selection, lat, lng]);
+
+  if (lat.length < 2 || lng.length < 2) {
+    return (
+      <Box sx={{ height: 350, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Typography color="text.secondary">Brak danych GPS</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ height: 350, '.leaflet-container': { height: '100%', borderRadius: '8px' } }}>

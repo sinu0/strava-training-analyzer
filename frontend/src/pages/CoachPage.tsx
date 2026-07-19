@@ -1,6 +1,6 @@
 import { AutoAwesome, Bolt, FitnessCenter, Hotel, Psychology, SelfImprovement } from '@mui/icons-material';
 import {
-  Box, Button, Chip, Divider, Grid2 as Grid, Paper, Skeleton, Stack, Typography,
+  Box, Button, Chip, Divider, Grid, Paper, Skeleton, Stack, Typography,
 } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';

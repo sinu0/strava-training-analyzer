@@ -320,7 +320,11 @@ export default function AnalyticsPage() {
                 <DailyOptimalLoadChart data={dailyOptimalLoad ?? []} />
               </Section>
               <Grid container spacing={2.5}>
-                <Grid item xs={12} md={7}>
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 7
+                  }}>
                   <Section
                     title="Obciążenie tygodniowe"
                     subtitle="Tygodniowe TSS względem bezpiecznego zakresu."
@@ -329,7 +333,11 @@ export default function AnalyticsPage() {
                     <OptimalLoadChart data={weeklyOptimalLoad ?? []} />
                   </Section>
                 </Grid>
-                <Grid item xs={12} md={5}>
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 5
+                  }}>
                   <Section
                     title="Strefy mocy"
                     subtitle="Czas spędzony w strefach dla wybranego okresu."
@@ -345,12 +353,20 @@ export default function AnalyticsPage() {
           {tab === 3 && (
             <Stack spacing={2.5}>
               <Grid container spacing={2.5}>
-                <Grid item xs={12} md={6}>
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 6
+                  }}>
                   <Section title="Trend FTP" subtitle="Szacowane FTP w czasie" accentColor={CHART_COLORS.primary}>
                     <FtpTrendChart data={ftpTrend ?? []} />
                   </Section>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 6
+                  }}>
                   <Section title="Efektywność (EF)" subtitle="Wydajność tlenowa w czasie" accentColor={CHART_COLORS.secondary}>
                     <EfficiencyTrend data={efTrend ?? []} />
                   </Section>

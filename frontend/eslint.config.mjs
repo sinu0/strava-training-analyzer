@@ -1,8 +1,10 @@
 import importPlugin from 'eslint-plugin-import';
+import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
 import reactPlugin from 'eslint-plugin-react';
+import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import tsParser from '@typescript-eslint/parser';
 
-const leakedRenderRule = ['warn', { validStrategies: ['coerce', 'ternary'] }];
+const leakedRenderRule = ['error', { validStrategies: ['coerce', 'ternary'] }];
 
 export default [
   {
@@ -22,7 +24,9 @@ export default [
     },
     plugins: {
       import: importPlugin,
+      'jsx-a11y': jsxA11yPlugin,
       react: reactPlugin,
+      'react-hooks': reactHooksPlugin,
     },
     settings: {
       react: {
@@ -36,6 +40,9 @@ export default [
       },
     },
     rules: {
+      ...jsxA11yPlugin.flatConfigs.recommended.rules,
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'error',
       'import/order': ['error', {
         groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index'], 'type'],
         pathGroups: [
@@ -54,7 +61,7 @@ export default [
         },
       }],
       'react/jsx-no-leaked-render': leakedRenderRule,
-      'react/no-array-index-key': 'warn',
+      'react/no-array-index-key': 'error',
     },
   },
   {

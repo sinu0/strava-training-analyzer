@@ -78,12 +78,17 @@ export default function AnalysisPage() {
       return (
         <Grid container spacing={2}>
           {[comparison.data.period1, comparison.data.period2].map((period, index) => (
-            <Grid item xs={12} md={6} key={period.from}>
+            <Grid
+              key={period.from}
+              size={{
+                xs: 12,
+                md: 6
+              }}>
               <PerformanceSurface accent={index === 0} sx={{ p: { xs: 2, md: 2.75 }, height: '100%' }}>
                 <Typography variant="overline" color="text.secondary">{index === 0 ? 'Wybrany okres' : 'Poprzedni okres'}</Typography>
                 <Typography variant="h6" fontWeight={750}>{period.from} — {period.to}</Typography>
                 <Grid container spacing={2.25} sx={{ mt: 0.75 }}>
-                  <Grid item xs={6}>
+                  <Grid size={6}>
                     <MetricReadout
                       icon={<DirectionsBikeOutlinedIcon />}
                       label="Aktywności"
@@ -92,7 +97,7 @@ export default function AnalysisPage() {
                       tone={index === 0 ? 'primary' : undefined}
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={6}>
                     <MetricReadout
                       icon={<StraightenOutlinedIcon />}
                       label="Dystans"
@@ -100,10 +105,10 @@ export default function AnalysisPage() {
                       hint={index === 0 ? changeLabel(period.totalDistanceM, comparison.data.period2.totalDistanceM) : undefined}
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={6}>
                     <MetricReadout icon={<TimerOutlinedIcon />} label="Czas" value={formatSummary(period.totalTimeSec, 'time')} />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={6}>
                     <MetricReadout icon={<LandscapeOutlinedIcon />} label="Przewyższenie" value={formatSummary(period.totalElevationM, 'elevation')} />
                   </Grid>
                 </Grid>

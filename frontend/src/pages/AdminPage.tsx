@@ -194,7 +194,7 @@ export default function AdminPage() {
     <PageContainer title="Ustawienia" subtitle="Konfiguracja: integracje, sync i dane oraz przetwarzanie." breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Ustawienia' }]}>
       <AdminGroup title="Integracje" subtitle="Połączenia z usługami zewnętrznymi i stan autoryzacji." icon={<LinkIcon />} defaultExpanded={true}>
         <Grid container spacing={3}>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <StravaConfigSection
               configLoading={configLoading}
               stravaConfig={stravaConfig}
@@ -216,10 +216,13 @@ export default function AdminPage() {
           </Grid>
         </Grid>
       </AdminGroup>
-
       <AdminGroup title="Sync i dane" subtitle="Synchronizacja, naprawy danych oraz przebudowa historii i map." icon={<SyncProblemIcon />} defaultExpanded={true}>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+          <Grid
+            size={{
+              xs: 12,
+              md: 6
+            }}>
             <SyncStatusSection
               syncStatus={syncStatus} syncLoading={syncLoading} isSyncing={isSyncing}
               isRateLimited={isRateLimited} rateLimitCountdown={rateLimitCountdown.label}
@@ -236,7 +239,11 @@ export default function AdminPage() {
               onUpdateAutoSyncInterval={(minutes) => updateAutoSyncConfig.mutate(minutes)}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid
+            size={{
+              xs: 12,
+              md: 6
+            }}>
             <Stack spacing={3}>
               <AdminActionSection title="Heatmapa" subtitle="Przebuduj warstwę tras po większym imporcie lub czyszczeniu danych." pending={rebuildHeatmap.isPending} success={rebuildHeatmap.isSuccess} idleLabel="Przebuduj heatmapę" pendingLabel="Przebudowywanie…" successLabel="Gotowe" onClick={() => rebuildHeatmap.mutate()} />
               <AdminActionSection title="Historia FTP" subtitle="Przelicz historię FTP na podstawie wszystkich aktywności." pending={rebuildFtpHistory.isPending} success={rebuildFtpHistory.isSuccess} idleLabel="Odbuduj historię FTP" pendingLabel="Przeliczanie…" successLabel="Historia FTP gotowa" onClick={() => rebuildFtpHistory.mutate()} />
@@ -244,10 +251,13 @@ export default function AdminPage() {
           </Grid>
         </Grid>
       </AdminGroup>
-
       <AdminGroup title="Przetwarzanie" subtitle="Zadania tła związane z pogodą, AI i automatyzacją systemu." icon={<SettingsSuggestIcon />} defaultExpanded={true}>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+          <Grid
+            size={{
+              xs: 12,
+              md: 6
+            }}>
             <WeatherJobSection
               weatherJobStatus={weatherJobStatus} weatherLocations={weatherLocations}
               refreshWeatherPending={refreshWeather.isPending} refreshAllWeatherPending={refreshAllWeather.isPending}
@@ -263,7 +273,6 @@ export default function AdminPage() {
           />
         </Grid>
       </AdminGroup>
-
       <AdminGroup title="Sprzęt" subtitle="Zarządzaj rowerem i komponentami — śledź przebieg i terminy wymian." icon={<SettingsSuggestIcon />} defaultExpanded={true}>
         <EquipmentSection />
       </AdminGroup>

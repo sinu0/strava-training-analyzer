@@ -262,8 +262,8 @@ export default function FtpProgressCard({ data, powerCurve, weightKg }: FtpProgr
                   border: `1px solid ${CHART_COLORS.grid}`,
                   borderRadius: 8,
                 }}
-                formatter={(value: number) => [`${value} W`, 'FTP']}
-                labelFormatter={(v) => new Date(v).toLocaleDateString('pl-PL')}
+                formatter={(value) => [`${Number(value ?? 0)} W`, 'FTP']}
+                labelFormatter={(value) => new Date(String(value ?? '')).toLocaleDateString('pl-PL')}
               />
               <Area
                 type="monotone"

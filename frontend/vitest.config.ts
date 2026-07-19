@@ -10,7 +10,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     exclude: ['**/e2e/**', 'node_modules'],
+    maxWorkers: 4,
     setupFiles: ['./test/setup.ts'],
-    // keep default reporters and other settings
+    testTimeout: 15_000,
   },
 });

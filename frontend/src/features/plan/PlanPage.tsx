@@ -52,7 +52,6 @@ export default function PlanPage() {
           <Tab value="scenario" icon={<AutoGraphOutlinedIcon />} iconPosition="start" label="Scenariusz obciążenia" />
         </Tabs>
       </PerformanceSurface>
-
       {tab === 'calendar' && <TrainingCalendar />}
       {tab === 'library' && <WorkoutLibrary />}
       {tab === 'scenario' && (
@@ -78,9 +77,9 @@ export default function PlanPage() {
               </Typography>
               {lastPoint ? (
                 <Grid container spacing={2} sx={{ mt: 1 }}>
-                  <Grid item xs={4}><MetricReadout label="CTL na końcu" value={lastPoint.ctl.toFixed(1)} tone="primary" /></Grid>
-                  <Grid item xs={4}><MetricReadout label="ATL na końcu" value={lastPoint.atl.toFixed(1)} tone="warning" /></Grid>
-                  <Grid item xs={4}><MetricReadout label="Forma" value={lastPoint.form.toFixed(1)} tone={lastPoint.form < -10 ? 'warning' : 'success'} /></Grid>
+                  <Grid size={4}><MetricReadout label="CTL na końcu" value={lastPoint.ctl.toFixed(1)} tone="primary" /></Grid>
+                  <Grid size={4}><MetricReadout label="ATL na końcu" value={lastPoint.atl.toFixed(1)} tone="warning" /></Grid>
+                  <Grid size={4}><MetricReadout label="Forma" value={lastPoint.form.toFixed(1)} tone={lastPoint.form < -10 ? 'warning' : 'success'} /></Grid>
                 </Grid>
               ) : null}
               <Box sx={{ height: 400, mt: 2 }}>

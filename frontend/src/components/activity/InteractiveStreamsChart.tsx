@@ -157,7 +157,7 @@ export default function InteractiveStreamsChart({
                 borderRadius: 8,
                 fontSize: 12,
               }}
-              labelFormatter={formatTime}
+              labelFormatter={(label) => formatTime(Number(label ?? 0))}
             />
 
             {!!altitudeStream && (

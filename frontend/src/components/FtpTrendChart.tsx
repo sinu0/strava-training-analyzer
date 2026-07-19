@@ -14,14 +14,6 @@ interface FtpTrendChartProps {
 const FtpTrendChart = memo(function FtpTrendChart({
   data,
 }: FtpTrendChartProps) {
-  if (!data.length) {
-    return (
-      <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-        Brak danych trendu FTP.
-      </Typography>
-    );
-  }
-
   const chartData = useMemo(
     () =>
       data.map((d) => ({
@@ -30,6 +22,14 @@ const FtpTrendChart = memo(function FtpTrendChart({
       })),
     [data],
   );
+
+  if (!data.length) {
+    return (
+      <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+        Brak danych trendu FTP.
+      </Typography>
+    );
+  }
 
   return (
     <Box sx={{ width: '100%', height: 400 }}>
@@ -52,8 +52,8 @@ const FtpTrendChart = memo(function FtpTrendChart({
             contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
             labelStyle={CHART_TOOLTIP_LABEL_STYLE}
             itemStyle={CHART_TOOLTIP_ITEM_STYLE}
-            formatter={(value: number) => [`${value} W`, 'FTP']}
-            labelFormatter={(v) => new Date(v).toLocaleDateString('pl-PL')}
+            formatter={(value) => [`${Number(value ?? 0)} W`, 'FTP']}
+            labelFormatter={(value) => new Date(String(value ?? '')).toLocaleDateString('pl-PL')}
           />
           <Line
             type="monotone"

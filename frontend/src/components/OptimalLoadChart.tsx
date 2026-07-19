@@ -165,13 +165,14 @@ const OptimalLoadChart = memo(function OptimalLoadChart({
               contentStyle={{ backgroundColor: CHART_COLORS.tooltip, border: `1px solid ${CHART_COLORS.grid}`, borderRadius: 8 }}
               labelStyle={{ color: CHART_COLORS.tooltipText }}
               itemStyle={{ color: CHART_COLORS.tickText, fontSize: 12 }}
-              formatter={(value: number, name: string) => {
+              formatter={(value, name) => {
                 const labels: Record<string, string> = {
                   tss: 'TSS tygodniowy',
                   optimalMin: 'Min. optymalny',
                   optimalMax: 'Max. optymalny',
                 };
-                return [value, labels[name] ?? name];
+                const seriesName = String(name ?? '');
+                return [Number(value ?? 0), labels[seriesName] ?? seriesName];
               }}
             />
 

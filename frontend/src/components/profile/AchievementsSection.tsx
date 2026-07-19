@@ -136,7 +136,14 @@ export default function AchievementsSection() {
       </Box>
       <Grid container spacing={2}>
         {(achievements ?? []).map((a) => (
-          <Grid item key={a.id} xs={6} sm={4} md={3} lg={2}>
+          <Grid
+            key={a.id}
+            size={{
+              xs: 6,
+              sm: 4,
+              md: 3,
+              lg: 2
+            }}>
             <AchievementBadge achievement={a} />
           </Grid>
         ))}

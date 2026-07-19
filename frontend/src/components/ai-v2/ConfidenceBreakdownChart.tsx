@@ -92,7 +92,7 @@ export default function ConfidenceBreakdownChart({
             <LabelList
               dataKey="value"
               position="right"
-              formatter={(v: number) => `${v}%`}
+              formatter={(value) => `${Number(value ?? 0)}%`}
               style={{ fill: CHART_COLORS.tickText, fontSize: 11, fontWeight: 600 }}
             />
           </Bar>

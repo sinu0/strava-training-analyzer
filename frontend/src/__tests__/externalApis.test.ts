@@ -5,6 +5,7 @@ import { searchGeocodingLocations, lookupElevation } from '../api/externalApis';
 const fetchMock = vi.fn();
 
 beforeEach(() => {
+  fetchMock.mockReset();
   vi.stubGlobal('fetch', fetchMock);
 });
 

@@ -114,8 +114,8 @@ export default function WPrimeBalanceChart({ activityId }: WPrimeBalanceChartPro
                   border: '1px solid #30363D',
                   borderRadius: 8,
                 }}
-                labelFormatter={formatTime}
-                formatter={(value: number) => [`${value}%`, "W' Balance"]}
+                labelFormatter={(label) => formatTime(Number(label ?? 0))}
+                formatter={(value) => [`${Number(value ?? 0)}%`, "W' Balance"]}
               />
               <ReferenceLine y={50} stroke="#ffc107" strokeDasharray="3 3" label={{ value: '50%', fill: '#ffc107', fontSize: 10 }} />
               <ReferenceLine y={25} stroke="#f44336" strokeDasharray="3 3" label={{ value: '25%', fill: '#f44336', fontSize: 10 }} />

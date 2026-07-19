@@ -74,7 +74,13 @@ export default function ActivityDetailV2Page() {
               { label: 'Przewyższenie', value: metric(data.elevationGainM, ' m') },
               { label: 'Kadencja', value: metric(data.avgCadence, ' rpm') },
             ].map(({ label, value }) => (
-              <Grid item xs={6} sm={4} md={2} key={label}>
+              <Grid
+                key={label}
+                size={{
+                  xs: 6,
+                  sm: 4,
+                  md: 2
+                }}>
                 <MetricReadout label={label} value={value} tone={label === 'Moc' ? 'primary' : undefined} />
               </Grid>
             ))}
@@ -86,11 +92,10 @@ export default function ActivityDetailV2Page() {
           <Tab value="laps" label="Okrążenia" />
         </Tabs>
       </PerformanceSurface>
-
       <Box sx={{ mt: 2.5 }}>
         {tab === 'overview' && (
           <Grid container spacing={2}>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <PerformanceSurface>
                 <ActivityRoutePreview
                   activityName={data.name}
@@ -100,7 +105,11 @@ export default function ActivityDetailV2Page() {
                 />
               </PerformanceSurface>
             </Grid>
-            <Grid item xs={12} md={7}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 7
+              }}>
               <PerformanceSurface sx={{ p: 2.5 }}>
                 <Typography variant="h6" fontWeight={750}>Podsumowanie</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, whiteSpace: 'pre-wrap' }}>
@@ -108,7 +117,11 @@ export default function ActivityDetailV2Page() {
                 </Typography>
               </PerformanceSurface>
             </Grid>
-            <Grid item xs={12} md={5}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 5
+              }}>
               <PerformanceSurface sx={{ p: 2.5 }}>
                 <Typography variant="h6" fontWeight={750}>Metryki i jakość</Typography>
                 <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1.5 }}>
