@@ -1,9 +1,10 @@
 import { Box, Typography, Stack } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from 'recharts';
 
-import { CHART_TICK, CHART_TOOLTIP_CONTENT_STYLE, CHART_TOOLTIP_ITEM_STYLE, CHART_TOOLTIP_LABEL_STYLE } from '../utils/chartStyles';
-import { ZONE_COLORS, CHART_COLORS } from '../utils/colors';
+import { getChartVisuals } from '../utils/chartStyles';
+import { ZONE_COLORS } from '../utils/colors';
 
 import type { ZoneDistribution as ZoneDistributionType } from '../types/analytics';
 
@@ -14,6 +15,8 @@ interface ZoneDistributionChartProps {
 const ZoneDistributionChart = memo(function ZoneDistributionChart({
   data,
 }: ZoneDistributionChartProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const chartData = useMemo(() => {
     if (!data?.zones) return [];
     return Object.entries(data.zones)
@@ -22,9 +25,9 @@ const ZoneDistributionChart = memo(function ZoneDistributionChart({
         zone,
         seconds: Math.round(seconds),
         minutes: Math.round(seconds / 60),
-        color: ZONE_COLORS[zone as keyof typeof ZONE_COLORS] ?? CHART_COLORS.tickText,
+        color: ZONE_COLORS[zone as keyof typeof ZONE_COLORS] ?? theme.tokens.chart.tick,
       }));
-  }, [data]);
+  }, [data, theme.tokens.chart.tick]);
 
   if (!chartData.length) {
     return (
@@ -39,20 +42,17 @@ const ZoneDistributionChart = memo(function ZoneDistributionChart({
       <Box sx={{ width: '100%', height: 400 }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
-            <XAxis dataKey="zone" stroke={CHART_COLORS.grid} tick={CHART_TICK} />
+            <CartesianGrid {...chart.grid} />
+            <XAxis dataKey="zone" {...chart.axis} />
             <YAxis
-              stroke={CHART_COLORS.grid}
-              tick={CHART_TICK}
-              label={{ value: 'Minuty', angle: -90, position: 'insideLeft', fill: CHART_COLORS.tickText }}
+              {...chart.axis}
+              label={{ value: 'Minuty', angle: -90, position: 'insideLeft', fill: theme.tokens.chart.tick, fontSize: 11, fontWeight: 700 }}
             />
             <Tooltip
-              contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
-              labelStyle={CHART_TOOLTIP_LABEL_STYLE}
-              itemStyle={CHART_TOOLTIP_ITEM_STYLE}
+              {...chart.tooltip}
               formatter={(value) => [`${Number(value ?? 0)} min`, 'Czas']}
             />
-            <Bar dataKey="minutes" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="minutes" radius={chart.barRadius}>
               {chartData.map((entry) => (
                 <Cell key={entry.zone} fill={entry.color} />
               ))}

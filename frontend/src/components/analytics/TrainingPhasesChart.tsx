@@ -6,6 +6,7 @@ import {
   Chip,
   Alert,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useMemo } from 'react';
 import {
   BarChart,
@@ -18,6 +19,7 @@ import {
 } from 'recharts';
 
 import { useTrainingPhases } from '../../hooks/useTrainingTrends';
+import { getChartVisuals } from '../../utils/chartStyles';
 
 const PHASE_COLORS: Record<string, string> = {
   BASE: '#4caf50',
@@ -39,6 +41,8 @@ interface TrainingPhasesChartProps {
 }
 
 export default function TrainingPhasesChart({ from, to }: TrainingPhasesChartProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const { data, isLoading } = useTrainingPhases(from, to);
 
   const chartData = useMemo(() => {
@@ -54,7 +58,7 @@ export default function TrainingPhasesChart({ from, to }: TrainingPhasesChartPro
 
   if (isLoading) {
     return (
-      <Paper sx={{ p: 2, backgroundColor: '#0D1117', border: '1px solid #30363D' }}>
+      <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
         <Typography color="text.secondary">Ładowanie faz treningowych…</Typography>
       </Paper>
     );
@@ -63,7 +67,7 @@ export default function TrainingPhasesChart({ from, to }: TrainingPhasesChartPro
   if (!data) return null;
 
   return (
-    <Paper sx={{ p: 2, backgroundColor: '#0D1117', border: '1px solid #30363D' }}>
+    <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
       <Stack spacing={1.5}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Typography variant="subtitle1" fontWeight={600}>
@@ -89,7 +93,7 @@ export default function TrainingPhasesChart({ from, to }: TrainingPhasesChartPro
           <Alert
             severity="info"
             icon={false}
-            sx={{ backgroundColor: 'rgba(88,166,255,0.08)', border: '1px solid #30363D' }}
+            sx={{ bgcolor: (currentTheme) => currentTheme.tokens?.activeOverlay ?? 'rgba(252,76,2,0.11)', border: '1px solid', borderColor: 'divider' }}
           >
             <Typography variant="body2">
               <strong>Aktualna faza:</strong> {PHASE_LABELS[data.currentPhase] || data.currentPhase}
@@ -101,18 +105,14 @@ export default function TrainingPhasesChart({ from, to }: TrainingPhasesChartPro
         <Box sx={{ width: '100%', height: 250 }}>
           <ResponsiveContainer>
             <BarChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-              <XAxis dataKey="week" stroke="#8B949E" fontSize={11} />
-              <YAxis stroke="#8B949E" fontSize={11} unit=" TSS" />
+              <XAxis dataKey="week" {...chart.axis} />
+              <YAxis {...chart.axis} unit=" TSS" />
               <Tooltip
-                contentStyle={{
-                  backgroundColor: '#161B22',
-                  border: '1px solid #30363D',
-                  borderRadius: 8,
-                }}
+                {...chart.tooltip}
                 labelFormatter={(label) => `Tydzień: ${label}`}
                 formatter={(value) => [`${value} TSS`, 'Obciążenie']}
               />
-              <Bar dataKey="tss" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="tss" radius={chart.barRadius}>
                 {chartData.map((entry) => (
                   <Cell key={entry.week} fill={PHASE_COLORS[entry.phase] || '#666'} />
                 ))}

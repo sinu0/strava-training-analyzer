@@ -13,18 +13,18 @@ interface ThemeModeContextValue {
 
 const ThemeModeContext = createContext<ThemeModeContextValue | null>(null);
 const FALLBACK_THEME_MODE: ThemeModeContextValue = {
-  mode: 'dark',
+  mode: 'light',
   setMode: () => undefined,
   toggleMode: () => undefined,
 };
 
 function getInitialMode(): AppColorMode {
-  if (typeof window === 'undefined') return 'dark';
+  if (typeof window === 'undefined') return 'light';
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    return stored === 'light' || stored === 'dark' ? stored : 'dark';
+    return stored === 'light' || stored === 'dark' ? stored : 'light';
   } catch {
-    return 'dark';
+    return 'light';
   }
 }
 

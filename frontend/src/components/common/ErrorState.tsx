@@ -22,6 +22,11 @@ export default function ErrorState({
       <Alert
         severity="error"
         icon={<WarningAmberIcon />}
+        sx={{
+          borderRadius: 3,
+          boxShadow: 'none',
+          alignItems: 'center',
+        }}
         action={onRetry ? (
           <Button color="inherit" size="small" onClick={onRetry}>
             {retryLabel}

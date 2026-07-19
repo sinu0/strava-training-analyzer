@@ -94,7 +94,7 @@ export default function PageContainer({
         >
           <Box sx={{ minWidth: 0 }}>
             {!!title && (
-              <Typography component="h1" variant="h4" sx={{ fontWeight: 820, letterSpacing: '-0.03em' }}>
+              <Typography component="h1" variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
                 {title}
               </Typography>
             )}

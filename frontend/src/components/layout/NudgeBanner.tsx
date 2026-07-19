@@ -45,7 +45,8 @@ export default function NudgeBanner() {
               onClick={nudge.actionUrl ? () => navigate(nudge.actionUrl!) : undefined}
               sx={{
                 cursor: nudge.actionUrl ? 'pointer' : 'default',
-                borderRadius: 2,
+                borderRadius: 4,
+                boxShadow: (t) => t.tokens.cardShadow,
                 '& .MuiAlert-message': { flex: 1 },
               }}
             >

@@ -1,4 +1,5 @@
 import { Box, Typography, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
 import { useState } from 'react';
 import {
@@ -13,6 +14,8 @@ import {
 } from 'recharts';
 
 import { useWeeklySummaries } from '../../hooks/useAnalytics';
+import { getChartVisuals } from '../../utils/chartStyles';
+import { alphaColor } from '../../utils/colors';
 
 type MetricKey = 'distance' | 'time' | 'elevation';
 
@@ -63,19 +66,22 @@ function CustomTooltip({
   label?: string;
   metric: MetricOption;
 }) {
+  const theme = useTheme();
   if (!active || !payload?.length) return null;
   return (
     <Box
       sx={{
-        bgcolor: '#21262D',
-        border: '1px solid #30363D',
+        bgcolor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'divider',
         borderRadius: 2,
         px: 1.5,
         py: 1,
+        boxShadow: theme.tokens.cardShadow,
       }}
     >
-      <Typography sx={{ color: '#8B949E', fontSize: '0.75rem' }}>{label}</Typography>
-      <Typography sx={{ color: 'white', fontSize: '0.85rem', fontWeight: 700 }}>
+      <Typography color="text.secondary" sx={{ fontSize: '0.75rem' }}>{label}</Typography>
+      <Typography color="text.primary" sx={{ fontSize: '0.85rem', fontWeight: 700 }}>
         {metric.format(payload[0]?.value ?? 0)}
       </Typography>
     </Box>
@@ -83,6 +89,8 @@ function CustomTooltip({
 }
 
 const WeeklyKmBarChart = memo(function WeeklyKmBarChart() {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const [metric, setMetric] = useState<MetricKey>('distance');
   const { data: summaries = [] } = useWeeklySummaries(12);
 
@@ -113,7 +121,7 @@ const WeeklyKmBarChart = memo(function WeeklyKmBarChart() {
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: '#E6EDF3' }}>
+        <Typography sx={{ fontSize: '0.9rem', fontWeight: 800, color: 'text.primary' }}>
           Ostatnie 12 tygodni
         </Typography>
         <ToggleButtonGroup
@@ -121,19 +129,7 @@ const WeeklyKmBarChart = memo(function WeeklyKmBarChart() {
           exclusive
           onChange={(_, v) => v && setMetric(v)}
           size="small"
-          sx={{
-            '& .MuiToggleButton-root': {
-              py: 0.3,
-              px: 1,
-              fontSize: '0.72rem',
-              borderColor: '#30363D',
-              color: '#8B949E',
-              '&.Mui-selected': {
-                bgcolor: '#21262D',
-                color: 'white',
-              },
-            },
-          }}
+          sx={{ '& .MuiToggleButton-root': { py: 0.3, px: 1, fontSize: '0.72rem' } }}
         >
           {METRICS.map((m) => (
             <ToggleButton key={m.key} value={m.key}>
@@ -145,28 +141,24 @@ const WeeklyKmBarChart = memo(function WeeklyKmBarChart() {
 
       <ResponsiveContainer width="100%" height={180}>
         <BarChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }} barCategoryGap="20%">
-          <CartesianGrid stroke="#30363D" strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid {...chart.grid} />
           <XAxis
             dataKey="week"
-            tick={{ fill: '#8B949E', fontSize: 10 }}
-            stroke="transparent"
-            tickLine={false}
+            {...chart.axis}
             interval={1}
           />
           <YAxis
             ticks={yTicks}
-            tick={{ fill: '#8B949E', fontSize: 10 }}
-            stroke="transparent"
-            tickLine={false}
+            {...chart.axis}
             width={38}
             tickFormatter={(v) => `${v}`}
           />
-          <Tooltip content={<CustomTooltip metric={activeMetric} />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
-          <Bar dataKey="value" isAnimationActive={false} radius={[3, 3, 0, 0]}>
+          <Tooltip content={<CustomTooltip metric={activeMetric} />} cursor={chart.tooltip.cursor} />
+          <Bar dataKey="value" isAnimationActive={false} radius={chart.barRadius}>
             {chartData.map((entry) => (
               <Cell
                 key={entry.week}
-                fill={entry.isCurrent ? activeMetric.color : `${activeMetric.color}99`}
+                fill={entry.isCurrent ? activeMetric.color : alphaColor(activeMetric.color, 0.58)}
               />
             ))}
           </Bar>

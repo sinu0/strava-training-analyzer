@@ -47,22 +47,12 @@ function NavButton({ item, selected, onClick }: { item: AppNavigationItem; selec
       onClick={onClick}
       sx={{
         mx: 1.25,
-        borderRadius: 2,
+        borderRadius: 999,
         mb: 0.35,
         py: 0.95,
-        position: 'relative',
+        '&:hover': { bgcolor: (theme) => theme.tokens.hoverOverlay },
         '&.Mui-selected': {
-          bgcolor: (theme) => alpha(theme.tokens.chart.primary, 0.115),
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            left: 0,
-            top: 9,
-            bottom: 9,
-            width: 3,
-            borderRadius: 4,
-            bgcolor: 'primary.main',
-          },
+          bgcolor: (theme) => alpha(theme.tokens.chart.primary, 0.1),
           '&:hover': { bgcolor: (theme) => alpha(theme.tokens.chart.primary, 0.16) },
         },
       }}
@@ -75,6 +65,7 @@ function NavButton({ item, selected, onClick }: { item: AppNavigationItem; selec
         primaryTypographyProps={{
           fontSize: '0.88rem',
           fontWeight: selected ? 700 : 500,
+          color: selected ? 'text.primary' : 'text.secondary',
         }}
       />
     </ListItemButton>
@@ -167,7 +158,7 @@ export default function Sidebar({
             height: 40,
             display: 'grid',
             placeItems: 'center',
-            borderRadius: 2.2,
+            borderRadius: '12px',
             color: '#fff',
             background: (t) => t.tokens.gradients.strava,
             boxShadow: '0 10px 28px rgba(252,76,2,0.24)',

@@ -8,6 +8,31 @@ import {
   useSyncStatus,
 } from '@/hooks/useAnalytics';
 
+import type { Theme } from '@mui/material/styles';
+
+/**
+ * Round white action button matching the TopBar floating cluster style.
+ * Stays opaque on hover; the token overlay only tints the surface slightly.
+ */
+const roundButtonSx = (theme: Theme) => ({
+  width: 40,
+  height: 40,
+  bgcolor: theme.tokens.searchPill,
+  color: theme.palette.text.primary,
+  boxShadow: theme.tokens.cardShadow,
+  transition: theme.tokens.transition,
+  '&:hover': {
+    bgcolor: theme.tokens.searchPill,
+    backgroundImage: `linear-gradient(${theme.tokens.hoverOverlay}, ${theme.tokens.hoverOverlay})`,
+    boxShadow: theme.tokens.cardShadowHover,
+  },
+  '&.Mui-disabled': {
+    bgcolor: theme.tokens.searchPill,
+    color: theme.palette.text.secondary,
+    boxShadow: theme.tokens.cardShadow,
+  },
+});
+
 interface TopBarSyncButtonProps {
   /** Called after successful sync to invalidate dashboard queries */
   onSyncComplete?: () => void;
@@ -59,27 +84,28 @@ export default function TopBarSyncButton({ onSyncComplete }: TopBarSyncButtonPro
         <IconButton
           onClick={handleSync}
           disabled={isSyncing || isRateLimited}
-          size="small"
           aria-label="Sync ostatnich treningów"
-          sx={{
-            position: 'relative',
-            zIndex: 1,
-            opacity: isRateLimited ? 0.4 : 1,
-            transition: 'opacity 0.2s',
-            '@keyframes syncPulse': {
-              '0%, 100%': { opacity: 1 },
-              '50%': { opacity: 0.5 },
+          sx={[
+            roundButtonSx,
+            {
+              position: 'relative',
+              zIndex: 1,
+              opacity: isRateLimited ? 0.4 : 1,
+              '@keyframes syncPulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: isSyncing ? 'syncPulse 1.2s ease-in-out infinite' : 'none',
             },
-            animation: isSyncing ? 'syncPulse 1.2s ease-in-out infinite' : 'none',
-          }}
+          ]}
         >
           {isSyncing ? (
             <CircularProgress size={20} sx={{ color: 'primary.main' }} />
           ) : (
             <CloudSyncIcon
               sx={{
-                fontSize: 22,
-                color: hasNew ? 'primary.main' : 'text.secondary',
+                fontSize: 20,
+                color: hasNew ? 'primary.main' : 'text.primary',
               }}
             />
           )}

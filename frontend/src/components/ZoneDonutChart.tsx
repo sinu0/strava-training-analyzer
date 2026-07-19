@@ -1,7 +1,9 @@
 import { Box, Typography, Stack } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
-import { CHART_COLORS, STATUS_COLORS, ZONE_COLORS } from '../utils/colors';
+import { getChartVisuals } from '../utils/chartStyles';
+import { STATUS_COLORS, ZONE_COLORS } from '../utils/colors';
 
 import type { ZoneDistribution } from '../types/analytics';
 
@@ -21,6 +23,8 @@ const zoneLabels: Record<string, string> = {
 };
 
 export default function ZoneDonutChart({ data, title }: ZoneDonutChartProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   if (!data || Object.keys(data.zones).length === 0) {
     return (
       <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
@@ -52,8 +56,8 @@ export default function ZoneDonutChart({ data, title }: ZoneDonutChartProps) {
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={35}
-                outerRadius={65}
+                innerRadius={38}
+                outerRadius={66}
                 dataKey="value"
                 stroke="none"
               >
@@ -62,13 +66,7 @@ export default function ZoneDonutChart({ data, title }: ZoneDonutChartProps) {
                 ))}
               </Pie>
               <Tooltip
-                contentStyle={{
-                  backgroundColor: CHART_COLORS.tooltip,
-                  border: `1px solid ${CHART_COLORS.grid}`,
-                  borderRadius: 8,
-                }}
-                labelStyle={{ color: CHART_COLORS.tooltipText }}
-                itemStyle={{ color: CHART_COLORS.tooltipText }}
+                {...chart.tooltip}
                 formatter={(value) => [`${Number(value ?? 0).toFixed(1)}%`]}
               />
             </PieChart>

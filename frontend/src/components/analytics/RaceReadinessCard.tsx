@@ -7,6 +7,7 @@ import {
   Alert,
   Chip,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useState } from 'react';
 import {
   LineChart,
@@ -20,6 +21,7 @@ import {
 } from 'recharts';
 
 import { useRaceReadiness } from '../../hooks/useTrainingTrends';
+import { getChartVisuals } from '../../utils/chartStyles';
 
 const FORM_COLORS: Record<string, string> = {
   'Świetna': '#4caf50',
@@ -29,11 +31,13 @@ const FORM_COLORS: Record<string, string> = {
 };
 
 export default function RaceReadinessCard() {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const [raceDate, setRaceDate] = useState<string>('');
   const { data, isLoading } = useRaceReadiness(raceDate || null);
 
   return (
-    <Paper sx={{ p: 2, backgroundColor: '#0D1117', border: '1px solid #30363D' }}>
+    <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
       <Stack spacing={1.5}>
         <Typography variant="subtitle1" fontWeight={600}>
           Gotowość na wyścig
@@ -74,7 +78,7 @@ export default function RaceReadinessCard() {
             <Alert
               severity="info"
               icon={false}
-              sx={{ backgroundColor: 'rgba(88,166,255,0.08)', border: '1px solid #30363D' }}
+              sx={{ bgcolor: (currentTheme) => currentTheme.tokens?.activeOverlay ?? 'rgba(252,76,2,0.11)', border: '1px solid', borderColor: 'divider' }}
             >
               <Typography variant="body2">{data.taperRecommendation}</Typography>
             </Alert>
@@ -83,20 +87,16 @@ export default function RaceReadinessCard() {
               <Box sx={{ width: '100%', height: 220 }}>
                 <ResponsiveContainer>
                   <LineChart data={data.projections} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                    <XAxis dataKey="date" stroke="#8B949E" fontSize={10} />
-                    <YAxis stroke="#8B949E" fontSize={11} />
+                    <XAxis dataKey="date" {...chart.axis} />
+                    <YAxis {...chart.axis} />
                     <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#161B22',
-                        border: '1px solid #30363D',
-                        borderRadius: 8,
-                      }}
+                      {...chart.tooltip}
                     />
-                    <Legend />
-                    <ReferenceLine y={0} stroke="#30363D" />
+                    <Legend {...chart.legend} />
+                    <ReferenceLine y={0} stroke={theme.tokens?.chart.grid ?? theme.palette.divider} />
                     <Line type="monotone" dataKey="ctl" stroke="#4caf50" name="CTL" strokeWidth={2} dot={false} />
                     <Line type="monotone" dataKey="atl" stroke="#f44336" name="ATL" strokeWidth={2} dot={false} />
-                    <Line type="monotone" dataKey="tsb" stroke="#58a6ff" name="TSB" strokeWidth={2} dot={false} />
+                    <Line type="monotone" dataKey="tsb" stroke={theme.tokens?.chart.tertiary ?? theme.palette.info.main} name="TSB" strokeWidth={2.5} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               </Box>

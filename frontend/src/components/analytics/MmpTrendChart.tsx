@@ -6,6 +6,7 @@ import {
   ToggleButtonGroup,
   ToggleButton,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useMemo, useState } from 'react';
 import {
   LineChart,
@@ -18,6 +19,7 @@ import {
 } from 'recharts';
 
 import { useWeeklyMmp } from '@/hooks/usePowerAnalysis';
+import { getChartVisuals } from '@/utils/chartStyles';
 
 const STANDARD_DURATIONS = ['5s', '1min', '5min', '20min', '60min'];
 
@@ -37,6 +39,8 @@ interface MmpTrendChartProps {
 const shouldRenderLegend = !import.meta.env.VITEST && import.meta.env.MODE !== 'test';
 
 export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const {
     data: weeklyMmp = [],
     isLoading,
@@ -57,7 +61,7 @@ export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
   };
 
   const renderState = (message: string, detail?: string) => (
-    <Paper sx={{ p: 2, backgroundColor: '#0D1117', border: '1px solid #30363D' }}>
+    <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
       <Stack spacing={0.75}>
         <Typography variant="subtitle1" fontWeight={600}>
           Trend mocy maksymalnej (MMP)
@@ -86,7 +90,7 @@ export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
   }
 
   return (
-    <Paper sx={{ p: 2, backgroundColor: '#0D1117', border: '1px solid #30363D' }}>
+    <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
       <Stack spacing={1}>
         <Typography variant="subtitle1" fontWeight={600}>
           Trend mocy maksymalnej (MMP)
@@ -107,24 +111,20 @@ export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
         <Box sx={{ width: '100%', height: 300 }}>
           <ResponsiveContainer>
             <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-              <XAxis dataKey="week" stroke="#8B949E" fontSize={11} />
-              <YAxis stroke="#8B949E" fontSize={11} unit=" W" />
+              <XAxis dataKey="week" {...chart.axis} />
+              <YAxis {...chart.axis} unit=" W" />
               <Tooltip
-                contentStyle={{
-                  backgroundColor: '#161B22',
-                  border: '1px solid #30363D',
-                  borderRadius: 8,
-                }}
+                {...chart.tooltip}
               />
-              {!!shouldRenderLegend && <Legend />}
+              {!!shouldRenderLegend && <Legend {...chart.legend} />}
               {selectedDurations.map((d) => (
                 <Line
                   key={d}
                   type="monotone"
                   dataKey={d}
                   stroke={DURATION_COLORS[d] || '#999'}
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
+                  strokeWidth={2.5}
+                  dot={{ r: 3.5, strokeWidth: 0 }}
                   name={d}
                   connectNulls
                 />

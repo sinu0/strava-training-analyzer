@@ -1,8 +1,6 @@
 import { Box, Paper, Stack, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import { alphaColor } from '@/utils/colors';
-
 type EditorialHeroProps = {
   eyebrow: string;
   title: string;
@@ -22,7 +20,6 @@ export default function EditorialHero({
   eyebrow,
   title,
   description,
-  accentColor,
   imageSrc,
   imageAlt,
   highlights = [],
@@ -35,9 +32,9 @@ export default function EditorialHero({
       sx={{
         p: compact ? { xs: 1.25, md: 1.5 } : { xs: 1.5, md: 2 },
         mb: compact ? { xs: 1.5, md: 2 } : { xs: 2, md: 2.5 },
-        borderRadius: 4,
+        borderRadius: { xs: 3, md: 3.5 },
         border: '1px solid',
-        borderColor: alphaColor(accentColor, 0.18),
+        borderColor: (currentTheme) => currentTheme.tokens.surfaceBorder,
         bgcolor: 'background.paper',
         overflow: 'hidden',
         boxShadow: (currentTheme) => currentTheme.tokens.cardShadow,
@@ -75,9 +72,7 @@ export default function EditorialHero({
                     px: compact ? 0.9 : 1.1,
                     py: compact ? 0.45 : 0.7,
                     borderRadius: 999,
-                    border: '1px solid',
-                    borderColor: alphaColor(accentColor, 0.2),
-                    bgcolor: alphaColor(theme.palette.background.default, 0.28),
+                    bgcolor: (currentTheme) => currentTheme.tokens.iconBubble,
                   }}
                 >
                   <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 700 }}>
@@ -98,7 +93,7 @@ export default function EditorialHero({
             overflow: 'hidden',
             minHeight: { xs: compact ? 120 : 160, md: compact ? 150 : 220 },
             border: '1px solid',
-            borderColor: alphaColor(accentColor, 0.14),
+            borderColor: (currentTheme) => currentTheme.tokens.surfaceBorder,
           }}
         >
           <Box

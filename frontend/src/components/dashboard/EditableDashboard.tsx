@@ -40,6 +40,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { useEffect, useState, type ReactNode } from 'react';
 
 import {
@@ -131,12 +132,14 @@ function SortableWidget({
             gap: 0.25,
             p: 0.25,
             borderRadius: 2,
-            bgcolor: 'rgba(8,13,19,0.94)',
+            bgcolor: 'rgba(17,24,39,0.94)',
+            color: '#FFFFFF',
           }}
         >
           <IconButton
             ref={setActivatorNodeRef}
             size="small"
+            color="inherit"
             aria-label={`Przenieś widget ${label}`}
             {...attributes}
             {...listeners}
@@ -145,6 +148,7 @@ function SortableWidget({
           </IconButton>
           <IconButton
             size="small"
+            color="inherit"
             aria-label={`Zmniejsz widget ${label}`}
             onClick={() => onResize(widget.span - 1)}
           >
@@ -152,6 +156,7 @@ function SortableWidget({
           </IconButton>
           <IconButton
             size="small"
+            color="inherit"
             aria-label={`Zwiększ widget ${label}`}
             onClick={() => onResize(widget.span + 1)}
           >
@@ -159,6 +164,7 @@ function SortableWidget({
           </IconButton>
           <IconButton
             size="small"
+            color="inherit"
             aria-label={`Ustawienia widgetu ${label}`}
             onClick={onConfigure}
           >
@@ -178,7 +184,8 @@ function SortableWidget({
         sx={{
           height: '100%',
           borderRadius: 3,
-          outline: editing ? '1px dashed rgba(88,166,255,0.55)' : 'none',
+          outline: editing ? '1px dashed' : 'none',
+          outlineColor: (theme) => alpha(theme.palette.primary.main, 0.45),
           outlineOffset: editing ? 3 : 0,
         }}
       >
@@ -338,7 +345,7 @@ export default function EditableDashboard({
                   sm: 'repeat(6, minmax(0, 1fr))',
                   lg: 'repeat(12, minmax(0, 1fr))',
                 },
-                gap: 2.5,
+                gap: 3,
                 alignItems: 'stretch',
               }}
             >

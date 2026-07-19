@@ -1,16 +1,9 @@
 import { Box, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
 
-import {
-  CHART_ACTIVE_DOT,
-  CHART_LEGEND_STYLE,
-  CHART_TICK,
-  CHART_TOOLTIP_CONTENT_STYLE,
-  CHART_TOOLTIP_ITEM_STYLE,
-  CHART_TOOLTIP_LABEL_STYLE,
-} from '../utils/chartStyles';
-import { CHART_COLORS } from '../utils/colors';
+import { CHART_ACTIVE_DOT, getChartVisuals } from '../utils/chartStyles';
 
 import type { PowerCurve as PowerCurveType } from '../types/analytics';
 
@@ -47,12 +40,14 @@ const PowerCurveChart = memo(function PowerCurveChart({
   data,
   comparisonSeries = [],
 }: PowerCurveProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const series = useMemo(
     () => [
-      { key: 'current', label: 'Aktualny zakres', data, color: CHART_COLORS.primary, dashed: false },
+      { key: 'current', label: 'Aktualny zakres', data, color: theme.tokens.chart.primary, dashed: false },
       ...comparisonSeries.filter((item) => item.data?.efforts && Object.keys(item.data.efforts).length > 0),
     ],
-    [comparisonSeries, data],
+    [comparisonSeries, data, theme.tokens.chart.primary],
   );
 
   const chartData = useMemo(() => {
@@ -105,7 +100,7 @@ const PowerCurveChart = memo(function PowerCurveChart({
     >
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
+          <CartesianGrid {...chart.grid} />
           <XAxis
             dataKey="seconds"
             scale="log"
@@ -113,21 +108,17 @@ const PowerCurveChart = memo(function PowerCurveChart({
             type="number"
              tickFormatter={(v) => DURATION_LABELS[v] ?? `${v}s`}
              ticks={tickValues}
-             tick={CHART_TICK}
-             stroke={CHART_COLORS.grid}
+             {...chart.axis}
              angle={-45}
              textAnchor="end"
             height={60}
           />
            <YAxis
-             stroke={CHART_COLORS.grid}
-             tick={CHART_TICK}
-             label={{ value: 'Moc (W)', angle: -90, position: 'insideLeft', fill: CHART_COLORS.tickText }}
+             {...chart.axis}
+             label={{ value: 'Moc (W)', angle: -90, position: 'insideLeft', fill: theme.tokens.chart.tick, fontSize: 11, fontWeight: 700 }}
            />
            <Tooltip
-             contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
-             labelStyle={CHART_TOOLTIP_LABEL_STYLE}
-             itemStyle={CHART_TOOLTIP_ITEM_STYLE}
+             {...chart.tooltip}
              formatter={(value, name) => {
                const seriesName = String(name ?? '');
                return [`${Number(value ?? 0)} W`, series.find((item) => item.key === seriesName)?.label ?? seriesName];
@@ -138,7 +129,7 @@ const PowerCurveChart = memo(function PowerCurveChart({
              }}
            />
            <Legend
-             wrapperStyle={CHART_LEGEND_STYLE}
+             {...chart.legend}
              formatter={(value: string) => series.find((item) => item.key === value)?.label ?? value}
            />
           {series.map((item) => (

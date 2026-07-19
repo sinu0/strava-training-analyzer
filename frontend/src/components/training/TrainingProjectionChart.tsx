@@ -1,4 +1,5 @@
 import { Alert, Box, Card, CardContent, Stack, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useMemo } from 'react';
 import {
   Bar,
@@ -10,6 +11,9 @@ import {
   YAxis,
   CartesianGrid,
 } from 'recharts';
+
+import { getChartVisuals } from '../../utils/chartStyles';
+import { PMC_COLORS } from '../../utils/colors';
 
 import type { CalendarDay } from '../../types/training';
 
@@ -23,6 +27,8 @@ function formatDateTick(dateStr: string): string {
 }
 
 export default function TrainingProjectionChart({ days }: TrainingProjectionChartProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const futureDays = useMemo(
     () => days.filter((day) => day.projection),
     [days],
@@ -68,14 +74,14 @@ export default function TrainingProjectionChart({ days }: TrainingProjectionChar
         <Box sx={{ width: '100%', height: 240, mb: adjustments.length ? 1.5 : 0 }}>
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={chartData} margin={{ top: 8, right: 16, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" tickFormatter={formatDateTick} tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Bar dataKey="plannedTss" fill="#90caf9" name="Plan TSS" />
-              <Line type="monotone" dataKey="ctl" stroke="#66bb6a" strokeWidth={2} dot={false} name="CTL" />
-              <Line type="monotone" dataKey="atl" stroke="#ef5350" strokeWidth={2} dot={false} name="ATL" />
-              <Line type="monotone" dataKey="tsb" stroke="#ab47bc" strokeWidth={2} dot={false} name="TSB" />
+              <CartesianGrid {...chart.grid} />
+              <XAxis dataKey="date" tickFormatter={formatDateTick} {...chart.axis} />
+              <YAxis {...chart.axis} />
+              <Tooltip {...chart.tooltip} />
+              <Bar dataKey="plannedTss" fill={theme.tokens.chart.tertiary} radius={chart.barRadius} name="Plan TSS" />
+              <Line type="monotone" dataKey="ctl" stroke={PMC_COLORS.CTL} strokeWidth={2.5} dot={false} name="CTL" />
+              <Line type="monotone" dataKey="atl" stroke={PMC_COLORS.ATL} strokeWidth={2.5} dot={false} name="ATL" />
+              <Line type="monotone" dataKey="tsb" stroke={PMC_COLORS.TSB} strokeWidth={2.5} dot={false} name="TSB" />
             </ComposedChart>
           </ResponsiveContainer>
         </Box>

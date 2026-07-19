@@ -18,7 +18,7 @@ export default function MetricReadout({ label, value, unit, hint, icon, tone }: 
         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 650 }}>{label}</Typography>
       </Stack>
       <Stack direction="row" spacing={0.55} alignItems="baseline" sx={{ mt: 0.45 }}>
-        <Typography variant="h5" sx={{ fontWeight: 820, color, letterSpacing: '-0.025em' }}>{value}</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 800, color, letterSpacing: '-0.02em' }}>{value}</Typography>
         {unit ? <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 650 }}>{unit}</Typography> : null}
       </Stack>
       {hint ? <Typography variant="caption" color="text.secondary">{hint}</Typography> : null}

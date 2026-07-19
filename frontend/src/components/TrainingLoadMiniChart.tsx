@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
 import {
   ResponsiveContainer,
@@ -10,8 +11,8 @@ import {
   CartesianGrid,
 } from 'recharts';
 
-import { CHART_TICK, CHART_TOOLTIP_CONTENT_STYLE } from '../utils/chartStyles';
-import { PMC_COLORS, CHART_COLORS } from '../utils/colors';
+import { getChartVisuals } from '../utils/chartStyles';
+import { PMC_COLORS } from '../utils/colors';
 
 import type { PmcData } from '../types/analytics';
 
@@ -22,6 +23,8 @@ interface TrainingLoadMiniChartProps {
 const TrainingLoadMiniChart = memo(function TrainingLoadMiniChart({
   data,
 }: TrainingLoadMiniChartProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const chartData = useMemo(() => {
     if (!data?.length) return [];
     return data.map((d) => ({
@@ -44,11 +47,11 @@ const TrainingLoadMiniChart = memo(function TrainingLoadMiniChart({
     <Box sx={{ width: '100%', height: 200 }}>
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={chartData}>
-          <CartesianGrid stroke={CHART_COLORS.grid} strokeDasharray="3 3" />
-          <XAxis dataKey="date" stroke={CHART_COLORS.tickText} tick={CHART_TICK} />
-          <YAxis stroke={CHART_COLORS.tickText} tick={CHART_TICK} />
+          <CartesianGrid {...chart.grid} />
+          <XAxis dataKey="date" {...chart.axis} />
+          <YAxis {...chart.axis} />
           <Tooltip
-            contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
+            {...chart.tooltip}
           />
           <Line type="monotone" dataKey="CTL" stroke={PMC_COLORS.CTL} dot={false} strokeWidth={2.25} />
           <Line type="monotone" dataKey="ATL" stroke={PMC_COLORS.ATL} dot={false} strokeWidth={2.25} />

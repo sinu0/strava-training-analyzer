@@ -109,15 +109,6 @@ export default function AppLayout() {
             pt: { xs: 3, sm: 3.5, md: 4 },
             pb: { xs: 11, md: 4 },
             bgcolor: 'background.default',
-            '&::before': {
-              content: '""',
-              position: 'fixed',
-              inset: 0,
-              zIndex: 0,
-              pointerEvents: 'none',
-              background: (currentTheme) => currentTheme.tokens.pageGlow,
-            },
-            '& > *': { position: 'relative', zIndex: 1 },
           }}
         >
           <Outlet />

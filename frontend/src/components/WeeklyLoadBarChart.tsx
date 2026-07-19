@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   ResponsiveContainer,
   BarChart,
@@ -11,7 +12,8 @@ import {
   ReferenceArea,
 } from 'recharts';
 
-import { CHART_COLORS, LOAD_COLORS, STATUS_COLORS } from '../utils/colors';
+import { getChartVisuals } from '../utils/chartStyles';
+import { LOAD_COLORS, STATUS_COLORS } from '../utils/colors';
 
 import type { WeeklySummary, WeeklyOptimalLoad } from '../types/analytics';
 
@@ -21,6 +23,8 @@ interface WeeklyLoadBarChartProps {
 }
 
 export default function WeeklyLoadBarChart({ data, optimalLoad }: WeeklyLoadBarChartProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   if (!data?.length) {
     return (
       <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
@@ -46,15 +50,11 @@ export default function WeeklyLoadBarChart({ data, optimalLoad }: WeeklyLoadBarC
     <Box sx={{ width: '100%', height: 220 }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 10, right: 72, left: -10, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
-            <XAxis dataKey="week" tick={{ fill: CHART_COLORS.tickText, fontSize: 11 }} />
-            <YAxis tick={{ fill: CHART_COLORS.tickText, fontSize: 11 }} />
+            <CartesianGrid {...chart.grid} />
+            <XAxis dataKey="week" {...chart.axis} />
+            <YAxis {...chart.axis} />
           <Tooltip
-            contentStyle={{
-              backgroundColor: CHART_COLORS.tooltip,
-              border: `1px solid ${CHART_COLORS.grid}`,
-              borderRadius: 8,
-            }}
+            {...chart.tooltip}
             formatter={(value, name) => {
               const seriesName = String(name ?? '');
               const numericValue = Number(value ?? 0);
@@ -87,8 +87,8 @@ export default function WeeklyLoadBarChart({ data, optimalLoad }: WeeklyLoadBarC
           />
           <Bar
             dataKey="TSS"
-            fill={CHART_COLORS.primary}
-            radius={[4, 4, 0, 0]}
+            fill={theme.tokens.chart.primary}
+            radius={chart.barRadius}
             maxBarSize={40}
           />
         </BarChart>

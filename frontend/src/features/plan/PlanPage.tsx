@@ -2,6 +2,7 @@ import AutoGraphOutlinedIcon from '@mui/icons-material/AutoGraphOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import FitnessCenterOutlinedIcon from '@mui/icons-material/FitnessCenterOutlined';
 import { Box, Grid, List, ListItem, ListItemText, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useSearchParams } from 'react-router-dom';
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
@@ -14,6 +15,7 @@ import TrainingCalendar from '@/components/training/TrainingCalendar';
 import WorkoutLibrary from '@/components/training/WorkoutLibrary';
 import MetricReadout from '@/components/v2/MetricReadout';
 import PerformanceSurface from '@/components/v2/PerformanceSurface';
+import { getChartVisuals } from '@/utils/chartStyles';
 import { PMC_COLORS } from '@/utils/colors';
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
 
@@ -22,6 +24,8 @@ import { useLoadScenario } from './useLoadScenario';
 type PlanTab = 'calendar' | 'library' | 'scenario';
 
 export default function PlanPage() {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const [params, setParams] = useSearchParams();
   const requestedTab = params.get('tab');
   const tab: PlanTab = requestedTab === 'library' || requestedTab === 'scenario' ? requestedTab : 'calendar';
@@ -101,14 +105,14 @@ export default function PlanPage() {
               >
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={scenario.data.points}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" tickFormatter={value => new Date(value).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })} />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="ctl" name="CTL 42 dni" stroke={PMC_COLORS.CTL} dot={false} strokeWidth={2} />
-                    <Line type="monotone" dataKey="atl" name="ATL 7 dni" stroke={PMC_COLORS.ATL} dot={false} strokeWidth={2} />
-                    <Line type="monotone" dataKey="form" name="Forma" stroke={PMC_COLORS.TSB} dot={false} strokeDasharray="5 4" />
+                    <CartesianGrid {...chart.grid} />
+                    <XAxis dataKey="date" tickFormatter={value => new Date(value).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })} {...chart.axis} />
+                    <YAxis {...chart.axis} />
+                    <Tooltip {...chart.tooltip} />
+                    <Legend {...chart.legend} />
+                    <Line type="monotone" dataKey="ctl" name="CTL 42 dni" stroke={PMC_COLORS.CTL} dot={false} strokeWidth={2.5} />
+                    <Line type="monotone" dataKey="atl" name="ATL 7 dni" stroke={PMC_COLORS.ATL} dot={false} strokeWidth={2.5} />
+                    <Line type="monotone" dataKey="form" name="Forma" stroke={PMC_COLORS.TSB} dot={false} strokeWidth={2.25} strokeDasharray="5 4" />
                   </LineChart>
                 </ResponsiveContainer>
               </Box>

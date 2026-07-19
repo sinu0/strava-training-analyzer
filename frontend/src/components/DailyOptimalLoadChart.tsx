@@ -1,4 +1,5 @@
 import { Box, Typography, Stack } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
 import {
   Area,
@@ -14,6 +15,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 
+import { getChartVisuals } from '@/utils/chartStyles';
 import { CHART_COLORS, LOAD_COLORS, alphaColor } from '@/utils/colors';
 import { getLoadStatusColor } from '@/utils/statusColors';
 
@@ -88,6 +90,8 @@ const DailyOptimalLoadChart = memo(function DailyOptimalLoadChart({
   data,
   compact = false,
 }: Props) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const todayStr = new Date().toISOString().slice(0, 10);
   const chartData = useMemo(() => mapDailyOptimalLoadChartData(data), [data]);
 
@@ -159,23 +163,21 @@ const DailyOptimalLoadChart = memo(function DailyOptimalLoadChart({
             data={chartData}
             margin={{ top: 10, right: compact ? 16 : 70, left: compact ? -18 : 0, bottom: compact ? 0 : 4 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.surface} />
+            <CartesianGrid {...chart.grid} />
             <XAxis
               dataKey="date"
-              stroke={CHART_COLORS.grid}
-              tick={{ fill: CHART_COLORS.tickText, fontSize: compact ? 9 : 11 }}
+              {...chart.axis}
+              tick={{ fill: theme.tokens.chart.tick, fontSize: compact ? 9 : 11, fontWeight: 600 }}
               interval={tickInterval - 1}
               tickFormatter={formatDateTick}
             />
             <YAxis
-              stroke={CHART_COLORS.grid}
-              tick={{ fill: CHART_COLORS.tickText, fontSize: compact ? 9 : 11 }}
+              {...chart.axis}
+              tick={{ fill: theme.tokens.chart.tick, fontSize: compact ? 9 : 11, fontWeight: 600 }}
               width={compact ? 28 : 44}
             />
             <Tooltip
-              contentStyle={{ backgroundColor: CHART_COLORS.tooltip, border: `1px solid ${CHART_COLORS.grid}`, borderRadius: 8 }}
-              labelStyle={{ color: CHART_COLORS.tooltipText, fontWeight: 600 }}
-              itemStyle={{ color: CHART_COLORS.tickText, fontSize: 12 }}
+              {...chart.tooltip}
               formatter={(value, name) => {
                 const labels: Record<string, string> = {
                   tss: 'TSS dzienny',
@@ -239,14 +241,14 @@ const DailyOptimalLoadChart = memo(function DailyOptimalLoadChart({
             />
 
             {/* ── Actual TSS bars (past) ── */}
-            <Bar dataKey="tss" name="tss" isAnimationActive={false} radius={[2, 2, 0, 0]} maxBarSize={compact ? 8 : 14}>
+            <Bar dataKey="tss" name="tss" isAnimationActive={false} radius={chart.barRadius} maxBarSize={compact ? 8 : 14}>
               {chartData.map((entry) => (
                 <Cell key={entry.date} fill={entry.barColor} fillOpacity={entry.barOpacity} />
               ))}
             </Bar>
 
             {/* ── Projected TSS bars (future) ── */}
-            <Bar dataKey="projectedTss" name="projectedTss" isAnimationActive={false} radius={[2, 2, 0, 0]} maxBarSize={compact ? 8 : 14}>
+            <Bar dataKey="projectedTss" name="projectedTss" isAnimationActive={false} radius={chart.barRadius} maxBarSize={compact ? 8 : 14}>
               {chartData.map((entry) => (
                 <Cell key={`${entry.date}-p`} fill={LOAD_COLORS.FUTURE} fillOpacity={0.35} />
               ))}

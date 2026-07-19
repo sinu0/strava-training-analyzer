@@ -9,6 +9,7 @@ import {
   IconButton,
   Typography,
 } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
 import { useMemo } from 'react';
 import {
   ComposedChart,
@@ -22,6 +23,7 @@ import {
 } from 'recharts';
 
 import type { ActivityLap } from '@/types/activity';
+import { getChartVisuals } from '@/utils/chartStyles';
 import { formatDuration, formatDistance } from '@/utils/formatters';
 
 interface LapCardProps {
@@ -84,6 +86,14 @@ export default function LapCard({
   onHover,
   onSelect,
 }: LapCardProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
+  const colors = {
+    power: theme.tokens?.chart.primary ?? theme.palette.primary.main,
+    heartRate: theme.palette.error.main,
+    speed: theme.tokens?.chart.secondary ?? theme.palette.secondary.main,
+    elevation: theme.palette.success.main,
+  };
   const intensityColor = lap.intensityClass ? INTENSITY_COLORS[lap.intensityClass] ?? '#666' : '#666';
   const intensityLabel = lap.intensityClass ? INTENSITY_LABELS[lap.intensityClass] ?? '' : '';
 
@@ -134,15 +144,16 @@ export default function LapCard({
       onMouseEnter={() => onHover?.(index)}
       onMouseLeave={() => onHover?.(null)}
       sx={{
-        bgcolor: isBest ? 'rgba(255,170,0,0.08)' : '#161B22',
-        borderRadius: 2,
+        bgcolor: isBest ? alpha(theme.palette.warning.main, 0.08) : 'background.paper',
+        borderRadius: 2.5,
         border: '1px solid',
-        borderColor: isBest ? 'rgba(255,170,0,0.4)' : '#30363D',
+        borderColor: isBest ? alpha(theme.palette.warning.main, 0.42) : 'divider',
         overflow: 'hidden',
         cursor: 'pointer',
-        transition: 'border-color 0.2s, background-color 0.2s',
+        transition: theme.tokens?.transition ?? 'border-color 0.2s, background-color 0.2s',
         '&:hover': {
-          borderColor: isBest ? 'rgba(255,170,0,0.7)' : '#58A6FF',
+          borderColor: isBest ? alpha(theme.palette.warning.main, 0.7) : alpha(theme.palette.primary.main, 0.58),
+          bgcolor: isBest ? alpha(theme.palette.warning.main, 0.1) : theme.tokens?.surfaceSubtle,
         },
       }}
     >
@@ -161,7 +172,7 @@ export default function LapCard({
           {/* Header row */}
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography sx={{ color: '#8B949E', fontSize: '0.8rem', fontWeight: 700 }}>
+              <Typography sx={{ color: 'text.secondary', fontSize: '0.8rem', fontWeight: 700 }}>
                 {lap.name || `Okr. ${index + 1}`}
               </Typography>
               {!!intensityLabel && (
@@ -189,8 +200,8 @@ export default function LapCard({
                         height: 20,
                         fontSize: '0.6rem',
                         fontWeight: 600,
-                        bgcolor: 'rgba(255,68,68,0.15)',
-                        color: '#FF6B6B',
+                        bgcolor: (currentTheme) => alpha(currentTheme.palette.error.main, 0.12),
+                        color: 'error.main',
                       }}
                     />
                   )}
@@ -203,15 +214,15 @@ export default function LapCard({
                         height: 20,
                         fontSize: '0.6rem',
                         fontWeight: 600,
-                        bgcolor: 'rgba(255,170,0,0.15)',
-                        color: '#FFAA00',
+                        bgcolor: (currentTheme) => alpha(currentTheme.palette.warning.main, 0.14),
+                        color: 'warning.main',
                       }}
                     />
                   )}
                 </Box>
               )}
             </Box>
-            <IconButton size="small" onClick={(e) => { e.stopPropagation(); onToggleExpand(); }} sx={{ color: '#8B949E' }}>
+            <IconButton size="small" onClick={(e) => { e.stopPropagation(); onToggleExpand(); }} sx={{ color: 'text.secondary' }}>
               {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
             </IconButton>
           </Box>
@@ -219,26 +230,26 @@ export default function LapCard({
           {/* Primary metrics */}
           <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'baseline' }}>
             <Box>
-              <Typography sx={{ fontSize: '1.1rem', fontWeight: 600, color: '#E6EDF3', lineHeight: 1.3 }}>
+              <Typography sx={{ fontSize: '1.1rem', fontWeight: 700, color: 'text.primary', lineHeight: 1.3 }}>
                 {formatDuration(lap.movingTimeSec)}
               </Typography>
-              <Typography sx={{ fontSize: '0.65rem', color: '#8B949E', textTransform: 'uppercase' }}>
+              <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', textTransform: 'uppercase' }}>
                 Czas
               </Typography>
             </Box>
             <Box>
-              <Typography sx={{ fontSize: '1.1rem', fontWeight: 600, color: '#E6EDF3', lineHeight: 1.3 }}>
+              <Typography sx={{ fontSize: '1.1rem', fontWeight: 700, color: 'text.primary', lineHeight: 1.3 }}>
                 {lap.avgPowerW != null ? `${lap.avgPowerW} W` : '-'}
               </Typography>
-              <Typography sx={{ fontSize: '0.65rem', color: '#8B949E', textTransform: 'uppercase' }}>
+              <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', textTransform: 'uppercase' }}>
                 Moc
               </Typography>
             </Box>
             <Box>
-              <Typography sx={{ fontSize: '1.1rem', fontWeight: 600, color: '#E6EDF3', lineHeight: 1.3 }}>
+              <Typography sx={{ fontSize: '1.1rem', fontWeight: 700, color: 'text.primary', lineHeight: 1.3 }}>
                 {lap.avgHeartrate != null ? `${lap.avgHeartrate}` : '-'}
               </Typography>
-              <Typography sx={{ fontSize: '0.65rem', color: '#8B949E', textTransform: 'uppercase' }}>
+              <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', textTransform: 'uppercase' }}>
                 HR
               </Typography>
             </Box>
@@ -246,16 +257,16 @@ export default function LapCard({
 
           {/* Secondary metrics */}
           <Box sx={{ display: 'flex', gap: 2, mt: 1, flexWrap: 'wrap' }}>
-            <Typography sx={{ fontSize: '0.75rem', color: '#8B949E' }}>
+            <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
               {formatDistance(lap.distanceM)}
             </Typography>
             {lap.avgCadence != null && (
-              <Typography sx={{ fontSize: '0.75rem', color: '#8B949E' }}>
+              <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
                 {lap.avgCadence} rpm
               </Typography>
             )}
             {lap.totalElevationGain != null && lap.totalElevationGain > 0 && (
-              <Typography sx={{ fontSize: '0.75rem', color: '#8B949E' }}>
+              <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
                 +{Math.round(lap.totalElevationGain)} m
               </Typography>
             )}
@@ -265,23 +276,23 @@ export default function LapCard({
 
       {/* Expanded section */}
       <Collapse in={isExpanded} timeout={200}>
-        <Box sx={{ px: 2, pb: 2, pt: 0, borderTop: '1px solid #30363D33' }}>
+        <Box sx={{ px: 2, pb: 2, pt: 0, borderTop: '1px solid', borderColor: 'divider' }}>
           {/* Advanced metrics */}
           <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 2, mt: 1.5 }}>
             {lap.normalizedPowerW != null && (
               <Box>
-                <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#E6EDF3' }}>
+                <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: 'text.primary' }}>
                   {lap.normalizedPowerW} W
                 </Typography>
-                <Typography sx={{ fontSize: '0.6rem', color: '#8B949E', textTransform: 'uppercase' }}>NP</Typography>
+                <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', textTransform: 'uppercase' }}>NP</Typography>
               </Box>
             )}
             {lap.variabilityIndex != null && (
               <Box>
-                <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#E6EDF3' }}>
+                <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: 'text.primary' }}>
                   {lap.variabilityIndex.toFixed(2)}
                 </Typography>
-                <Typography sx={{ fontSize: '0.6rem', color: '#8B949E', textTransform: 'uppercase' }}>VI</Typography>
+                <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', textTransform: 'uppercase' }}>VI</Typography>
               </Box>
             )}
             {lap.powerDropPct != null && (
@@ -290,22 +301,22 @@ export default function LapCard({
                   sx={{
                     fontSize: '0.8rem',
                     fontWeight: 600,
-                    color: lap.powerDropPct > 0 ? '#FF6B6B' : lap.powerDropPct < 0 ? '#44CC44' : '#E6EDF3',
+                    color: lap.powerDropPct > 0 ? 'error.main' : lap.powerDropPct < 0 ? 'success.main' : 'text.primary',
                   }}
                 >
                   {lap.powerDropPct > 0 ? '-' : '+'}{Math.abs(lap.powerDropPct).toFixed(1)}%
                 </Typography>
-                <Typography sx={{ fontSize: '0.6rem', color: '#8B949E', textTransform: 'uppercase' }}>
+                <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', textTransform: 'uppercase' }}>
                   Spadek mocy
                 </Typography>
               </Box>
             )}
             {lap.avgSpeedMs != null && (
               <Box>
-                <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#E6EDF3' }}>
+                <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: 'text.primary' }}>
                   {(lap.avgSpeedMs * 3.6).toFixed(1)} km/h
                 </Typography>
-                <Typography sx={{ fontSize: '0.6rem', color: '#8B949E', textTransform: 'uppercase' }}>Prędkość</Typography>
+                <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', textTransform: 'uppercase' }}>Prędkość</Typography>
               </Box>
             )}
           </Box>
@@ -317,26 +328,26 @@ export default function LapCard({
               <Box sx={{ display: 'flex', gap: 2, mb: 1, flexWrap: 'wrap' }}>
                 {!!hasPower && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Box sx={{ width: 12, height: 3, borderRadius: 1, bgcolor: '#FF6B35' }} />
-                    <Typography sx={{ fontSize: '0.6rem', color: '#8B949E' }}>Moc</Typography>
+                    <Box sx={{ width: 12, height: 3, borderRadius: 1, bgcolor: colors.power }} />
+                    <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary' }}>Moc</Typography>
                   </Box>
                 )}
                 {!!hasHr && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Box sx={{ width: 12, height: 3, borderRadius: 1, bgcolor: '#FF4444' }} />
-                    <Typography sx={{ fontSize: '0.6rem', color: '#8B949E' }}>Tętno</Typography>
+                    <Box sx={{ width: 12, height: 3, borderRadius: 1, bgcolor: colors.heartRate }} />
+                    <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary' }}>Tętno</Typography>
                   </Box>
                 )}
                 {!!hasSpeed && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Box sx={{ width: 12, height: 3, borderRadius: 1, bgcolor: '#58A6FF' }} />
-                    <Typography sx={{ fontSize: '0.6rem', color: '#8B949E' }}>Prędkość</Typography>
+                    <Box sx={{ width: 12, height: 3, borderRadius: 1, bgcolor: colors.speed }} />
+                    <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary' }}>Prędkość</Typography>
                   </Box>
                 )}
                 {!!hasAlt && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Box sx={{ width: 12, height: 3, borderRadius: 1, bgcolor: '#3FB950' }} />
-                    <Typography sx={{ fontSize: '0.6rem', color: '#8B949E' }}>Przewyższenie</Typography>
+                    <Box sx={{ width: 12, height: 3, borderRadius: 1, bgcolor: colors.elevation }} />
+                    <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary' }}>Przewyższenie</Typography>
                   </Box>
                 )}
               </Box>
@@ -345,8 +356,8 @@ export default function LapCard({
                 <ComposedChart data={mergedChartData} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
                   <defs>
                     <linearGradient id={`altGrad-${index}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3FB950" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#3FB950" stopOpacity={0.02} />
+                      <stop offset="0%" stopColor={colors.elevation} stopOpacity={0.26} />
+                      <stop offset="100%" stopColor={colors.elevation} stopOpacity={0.02} />
                     </linearGradient>
                   </defs>
                   <XAxis dataKey="t" hide />
@@ -378,14 +389,7 @@ export default function LapCard({
                     />
                   )}
                   <Tooltip
-                    contentStyle={{
-                      background: '#1C2128',
-                      border: '1px solid #30363D',
-                      borderRadius: 6,
-                      fontSize: '0.7rem',
-                      color: '#E6EDF3',
-                      padding: '4px 8px',
-                    }}
+                    {...chart.tooltip}
                     formatter={(value, name) => {
                       const numericValue = Number(value ?? 0);
                       const seriesName = String(name ?? '');
@@ -416,7 +420,7 @@ export default function LapCard({
                     <Line
                       yAxisId="power"
                       dataKey="speed"
-                      stroke="#58A6FF"
+                      stroke={colors.speed}
                       strokeWidth={1.2}
                       strokeOpacity={0.6}
                       dot={false}
@@ -429,7 +433,7 @@ export default function LapCard({
                     <Line
                       yAxisId="hr"
                       dataKey="hr"
-                      stroke="#FF4444"
+                      stroke={colors.heartRate}
                       strokeWidth={1.5}
                       dot={false}
                       isAnimationActive={false}
@@ -441,7 +445,7 @@ export default function LapCard({
                     <Line
                       yAxisId="power"
                       dataKey="power"
-                      stroke="#FF6B35"
+                      stroke={colors.power}
                       strokeWidth={1.8}
                       dot={false}
                       isAnimationActive={false}
@@ -453,7 +457,7 @@ export default function LapCard({
                     <ReferenceLine
                       yAxisId="power"
                       y={lap.avgPowerW}
-                      stroke="#FF6B35"
+                      stroke={colors.power}
                       strokeDasharray="4 2"
                       strokeOpacity={0.3}
                       strokeWidth={1}

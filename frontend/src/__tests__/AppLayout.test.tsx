@@ -1,7 +1,7 @@
 import { ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { describe, it, expect, vi, beforeAll } from 'vitest';
 
 import AppLayout from '../components/layout/AppLayout';
@@ -23,6 +23,10 @@ vi.mock('../components/layout/TopBar', () => ({
   default: () => <div>TopBar</div>,
 }));
 
+vi.mock('../components/layout/TopBarSyncButton', () => ({
+  default: () => <div>Sync button</div>,
+}));
+
 vi.mock('../hooks/useAnalytics', () => ({
   useReadiness: () => ({ data: null }),
   useBlockHealth: () => ({ data: null }),
@@ -32,13 +36,20 @@ vi.mock('../hooks/useAnalytics', () => ({
   useWeatherGradient: () => ({ data: null }),
 }));
 
-function renderWithProviders(initialEntry: string) {
-  const queryClient = new QueryClient({
+function LocationProbe() {
+  const location = useLocation();
+  return <output data-testid="location-probe">{location.pathname}{location.search}</output>;
+}
+
+function createQueryClient() {
+  return new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+}
 
+function renderWithProviders(initialEntry: string) {
   return render(
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={createQueryClient()}>
       <ThemeProvider theme={theme}>
         <MemoryRouter initialEntries={[initialEntry]}>
           <Routes>
@@ -46,6 +57,23 @@ function renderWithProviders(initialEntry: string) {
               <Route path="/" element={<div>Dashboard</div>} />
             </Route>
           </Routes>
+        </MemoryRouter>
+      </ThemeProvider>
+    </QueryClientProvider>,
+  );
+}
+
+async function renderRealTopBar(initialEntry: string) {
+  const { default: RealTopBar } = await vi.importActual<typeof import('../components/layout/TopBar')>(
+    '../components/layout/TopBar',
+  );
+
+  return render(
+    <QueryClientProvider client={createQueryClient()}>
+      <ThemeProvider theme={theme}>
+        <MemoryRouter initialEntries={[initialEntry]}>
+          <RealTopBar onToggleSidebar={vi.fn()} />
+          <LocationProbe />
         </MemoryRouter>
       </ThemeProvider>
     </QueryClientProvider>,
@@ -67,5 +95,23 @@ describe('AppLayout', () => {
     await waitForElementToBeRemoved(() =>
       screen.queryByText('Konto Strava zostało połączone. Możesz teraz uruchomić synchronizację aktywności.'),
     );
+  });
+});
+
+describe('TopBar search pill', () => {
+  it('renders the global search input', async () => {
+    await renderRealTopBar('/');
+
+    expect(screen.getByRole('textbox', { name: 'Szukaj aktywności lub metryk' })).toBeDefined();
+  });
+
+  it('navigates to activities with the search query on Enter', async () => {
+    await renderRealTopBar('/');
+
+    const input = screen.getByRole('textbox', { name: 'Szukaj aktywności lub metryk' });
+    fireEvent.change(input, { target: { value: 'tempo ride' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(screen.getByTestId('location-probe').textContent).toBe('/activities?q=tempo%20ride');
   });
 });

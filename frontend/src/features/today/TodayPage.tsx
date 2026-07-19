@@ -55,7 +55,7 @@ export default function TodayPage() {
   return (
     <PageContainer
       title="Dzisiaj"
-      subtitle="Najważniejsza decyzja, kontekst i moduły w Twoim układzie."
+      subtitle="Rekomendacja dnia, forma i kluczowe moduły w Twoim układzie."
       maxWidth={1440}
       actions={(
         <Stack direction="row" spacing={1} alignItems="center">

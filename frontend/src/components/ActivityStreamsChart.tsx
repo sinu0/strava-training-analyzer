@@ -1,4 +1,5 @@
 import { Box } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useMemo } from 'react';
 import {
   ResponsiveContainer,
@@ -11,7 +12,8 @@ import {
   CartesianGrid,
 } from 'recharts';
 
-import { CHART_COLORS, STATUS_COLORS } from '../utils/colors';
+import { getChartVisuals } from '../utils/chartStyles';
+import { STATUS_COLORS } from '../utils/colors';
 
 interface StreamsChartProps {
   timeStream: number[] | null;
@@ -28,6 +30,8 @@ export default function ActivityStreamsChart({
   cadenceStream,
   altitudeStream,
 }: StreamsChartProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const data = useMemo(() => {
     const length = timeStream?.length ?? powerStream?.length ?? heartrateStream?.length ?? 0;
     if (length === 0) return [];
@@ -59,32 +63,26 @@ export default function ActivityStreamsChart({
     <Box sx={{ width: '100%', height: 350 }}>
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data}>
-          <CartesianGrid stroke={CHART_COLORS.grid} strokeDasharray="3 3" />
+          <CartesianGrid {...chart.grid} />
           <XAxis
             dataKey="time"
             tickFormatter={formatTime}
-            stroke={CHART_COLORS.tickText}
-            tick={{ fontSize: 11 }}
+            {...chart.axis}
           />
 
           {!!altitudeStream && (
             <YAxis
               yAxisId="altitude"
               orientation="right"
-              stroke={CHART_COLORS.tickText}
-              tick={{ fontSize: 11 }}
+              {...chart.axis}
               domain={['dataMin', 'dataMax']}
             />
           )}
 
-          <YAxis yAxisId="main" stroke={CHART_COLORS.tickText} tick={{ fontSize: 11 }} />
+          <YAxis yAxisId="main" {...chart.axis} />
 
           <Tooltip
-            contentStyle={{
-              backgroundColor: CHART_COLORS.tooltip,
-              border: `1px solid ${CHART_COLORS.grid}`,
-              borderRadius: 8,
-            }}
+            {...chart.tooltip}
             labelFormatter={(label) => formatTime(Number(label ?? 0))}
           />
 
@@ -94,7 +92,7 @@ export default function ActivityStreamsChart({
               type="monotone"
               dataKey="altitude"
               stroke="none"
-              fill={CHART_COLORS.grid}
+              fill={theme.tokens?.chart.grid ?? theme.palette.divider}
               fillOpacity={0.5}
               name="Altitude (m)"
             />
@@ -105,7 +103,7 @@ export default function ActivityStreamsChart({
               yAxisId="main"
               type="monotone"
               dataKey="power"
-              stroke={CHART_COLORS.primary}
+              stroke={theme.tokens?.chart.primary ?? theme.palette.primary.main}
               dot={false}
               strokeWidth={1.5}
               name="Power (W)"
@@ -129,7 +127,7 @@ export default function ActivityStreamsChart({
               yAxisId="main"
               type="monotone"
               dataKey="cadence"
-              stroke={CHART_COLORS.secondary}
+              stroke={theme.tokens?.chart.secondary ?? theme.palette.secondary.main}
               dot={false}
               strokeWidth={1}
               name="Cadence (rpm)"

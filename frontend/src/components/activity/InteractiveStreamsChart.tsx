@@ -1,4 +1,5 @@
 import { Box, Typography, Chip, Stack } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useMemo } from 'react';
 import {
   ResponsiveContainer,
@@ -18,6 +19,7 @@ import type {
   StreamDataPoint,
 } from '@/components/activity/interactiveStreams.types';
 import { useChartInteraction } from '@/components/activity/useChartInteraction';
+import { getChartVisuals } from '@/utils/chartStyles';
 import { CHART_COLORS, STATUS_COLORS, alphaColor } from '@/utils/colors';
 import { formatDuration } from '@/utils/formatters';
 
@@ -53,6 +55,8 @@ export default function InteractiveStreamsChart({
   onHoverIndex,
   onSelectionChange,
 }: InteractiveStreamsChartProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const data = useMemo(() => {
     const length = timeStream?.length ?? powerStream?.length ?? heartrateStream?.length ?? 0;
     if (length === 0) return [] as StreamDataPoint[];
@@ -128,43 +132,36 @@ export default function InteractiveStreamsChart({
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
           >
-            <CartesianGrid stroke={CHART_COLORS.grid} strokeDasharray="3 3" />
+            <CartesianGrid {...chart.grid} />
             <XAxis
               dataKey="time"
               tickFormatter={formatTime}
-              stroke={CHART_COLORS.tickText}
-              tick={{ fontSize: 11 }}
+              {...chart.axis}
             />
 
             {!!altitudeStream && (
               <YAxis
                 yAxisId="altitude"
                 orientation="right"
-                stroke={CHART_COLORS.tickText}
-                tick={{ fontSize: 11 }}
+                {...chart.axis}
                 domain={['dataMin - 10', 'dataMax + 20']}
                 width={44}
                 tickFormatter={(v: number) => `${Math.round(v)}m`}
               />
             )}
 
-            <YAxis yAxisId="main" stroke={CHART_COLORS.tickText} tick={{ fontSize: 11 }} />
+            <YAxis yAxisId="main" {...chart.axis} />
 
             <Tooltip
-              contentStyle={{
-                backgroundColor: CHART_COLORS.tooltip,
-                border: `1px solid ${CHART_COLORS.grid}`,
-                borderRadius: 8,
-                fontSize: 12,
-              }}
+              {...chart.tooltip}
               labelFormatter={(label) => formatTime(Number(label ?? 0))}
             />
 
             {!!altitudeStream && (
               <defs>
                 <linearGradient id="altitudeGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={CHART_COLORS.tertiary} stopOpacity={0.45} />
-                  <stop offset="95%" stopColor={CHART_COLORS.tertiary} stopOpacity={0.12} />
+                  <stop offset="5%" stopColor={theme.tokens?.chart.tertiary ?? theme.palette.info.main} stopOpacity={0.45} />
+                  <stop offset="95%" stopColor={theme.tokens?.chart.tertiary ?? theme.palette.info.main} stopOpacity={0.12} />
                 </linearGradient>
               </defs>
             )}
@@ -173,7 +170,7 @@ export default function InteractiveStreamsChart({
                 yAxisId="altitude"
                 type="monotone"
                 dataKey="altitude"
-                stroke={alphaColor(CHART_COLORS.tertiary, 0.82)}
+                stroke={alphaColor(theme.tokens?.chart.tertiary ?? theme.palette.info.main, 0.82)}
                 strokeWidth={1.5}
                 fill="url(#altitudeGradient)"
                 fillOpacity={1}
@@ -187,7 +184,7 @@ export default function InteractiveStreamsChart({
                 yAxisId="main"
                 type="monotone"
                 dataKey="power"
-                stroke={CHART_COLORS.primary}
+                stroke={theme.tokens?.chart.primary ?? theme.palette.primary.main}
                 dot={false}
                 strokeWidth={1.5}
                 name="Moc (W)"
@@ -211,7 +208,7 @@ export default function InteractiveStreamsChart({
                 yAxisId="main"
                 type="monotone"
                 dataKey="cadence"
-                stroke={CHART_COLORS.secondary}
+                stroke={theme.tokens?.chart.secondary ?? theme.palette.secondary.main}
                 dot={false}
                 strokeWidth={1}
                 name="Kadencja (rpm)"
@@ -236,7 +233,7 @@ export default function InteractiveStreamsChart({
                 yAxisId="main"
                 x1={refAreaLeft}
                 x2={refAreaRight}
-                fill={CHART_COLORS.primary}
+                fill={theme.tokens?.chart.primary ?? theme.palette.primary.main}
                 fillOpacity={0.15}
                 strokeOpacity={0}
               />
@@ -248,16 +245,16 @@ export default function InteractiveStreamsChart({
                 yAxisId="main"
                 x1={selectionRange[0]}
                 x2={selectionRange[1]}
-                fill={CHART_COLORS.primary}
+                fill={theme.tokens?.chart.primary ?? theme.palette.primary.main}
                 fillOpacity={0.12}
-                stroke={CHART_COLORS.primary}
+                stroke={theme.tokens?.chart.primary ?? theme.palette.primary.main}
                 strokeOpacity={0.3}
               />
             )}
           </ComposedChart>
         </ResponsiveContainer>
       </Box>
-      <Typography sx={{ color: CHART_COLORS.tickText, fontSize: '0.7rem', textAlign: 'center', mt: 0.5 }}>
+      <Typography color="text.secondary" sx={{ fontSize: '0.7rem', textAlign: 'center', mt: 0.5 }}>
         Najedź myszką, aby zobaczyć punkt na mapie • Kliknij i przeciągnij, aby wybrać odcinek
       </Typography>
     </Box>

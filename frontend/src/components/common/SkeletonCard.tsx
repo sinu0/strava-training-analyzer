@@ -30,10 +30,14 @@ export default function SkeletonCard({
       }}
     >
       <Box sx={{ px: { xs: 2, md: 2.5, lg: 3 }, pt: { xs: 2, md: 2.5 }, pb: 1 }}>
-        {title ? <Skeleton variant="text" width="34%" height={18} /> : null}
+        {title ? <Skeleton variant="text" width="34%" height={22} sx={{ borderRadius: 2 }} /> : null}
       </Box>
       <Stack spacing={1.2} sx={{ px: { xs: 2, md: 2.5, lg: 3 }, pb: { xs: 2, md: 2.5, lg: 3 } }}>
-        <Skeleton variant="rounded" height={typeof height === 'number' ? Math.max(80, height) - 80 : 140} />
+        <Skeleton
+          variant="rounded"
+          height={typeof height === 'number' ? Math.max(80, height) - 80 : 140}
+          sx={{ borderRadius: 4 }}
+        />
         {lineKeys.map((lineKey, index) => (
           <Skeleton
             key={lineKey}

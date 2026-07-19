@@ -24,14 +24,15 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <Box
       sx={{
-        bgcolor: '#161B22',
+        bgcolor: 'background.paper',
         borderRadius: 3,
-        border: '1px solid #30363D',
+        border: '1px solid',
+        borderColor: 'divider',
         p: 3,
         mb: 3,
       }}
     >
-      <Typography sx={{ fontSize: '1rem', fontWeight: 700, color: '#E6EDF3', mb: 2 }}>
+      <Typography sx={{ fontSize: '1rem', fontWeight: 800, color: 'text.primary', mb: 2 }}>
         {title}
       </Typography>
       {children}
@@ -42,9 +43,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function StatRow({ label, value, unit }: { label: string; value: string | number | null; unit?: string }) {
   if (value == null || value === '') return null;
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.75, borderBottom: '1px solid rgba(48,54,61,0.3)' }}>
-      <Typography sx={{ color: '#8B949E', fontSize: '0.8rem' }}>{label}</Typography>
-      <Typography sx={{ color: '#E6EDF3', fontSize: '0.8rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.75, borderBottom: '1px solid', borderColor: 'divider' }}>
+      <Typography color="text.secondary" sx={{ fontSize: '0.8rem' }}>{label}</Typography>
+      <Typography color="text.primary" sx={{ fontSize: '0.8rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
         {value}{unit ? ` ${unit}` : ''}
       </Typography>
     </Box>
@@ -144,7 +145,7 @@ export default function AdvancedStatsTab({ activity }: AdvancedStatsTabProps) {
   if (!hasAny) {
     return (
       <Box sx={{ textAlign: 'center', py: 6 }}>
-        <Typography sx={{ color: '#8B949E' }}>Brak danych strumieni do analizy zaawansowanej.</Typography>
+        <Typography color="text.secondary">Brak danych strumieni do analizy zaawansowanej.</Typography>
       </Box>
     );
   }

@@ -79,22 +79,20 @@ export default function Section({
             pb: subtitle ? 0.5 : 1.5,
           }}
         >
-          <Box>
+          <Box sx={{ minWidth: 0 }}>
             {!!title && (
               <Typography
-                variant="subtitle2"
+                variant="subtitle1"
                 sx={{
-                  color: 'text.secondary',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  fontSize: '0.75rem',
+                  fontWeight: 800,
+                  letterSpacing: '-0.01em',
                 }}
               >
                 {title}
               </Typography>
             )}
             {!!subtitle && (
-              <Typography variant="caption" color="text.secondary" sx={{ opacity: 0.88 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
                 {subtitle}
               </Typography>
             )}

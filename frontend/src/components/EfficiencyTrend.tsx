@@ -1,9 +1,9 @@
 import { Box, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
 import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
-import { CHART_TICK, CHART_TOOLTIP_CONTENT_STYLE, CHART_TOOLTIP_ITEM_STYLE, CHART_TOOLTIP_LABEL_STYLE } from '../utils/chartStyles';
-import { CHART_COLORS } from '../utils/colors';
+import { getChartVisuals } from '../utils/chartStyles';
 
 import type { TrendPoint } from '../types/analytics';
 
@@ -14,6 +14,8 @@ interface EfficiencyTrendProps {
 const EfficiencyTrend = memo(function EfficiencyTrend({
   data,
 }: EfficiencyTrendProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const chartData = useMemo(
     () =>
       data.map((d, i) => ({
@@ -36,12 +38,11 @@ const EfficiencyTrend = memo(function EfficiencyTrend({
     <Box sx={{ width: '100%', height: 400 }}>
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
+          <CartesianGrid {...chart.grid} />
           <XAxis
             dataKey="index"
             type="number"
-            stroke={CHART_COLORS.grid}
-            tick={CHART_TICK}
+            {...chart.axis}
             tickFormatter={(i) => {
               const d = chartData[i];
               return d ? new Date(d.date).toLocaleDateString('pl-PL', { month: 'short', day: 'numeric' }) : '';
@@ -49,14 +50,11 @@ const EfficiencyTrend = memo(function EfficiencyTrend({
           />
           <YAxis
             dataKey="value"
-            stroke={CHART_COLORS.grid}
-            tick={CHART_TICK}
-            label={{ value: 'EF', angle: -90, position: 'insideLeft', fill: CHART_COLORS.tickText }}
+            {...chart.axis}
+            label={{ value: 'EF', angle: -90, position: 'insideLeft', fill: theme.tokens.chart.tick, fontSize: 11, fontWeight: 700 }}
           />
           <Tooltip
-            contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
-            labelStyle={CHART_TOOLTIP_LABEL_STYLE}
-            itemStyle={CHART_TOOLTIP_ITEM_STYLE}
+            {...chart.tooltip}
             formatter={(value) => [Number(value ?? 0).toFixed(3), 'EF']}
             labelFormatter={(i) => {
               const d = chartData[Number(i)];
@@ -65,7 +63,7 @@ const EfficiencyTrend = memo(function EfficiencyTrend({
           />
           <Scatter
             data={chartData}
-            fill={CHART_COLORS.secondary}
+            fill={theme.tokens.chart.secondary}
             shape="circle"
           />
         </ScatterChart>

@@ -1,6 +1,5 @@
 import WidgetsIcon from '@mui/icons-material/Widgets';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useUiPreferences } from '@/hooks/useUiPreferences';
@@ -45,17 +44,15 @@ export default function MobileBottomNav() {
       sx={{
         display: { xs: 'block', md: 'none' },
         position: 'fixed',
-        left: 8,
-        right: 8,
-        bottom: 'max(8px, env(safe-area-inset-bottom))',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        pb: 'env(safe-area-inset-bottom)',
         zIndex: (theme) => theme.zIndex.appBar,
-        borderRadius: 3.25,
-        border: '1px solid',
+        borderTop: '1px solid',
         borderColor: (theme) => theme.tokens.surfaceBorder,
-        boxShadow: (theme) => theme.tokens.cardShadowHover,
-        bgcolor: (theme) => alpha(theme.palette.background.paper, 0.95),
-        backdropFilter: 'blur(22px)',
-        overflow: 'hidden',
+        boxShadow: (theme) => theme.tokens.cardShadow,
+        bgcolor: (theme) => theme.palette.background.paper,
       }}
     >
       <BottomNavigation

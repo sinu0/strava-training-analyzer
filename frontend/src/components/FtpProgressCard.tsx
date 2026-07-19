@@ -5,6 +5,7 @@ import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { Box, Typography, Chip, Divider, LinearProgress, Stack, Tooltip } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -16,6 +17,7 @@ import {
 } from 'recharts';
 
 import PowerProfileRadar from './PowerProfileRadar';
+import { getChartVisuals } from '../utils/chartStyles';
 import {
   CHART_COLORS,
   COMMON_COLORS,
@@ -55,6 +57,8 @@ function getFtpColor(ftp: number): string {
 }
 
 export default function FtpProgressCard({ data, powerCurve, weightKg }: FtpProgressCardProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   if (!data) {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 2 }}>
@@ -244,24 +248,20 @@ export default function FtpProgressCard({ data, powerCurve, weightKg }: FtpProgr
                   <stop offset="95%" stopColor={ftpColor} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
+              <CartesianGrid {...chart.grid} />
               <XAxis
                 dataKey="date"
-                tick={{ fill: CHART_COLORS.tickText, fontSize: 10 }}
+                {...chart.axis}
                 tickFormatter={(v) =>
                   new Date(v).toLocaleDateString('pl-PL', { month: 'short', day: 'numeric' })
                 }
               />
               <YAxis
-                tick={{ fill: CHART_COLORS.tickText, fontSize: 10 }}
+                {...chart.axis}
                 domain={['dataMin - 5', 'dataMax + 5']}
               />
               <RechartsTooltip
-                contentStyle={{
-                  backgroundColor: CHART_COLORS.tooltip,
-                  border: `1px solid ${CHART_COLORS.grid}`,
-                  borderRadius: 8,
-                }}
+                {...chart.tooltip}
                 formatter={(value) => [`${Number(value ?? 0)} W`, 'FTP']}
                 labelFormatter={(value) => new Date(String(value ?? '')).toLocaleDateString('pl-PL')}
               />

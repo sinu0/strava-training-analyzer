@@ -22,7 +22,7 @@ export default function PerformanceSurface({
           overflow: 'hidden',
           border: '1px solid',
           borderColor: (theme) => accent ? 'rgba(252,76,2,0.42)' : theme.tokens?.surfaceBorder ?? theme.palette.divider,
-          borderRadius: { xs: 3, md: 4 },
+          borderRadius: { xs: 3, md: 3.5 },
           bgcolor: 'background.paper',
           backgroundImage: (theme) => {
             const subtle = theme.tokens?.surfaceSubtle ?? 'rgba(255,255,255,0.025)';

@@ -27,7 +27,7 @@ export default function ChartWrapper({ title, legend, height = 300, children }: 
           }}
         >
           {!!title && (
-            <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+            <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.secondary' }}>
               {title}
             </Typography>
           )}

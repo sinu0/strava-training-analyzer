@@ -43,11 +43,23 @@ export default function EmptyState({
           sx={{ width: 140, height: 140, objectFit: 'contain', opacity: 0.85, mb: 1 }}
         />
       ) : (
-        <Box sx={{ color: 'text.secondary', opacity: 0.5, fontSize: 48, display: 'flex' }}>
-          {icon ?? <InboxIcon fontSize="inherit" />}
+        <Box
+          sx={{
+            width: 72,
+            height: 72,
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: (theme) => theme.tokens?.iconBubble ?? 'action.hover',
+            color: 'text.secondary',
+            mb: 1,
+          }}
+        >
+          {icon ?? <InboxIcon sx={{ fontSize: 32 }} />}
         </Box>
       )}
-      <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'text.primary' }}>
         {title}
       </Typography>
       {!!description && (

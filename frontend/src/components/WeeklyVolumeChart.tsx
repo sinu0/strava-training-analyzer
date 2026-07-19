@@ -1,8 +1,9 @@
 import { Box, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
-import { CHART_COLORS } from '../utils/colors';
+import { getChartVisuals } from '../utils/chartStyles';
 
 import type { WeeklySummary } from '../types/analytics';
 
@@ -13,6 +14,8 @@ interface WeeklyVolumeChartProps {
 const WeeklyVolumeChart = memo(function WeeklyVolumeChart({
   data,
 }: WeeklyVolumeChartProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const chartData = useMemo(() => {
     return data.map((w) => ({
       week: new Date(w.weekStart).toLocaleDateString('pl-PL', { month: 'short', day: 'numeric' }),
@@ -33,17 +36,16 @@ const WeeklyVolumeChart = memo(function WeeklyVolumeChart({
     <Box sx={{ width: '100%', height: 400 }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
-          <XAxis dataKey="week" stroke={CHART_COLORS.grid} tick={{ fill: CHART_COLORS.tickText, fontSize: 12 }} />
+          <CartesianGrid {...chart.grid} />
+          <XAxis dataKey="week" {...chart.axis} />
           <YAxis
-            stroke={CHART_COLORS.grid}
-            tick={{ fill: CHART_COLORS.tickText, fontSize: 12 }}
-            label={{ value: 'TSS', angle: -90, position: 'insideLeft', fill: CHART_COLORS.tickText }}
+            {...chart.axis}
+            label={{ value: 'TSS', angle: -90, position: 'insideLeft', fill: theme.tokens.chart.tick, fontSize: 11, fontWeight: 700 }}
           />
           <Tooltip
-            contentStyle={{ backgroundColor: CHART_COLORS.tooltip, border: 'none', borderRadius: 8 }}
+            {...chart.tooltip}
           />
-          <Bar dataKey="tss" fill={CHART_COLORS.primary} radius={[4, 4, 0, 0]} name="TSS" />
+          <Bar dataKey="tss" fill={theme.tokens.chart.primary} radius={chart.barRadius} name="TSS" />
         </BarChart>
       </ResponsiveContainer>
     </Box>

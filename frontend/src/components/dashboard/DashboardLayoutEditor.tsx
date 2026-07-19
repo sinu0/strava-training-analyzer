@@ -115,9 +115,9 @@ export default function DashboardLayoutEditor({
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
-                p: 1,
-                borderRadius: 2,
-                bgcolor: w.visible ? 'rgba(255,255,255,0.04)' : 'transparent',
+                p: 1.25,
+                borderRadius: 2.5,
+                bgcolor: (theme) => w.visible ? theme.tokens?.surfaceSubtle ?? 'rgba(255,255,255,0.04)' : 'transparent',
                 opacity: w.visible ? 1 : 0.5,
               }}
             >

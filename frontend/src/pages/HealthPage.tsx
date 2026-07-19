@@ -17,6 +17,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import {
@@ -41,9 +42,8 @@ import SkeletonCard from '@/components/common/SkeletonCard';
 import SwipeableContent from '@/components/common/SwipeableContent';
 import TabsNav from '@/components/common/TabsNav';
 import { useHealthOverview, useHealthTimeline, useRecoveryStatus } from '@/hooks/useHealth';
-import { CHART_ACTIVE_DOT, CHART_TICK, CHART_TOOLTIP_CONTENT_STYLE, CHART_TOOLTIP_LABEL_STYLE } from '@/utils/chartStyles';
+import { CHART_ACTIVE_DOT, getChartVisuals } from '@/utils/chartStyles';
 import {
-  CHART_COLORS,
   HEALTH_COLORS,
   STATUS_COLORS,
   alphaColor,
@@ -156,6 +156,7 @@ function MetricSummary({
 }
 
 export default function HealthPage() {
+  const chart = getChartVisuals(useTheme());
   const queryClient = useQueryClient();
   const [tab, setTab] = useState(0);
 
@@ -475,13 +476,10 @@ export default function HealthPage() {
                               <stop offset="95%" stopColor={HEALTH_COLORS.hrv} stopOpacity={0} />
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
-                          <XAxis dataKey="date" tick={CHART_TICK} />
-                          <YAxis tick={CHART_TICK} />
-                          <RechartsTooltip
-                            contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
-                            labelStyle={CHART_TOOLTIP_LABEL_STYLE}
-                          />
+                          <CartesianGrid {...chart.grid} />
+                          <XAxis dataKey="date" {...chart.axis} />
+                          <YAxis {...chart.axis} />
+                          <RechartsTooltip {...chart.tooltip} />
                           {overview?.hrvTrend.periodAvg != null && (
                             <ReferenceLine y={Math.round(overview.hrvTrend.periodAvg)} stroke={STATUS_COLORS.success} strokeDasharray="5 5" />
                           )}
@@ -515,13 +513,10 @@ export default function HealthPage() {
                               <stop offset="95%" stopColor={HEALTH_COLORS.restingHeartRate} stopOpacity={0} />
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
-                          <XAxis dataKey="date" tick={CHART_TICK} />
-                          <YAxis tick={CHART_TICK} domain={['dataMin - 2', 'dataMax + 2']} />
-                          <RechartsTooltip
-                            contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
-                            labelStyle={CHART_TOOLTIP_LABEL_STYLE}
-                          />
+                          <CartesianGrid {...chart.grid} />
+                          <XAxis dataKey="date" {...chart.axis} />
+                          <YAxis {...chart.axis} domain={['dataMin - 2', 'dataMax + 2']} />
+                          <RechartsTooltip {...chart.tooltip} />
                           {overview?.restingHrTrend.avg != null && (
                             <ReferenceLine y={Math.round(overview.restingHrTrend.avg)} stroke={STATUS_COLORS.error} strokeDasharray="5 5" />
                           )}
@@ -560,13 +555,10 @@ export default function HealthPage() {
                               <stop offset="95%" stopColor={HEALTH_COLORS.sleepScore} stopOpacity={0} />
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
-                          <XAxis dataKey="date" tick={CHART_TICK} />
-                          <YAxis tick={CHART_TICK} domain={[0, 100]} />
-                          <RechartsTooltip
-                            contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
-                            labelStyle={CHART_TOOLTIP_LABEL_STYLE}
-                          />
+                          <CartesianGrid {...chart.grid} />
+                          <XAxis dataKey="date" {...chart.axis} />
+                          <YAxis {...chart.axis} domain={[0, 100]} />
+                          <RechartsTooltip {...chart.tooltip} />
                           <ReferenceLine y={80} stroke={STATUS_COLORS.info} strokeDasharray="5 5" />
                           <Area
                             type="monotone"
@@ -592,18 +584,15 @@ export default function HealthPage() {
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={sleepStageData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
-                          <XAxis dataKey="date" tick={CHART_TICK} />
-                          <YAxis tick={CHART_TICK} unit="h" />
-                          <RechartsTooltip
-                            contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
-                            labelStyle={CHART_TOOLTIP_LABEL_STYLE}
-                          />
-                          <Legend wrapperStyle={{ fontSize: 12 }} />
-                          <Bar dataKey="deep" stackId="sleep" fill={STATUS_COLORS.highlight} name="Deep" />
-                          <Bar dataKey="light" stackId="sleep" fill={STATUS_COLORS.info} name="Light" />
-                          <Bar dataKey="rem" stackId="sleep" fill={STATUS_COLORS.secondary} name="REM" />
-                          <Bar dataKey="awake" stackId="sleep" fill={STATUS_COLORS.warning} name="Awake" />
+                          <CartesianGrid {...chart.grid} />
+                          <XAxis dataKey="date" {...chart.axis} />
+                          <YAxis {...chart.axis} unit="h" />
+                          <RechartsTooltip {...chart.tooltip} />
+                          <Legend {...chart.legend} />
+                          <Bar dataKey="deep" stackId="sleep" fill={STATUS_COLORS.highlight} radius={[0, 0, 0, 0]} name="Deep" />
+                          <Bar dataKey="light" stackId="sleep" fill={STATUS_COLORS.info} radius={[0, 0, 0, 0]} name="Light" />
+                          <Bar dataKey="rem" stackId="sleep" fill={STATUS_COLORS.secondary} radius={[0, 0, 0, 0]} name="REM" />
+                          <Bar dataKey="awake" stackId="sleep" fill={STATUS_COLORS.warning} radius={chart.barRadius} name="Awake" />
                         </BarChart>
                       </ResponsiveContainer>
                     </Box>
@@ -629,13 +618,10 @@ export default function HealthPage() {
                               <stop offset="95%" stopColor={HEALTH_COLORS.bodyBattery} stopOpacity={0} />
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
-                          <XAxis dataKey="date" tick={CHART_TICK} />
-                          <YAxis tick={CHART_TICK} domain={[0, 100]} />
-                          <RechartsTooltip
-                            contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
-                            labelStyle={CHART_TOOLTIP_LABEL_STYLE}
-                          />
+                          <CartesianGrid {...chart.grid} />
+                          <XAxis dataKey="date" {...chart.axis} />
+                          <YAxis {...chart.axis} domain={[0, 100]} />
+                          <RechartsTooltip {...chart.tooltip} />
                           <ReferenceLine y={70} stroke={STATUS_COLORS.warningStrong} strokeDasharray="5 5" />
                           <Area
                             type="monotone"
@@ -667,13 +653,10 @@ export default function HealthPage() {
                               <stop offset="95%" stopColor={STATUS_COLORS.warning} stopOpacity={0} />
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
-                          <XAxis dataKey="date" tick={CHART_TICK} />
-                          <YAxis tick={CHART_TICK} domain={[0, 100]} />
-                          <RechartsTooltip
-                            contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
-                            labelStyle={CHART_TOOLTIP_LABEL_STYLE}
-                          />
+                          <CartesianGrid {...chart.grid} />
+                          <XAxis dataKey="date" {...chart.axis} />
+                          <YAxis {...chart.axis} domain={[0, 100]} />
+                          <RechartsTooltip {...chart.tooltip} />
                           <ReferenceLine y={40} stroke={STATUS_COLORS.warning} strokeDasharray="5 5" />
                           <Area
                             type="monotone"

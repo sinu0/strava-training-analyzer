@@ -32,7 +32,7 @@ function DotRow({ label, value, filled, color }: { label: string; value: string;
               aspectRatio: 1,
               minWidth: 8,
               borderRadius: '50%',
-              bgcolor: index < filled ? color : (theme) => alpha(theme.palette.text.secondary, 0.13),
+              bgcolor: index < filled ? color : (theme) => theme.tokens?.trackBg ?? alpha(theme.palette.text.secondary, 0.13),
               boxShadow: index < filled ? `0 3px 8px ${alpha(color, 0.2)}` : 'none',
             }}
           />
@@ -86,7 +86,7 @@ export function RecoveryFormGauge({ form }: RecoveryFormGaugeProps) {
 
   return (
     <Box role="img" aria-label={`Skala formy: ${form.toFixed(1)}, od -30 do 30`} sx={{ mt: 2.5 }}>
-      <Box sx={{ position: 'relative', height: 9, borderRadius: 99, bgcolor: (currentTheme) => alpha(currentTheme.palette.text.secondary, 0.15) }}>
+      <Box sx={{ position: 'relative', height: 9, borderRadius: 99, bgcolor: (currentTheme) => currentTheme.tokens?.trackBg ?? alpha(currentTheme.palette.text.secondary, 0.15) }}>
         <Box
           sx={{
             position: 'absolute',

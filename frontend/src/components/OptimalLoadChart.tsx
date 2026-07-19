@@ -1,4 +1,5 @@
 import { Box, Typography, Stack } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
 import {
   Area,
@@ -14,6 +15,7 @@ import {
 
 import { getLoadStatusColor } from '@/utils/statusColors';
 
+import { getChartVisuals } from '../utils/chartStyles';
 import { CHART_COLORS, LOAD_COLORS, alphaColor } from '../utils/colors';
 
 import type { WeeklyOptimalLoad } from '../types/analytics';
@@ -86,6 +88,8 @@ const OptimalLoadChart = memo(function OptimalLoadChart({
   data,
   compact = false,
 }: OptimalLoadChartProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const currentMonday = currentWeekMonday();
   const elapsed = elapsedDaysInCurrentWeek();
 
@@ -158,13 +162,11 @@ const OptimalLoadChart = memo(function OptimalLoadChart({
       <Box sx={{ width: '100%', height: compact ? 200 : 380 }}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartData} margin={{ top: 10, right: compact ? 50 : 60, left: compact ? -15 : 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.surface} />
-            <XAxis dataKey="week" stroke={CHART_COLORS.grid} tick={{ fill: CHART_COLORS.tickText, fontSize: compact ? 10 : 12 }} />
-            <YAxis stroke={CHART_COLORS.grid} tick={{ fill: CHART_COLORS.tickText, fontSize: compact ? 10 : 12 }} width={compact ? 28 : 44} />
+            <CartesianGrid {...chart.grid} />
+            <XAxis dataKey="week" {...chart.axis} tick={{ fill: theme.tokens.chart.tick, fontSize: compact ? 10 : 12, fontWeight: 600 }} />
+            <YAxis {...chart.axis} tick={{ fill: theme.tokens.chart.tick, fontSize: compact ? 10 : 12, fontWeight: 600 }} width={compact ? 28 : 44} />
             <Tooltip
-              contentStyle={{ backgroundColor: CHART_COLORS.tooltip, border: `1px solid ${CHART_COLORS.grid}`, borderRadius: 8 }}
-              labelStyle={{ color: CHART_COLORS.tooltipText }}
-              itemStyle={{ color: CHART_COLORS.tickText, fontSize: 12 }}
+              {...chart.tooltip}
               formatter={(value, name) => {
                 const labels: Record<string, string> = {
                   tss: 'TSS tygodniowy',

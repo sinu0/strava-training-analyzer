@@ -6,6 +6,7 @@ interface LoadingStateProps {
 
 /**
  * Displays a centered loading indicator with an optional status message.
+ * The spinner sits inside a soft iconBubble circle matching the dashboard style.
  */
 export default function LoadingState({ message = 'Ładowanie...' }: LoadingStateProps) {
   return (
@@ -19,7 +20,19 @@ export default function LoadingState({ message = 'Ładowanie...' }: LoadingState
         gap: 2,
       }}
     >
-      <CircularProgress color="primary" />
+      <Box
+        sx={{
+          width: 64,
+          height: 64,
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: (theme) => theme.tokens?.iconBubble ?? 'action.hover',
+        }}
+      >
+        <CircularProgress color="primary" size={28} thickness={4} />
+      </Box>
       <Typography variant="body2" color="text.secondary">
         {message}
       </Typography>

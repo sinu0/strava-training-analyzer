@@ -25,4 +25,28 @@ describe('training visualizations', () => {
 
     expect(screen.getByLabelText('Skala formy: -14.2, od -30 do 30')).toBeDefined();
   });
+
+  it('paints the recovery scale track with the theme track color', () => {
+    render(
+      <ThemeProvider theme={theme}>
+        <RecoveryFormGauge form={0} />
+      </ThemeProvider>,
+    );
+
+    const track = screen.getByRole('img', { name: /Skala formy/ }).firstElementChild as HTMLElement;
+    expect(window.getComputedStyle(track).backgroundColor).toBe('rgb(233, 237, 245)');
+  });
+
+  it('paints inactive load dots with the theme track color', () => {
+    const { container } = render(
+      <ThemeProvider theme={theme}>
+        <LoadDotMatrix ctl={10} atl={90} form={0} />
+      </ThemeProvider>,
+    );
+
+    const trackDots = Array.from(container.querySelectorAll('div')).filter(
+      (element) => window.getComputedStyle(element).backgroundColor === 'rgb(233, 237, 245)',
+    );
+    expect(trackDots.length).toBeGreaterThan(0);
+  });
 });

@@ -7,6 +7,7 @@ import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import { Box, Typography, Popover, Stack, LinearProgress, Tooltip } from '@mui/material';
+import { alpha, type Theme } from '@mui/material/styles';
 import { useState } from 'react';
 
 import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
@@ -16,7 +17,6 @@ import {
   COMMON_COLORS,
   PMC_COLORS,
   STATUS_COLORS,
-  SURFACE_COLORS,
   WEATHER_METRIC_COLORS,
   alphaColor,
 } from '@/utils/colors';
@@ -280,11 +280,12 @@ export default function StatusPill({ readiness, ftpProgress, weatherGradient }: 
         sx={{
           px: 0.8,
           py: 0.7,
-          bgcolor: alphaColor(CHART_COLORS.tooltip, 0.84),
+          bgcolor: (t) => alpha(t.tokens.chart.tooltip, 0.9),
           borderRadius: 999,
-          border: `1px solid ${alphaColor(CHART_COLORS.grid, 0.6)}`,
+          border: '1px solid',
+          borderColor: (t) => t.tokens.surfaceBorder,
           backdropFilter: 'blur(14px)',
-          boxShadow: '0 12px 30px rgba(0,0,0,0.18)',
+          boxShadow: (t) => t.tokens.cardShadow,
         }}
       >
         {/* Readiness segment */}
@@ -300,8 +301,8 @@ export default function StatusPill({ readiness, ftpProgress, weatherGradient }: 
               minWidth: 94,
               borderRadius: 999,
               cursor: 'pointer',
-              transition: 'background 0.15s, transform 0.15s',
-              '&:hover': { bgcolor: SURFACE_COLORS.hover, transform: 'translateY(-1px)' },
+              transition: (t) => t.tokens.transition,
+              '&:hover': { bgcolor: (t) => t.tokens.hoverOverlay, transform: 'translateY(-1px)' },
             }}
           >
             <Box
@@ -334,8 +335,8 @@ export default function StatusPill({ readiness, ftpProgress, weatherGradient }: 
               minWidth: 86,
               borderRadius: 999,
               cursor: 'pointer',
-              transition: 'background 0.15s, transform 0.15s',
-              '&:hover': { bgcolor: SURFACE_COLORS.hover, transform: 'translateY(-1px)' },
+              transition: (t) => t.tokens.transition,
+              '&:hover': { bgcolor: (t) => t.tokens.hoverOverlay, transform: 'translateY(-1px)' },
             }}
           >
             <BoltIcon sx={{ fontSize: 16, color: trendColors[ftpProgress.trend] }} />
@@ -363,8 +364,8 @@ export default function StatusPill({ readiness, ftpProgress, weatherGradient }: 
               minWidth: 88,
               borderRadius: 999,
               cursor: 'pointer',
-              transition: 'background 0.15s, transform 0.15s',
-              '&:hover': { bgcolor: SURFACE_COLORS.hover, transform: 'translateY(-1px)' },
+              transition: (t) => t.tokens.transition,
+              '&:hover': { bgcolor: (t) => t.tokens.hoverOverlay, transform: 'translateY(-1px)' },
             }}
           >
             <WeatherConditionIcon
@@ -395,10 +396,11 @@ export default function StatusPill({ readiness, ftpProgress, weatherGradient }: 
           paper: {
             sx: {
               mt: 1,
-              bgcolor: CHART_COLORS.tooltip,
-              border: `1px solid ${alphaColor(CHART_COLORS.grid, 0.8)}`,
-              borderRadius: 2,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+              bgcolor: 'background.paper',
+              border: '1px solid',
+              borderColor: (t: Theme) => t.tokens.surfaceBorder,
+              borderRadius: 3,
+              boxShadow: (t: Theme) => t.tokens.cardShadow,
             },
           },
         }}

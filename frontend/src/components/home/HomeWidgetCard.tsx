@@ -1,7 +1,7 @@
 import ArrowOutwardIcon from '@mui/icons-material/ArrowOutward';
 import { Box, Paper, Stack, Typography } from '@mui/material';
 
-import { SURFACE_COLORS, alphaColor } from '@/utils/colors';
+import { alphaColor } from '@/utils/colors';
 
 type HomeWidgetResponsiveValue =
   | number
@@ -50,22 +50,15 @@ export default function HomeWidgetCard({
       data-testid={testId}
       onClick={onClick}
       sx={{
-        pt: { xs: 1.8, md: 2 },
-        pb: { xs: 1.75, md: 1.95 },
-        pl: { xs: 1.8, md: 2 },
-        pr: { xs: 1.7, md: 1.9 },
+        p: { xs: 2.5, md: 3 },
         height: 'auto',
         aspectRatio,
         minHeight: minHeight ?? (artwork ? { xs: 360, sm: 400 } : undefined),
         minWidth: 0,
-        borderRadius: 4.5,
+        borderRadius: 3.5,
         border: '1px solid',
-        borderColor: alphaColor(accentColor, 0.18),
-        bgcolor: SURFACE_COLORS.elevated,
-        backgroundImage: `linear-gradient(180deg, ${alphaColor(SURFACE_COLORS.subtle, 0.7)} 0%, ${alphaColor(
-          SURFACE_COLORS.elevated,
-          0.98,
-        )} 100%)`,
+        borderColor: (theme) => theme.tokens?.surfaceBorder ?? theme.palette.divider,
+        bgcolor: 'background.paper',
         overflow: 'hidden',
         boxShadow: (theme: { tokens?: { cardShadow?: string } }) => theme.tokens?.cardShadow ?? 'none',
         cursor: onClick ? 'pointer' : 'default',
@@ -84,24 +77,21 @@ export default function HomeWidgetCard({
       <Stack spacing={1.25} sx={{ height: '100%' }}>
         <Stack
           direction="row"
-          alignItems="flex-start"
+          alignItems="center"
           justifyContent="space-between"
           spacing={1}
-          sx={{ px: 0.35 }}
         >
           <Box sx={{ minWidth: 0 }}>
             <Typography
-              variant="overline"
+              variant="subtitle1"
               sx={{
                 color: 'text.primary',
-                letterSpacing: '0.09em',
                 fontWeight: 800,
-                lineHeight: 1.1,
+                lineHeight: 1.2,
                 display: 'block',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
-                pl: '0.08em',
               }}
             >
               {title}
@@ -109,17 +99,15 @@ export default function HomeWidgetCard({
             {subtitle ? (
               <Typography
                 variant="caption"
-                color="text.primary"
+                color="text.secondary"
                 sx={{
                   display: '-webkit-box',
                   mt: 0.35,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  opacity: 0.78,
                   lineHeight: 1.28,
                   WebkitLineClamp: subtitleLines,
                   WebkitBoxOrient: 'vertical',
-                  pl: '0.08em',
                 }}
               >
                 {subtitle}
@@ -130,18 +118,18 @@ export default function HomeWidgetCard({
           {onClick ? (
             <Box
               sx={{
-                width: 28,
-                height: 28,
+                width: 34,
+                height: 34,
                 borderRadius: '50%',
-                bgcolor: alphaColor(accentColor, 0.16),
-                color: accentColor,
+                bgcolor: (theme) => theme.tokens?.iconBubble ?? 'rgba(255,255,255,0.05)',
+                color: 'text.primary',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
               }}
             >
-              <ArrowOutwardIcon sx={{ fontSize: 16 }} />
+              <ArrowOutwardIcon sx={{ fontSize: 18 }} />
             </Box>
           ) : null}
         </Stack>
@@ -151,11 +139,11 @@ export default function HomeWidgetCard({
               sx={{
                 position: 'relative',
                 overflow: 'hidden',
-                borderRadius: 3.25,
+                borderRadius: 3,
                 height: artwork.height ?? { xs: 94, sm: 112 },
                 border: '1px solid',
-                borderColor: alphaColor(accentColor, 0.16),
-                bgcolor: alphaColor(SURFACE_COLORS.subtle, 0.4),
+                borderColor: (theme) => theme.tokens?.surfaceBorder ?? theme.palette.divider,
+                bgcolor: (theme) => theme.tokens?.iconBubble ?? 'rgba(255,255,255,0.05)',
             }}
           >
             <Box
@@ -179,10 +167,7 @@ export default function HomeWidgetCard({
               sx={{
                 position: 'absolute',
                 inset: 0,
-                background: `linear-gradient(180deg, ${alphaColor(SURFACE_COLORS.subtle, 0.08)} 0%, ${alphaColor(
-                  '#0D1117',
-                  0.34,
-                )} 100%)`,
+                background: 'linear-gradient(180deg, rgba(13,17,23,0.03) 0%, rgba(13,17,23,0.32) 100%)',
               }}
             />
           </Box>
@@ -195,10 +180,10 @@ export default function HomeWidgetCard({
             flex: 1,
             overflow: 'hidden',
             p: { xs: 1.35, md: 1.5 },
-            borderRadius: 3.25,
-            bgcolor: alphaColor('#0D1117', 0.28),
+            borderRadius: 3,
+            bgcolor: (theme) => theme.tokens?.iconBubble ?? 'rgba(255,255,255,0.05)',
             border: '1px solid',
-            borderColor: alphaColor(accentColor, 0.12),
+            borderColor: (theme) => theme.tokens?.surfaceBorder ?? theme.palette.divider,
           }}
         >
           {children}

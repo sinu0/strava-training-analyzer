@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -101,5 +101,36 @@ describe('TodayPage', () => {
     expect(screen.getByText(/Obciążenie jest stabilne/)).toBeDefined();
     expect(screen.getByLabelText('Ślad trasy: Morning Ride')).toBeDefined();
     expect(await screen.findByTestId('lightweight-route-preview')).toBeDefined();
+  });
+
+  it('exposes a round hero CTA that navigates to the training plan', () => {
+    vi.mocked(useToday).mockReturnValue({
+      data: {
+        asOf: '2026-07-18',
+        dataStatus: 'AVAILABLE',
+        recommendation: {
+          decision: 'TRAIN',
+          sessionType: 'ENDURANCE',
+          durationMinutes: 60,
+          targetTss: 45,
+          description: 'Spokojna jazda Z2.',
+        },
+        evidence: [],
+        confidence: { level: 'HIGH', reasons: ['Aktualne źródła'] },
+        lastActivity: null,
+        load: { ctl42: 42, atl7: 45, form: -3, asOf: '2026-07-18' },
+        nextTraining: null,
+        sync: { status: 'completed', imported: 1, skipped: 0 },
+      },
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useToday>);
+
+    renderPage();
+
+    const cta = screen.getByRole('button', { name: 'Otwórz plan' });
+    expect(cta).toBeDefined();
+    fireEvent.click(cta);
+    expect(screen.getByRole('heading', { name: 'ENDURANCE' })).toBeDefined();
   });
 });

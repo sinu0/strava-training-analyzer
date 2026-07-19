@@ -1,4 +1,5 @@
 import { Box, Grid } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   Area,
   AreaChart,
@@ -12,14 +13,7 @@ import {
 
 import ChartContainer from '@/components/common/ChartContainer';
 import type { WeightGoal, WeightRecord } from '@/types/weight';
-import {
-  CHART_ACTIVE_DOT,
-  CHART_TICK,
-  CHART_TOOLTIP_CONTENT_STYLE,
-  CHART_TOOLTIP_ITEM_STYLE,
-  CHART_TOOLTIP_LABEL_STYLE,
-} from '@/utils/chartStyles';
-import { CHART_COLORS } from '@/utils/colors';
+import { CHART_ACTIVE_DOT, getChartVisuals } from '@/utils/chartStyles';
 
 const WEIGHT_GRADIENT_ID = 'weight-history-gradient';
 
@@ -32,6 +26,8 @@ export default function WeightChart({
   history,
   goal,
 }: WeightChartProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const chartData = history.map((record) => ({
     date: record.recordedDate,
     weight: Number(record.weightKg),
@@ -50,14 +46,14 @@ export default function WeightChart({
             <AreaChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id={WEIGHT_GRADIENT_ID} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={CHART_COLORS.secondary} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={CHART_COLORS.secondary} stopOpacity={0} />
+                  <stop offset="5%" stopColor={theme.tokens.chart.secondary} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={theme.tokens.chart.secondary} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
+              <CartesianGrid {...chart.grid} />
               <XAxis
                 dataKey="date"
-                tick={CHART_TICK}
+                {...chart.axis}
                 tickFormatter={(value) =>
                   new Date(String(value)).toLocaleDateString('pl-PL', {
                     month: 'short',
@@ -65,25 +61,23 @@ export default function WeightChart({
                   })}
               />
               <YAxis
-                tick={CHART_TICK}
+                {...chart.axis}
                 domain={['dataMin - 1', 'dataMax + 1']}
                 tickFormatter={(value) => `${value} kg`}
               />
               <RechartsTooltip
-                contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
-                labelStyle={CHART_TOOLTIP_LABEL_STYLE}
-                itemStyle={CHART_TOOLTIP_ITEM_STYLE}
+                {...chart.tooltip}
                 formatter={(value) => [`${Number(value ?? 0).toFixed(1)} kg`, 'Waga']}
                 labelFormatter={(value) => new Date(String(value)).toLocaleDateString('pl-PL')}
               />
               {!!goal && (
                 <ReferenceLine
                   y={Number(goal.targetWeightKg)}
-                  stroke={CHART_COLORS.primary}
+                  stroke={theme.tokens.chart.primary}
                   strokeDasharray="5 5"
                   label={{
                     value: `Cel: ${Number(goal.targetWeightKg).toFixed(1)} kg`,
-                    fill: CHART_COLORS.primary,
+                    fill: theme.tokens.chart.primary,
                     fontSize: 11,
                     position: 'right',
                   }}
@@ -92,11 +86,11 @@ export default function WeightChart({
               <Area
                 type="monotone"
                 dataKey="weight"
-                stroke={CHART_COLORS.secondary}
+                stroke={theme.tokens.chart.secondary}
                 strokeWidth={2.5}
                 fill={`url(#${WEIGHT_GRADIENT_ID})`}
-                dot={{ fill: CHART_COLORS.secondary, r: 3, strokeWidth: 0 }}
-                activeDot={{ ...CHART_ACTIVE_DOT, stroke: CHART_COLORS.secondary }}
+                dot={{ fill: theme.tokens.chart.secondary, r: 3.5, strokeWidth: 0 }}
+                activeDot={{ ...CHART_ACTIVE_DOT, stroke: theme.tokens.chart.secondary }}
               />
             </AreaChart>
           </ResponsiveContainer>

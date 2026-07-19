@@ -1,9 +1,10 @@
 import { Box, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { memo } from 'react';
 import { ResponsiveContainer, ComposedChart, Line, Area, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine } from 'recharts';
 
-import { CHART_TICK } from '../utils/chartStyles';
-import { CHART_COLORS, PMC_COLORS, STATUS_COLORS } from '../utils/colors';
+import { getChartVisuals } from '../utils/chartStyles';
+import { PMC_COLORS, STATUS_COLORS } from '../utils/colors';
 
 import type { PmcData } from '../types/analytics';
 
@@ -24,6 +25,7 @@ function formatDelta(value: number): string {
 }
 
 function PmcTooltipContent({ active, payload, label }: { active?: boolean; payload?: TooltipEntry[]; label?: string }) {
+  const theme = useTheme();
   if (!active || !payload?.length) return null;
   const row = payload[0]?.payload;
   if (!row) return null;
@@ -35,8 +37,8 @@ function PmcTooltipContent({ active, payload, label }: { active?: boolean; paylo
   ];
 
   return (
-    <Box sx={{ bgcolor: CHART_COLORS.tooltip, p: 1.5, borderRadius: 2, minWidth: 180 }}>
-      <Typography variant="caption" sx={{ color: CHART_COLORS.tickText, mb: 0.5, display: 'block' }}>
+    <Box sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: theme.tokens.cardShadow, p: 1.5, borderRadius: 2, minWidth: 180 }}>
+      <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0.5, display: 'block' }}>
         {label ? new Date(label).toLocaleDateString('pl-PL') : ''}
       </Typography>
       {metrics.map((m) => (
@@ -45,13 +47,13 @@ function PmcTooltipContent({ active, payload, label }: { active?: boolean; paylo
             {m.label}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2" sx={{ color: CHART_COLORS.tooltipText }}>
+            <Typography variant="body2" sx={{ color: 'text.primary' }}>
               {Math.round(m.value * 10) / 10}
             </Typography>
             <Typography
               variant="caption"
               sx={{
-                color: m.delta > 0 ? STATUS_COLORS.success : m.delta < 0 ? STATUS_COLORS.error : CHART_COLORS.tickText,
+                color: m.delta > 0 ? STATUS_COLORS.success : m.delta < 0 ? STATUS_COLORS.error : 'text.secondary',
                 fontWeight: 600,
                 minWidth: 40,
                 textAlign: 'right',
@@ -67,6 +69,8 @@ function PmcTooltipContent({ active, payload, label }: { active?: boolean; paylo
 }
 
 const PMChart = memo(function PMChart({ data }: PMChartProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   if (!data.length) {
     return (
       <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
@@ -85,16 +89,15 @@ const PMChart = memo(function PMChart({ data }: PMChartProps) {
     >
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
+          <CartesianGrid {...chart.grid} />
             <XAxis
               dataKey="date"
-              stroke={CHART_COLORS.grid}
-              tick={CHART_TICK}
+              {...chart.axis}
               tickFormatter={(v) => new Date(v).toLocaleDateString('pl-PL', { month: 'short', day: 'numeric' })}
             />
-            <YAxis stroke={CHART_COLORS.grid} tick={CHART_TICK} />
-            <Tooltip content={<PmcTooltipContent />} />
-            <ReferenceLine y={0} stroke={CHART_COLORS.tickText} strokeDasharray="3 3" />
+            <YAxis {...chart.axis} />
+            <Tooltip content={<PmcTooltipContent />} cursor={chart.tooltip.cursor} />
+            <ReferenceLine y={0} stroke={theme.tokens.chart.tick} strokeDasharray="2 5" />
           <Area
             type="monotone"
             dataKey="tsb"

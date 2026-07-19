@@ -53,17 +53,20 @@ export default function StatDisplay({
         {!!icon && <Box sx={{ color: color ?? 'text.secondary', display: 'flex' }}>{icon}</Box>}
         <Typography
           variant="caption"
-          sx={{ color: 'text.secondary', fontSize: cfg.labelSize, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.04em' }}
+          sx={{ color: 'text.secondary', fontSize: cfg.labelSize, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}
         >
           {label}
         </Typography>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-        <Typography variant={cfg.valueVariant} sx={{ fontWeight: 700, color: color ?? 'text.primary' }}>
+        <Typography
+          variant={cfg.valueVariant}
+          sx={{ fontWeight: 800, letterSpacing: '-0.01em', color: color ?? 'text.primary' }}
+        >
           {value}
         </Typography>
         {!!unit && (
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 400 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
             {unit}
           </Typography>
         )}

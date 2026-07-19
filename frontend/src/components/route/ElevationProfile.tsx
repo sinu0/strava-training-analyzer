@@ -1,8 +1,10 @@
 import { Box, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-import { CHART_COLORS, ROUTE_COLORS } from '../../utils/colors';
+import { getChartVisuals } from '../../utils/chartStyles';
+import { ROUTE_COLORS } from '../../utils/colors';
 
 import type { ElevationPoint } from '../../types/route';
 
@@ -18,6 +20,8 @@ function formatDistance(meters: number): string {
 }
 
 export default function ElevationProfile({ points, onHover }: ElevationProfileProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const data = useMemo(
     () =>
       points.map((p) => ({
@@ -61,16 +65,11 @@ export default function ElevationProfile({ points, onHover }: ElevationProfilePr
             type="number"
             domain={['dataMin', 'dataMax']}
             tickFormatter={(v) => `${v.toFixed(1)}`}
-            stroke={CHART_COLORS.tickText}
-            fontSize={11}
+            {...chart.axis}
           />
-          <YAxis stroke={CHART_COLORS.tickText} fontSize={11} unit=" m" />
+          <YAxis {...chart.axis} unit=" m" />
           <Tooltip
-            contentStyle={{
-              backgroundColor: CHART_COLORS.tooltip,
-              border: `1px solid ${CHART_COLORS.grid}`,
-              borderRadius: 8,
-            }}
+            {...chart.tooltip}
             labelFormatter={(value) => formatDistance(Number(value ?? 0) * 1000)}
             formatter={(value, name) => {
               const numericValue = Number(value ?? 0);

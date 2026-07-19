@@ -1,4 +1,5 @@
 import { Box } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   ResponsiveContainer,
   RadarChart,
@@ -14,7 +15,7 @@ import {
 } from 'recharts';
 
 import type { ConfidenceBreakdown } from '@/types/aiV2';
-import { CHART_COLORS, STATUS_COLORS, alphaColor } from '@/utils/colors';
+import { STATUS_COLORS, alphaColor } from '@/utils/colors';
 
 interface ConfidenceBreakdownChartProps {
   breakdown: ConfidenceBreakdown;
@@ -37,6 +38,7 @@ export default function ConfidenceBreakdownChart({
   breakdown,
   variant = 'bars',
 }: ConfidenceBreakdownChartProps) {
+  const theme = useTheme();
   if (variant === 'radar') {
     const radarData = [
       { subject: LABELS.dataQuality, value: breakdown.dataQuality * 100 },
@@ -48,10 +50,10 @@ export default function ConfidenceBreakdownChart({
       <Box sx={{ width: '100%', height: 200 }}>
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={radarData} outerRadius="70%">
-            <PolarGrid stroke={alphaColor(CHART_COLORS.grid, 0.6)} />
+            <PolarGrid stroke={alphaColor(theme.tokens.chart.grid, 0.72)} />
             <PolarAngleAxis
               dataKey="subject"
-              tick={{ fill: CHART_COLORS.tickText, fontSize: 11, fontWeight: 500 }}
+              tick={{ fill: theme.tokens.chart.tick, fontSize: 11, fontWeight: 600 }}
             />
             <Radar
               dataKey="value"
@@ -81,11 +83,11 @@ export default function ConfidenceBreakdownChart({
           <YAxis
             type="category"
             dataKey="name"
-            tick={{ fill: CHART_COLORS.tickText, fontSize: 11 }}
+            tick={{ fill: theme.tokens.chart.tick, fontSize: 11, fontWeight: 600 }}
             axisLine={false}
             tickLine={false}
           />
-          <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={18} maxBarSize={24}>
+          <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={18} maxBarSize={24}>
             {barData.map((entry) => (
               <Cell key={entry.name} fill={alphaColor(entry.color, 0.6)} />
             ))}
@@ -93,7 +95,7 @@ export default function ConfidenceBreakdownChart({
               dataKey="value"
               position="right"
               formatter={(value) => `${Number(value ?? 0)}%`}
-              style={{ fill: CHART_COLORS.tickText, fontSize: 11, fontWeight: 600 }}
+              style={{ fill: theme.tokens.chart.tick, fontSize: 11, fontWeight: 700 }}
             />
           </Bar>
         </BarChart>

@@ -1,4 +1,5 @@
 import { Box, Typography, Stack, Tooltip } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   ResponsiveContainer,
   RadarChart,
@@ -7,11 +8,7 @@ import {
   Radar,
 } from 'recharts';
 
-import {
-  CHART_COLORS,
-  STATUS_COLORS,
-  alphaColor,
-} from '../utils/colors';
+import { STATUS_COLORS, alphaColor } from '../utils/colors';
 
 import type { PowerCurve } from '../types/analytics';
 
@@ -62,6 +59,7 @@ function getSegmentLevel(pct: number): string {
 }
 
 export default function PowerProfileRadar({ data, weightKg }: PowerProfileRadarProps) {
+  const theme = useTheme();
   const hasData = data?.efforts && Object.keys(data.efforts).length > 0;
   const athleteWeight = weightKg ?? 75;
 
@@ -92,10 +90,10 @@ export default function PowerProfileRadar({ data, weightKg }: PowerProfileRadarP
       <Box sx={{ width: '100%', height: 220, position: 'relative' }}>
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={radarData} outerRadius="72%">
-            <PolarGrid stroke={alphaColor(CHART_COLORS.grid, 0.6)} />
+            <PolarGrid stroke={alphaColor(theme.tokens.chart.grid, 0.72)} />
             <PolarAngleAxis
               dataKey="subject"
-              tick={{ fill: CHART_COLORS.tickText, fontSize: 10, fontWeight: 600 }}
+              tick={{ fill: theme.tokens.chart.tick, fontSize: 10, fontWeight: 600 }}
             />
             <Radar
               dataKey="value"

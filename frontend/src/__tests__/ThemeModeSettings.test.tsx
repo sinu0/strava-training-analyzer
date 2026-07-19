@@ -22,11 +22,11 @@ describe('ThemeModeSettings', () => {
     renderSettings();
 
     expect(screen.getByRole('heading', { name: 'Motyw aplikacji' })).toBeDefined();
-    expect(screen.getByRole('button', { name: 'Ciemny motyw' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Jasny motyw' }).getAttribute('aria-pressed')).toBe('true');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Jasny motyw' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ciemny motyw' }));
 
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Jasny motyw' }).getAttribute('aria-pressed')).toBe('true'));
-    expect(window.localStorage.getItem('strava-analizator.color-mode')).toBe('light');
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Ciemny motyw' }).getAttribute('aria-pressed')).toBe('true'));
+    expect(window.localStorage.getItem('strava-analizator.color-mode')).toBe('dark');
   });
 });

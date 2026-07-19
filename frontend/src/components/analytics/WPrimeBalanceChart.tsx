@@ -5,6 +5,7 @@ import {
   Stack,
   Chip,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useMemo } from 'react';
 import {
   AreaChart,
@@ -17,6 +18,7 @@ import {
 } from 'recharts';
 
 import { useWPrimeBalance } from '../../hooks/usePowerAnalysis';
+import { getChartVisuals } from '../../utils/chartStyles';
 
 interface WPrimeBalanceChartProps {
   activityId: string;
@@ -31,6 +33,8 @@ function formatTime(seconds: number): string {
 }
 
 export default function WPrimeBalanceChart({ activityId }: WPrimeBalanceChartProps) {
+  const theme = useTheme();
+  const chart = getChartVisuals(theme);
   const { data, isLoading } = useWPrimeBalance(activityId);
 
   const chartData = useMemo(() => {
@@ -47,7 +51,7 @@ export default function WPrimeBalanceChart({ activityId }: WPrimeBalanceChartPro
 
   if (isLoading) {
     return (
-      <Paper sx={{ p: 2, backgroundColor: '#0D1117', border: '1px solid #30363D' }}>
+      <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
         <Typography color="text.secondary">Ładowanie W&apos; Balance…</Typography>
       </Paper>
     );
@@ -58,7 +62,7 @@ export default function WPrimeBalanceChart({ activityId }: WPrimeBalanceChartPro
   const minPct = Math.round((data.minBalance / data.wPrime) * 100);
 
   return (
-    <Paper sx={{ p: 2, backgroundColor: '#0D1117', border: '1px solid #30363D' }}>
+    <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
       <Stack spacing={1}>
         <Typography variant="subtitle1" fontWeight={600}>
           W&apos; Balance
@@ -97,23 +101,18 @@ export default function WPrimeBalanceChart({ activityId }: WPrimeBalanceChartPro
             <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <defs>
                 <linearGradient id="wBalGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#58a6ff" stopOpacity={0.5} />
-                  <stop offset="95%" stopColor="#58a6ff" stopOpacity={0.05} />
+                  <stop offset="5%" stopColor={theme.tokens?.chart.tertiary ?? theme.palette.info.main} stopOpacity={0.5} />
+                  <stop offset="95%" stopColor={theme.tokens?.chart.tertiary ?? theme.palette.info.main} stopOpacity={0.05} />
                 </linearGradient>
               </defs>
               <XAxis
                 dataKey="time"
-                stroke="#8B949E"
-                fontSize={11}
+                {...chart.axis}
                 tickFormatter={formatTime}
               />
-              <YAxis stroke="#8B949E" fontSize={11} unit="%" domain={[0, 100]} dataKey="pct" />
+              <YAxis {...chart.axis} unit="%" domain={[0, 100]} dataKey="pct" />
               <Tooltip
-                contentStyle={{
-                  backgroundColor: '#161B22',
-                  border: '1px solid #30363D',
-                  borderRadius: 8,
-                }}
+                {...chart.tooltip}
                 labelFormatter={(label) => formatTime(Number(label ?? 0))}
                 formatter={(value) => [`${Number(value ?? 0)}%`, "W' Balance"]}
               />
@@ -122,7 +121,7 @@ export default function WPrimeBalanceChart({ activityId }: WPrimeBalanceChartPro
               <Area
                 type="monotone"
                 dataKey="pct"
-                stroke="#58a6ff"
+                stroke={theme.tokens?.chart.tertiary ?? theme.palette.info.main}
                 fill="url(#wBalGradient)"
                 strokeWidth={2}
               />
