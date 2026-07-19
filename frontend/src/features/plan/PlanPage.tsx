@@ -82,7 +82,11 @@ export default function PlanPage() {
                   <Grid size={4}><MetricReadout label="Forma" value={lastPoint.form.toFixed(1)} tone={lastPoint.form < -10 ? 'warning' : 'success'} /></Grid>
                 </Grid>
               ) : null}
-              <Box sx={{ height: 400, mt: 2 }}>
+              <Box
+                role="img"
+                aria-label={`Scenariusz obciążenia od ${from} do ${to}.${lastPoint ? ` Wartości końcowe: CTL ${lastPoint.ctl.toFixed(1)}, ATL ${lastPoint.atl.toFixed(1)}, forma ${lastPoint.form.toFixed(1)}.` : ''}`}
+                sx={{ height: 400, mt: 2 }}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={scenario.data.points}>
                     <CartesianGrid strokeDasharray="3 3" />

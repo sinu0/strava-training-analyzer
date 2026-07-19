@@ -1,4 +1,4 @@
-import { Box, Chip, Typography } from '@mui/material';
+import { ButtonBase, Chip, Typography } from '@mui/material';
 
 import { CATEGORY_LABELS, type WorkoutCategory } from '../../types/training';
 
@@ -6,6 +6,7 @@ import type { CalendarDay } from '../../types/training';
 
 interface CalendarDayCellProps {
   day: CalendarDay | null;
+  date: string;
   dateNum: number;
   isCurrentMonth: boolean;
   isToday: boolean;
@@ -20,14 +21,18 @@ function statusBorderColor(day: CalendarDay): string {
   return 'transparent';
 }
 
-export default function CalendarDayCell({ day, dateNum, isCurrentMonth, isToday, onClick }: CalendarDayCellProps) {
+export default function CalendarDayCell({ day, date, dateNum, isCurrentMonth, isToday, onClick }: CalendarDayCellProps) {
   const border = day ? statusBorderColor(day) : 'transparent';
   const hasBorder = border !== 'transparent';
 
   return (
-    <Box
+    <ButtonBase
+      aria-label={`Otwórz ${new Date(`${date}T12:00:00`).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })}`}
       onClick={onClick}
       sx={{
+        display: 'block',
+        width: '100%',
+        textAlign: 'left',
         minHeight: 90,
         p: 0.5,
         cursor: 'pointer',
@@ -35,7 +40,7 @@ export default function CalendarDayCell({ day, dateNum, isCurrentMonth, isToday,
         borderWidth: hasBorder ? 2 : 1,
         borderColor: hasBorder ? border : 'divider',
         borderRadius: 1,
-        opacity: isCurrentMonth ? 1 : 0.35,
+        opacity: isCurrentMonth ? 1 : 0.65,
         bgcolor: isToday ? 'action.hover' : 'background.paper',
         '&:hover': { bgcolor: 'action.hover' },
         overflow: 'hidden',
@@ -81,7 +86,7 @@ export default function CalendarDayCell({ day, dateNum, isCurrentMonth, isToday,
           sx={{ fontSize: '0.6rem', height: 18, mt: 0.25, maxWidth: '100%' }}
         />
       )}
-    </Box>
+    </ButtonBase>
   );
 }
 

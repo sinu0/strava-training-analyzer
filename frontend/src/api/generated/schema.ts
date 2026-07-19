@@ -20,6 +20,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/ui-preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getPreferences"];
+        put: operations["updatePreferences"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/training/plans/{id}/status": {
         parameters: {
             query?: never;
@@ -2753,6 +2769,29 @@ export interface components {
             longitude?: number;
             active?: boolean;
         };
+        DashboardLayoutDto: {
+            widgets?: components["schemas"]["DashboardWidgetDto"][];
+        };
+        DashboardWidgetDto: {
+            id?: string;
+            type?: string;
+            /** Format: int32 */
+            order?: number;
+            /** Format: int32 */
+            span?: number;
+            settings?: {
+                [key: string]: Record<string, never>;
+            };
+        };
+        UiPreferencesDto: {
+            /** Format: int32 */
+            schemaVersion?: number;
+            /** Format: int64 */
+            revision?: number;
+            dashboard?: components["schemas"]["DashboardLayoutDto"];
+            mobileNavigation?: string[];
+            warnings?: string[];
+        };
         AutoSyncConfig: {
             /** Format: int32 */
             intervalMinutes?: number;
@@ -5170,6 +5209,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["WeatherLocationDto"];
+                };
+            };
+        };
+    };
+    getPreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UiPreferencesDto"];
+                };
+            };
+        };
+    };
+    updatePreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UiPreferencesDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UiPreferencesDto"];
                 };
             };
         };

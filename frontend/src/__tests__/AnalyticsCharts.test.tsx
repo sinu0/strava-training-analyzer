@@ -31,6 +31,7 @@ describe('PMChart', () => {
       />,
     );
     expect(container.querySelector('.recharts-wrapper')).toBeDefined();
+    expect(screen.getByRole('img', { name: /Wykres obciążenia PMC.*CTL 56.*ATL 68.*forma -12/i })).toBeDefined();
   });
 
   it('shows empty state when no data', () => {
@@ -45,6 +46,7 @@ describe('PowerCurveChart', () => {
       <PowerCurveChart data={{ efforts: { 1: 800, 60: 350, 300: 280 } }} />,
     );
     expect(container.querySelector('.recharts-wrapper')).toBeDefined();
+    expect(screen.getByRole('img', { name: /Krzywa mocy.*3 punkty.*800 W/i })).toBeDefined();
   });
 
   it('shows empty state when no data', () => {

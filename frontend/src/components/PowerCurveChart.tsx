@@ -92,8 +92,17 @@ const PowerCurveChart = memo(function PowerCurveChart({
     );
   }
 
+  const currentValues = chartData
+    .map((point) => Number(point.current))
+    .filter(Number.isFinite);
+  const peakPower = currentValues.length ? Math.max(...currentValues) : null;
+
   return (
-    <Box sx={{ width: '100%', height: 400 }}>
+    <Box
+      role="img"
+      aria-label={`Krzywa mocy. ${chartData.length} punkty pomiarowe.${peakPower != null ? ` Najwyższa wartość aktualnego zakresu: ${peakPower} W.` : ''}`}
+      sx={{ width: '100%', height: 400 }}
+    >
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />

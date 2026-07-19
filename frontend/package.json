@@ -15,7 +15,8 @@
     "test:e2e:critical": "playwright test --config=e2e/playwright.config.ts e2e/tests/v2-critical-flows.spec.ts",
     "typecheck": "tsc --noEmit",
     "api:generate": "openapi-typescript http://localhost:8080/api-docs -o src/api/generated/schema.ts",
-    "quality": "npm run lint && npm run typecheck && npm run test && npm run build"
+    "budget": "node scripts/check-bundle-budget.mjs",
+    "quality": "npm run lint && npm run typecheck && npm run test && npm run build && npm run budget"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

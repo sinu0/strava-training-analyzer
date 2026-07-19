@@ -183,7 +183,7 @@ export default function Sidebar({ width, open, onNavigateComplete }: SidebarProp
       </Toolbar>
 
       {/* Primary daily decision */}
-      <List sx={{ px: 0 }}>
+      <List component="div" sx={{ px: 0 }}>
         <NavButton
           item={HERO_ITEM}
           selected={isSelected(HERO_ITEM.path)}
@@ -196,7 +196,7 @@ export default function Sidebar({ width, open, onNavigateComplete }: SidebarProp
         {NAV_GROUPS.map((group) => (
           <Box key={group.label}>
             <GroupLabel label={group.label} />
-            <List disablePadding>
+            <List component="div" disablePadding>
               {group.items.map((item) => (
                 <NavButton
                   key={item.path}

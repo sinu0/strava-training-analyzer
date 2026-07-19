@@ -142,7 +142,7 @@ test('Dzisiaj pokazuje jedną decyzję i status synchronizacji', async ({ page }
   const main = page.locator('main:visible');
   await expect(main.getByRole('heading', { name: 'Dzisiaj' }).first()).toBeVisible();
   await expect(main.getByText(/ENDURANCE/i).first()).toBeVisible();
-  await expect(main.getByLabel('Mapa trasy: Jazda kontrolna V2')).toBeVisible();
+  await expect(main.getByLabel('Ślad trasy: Jazda kontrolna V2')).toBeVisible();
 });
 
 test('Historia prowadzi do lekkiego szczegółu aktywności', async ({ page }) => {

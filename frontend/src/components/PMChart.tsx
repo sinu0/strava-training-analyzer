@@ -75,8 +75,14 @@ const PMChart = memo(function PMChart({ data }: PMChartProps) {
     );
   }
 
+  const latest = data[data.length - 1]!;
+
   return (
-    <Box sx={{ width: '100%', height: 400 }}>
+    <Box
+      role="img"
+      aria-label={`Wykres obciążenia PMC. ${data.length} punktów od ${data[0]!.date} do ${latest.date}. Ostatnie wartości: CTL ${latest.ctl}, ATL ${latest.atl}, forma ${latest.tsb}.`}
+      sx={{ width: '100%', height: 400 }}
+    >
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />

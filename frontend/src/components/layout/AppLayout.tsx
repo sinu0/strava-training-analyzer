@@ -18,7 +18,7 @@ const SIDEBAR_WIDTH = 260;
 export default function AppLayout() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => !isMobile);
   const [oauthNoticeOpen, setOauthNoticeOpen] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();

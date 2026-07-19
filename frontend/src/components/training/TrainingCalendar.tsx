@@ -55,11 +55,11 @@ export default function TrainingCalendar() {
       <TrainingProjectionChart days={days ?? []} />
 
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <IconButton onClick={prev} size="small"><ChevronLeftIcon /></IconButton>
+        <IconButton onClick={prev} size="small" aria-label="Poprzedni miesiąc"><ChevronLeftIcon /></IconButton>
         <Typography variant="h6" sx={{ mx: 2, textTransform: 'capitalize', minWidth: 180, textAlign: 'center' }}>
           {formatMonth(new Date(year, month))}
         </Typography>
-        <IconButton onClick={next} size="small"><ChevronRightIcon /></IconButton>
+        <IconButton onClick={next} size="small" aria-label="Następny miesiąc"><ChevronRightIcon /></IconButton>
       </Box>
 
       <Grid container columns={7} spacing={0.5} sx={{ mb: 1 }}>
@@ -81,6 +81,7 @@ export default function TrainingCalendar() {
               <Grid size={1} key={dateStr}>
                 <CalendarDayCell
                   day={day}
+                  date={dateStr}
                   dateNum={d.getDate()}
                   isCurrentMonth={d.getMonth() === month}
                   isToday={dateStr === todayStr}
