@@ -1,26 +1,24 @@
-import BarChartIcon from '@mui/icons-material/BarChart';
-import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import TodayIcon from '@mui/icons-material/Today';
 import WidgetsIcon from '@mui/icons-material/Widgets';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const NAV_ITEMS = [
-  { label: 'Dzisiaj', value: '/', path: '/', icon: <TodayIcon /> },
-  { label: 'Historia', value: '/activities', path: '/activities', icon: <DirectionsBikeIcon /> },
-  { label: 'Analiza', value: '/analytics', path: '/analytics', icon: <BarChartIcon /> },
-  { label: 'Plan', value: '/training', path: '/training', icon: <FitnessCenterIcon /> },
-  { label: 'Więcej', value: '/more', path: '/more', icon: <WidgetsIcon /> },
-] as const;
+import { useUiPreferences } from '@/hooks/useUiPreferences';
+import { PRIMARY_NAVIGATION_BY_PATH } from '@/navigation/appNavigation';
+import { DEFAULT_UI_PREFERENCES } from '@/utils/uiPreferences';
 
-function resolveCurrentValue(pathname: string) {
-  const matched = NAV_ITEMS.find((item) =>
+interface MobileNavigationItem {
+  label: string;
+  path: string;
+  icon: React.ReactElement;
+}
+
+function resolveCurrentValue(pathname: string, items: MobileNavigationItem[]) {
+  const matched = items.find((item) =>
     item.path === '/' ? pathname === '/' : pathname.startsWith(item.path),
   );
 
-  return matched?.value ?? '/more';
+  return matched?.path ?? '/more';
 }
 
 /**
@@ -29,6 +27,17 @@ function resolveCurrentValue(pathname: string) {
 export default function MobileBottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const preferences = useUiPreferences();
+  const savedPaths = preferences.data?.mobileNavigation ?? DEFAULT_UI_PREFERENCES.mobileNavigation;
+  const shortcuts = savedPaths
+    .map((path) => PRIMARY_NAVIGATION_BY_PATH.get(path))
+    .filter((item) => item != null);
+  const navigationItems: MobileNavigationItem[] = [
+    ...(shortcuts.length === 4
+      ? shortcuts
+      : DEFAULT_UI_PREFERENCES.mobileNavigation.map((path) => PRIMARY_NAVIGATION_BY_PATH.get(path)!)),
+    { label: 'Więcej', path: '/more', icon: <WidgetsIcon /> },
+  ];
 
   return (
     <Paper
@@ -51,7 +60,7 @@ export default function MobileBottomNav() {
     >
       <BottomNavigation
         showLabels
-        value={resolveCurrentValue(location.pathname)}
+        value={resolveCurrentValue(location.pathname, navigationItems)}
         onChange={(_, nextValue) => navigate(nextValue)}
         sx={{
           height: 64,
@@ -74,10 +83,10 @@ export default function MobileBottomNav() {
           },
         }}
       >
-        {NAV_ITEMS.map((item) => (
+        {navigationItems.map((item) => (
           <BottomNavigationAction
-            key={item.value}
-            value={item.value}
+            key={item.path}
+            value={item.path}
             label={item.label}
             icon={item.icon}
           />

@@ -362,7 +362,7 @@ export default function WeatherPage() {
                   <Button
                     variant="outlined"
                     startIcon={<AutoAwesomeIcon />}
-                    onClick={() => navigate('/route-planner?showWeather=1')}
+                    onClick={() => navigate('/routes?showWeather=1')}
                   >
                     Otwórz planer z pogodą
                   </Button>

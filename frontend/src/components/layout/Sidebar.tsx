@@ -1,13 +1,4 @@
-import BarChartIcon from '@mui/icons-material/BarChart';
-import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
-import ScaleIcon from '@mui/icons-material/Scale';
-import SettingsIcon from '@mui/icons-material/Settings';
 import SpeedOutlinedIcon from '@mui/icons-material/SpeedOutlined';
-import TodayIcon from '@mui/icons-material/Today';
-import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import {
   Drawer,
   List,
@@ -23,48 +14,33 @@ import { alpha, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION, type AppNavigationItem } from '@/navigation/appNavigation';
+
 interface SidebarProps {
   width: number;
   open: boolean;
   onNavigateComplete?: () => void;
 }
 
-interface NavItem {
-  label: string;
-  path: string;
-  icon: React.ReactElement;
-}
-
 interface NavGroup {
   label: string;
-  items: NavItem[];
+  items: AppNavigationItem[];
 }
 
-const HERO_ITEM: NavItem = { label: 'Dzisiaj', path: '/', icon: <TodayIcon /> };
+const HERO_ITEM = PRIMARY_NAVIGATION[0]!;
 
 const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Główne',
-    items: [
-      { label: 'Historia', path: '/activities', icon: <DirectionsBikeIcon /> },
-      { label: 'Analiza', path: '/analytics', icon: <BarChartIcon /> },
-      { label: 'Plan', path: '/training', icon: <FitnessCenterIcon /> },
-    ],
+    items: PRIMARY_NAVIGATION.slice(1),
   },
   {
     label: 'Więcej',
-    items: [
-      { label: 'Pełna pogoda', path: '/weather', icon: <WbSunnyOutlinedIcon /> },
-      { label: 'Profil i strefy', path: '/profile', icon: <PersonOutlineIcon /> },
-      { label: 'Zdrowie', path: '/health', icon: <MonitorHeartIcon /> },
-      { label: 'Masa ciała', path: '/weight', icon: <ScaleIcon /> },
-    ],
+    items: SECONDARY_NAVIGATION,
   },
 ];
 
-const BOTTOM_ITEM: NavItem = { label: 'Dane i zadania', path: '/admin', icon: <SettingsIcon /> };
-
-function NavButton({ item, selected, onClick }: { item: NavItem; selected: boolean; onClick: () => void }) {
+function NavButton({ item, selected, onClick }: { item: AppNavigationItem; selected: boolean; onClick: () => void }) {
   return (
     <ListItemButton
       selected={selected}
@@ -234,7 +210,7 @@ export default function Sidebar({ width, open, onNavigateComplete }: SidebarProp
         ))}
       </Box>
 
-      {/* Bottom-pinned settings */}
+      {/* Privacy status */}
       <Box
         sx={{
           borderTop: '1px solid',
@@ -243,13 +219,6 @@ export default function Sidebar({ width, open, onNavigateComplete }: SidebarProp
           pt: 0.75,
         }}
       >
-        <List disablePadding>
-          <NavButton
-            item={BOTTOM_ITEM}
-            selected={isSelected(BOTTOM_ITEM.path)}
-            onClick={() => navigateTo(BOTTOM_ITEM.path)}
-          />
-        </List>
         <Stack direction="row" spacing={0.8} alignItems="center" sx={{ px: 2.75, pt: 0.75 }}>
           <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: 'success.main', boxShadow: '0 0 10px rgba(63,185,80,0.55)' }} />
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.68rem' }}>

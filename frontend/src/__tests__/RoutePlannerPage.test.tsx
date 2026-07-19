@@ -166,7 +166,7 @@ describe('RoutePlannerPage', () => {
 
   it('renders main layout elements', () => {
     renderPage();
-    expect(screen.getByText('Planowanie trasy')).toBeDefined();
+    expect(screen.getByRole('heading', { name: 'Trasy' })).toBeDefined();
     expect(screen.getByTestId('route-map')).toBeDefined();
     expect(screen.getByTestId('elevation-profile')).toBeDefined();
     expect(screen.getByLabelText('Nazwa trasy')).toBeDefined();

@@ -14,7 +14,9 @@ const TrainingPlanPage = lazy(() => import('@/features/plan/PlanPage'));
 const HealthPage = lazy(() => import('@/pages/HealthPage'));
 const WeightPage = lazy(() => import('@/pages/WeightPage'));
 const WeatherPage = lazy(() => import('@/pages/WeatherPage'));
-const AdminPage = lazy(() => import('@/features/data/DataJobsPage'));
+const DataJobsPage = lazy(() => import('@/features/data/DataJobsPage'));
+const RoutePlannerPage = lazy(() => import('@/pages/RoutePlannerPage'));
+const SettingsPage = lazy(() => import('@/pages/AdminPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 type LazyPageComponent = LazyExoticComponent<ComponentType>;
@@ -41,7 +43,8 @@ export default function App() {
         <Route path="/health" element={renderLazyPage(HealthPage)} />
         <Route path="/weather" element={renderLazyPage(WeatherPage)} />
         <Route path="/more" element={renderLazyPage(MorePage)} />
-        <Route path="/route-planner" element={<Navigate to="/" replace />} />
+        <Route path="/routes" element={renderLazyPage(RoutePlannerPage)} />
+        <Route path="/route-planner" element={<Navigate to="/routes" replace />} />
         <Route path="/weight" element={renderLazyPage(WeightPage)} />
         <Route path="/priorities" element={<Navigate to="/analytics" replace />} />
         <Route path="/coach" element={<Navigate to="/" replace />} />
@@ -50,7 +53,9 @@ export default function App() {
         <Route path="/adaptive-coach" element={<Navigate to="/" replace />} />
         <Route path="/ai-v2" element={<Navigate to="/" replace />} />
         <Route path="/ai-predictions" element={<Navigate to="/" replace />} />
-        <Route path="/admin" element={renderLazyPage(AdminPage)} />
+        <Route path="/data" element={renderLazyPage(DataJobsPage)} />
+        <Route path="/settings" element={renderLazyPage(SettingsPage)} />
+        <Route path="/admin" element={<Navigate to="/data" replace />} />
         <Route path="*" element={renderLazyPage(NotFoundPage)} />
       </Route>
     </Routes>

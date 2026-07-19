@@ -5,23 +5,27 @@ import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import ScaleOutlinedIcon from '@mui/icons-material/ScaleOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
-import { Box, ButtonBase, Grid, Stack, Typography } from '@mui/material';
+import { Alert, Box, ButtonBase, Grid, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 import PageContainer from '@/components/common/PageContainer';
+import MobileNavigationSettings from '@/components/settings/MobileNavigationSettings';
 import PerformanceSurface from '@/components/v2/PerformanceSurface';
+import { useSaveUiPreferences, useUiPreferences } from '@/hooks/useUiPreferences';
 
 const items = [
-  { label: 'Pełna pogoda', description: 'Prognoza, lokalizacje i ustawienia', path: '/weather', icon: <CloudOutlinedIcon /> },
-  { label: 'Profil i strefy', description: 'FTP, tętno i ustawienia sportowe', path: '/profile', icon: <PersonOutlineIcon /> },
+  { label: 'Pogoda', description: 'Prognoza, lokalizacje i ustawienia', path: '/weather', icon: <CloudOutlinedIcon /> },
+  { label: 'Profil', description: 'FTP, tętno i ustawienia sportowe', path: '/profile', icon: <PersonOutlineIcon /> },
   { label: 'Zdrowie', description: 'Ręczny check-in i dostępność danych', path: '/health', icon: <MonitorHeartOutlinedIcon /> },
   { label: 'Masa ciała', description: 'Historia oraz cel masy', path: '/weight', icon: <ScaleOutlinedIcon /> },
-  { label: 'Dane i zadania', description: 'Synchronizacja, przeliczenia i diagnostyka', path: '/admin', icon: <DataObjectOutlinedIcon /> },
-  { label: 'Ustawienia', description: 'Integracje i konfiguracja aplikacji', path: '/admin', icon: <SettingsOutlinedIcon /> },
+  { label: 'Dane', description: 'Synchronizacja, przeliczenia i diagnostyka', path: '/data', icon: <DataObjectOutlinedIcon /> },
+  { label: 'Ustawienia', description: 'Integracje i konfiguracja aplikacji', path: '/settings', icon: <SettingsOutlinedIcon /> },
 ];
 
 export default function MorePage() {
   const navigate = useNavigate();
+  const preferences = useUiPreferences();
+  const savePreferences = useSaveUiPreferences();
   return (
     <PageContainer title="Więcej" subtitle="Pełna pogoda, profil sportowy, zdrowie oraz kontrola danych w jednym miejscu." maxWidth={1100}>
       <Grid container spacing={2}>
@@ -62,6 +66,23 @@ export default function MorePage() {
             </PerformanceSurface>
           </Grid>
         ))}
+        <Grid size={12}>
+          <PerformanceSurface sx={{ p: { xs: 2, md: 2.5 } }}>
+            {preferences.data ? (
+              <MobileNavigationSettings
+                preferences={preferences.data}
+                saving={savePreferences.isPending}
+                onSave={async (nextPreferences) => {
+                  await savePreferences.mutateAsync(nextPreferences);
+                }}
+              />
+            ) : preferences.isError ? (
+              <Alert severity="warning">Nie udało się wczytać ustawień skrótów mobilnych.</Alert>
+            ) : (
+              <Typography variant="body2" color="text.secondary">Wczytywanie skrótów mobilnych…</Typography>
+            )}
+          </PerformanceSurface>
+        </Grid>
       </Grid>
     </PageContainer>
   );

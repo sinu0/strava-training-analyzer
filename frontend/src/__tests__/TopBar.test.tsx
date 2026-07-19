@@ -35,17 +35,18 @@ function renderTopBar(pathname: string) {
 }
 
 describe('TopBar', () => {
-  it('shows Today context on root route', () => {
+  it('shows only global application context on root route', () => {
     renderTopBar('/');
 
-    expect(screen.getByText('Dzisiaj')).toBeDefined();
-    expect(screen.getByText('Decyzja treningowa')).toBeDefined();
+    expect(screen.getByText('Training Lab')).toBeDefined();
+    expect(screen.queryByText('Dzisiaj')).toBeNull();
+    expect(screen.queryByText('Decyzja treningowa')).toBeNull();
   });
 
-  it('shows Today context on legacy dashboard route', () => {
-    renderTopBar('/dashboard');
+  it('does not duplicate route-specific headings', () => {
+    renderTopBar('/activities');
 
-    expect(screen.getByText('Dzisiaj')).toBeDefined();
-    expect(screen.getByText('Decyzja treningowa')).toBeDefined();
+    expect(screen.getByText('Training Lab')).toBeDefined();
+    expect(screen.queryByText('Aktywności')).toBeNull();
   });
 });

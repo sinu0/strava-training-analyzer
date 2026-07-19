@@ -66,8 +66,12 @@ function mockStaticPages(importedPages: string[] = [], options?: { skipToday?: b
     return { default: () => <div>Weight page</div> };
   });
   vi.doMock('../features/data/DataJobsPage', () => {
-    importedPages.push('admin');
-    return { default: () => <div>Admin page</div> };
+    importedPages.push('data');
+    return { default: () => <div>Data page</div> };
+  });
+  vi.doMock('../pages/AdminPage', () => {
+    importedPages.push('settings');
+    return { default: () => <div>Settings page</div> };
   });
 }
 
@@ -121,6 +125,30 @@ describe('App', () => {
 
     expect(importedPages).toContain('today');
     expect(importedPages).not.toContain('activities');
+  });
+
+  it('loads route planning from its primary route', async () => {
+    const importedPages: string[] = [];
+    mockAppLayout();
+    mockStaticPages(importedPages);
+
+    await renderApp('/routes');
+
+    expect((await screen.findAllByText('Route planner page')).length).toBeGreaterThan(0);
+    expect(importedPages).toContain('route-planner');
+  });
+
+  it.each([
+    ['/route-planner', 'Route planner page'],
+    ['/admin', 'Data page'],
+  ])('redirects legacy route %s', async (legacyRoute, pageText) => {
+    const importedPages: string[] = [];
+    mockAppLayout();
+    mockStaticPages(importedPages);
+
+    await renderApp(legacyRoute);
+
+    expect((await screen.findAllByText(pageText)).length).toBeGreaterThan(0);
   });
 
 });

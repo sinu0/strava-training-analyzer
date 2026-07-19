@@ -16,7 +16,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import TopBarSyncButton from '@/components/layout/TopBarSyncButton';
 
@@ -26,63 +26,6 @@ interface TopBarProps {
   onToggleSidebar: () => void;
 }
 
-function getPageContext(pathname: string) {
-  if (pathname === '/' || pathname.startsWith('/dashboard')) {
-    return {
-      eyebrow: 'Dzisiaj',
-      title: 'Decyzja treningowa',
-      subtitle: 'Wniosek, dowody, jakość danych i kontekst kolejnej sesji.',
-    };
-  }
-  if (pathname.startsWith('/weather')) {
-    return {
-      eyebrow: 'Pogoda',
-      title: 'Pełna pogoda',
-      subtitle: 'Warunki godzinowe, prognoza tygodnia, lokalizacje i ustawienia.',
-    };
-  }
-  if (pathname.startsWith('/training')) {
-    return {
-      eyebrow: 'Plan',
-      title: 'Kalendarz treningowy',
-      subtitle: 'Planowane i wykonane sesje oraz scenariusz obciążenia.',
-    };
-  }
-  if (pathname.startsWith('/activities')) {
-    return {
-      eyebrow: 'Historia',
-      title: 'Aktywności',
-      subtitle: 'Lista, kalendarz, mapa i szczegół wykonanej sesji.',
-    };
-  }
-  if (pathname.startsWith('/analytics')) {
-    return {
-      eyebrow: 'Analiza',
-      title: 'Porównania i trendy',
-      subtitle: 'Obciążenie, regeneracja, moc i trwałość.',
-    };
-  }
-  if (pathname.startsWith('/health')) {
-    return {
-      eyebrow: 'Zdrowie',
-      title: 'Regeneracja',
-      subtitle: 'Sygnały wellness i codzienna gotowość.',
-    };
-  }
-  if (pathname.startsWith('/more')) {
-    return {
-      eyebrow: 'Więcej',
-      title: 'Dane i ustawienia',
-      subtitle: 'Profil, zdrowie, integracje, jakość danych i zadania.',
-    };
-  }
-  return {
-    eyebrow: 'Aplikacja',
-    title: 'Strava Analizator',
-    subtitle: 'Operacyjny cockpit treningowy.',
-  };
-}
-
 /**
  * Displays the main app bar with the sidebar toggle, status summary, and profile menu.
  */
@@ -90,9 +33,7 @@ export default function TopBar({
   onToggleSidebar,
 }: TopBarProps) {
   const navigate = useNavigate();
-  const location = useLocation();
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
-  const pageContext = getPageContext(location.pathname);
 
   return (
     <>
@@ -120,22 +61,15 @@ export default function TopBar({
           </IconButton>
 
           <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'baseline', gap: 1.1 }}>
-            <Typography
-              variant="caption"
-              color="primary"
-              sx={{ display: { xs: 'none', sm: 'block' }, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}
-            >
-              {pageContext.eyebrow}
-            </Typography>
             <Typography variant="subtitle1" sx={{ fontWeight: 760, lineHeight: 1.2 }}>
-              {pageContext.title}
+              Training Lab
             </Typography>
             <Typography
               variant="caption"
               color="text.secondary"
               sx={{ display: { xs: 'none', lg: 'block' }, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
             >
-              {pageContext.subtitle}
+              Prywatny kokpit kolarski
             </Typography>
           </Box>
 

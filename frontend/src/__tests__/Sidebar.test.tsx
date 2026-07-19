@@ -6,7 +6,7 @@ import { it, expect } from 'vitest';
 import Sidebar from '../components/layout/Sidebar';
 import theme from '../theme/theme';
 
-it('renders the V2 decision-first navigation and keeps full weather accessible', () => {
+it('renders the decision-first primary and secondary navigation', () => {
   render(
     <ThemeProvider theme={theme}>
       <MemoryRouter>
@@ -19,6 +19,10 @@ it('renders the V2 decision-first navigation and keeps full weather accessible',
   expect(screen.getByText('Historia')).toBeDefined();
   expect(screen.getByText('Analiza')).toBeDefined();
   expect(screen.getByText('Plan')).toBeDefined();
-  expect(screen.getByText('Pełna pogoda')).toBeDefined();
-  expect(screen.getByText('Dane i zadania')).toBeDefined();
+  expect(screen.getByText('Trasy')).toBeDefined();
+  expect(screen.getByText('Pogoda')).toBeDefined();
+  expect(screen.getByText('Zdrowie')).toBeDefined();
+  expect(screen.getByText('Profil')).toBeDefined();
+  expect(screen.getByText('Dane')).toBeDefined();
+  expect(screen.getByText('Ustawienia')).toBeDefined();
 });
