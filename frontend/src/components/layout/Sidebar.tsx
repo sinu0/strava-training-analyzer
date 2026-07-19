@@ -106,7 +106,11 @@ function GroupLabel({ label }: { label: string }) {
 /**
  * Renders the grouped primary navigation used by the application shell.
  */
-export default function Sidebar({ width, open, onNavigateComplete }: SidebarProps) {
+export default function Sidebar({
+  width,
+  open,
+  onNavigateComplete,
+}: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
@@ -136,7 +140,7 @@ export default function Sidebar({ width, open, onNavigateComplete }: SidebarProp
           boxSizing: 'border-box',
           borderRight: '1px solid',
           borderColor: (t) => t.tokens.surfaceBorder,
-          bgcolor: '#0A1017',
+          bgcolor: (t) => t.palette.background.paper,
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
@@ -145,8 +149,7 @@ export default function Sidebar({ width, open, onNavigateComplete }: SidebarProp
             content: '""',
             position: 'absolute',
             inset: 0,
-            background:
-              'radial-gradient(circle at 10% 5%, rgba(255,107,53,0.09), transparent 32%), radial-gradient(circle at 95% 85%, rgba(78,205,196,0.045), transparent 28%)',
+            background: (t) => t.tokens.pageGlow,
             pointerEvents: 'none',
           },
           '& > *': {
@@ -166,7 +169,7 @@ export default function Sidebar({ width, open, onNavigateComplete }: SidebarProp
             placeItems: 'center',
             borderRadius: 2.2,
             color: '#fff',
-            background: 'linear-gradient(135deg, #FC4C02, #FF7A3D)',
+            background: (t) => t.tokens.gradients.strava,
             boxShadow: '0 10px 28px rgba(252,76,2,0.24)',
           }}
         >

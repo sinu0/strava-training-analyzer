@@ -6,10 +6,10 @@ import {
 } from '@/types/uiPreferences';
 
 const DEFAULT_WIDGETS: DashboardWidget[] = [
-  widget('decision-main', 'decision', 0, 12),
-  widget('recovery-main', 'recovery', 1, 4),
-  widget('load-main', 'load', 2, 4),
-  widget('last-activity-main', 'lastActivity', 3, 4),
+  widget('decision-main', 'decision', 0, 8),
+  widget('last-activity-main', 'lastActivity', 1, 4),
+  widget('recovery-main', 'recovery', 2, 4),
+  widget('load-main', 'load', 3, 4),
   widget('next-workout-main', 'nextWorkout', 4, 6),
   widget('weather-main', 'weather', 5, 6),
 ];

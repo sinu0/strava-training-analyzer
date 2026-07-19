@@ -115,7 +115,7 @@ export default function AppLayout() {
               inset: 0,
               zIndex: 0,
               pointerEvents: 'none',
-              background: 'radial-gradient(circle at 88% 8%, rgba(255,107,53,0.045), transparent 26%), radial-gradient(circle at 55% 92%, rgba(78,205,196,0.025), transparent 28%)',
+              background: (currentTheme) => currentTheme.tokens.pageGlow,
             },
             '& > *': { position: 'relative', zIndex: 1 },
           }}

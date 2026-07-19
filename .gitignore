@@ -55,5 +55,6 @@ AI_PROGRESS.md
 *.jpg
 !frontend/public/illustrations/*.png
 !frontend/public/illustrations/*.jpg
+!frontend/public/illustrations/v4/*.webp
 !/image-gen/*.py
 .playwright-mcp/

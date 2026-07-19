@@ -22,6 +22,7 @@ import SyncStatusSection from '@/components/admin/SyncStatusSection';
 import WeatherJobSection from '@/components/admin/WeatherJobSection';
 import PageContainer from '@/components/common/PageContainer';
 import Section from '@/components/common/Section';
+import ThemeModeSettings from '@/components/settings/ThemeModeSettings';
 import { useAiStatus, useRunAiBatch } from '@/hooks/useAi';
 import {
   useAutoSyncConfig,
@@ -250,6 +251,9 @@ export default function AdminPage() {
             </Stack>
           </Grid>
         </Grid>
+      </AdminGroup>
+      <AdminGroup title="Wygląd" subtitle="Motyw i preferencje wizualne interfejsu." icon={<SettingsSuggestIcon />} defaultExpanded={true}>
+        <ThemeModeSettings />
       </AdminGroup>
       <AdminGroup title="Przetwarzanie" subtitle="Zadania tła związane z pogodą, AI i automatyzacją systemu." icon={<SettingsSuggestIcon />} defaultExpanded={true}>
         <Grid container spacing={3}>

@@ -1,7 +1,7 @@
 import { Box, Paper, Stack, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import { SURFACE_COLORS, alphaColor } from '@/utils/colors';
+import { alphaColor } from '@/utils/colors';
 
 type EditorialHeroProps = {
   eyebrow: string;
@@ -38,9 +38,9 @@ export default function EditorialHero({
         borderRadius: 4,
         border: '1px solid',
         borderColor: alphaColor(accentColor, 0.18),
-        bgcolor: SURFACE_COLORS.elevated,
+        bgcolor: 'background.paper',
         overflow: 'hidden',
-        boxShadow: (theme: { tokens?: { cardShadow?: string } }) => theme.tokens?.cardShadow ?? 'none',
+        boxShadow: (currentTheme) => currentTheme.tokens.cardShadow,
       }}
     >
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 1.5, md: 2 }} alignItems="stretch">
@@ -118,10 +118,7 @@ export default function EditorialHero({
             sx={{
               position: 'absolute',
               inset: 0,
-              background: `linear-gradient(135deg, ${alphaColor(theme.palette.background.default, 0.12)} 0%, ${alphaColor(
-                theme.palette.background.default,
-                0.58,
-              )} 100%)`,
+              background: theme.tokens?.heroScrim ?? 'linear-gradient(135deg, rgba(8,13,19,0.12), rgba(8,13,19,0.58))',
             }}
           />
         </Box>

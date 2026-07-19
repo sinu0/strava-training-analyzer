@@ -5,6 +5,7 @@ import { Box, Grid, List, ListItem, ListItemText, Stack, Tab, Tabs, TextField, T
 import { useSearchParams } from 'react-router-dom';
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
+import EditorialHero from '@/components/common/EditorialHero';
 import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
@@ -14,6 +15,7 @@ import WorkoutLibrary from '@/components/training/WorkoutLibrary';
 import MetricReadout from '@/components/v2/MetricReadout';
 import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import { PMC_COLORS } from '@/utils/colors';
+import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
 
 import { useLoadScenario } from './useLoadScenario';
 
@@ -45,6 +47,16 @@ export default function PlanPage() {
 
   return (
     <PageContainer title="Plan treningowy" subtitle="Zbuduj tydzień, wybierz jednostkę i zobacz matematyczny scenariusz obciążenia." maxWidth={1320}>
+      <EditorialHero
+        compact
+        eyebrow="Kierunek sezonu"
+        title="Trening, który ma swoje miejsce w planie"
+        description="Zbuduj tydzień, wybierz sesję i sprawdź konsekwencje dla obciążenia, zanim wsiądziesz na rower."
+        accentColor="#FC4C02"
+        imageSrc={getCyclingHeroIllustrationPath('training')}
+        imageAlt="Przygotowane akcesoria kolarskie i mapa trasy"
+        highlights={['Kalendarz', 'Biblioteka sesji', 'Scenariusz CTL / ATL']}
+      />
       <PerformanceSurface sx={{ mb: 2.5 }}>
         <Tabs value={tab} onChange={(_, value: PlanTab) => changeTab(value)} variant="fullWidth">
           <Tab value="calendar" icon={<CalendarMonthOutlinedIcon />} iconPosition="start" label="Kalendarz" />
