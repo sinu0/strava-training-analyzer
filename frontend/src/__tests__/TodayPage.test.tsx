@@ -2,16 +2,19 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../components/ActivityMap', () => ({
-  default: () => <div data-testid="today-route-map" />,
-}));
-
 vi.mock('../features/today/useToday', () => ({
   useToday: vi.fn(),
 }));
 
+vi.mock('../hooks/useUiPreferences', () => ({
+  useUiPreferences: vi.fn(),
+  useSaveUiPreferences: vi.fn(),
+}));
+
 import TodayPage from '../features/today/TodayPage';
 import { useToday } from '../features/today/useToday';
+import { useSaveUiPreferences, useUiPreferences } from '../hooks/useUiPreferences';
+import { DEFAULT_UI_PREFERENCES } from '../utils/uiPreferences';
 
 function renderPage() {
   return render(
@@ -22,7 +25,18 @@ function renderPage() {
 }
 
 describe('TodayPage', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(useUiPreferences).mockReturnValue({
+      data: structuredClone(DEFAULT_UI_PREFERENCES),
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useUiPreferences>);
+    vi.mocked(useSaveUiPreferences).mockReturnValue({
+      isPending: false,
+      mutateAsync: vi.fn().mockResolvedValue(structuredClone(DEFAULT_UI_PREFERENCES)),
+    } as unknown as ReturnType<typeof useSaveUiPreferences>);
+  });
 
   it('shows explicit unknown state without fabricated load values', () => {
     vi.mocked(useToday).mockReturnValue({
@@ -46,7 +60,7 @@ describe('TodayPage', () => {
     expect(screen.getByText('Brak danych')).toBeDefined();
     expect(screen.getByText('Brak historii wymaganej do obliczenia obciążenia.')).toBeDefined();
     expect(screen.queryByText('0.0')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Otwórz pełną pogodę' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Otwórz pogodę' })).toBeDefined();
   });
 
   it('shows one recommendation together with its evidence', async () => {
@@ -84,8 +98,8 @@ describe('TodayPage', () => {
 
     expect(screen.getByRole('heading', { name: 'ENDURANCE' })).toBeDefined();
     expect(screen.getByText('Spokojna jazda Z2.')).toBeDefined();
-    expect(screen.getByText('Obciążenie jest stabilne')).toBeDefined();
-    expect(screen.getByLabelText('Mapa trasy: Morning Ride')).toBeDefined();
-    expect(await screen.findByTestId('today-route-map')).toBeDefined();
+    expect(screen.getByText(/Obciążenie jest stabilne/)).toBeDefined();
+    expect(screen.getByLabelText('Ślad trasy: Morning Ride')).toBeDefined();
+    expect(await screen.findByTestId('lightweight-route-preview')).toBeDefined();
   });
 });

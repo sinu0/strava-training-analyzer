@@ -14,6 +14,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import pl.strava.analizator.application.ActivityNotFoundException;
 import pl.strava.analizator.application.ProfileNotFoundException;
 import pl.strava.analizator.application.ProcessingJobNotFoundException;
+import pl.strava.analizator.application.UiPreferencesConflictException;
 import pl.strava.analizator.application.ai.AiModuleDisabledException;
 
 @RestControllerAdvice
@@ -39,6 +40,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, Object>> handleConflict(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(errorBody(HttpStatus.CONFLICT, ex.getMessage()));
+    }
+
+    @ExceptionHandler(UiPreferencesConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleUiPreferencesConflict(UiPreferencesConflictException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(errorBody(HttpStatus.CONFLICT, ex.getMessage()));
     }
