@@ -1,4 +1,5 @@
 import { Box, Paper, Stack, Typography } from '@mui/material';
+
 import { STATUS_COLORS } from '@/utils/colors';
 
 interface WeekData {

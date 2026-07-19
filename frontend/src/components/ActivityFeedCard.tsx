@@ -15,8 +15,8 @@ import { MapContainer, TileLayer, Polyline } from 'react-leaflet';
 
 import { DEFAULT_MAP_TILE_VARIANT, MAP_TILE_CONFIG } from '@/constants/mapTiles';
 import type { ActivitySummary } from '@/types/activity';
-import { BENEFIT_COLORS, BENEFIT_LABELS } from '@/types/trainingEffect';
 import type { MaxValues, MetricKey } from '@/types/metrics';
+import { BENEFIT_COLORS, BENEFIT_LABELS } from '@/types/trainingEffect';
 import {
   CHART_COLORS,
   COMMON_COLORS,
@@ -375,9 +375,7 @@ const ActivityFeedCard = memo(function ActivityFeedCard({
         ) : null}
 
         <Stack direction="row" spacing={0} sx={{ flexWrap: 'wrap', gap: 0.75 }}>
-          {activity.primaryBenefit && (
-            <BenefitChip benefit={activity.primaryBenefit} />
-          )}
+          {!!activity.primaryBenefit && <BenefitChip benefit={activity.primaryBenefit} />}
           {activity.distanceM != null && activity.distanceM > 0 && (
             <StatChip icon={<StraightenIcon sx={{ fontSize: '2rem' }} />} value={formatDistance(activity.distanceM)} color={sportColor} />
           )}

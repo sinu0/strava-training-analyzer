@@ -13,15 +13,17 @@ import {
   Timeline,
 } from '@mui/icons-material';
 import { Box, Typography, Tooltip, Paper } from '@mui/material';
-import type { SvgIconComponent } from '@mui/icons-material';
 
 import {
+  PREDICTION_TYPE_V2_ICONS,
   PREDICTION_TYPE_V2_LABELS,
   PREDICTION_TYPE_V2_DESCRIPTIONS,
   PREDICTION_TYPE_V2_COLORS,
   type PredictionTypeV2,
 } from '@/types/aiV2';
 import { alphaColor } from '@/utils/colors';
+
+import type { SvgIconComponent } from '@mui/icons-material';
 
 const ICON_MAP: Record<string, SvgIconComponent> = {
   BoltIcon: Bolt,
@@ -37,8 +39,6 @@ const ICON_MAP: Record<string, SvgIconComponent> = {
   HealingIcon: Healing,
   TimelineIcon: Timeline,
 };
-
-import { PREDICTION_TYPE_V2_ICONS } from '@/types/aiV2';
 
 const ALL_TYPES: PredictionTypeV2[] = [
   'FTP_PREDICTION',

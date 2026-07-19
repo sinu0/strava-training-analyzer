@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from 'react';
 
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -32,6 +31,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useCreateEvent, useEvents } from '@/hooks/useAnalytics';
 import { useCurrentPerformanceState } from '@/hooks/usePerformancePrediction';
@@ -243,7 +243,7 @@ export default function PlanBuilder() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {isLoadingState && <LinearProgress sx={{ borderRadius: 2 }} />}
+      {!!isLoadingState && <LinearProgress sx={{ borderRadius: 2 }} />}
 
       <Card>
         <CardHeader
@@ -490,10 +490,10 @@ export default function PlanBuilder() {
                 <Chip label={`${daysPerWeek} dni/tydz.`} variant="outlined" />
                 <Chip label={`${weeklyTss} TSS/tydz.`} variant="outlined" />
                 <Chip label={`CTL: ${currentCtl} | ATL: ${currentAtl} | FTP: ${ftp}W`} variant="outlined" color="info" />
-                {eventDate && <Chip label={`Event: ${eventDate}`} color="warning" variant="outlined" />}
+                {!!eventDate && <Chip label={`Event: ${eventDate}`} color="warning" variant="outlined" />}
               </Stack>
 
-              {eventDate && (
+              {!!eventDate && (
                 <Alert severity="info">
                   Event {eventDate}. Planner uwzgledni taper i progresywny ramp TSS.
                 </Alert>
@@ -514,21 +514,20 @@ export default function PlanBuilder() {
           {/* STEP 4: Results */}
           {activeStep === 3 && (
             <Stack spacing={2.5}>
-              {isOptimizerError && (
+              {!!isOptimizerError && (
                 <Alert severity="error">
                   {(optimizerError as Error)?.message ?? 'Blad optymalizacji.'}
                 </Alert>
               )}
 
-              {isOptimizing && (
+              {!!isOptimizing && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 4 }}>
                   <CircularProgress />
                   <Typography color="text.secondary">Optymalizuje plan z Monte Carlo...</Typography>
                 </Box>
               )}
 
-              {result && (
-                <>
+              {!!result && <>
                   {/* Strategy */}
                   {result.plans.length === 0 ? (
                     <Alert severity="warning">
@@ -587,7 +586,7 @@ export default function PlanBuilder() {
                                             color: PLAN_TYPE_CONFIG[plan.type].color,
                                           }}
                                         />
-                                        {isSelected && <Chip label="Wybrany" size="small" color="primary" variant="outlined" />}
+                                        {!!isSelected && <Chip label="Wybrany" size="small" color="primary" variant="outlined" />}
                                       </Stack>
                                       <Divider />
                                       <Box>
@@ -637,27 +636,25 @@ export default function PlanBuilder() {
                       </Card>
 
                       {/* Applied success */}
-                      {applied && (
+                      {!!applied && (
                         <Alert severity="success">
                           Plan <strong>{PLAN_TYPE_CONFIG[selectedType].label.toLowerCase()}</strong> zapisany w kalendarzu.
                         </Alert>
                       )}
-                      {applyMutation.isError && (
+                      {!!applyMutation.isError && (
                         <Alert severity="error">
                           Nie udalo sie zapisac: {(applyMutation.error as Error)?.message ?? 'Nieznany blad'}
                         </Alert>
                       )}
-                      {generatedProgram && (
+                      {!!generatedProgram && (
                         <Alert severity="success">
                           Wygenerowano program. Przejdz do zakladki <strong>Programy</strong>.
                         </Alert>
                       )}
-                      {generate.isError && (
-                        <Alert severity="error">Blad generowania programu</Alert>
-                      )}
+                      {!!generate.isError && <Alert severity="error">Blad generowania programu</Alert>}
 
                       {/* Sessions table */}
-                      {selectedPlan && selectedPlan.sessions.length > 0 && (
+                      {!!selectedPlan && selectedPlan.sessions.length > 0 && (
                         <Card>
                           <CardHeader
                             title={`Sesje: ${PLAN_TYPE_CONFIG[selectedType].label} (${selectedPlan.sessions.length} sesji | Pewnosc: ${result.confidence}%)`}
@@ -717,26 +714,26 @@ export default function PlanBuilder() {
                                     </TableRow>
                                   </TableHead>
                                   <TableBody>
-                                    {selectedPlan.sessions.map((s, i) => (
-                                      <TableRow key={i} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                        <TableCell>{s.day}</TableCell>
+                                    {selectedPlan.sessions.map((session) => (
+                                      <TableRow key={session.day} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                        <TableCell>{session.day}</TableCell>
                                         <TableCell>
-                                          <Chip label={s.type} size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
+                                          <Chip label={session.type} size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
                                         </TableCell>
-                                        <TableCell>{s.durationMinutes}</TableCell>
+                                        <TableCell>{session.durationMinutes}</TableCell>
                                         <TableCell>
                                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                             <Box sx={{
                                               width: 8, height: 8, borderRadius: '50%',
-                                              bgcolor: INTENSITY_COLORS[s.intensity] ?? STATUS_COLORS.neutral,
+                                              bgcolor: INTENSITY_COLORS[session.intensity] ?? STATUS_COLORS.neutral,
                                             }} />
-                                            <Typography variant="body2">{s.intensity}</Typography>
+                                            <Typography variant="body2">{session.intensity}</Typography>
                                           </Box>
                                         </TableCell>
-                                        <TableCell>{s.tss}</TableCell>
+                                        <TableCell>{session.tss}</TableCell>
                                         <TableCell>
                                           <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 200, display: 'block', whiteSpace: 'normal' }}>
-                                            {s.goal}
+                                            {session.goal}
                                           </Typography>
                                         </TableCell>
                                       </TableRow>
@@ -750,13 +747,13 @@ export default function PlanBuilder() {
                       )}
 
                       {/* Load summary */}
-                      {result.loadSummary && result.loadSummary.length > 0 && (
+                      {!!result.loadSummary && result.loadSummary.length > 0 && (
                         <Card>
                           <CardHeader title="Podsumowanie obciazenia" titleTypographyProps={{ variant: 'subtitle2' }} />
                           <CardContent>
                             <Stack spacing={0.5}>
-                              {result.loadSummary.map((s, i) => (
-                                <Typography key={i} variant="body2" color="text.secondary">• {s}</Typography>
+                              {result.loadSummary.map((summary) => (
+                                <Typography key={summary} variant="body2" color="text.secondary">• {summary}</Typography>
                               ))}
                             </Stack>
                           </CardContent>
@@ -764,8 +761,7 @@ export default function PlanBuilder() {
                       )}
                     </Stack>
                   )}
-                </>
-              )}
+                </>}
             </Stack>
           )}
 

@@ -33,6 +33,7 @@ import {
 } from '@/hooks/useAnalytics';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import theme from '@/theme/theme';
+import { alphaColor, CHART_COLORS, STATUS_COLORS } from '@/utils/colors';
 import { getWeatherIllustrationPath } from '@/utils/illustrationAssets';
 import {
   buildWeatherComparison,
@@ -40,7 +41,6 @@ import {
   defaultWeatherScoringProfile,
   adaptWeatherGradientForProfile,
 } from '@/utils/weatherScoring';
-import { alphaColor, CHART_COLORS, STATUS_COLORS } from '@/utils/colors';
 
 export default function WeatherPage() {
   const navigate = useNavigate();

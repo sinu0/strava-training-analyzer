@@ -27,6 +27,7 @@ interface AiCoachSectionProps {
 }
 
 interface ChatMessage {
+  id: string;
   role: 'user' | 'assistant';
   content: string;
 }
@@ -55,18 +56,18 @@ export default function AiCoachSection({ activityId }: AiCoachSectionProps) {
   const handleAsk = () => {
     if (!question.trim()) return;
     const q = question.trim();
-    setChatHistory((prev) => [...prev, { role: 'user', content: q }]);
+    setChatHistory((prev) => [...prev, { id: crypto.randomUUID(), role: 'user', content: q }]);
     setQuestion('');
     askMutation.mutate(
       { activityId, question: q },
       {
         onSuccess: (data) => {
-          setChatHistory((prev) => [...prev, { role: 'assistant', content: data.answer }]);
+          setChatHistory((prev) => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: data.answer }]);
         },
         onError: (error) => {
           setChatHistory((prev) => [
             ...prev,
-            { role: 'assistant', content: `Błąd: ${error.message}` },
+            { id: crypto.randomUUID(), role: 'assistant', content: `Błąd: ${error.message}` },
           ]);
         },
       }
@@ -222,9 +223,9 @@ export default function AiCoachSection({ activityId }: AiCoachSectionProps) {
         <Collapse in={chatOpen}>
           {chatHistory.length > 0 && (
             <Box sx={{ maxHeight: 300, overflowY: 'auto', mb: 2 }}>
-              {chatHistory.map((msg, idx) => (
+              {chatHistory.map((msg) => (
                 <Box
-                  key={idx}
+                  key={msg.id}
                   sx={{
                     display: 'flex',
                     justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',

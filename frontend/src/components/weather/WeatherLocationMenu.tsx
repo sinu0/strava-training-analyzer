@@ -201,9 +201,9 @@ export default function WeatherLocationMenu({
           />
           {searchResults.length > 0 && (
             <List dense sx={{ py: 0, maxHeight: 200, overflow: 'auto' }}>
-              {searchResults.map((result, index) => (
+              {searchResults.map((result) => (
                 <ListItemButton
-                  key={`${result.name}-${index}`}
+                  key={`${result.name}-${result.latitude}-${result.longitude}`}
                   onClick={() => handleSelectResult(result)}
                   sx={{
                     borderRadius: 1,

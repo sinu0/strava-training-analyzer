@@ -42,15 +42,15 @@ import type {
   ReadinessData,
   WeeklyBudget,
 } from '@/types/analytics';
+import type { TrainingEvent } from '@/types/event';
+import type { EventProjection } from '@/types/event';
+import type { FatigueState, LoadFocus, TrainingStatus, WeeklyBrief } from '@/types/fatigue';
 import type { AthleteProfile } from '@/types/profile';
 import type {
   ComparePeriodsResponse,
   DateRange,
   QueryToggleOptions,
 } from '@/types/query';
-import type { FatigueState, LoadFocus, TrainingStatus, WeeklyBrief } from '@/types/fatigue';
-import type { TrainingEvent } from '@/types/event';
-import type { EventProjection } from '@/types/event';
 
 export function usePmc(range: DateRange) {
   return useQuery<PmcData[]>({

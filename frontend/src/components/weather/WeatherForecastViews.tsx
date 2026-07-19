@@ -429,9 +429,9 @@ export default function WeatherForecastViews({
 
       {current.warnings.length > 0 && (
         <Box sx={{ mt: 1.5 }}>
-          {current.warnings.map((warning, index) => (
+          {current.warnings.map((warning) => (
             <Typography
-              key={`${warning}-${index}`}
+              key={warning}
               variant="body2"
               sx={{ display: 'block', color: STATUS_COLORS.warning, fontSize: '0.8rem' }}
             >

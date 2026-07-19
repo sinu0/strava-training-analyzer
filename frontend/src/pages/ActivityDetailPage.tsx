@@ -15,11 +15,11 @@ import LapsTab from '@/components/activity/LapsTab';
 import OverviewTab from '@/components/activity/OverviewTab';
 import AiCoachSection from '@/components/AiCoachSection';
 import ErrorState from '@/components/common/ErrorState';
-import JournalEntryForm from '@/components/journal/JournalEntryForm';
 import LoadingState from '@/components/common/LoadingState';
 import PageContainer from '@/components/common/PageContainer';
 import PullToRefreshPanel from '@/components/common/PullToRefreshPanel';
 import SwipeableContent from '@/components/common/SwipeableContent';
+import JournalEntryForm from '@/components/journal/JournalEntryForm';
 import { useActivity, useActivityMap, useRecalculateActivityMetrics } from '@/hooks/useActivities';
 
 export default function ActivityDetailPage() {

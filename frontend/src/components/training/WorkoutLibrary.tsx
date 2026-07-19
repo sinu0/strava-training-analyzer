@@ -83,8 +83,8 @@ function CategoryFilters({ selected, onChange }: { selected?: WorkoutCategory; o
 function LoadingSkeleton() {
   return (
     <Grid container spacing={2}>
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Grid key={i} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+      {['first', 'second', 'third', 'fourth'].map((slot) => (
+        <Grid key={slot} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
           <Skeleton variant="rounded" height={220} sx={{ borderRadius: 3 }} />
         </Grid>
       ))}

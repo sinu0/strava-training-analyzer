@@ -1,4 +1,3 @@
-import { useState } from 'react';
 
 import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
 import {
@@ -11,6 +10,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { useState } from 'react';
 
 interface WorkoutStep {
   label: string;
@@ -144,7 +144,7 @@ export default function WorkoutCompanion() {
           value={totalDuration > 0 ? (elapsed / totalDuration) * 100 : 0}
           sx={{ width: 300, height: 8, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.08)' }}
         />
-        {currentStep && (
+        {!!currentStep && (
           <Box>
             <Typography variant="h5" fontWeight={700} color={currentStep.color}>
               {currentStep.label}

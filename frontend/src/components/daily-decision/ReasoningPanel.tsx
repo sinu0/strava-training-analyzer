@@ -67,11 +67,11 @@ export default function ReasoningPanel({ reasons }: Props) {
 
         <Collapse in={expanded}>
           <Stack spacing={1}>
-            {reasons.map((reason, i) => {
+            {reasons.map((reason) => {
               const priorityColor = PRIORITY_COLORS[reason.priority] ?? STATUS_COLORS.neutral;
               return (
                 <Box
-                  key={i}
+                  key={`${reason.priority}-${reason.signal}-${reason.message}`}
                   sx={{
                     p: 1.5,
                     borderRadius: 2,

@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import apiClient from '@/api/client';
 import { STALE_STANDARD } from '@/constants/queryConfig';
-
 import type {
   PredictionRequestV2,
   PredictionResponseV2,

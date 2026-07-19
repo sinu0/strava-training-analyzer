@@ -8,6 +8,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+
 import type { ActivityTrainingEffect } from '@/types/trainingEffect';
 import {
   BENEFIT_COLORS,

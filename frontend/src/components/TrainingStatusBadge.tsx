@@ -1,8 +1,9 @@
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { Chip } from '@mui/material';
+
 import type { TrainingStatus } from '@/types/fatigue';
 import { STATUS_COLORS } from '@/utils/colors';
 

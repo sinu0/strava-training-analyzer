@@ -264,7 +264,7 @@ export default function DailyDecisionHeroCard({
               flexWrap: 'wrap',
             }}
           >
-            {decision.decision !== 'SKIP' && onStartWorkout && (
+            {decision.decision !== 'SKIP' && !!onStartWorkout && (
               <Button
                 variant="contained"
                 size="large"
@@ -280,7 +280,7 @@ export default function DailyDecisionHeroCard({
               </Button>
             )}
 
-            {onSkip && (
+            {!!onSkip && (
               <Button
                 variant="outlined"
                 size="large"

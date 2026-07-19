@@ -260,14 +260,14 @@ export default function ProfileGallery() {
 
         {photos.length > PAGE_SIZE && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-            {Array.from({ length: totalPages }).map((_, index) => (
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
               <Box
-                key={`dot-${index}`}
+                key={`page-${pageNumber}`}
                 sx={{
-                  width: index === currentPage ? 22 : 8,
+                  width: pageNumber - 1 === currentPage ? 22 : 8,
                   height: 8,
                   borderRadius: 999,
-                  bgcolor: index === currentPage ? 'primary.main' : 'rgba(255,255,255,0.16)',
+                  bgcolor: pageNumber - 1 === currentPage ? 'primary.main' : 'rgba(255,255,255,0.16)',
                   mx: 0.4,
                   transition: 'all 0.18s ease',
                 }}

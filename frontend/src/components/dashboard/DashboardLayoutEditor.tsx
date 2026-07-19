@@ -1,4 +1,3 @@
-import { useState, useCallback } from 'react';
 
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
@@ -14,6 +13,7 @@ import {
   Switch,
   Typography,
 } from '@mui/material';
+import { useState, useCallback } from 'react';
 
 export interface WidgetConfig {
   id: string;

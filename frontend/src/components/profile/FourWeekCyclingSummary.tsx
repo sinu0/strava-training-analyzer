@@ -149,7 +149,7 @@ export default function FourWeekCyclingSummary() {
               : DAY_LABELS[i] ?? '';
             return (
               <Box
-                key={i}
+                key={DAY_LABELS[i]}
                 title={title}
                 sx={{
                   display: 'flex',

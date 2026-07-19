@@ -61,7 +61,7 @@ export default function SessionOptionsList({ sessions, bestSessionType, onSelect
                 >
                   <TableCell>
                     <Stack direction="row" spacing={1} alignItems="center">
-                      {isBest && <Star sx={{ color: STATUS_COLORS.warning, fontSize: 16 }} />}
+                      {!!isBest && <Star sx={{ color: STATUS_COLORS.warning, fontSize: 16 }} />}
                       <Typography variant="body2" fontWeight={isBest ? 600 : 400}>
                         {session.type}
                       </Typography>

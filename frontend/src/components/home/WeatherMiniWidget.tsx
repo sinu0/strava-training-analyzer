@@ -2,11 +2,12 @@ import AirIcon from '@mui/icons-material/Air';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import { Box, Stack, Typography } from '@mui/material';
 
-import HomeWidgetCard from './HomeWidgetCard';
 import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
 import type { WeatherGradient } from '@/types/analytics';
 import { STATUS_COLORS, alphaColor } from '@/utils/colors';
 import { getHomeWidgetIllustrationPath } from '@/utils/illustrationAssets';
+
+import HomeWidgetCard from './HomeWidgetCard';
 
 const WEATHER_ART = getHomeWidgetIllustrationPath('weather');
 

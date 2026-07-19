@@ -172,7 +172,7 @@ export default function LapsTab({
       </Box>
 
       {/* Comparison mode header */}
-      {compareMode && compareLaps.length > 0 && (
+      {!!compareMode && compareLaps.length > 0 && (
         <Box sx={{ mb: 2, p: 2, bgcolor: '#161B22', borderRadius: 2, border: '1px solid #30363D' }}>
           <Typography sx={{ color: '#8B949E', fontSize: '0.75rem', mb: 1 }}>
             Porównanie okrążeń {compareLaps.map((i) => `#${i + 1}`).join(' vs ')}
@@ -208,7 +208,7 @@ export default function LapsTab({
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         {resolvedLaps.map((lap, idx) => (
           <LapCard
-            key={idx}
+            key={lap.lapIndex}
             lap={lap}
             index={idx}
             sportType={sportType}

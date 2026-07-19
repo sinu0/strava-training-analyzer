@@ -1,6 +1,6 @@
+import { Box, Button, Chip, Stack, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 
-import { Box, Button, Chip, Stack, TextField, Typography } from '@mui/material';
 
 import { useJournalForActivity, useSaveJournalEntry } from '@/hooks/useJournal';
 import type { JournalMood } from '@/types/journal';
@@ -112,7 +112,7 @@ export default function JournalEntryForm({ activityId }: JournalEntryFormProps) 
         {saveMutation.isPending ? 'Zapisywanie...' : existing ? 'Aktualizuj' : 'Zapisz'}
       </Button>
 
-      {saveMutation.isSuccess && (
+      {!!saveMutation.isSuccess && (
         <Typography variant="caption" color="success.main">
           Zapisano!
         </Typography>

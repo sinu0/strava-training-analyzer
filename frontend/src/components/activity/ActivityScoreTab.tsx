@@ -7,6 +7,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+
 import type { ActivityTrainingEffect } from '@/types/trainingEffect';
 import {
   BENEFIT_COLORS,
@@ -156,7 +157,7 @@ export default function ActivityScoreTab({ effect }: ActivityScoreTabProps) {
                 variant="outlined"
                 sx={{ fontSize: '0.7rem' }}
               />
-              {effect.secondaryBenefit && (
+              {!!effect.secondaryBenefit && (
                 <Chip
                   label={`Wtórny: ${BENEFIT_LABELS[effect.secondaryBenefit] ?? effect.secondaryBenefit}`}
                   size="small"

@@ -8,25 +8,24 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import ActivityMediaCarousel from '@/components/ActivityMediaCarousel';
-import DailyDecisionHeroCard from '@/components/daily-decision/DailyDecisionHeroCard';
-import ReadinessWidget from '@/components/home/ReadinessWidget';
+import ChallengeWidget from '@/components/challenge/ChallengeWidget';
 import PageContainer from '@/components/common/PageContainer';
-import TrainingLoadMiniChart from '@/components/TrainingLoadMiniChart';
-import RecoveryWidget from '@/components/home/RecoveryWidget';
-import EventCountdownWidget from '@/components/home/EventCountdownWidget';
+import DailyDecisionHeroCard from '@/components/daily-decision/DailyDecisionHeroCard';
+import DashboardLayoutEditor, { useDashboardWidgets } from '@/components/dashboard/DashboardLayoutEditor';
 import CoachWidget from '@/components/home/CoachWidget';
+import EventCountdownWidget from '@/components/home/EventCountdownWidget';
+import ReadinessWidget from '@/components/home/ReadinessWidget';
+import RecoveryWidget from '@/components/home/RecoveryWidget';
 import WeatherMiniWidget from '@/components/home/WeatherMiniWidget';
 import JournalWidget from '@/components/journal/JournalWidget';
-import ChallengeWidget from '@/components/challenge/ChallengeWidget';
 import NudgeBanner from '@/components/layout/NudgeBanner';
-import DashboardLayoutEditor, { useDashboardWidgets } from '@/components/dashboard/DashboardLayoutEditor';
 import OnboardingOverlay from '@/components/onboarding/OnboardingOverlay';
+import TrainingLoadMiniChart from '@/components/TrainingLoadMiniChart';
 import {
   useCreateEvent,
   useDeleteEvent,
@@ -168,12 +167,12 @@ export default function DashboardPage() {
             <DailyDecisionHeroCard decision={decision} isLoading={isDecisionLoading} onStartWorkout={() => navigate('/training')} />
             <CoachWidget />
 
-            {pmcData && pmcData.length > 0 && (
+            {!!pmcData && pmcData.length > 0 && (
               <Paper sx={{ ...surfaceSx, p: { xs: 1.75, md: 2.5 }, bgcolor: alphaColor('#0D1117', 0.28), border: `1px solid ${alphaColor(STATUS_COLORS.warning, 0.14)}` }}>
                 <Stack spacing={1.5}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>Obciążenie PMC</Typography>
                   <TrainingLoadMiniChart data={pmcData} />
-                  {latestPmc && (
+                  {!!latestPmc && (
                     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                       {([{ label: 'CTL', delta: latestPmc.ctlDelta, color: PMC_COLORS.CTL }, { label: 'ATL', delta: latestPmc.atlDelta, color: PMC_COLORS.ATL }, { label: 'TSB', delta: latestPmc.tsbDelta, color: PMC_COLORS.TSB }] as const).map((metric) => {
                         const rounded = Math.round(metric.delta * 10) / 10;
@@ -183,7 +182,7 @@ export default function DashboardPage() {
                       })}
                     </Box>
                   )}
-                  {weeklyBudget && (
+                  {!!weeklyBudget && (
                     <Box sx={{ mt: 1 }}>
                       <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
                         <Typography variant="caption" color="text.secondary">Tydzień: {weeklyBudget.optimalTss} TSS cel</Typography>
@@ -207,7 +206,7 @@ export default function DashboardPage() {
                       {latestActivity.primaryBenefit || latestActivity.trainingScore != null ? (
                         <Stack direction="row" spacing={0.75} sx={{ mt: 0.75 }}>
                           {latestActivity.trainingScore != null && <Chip label={latestActivity.trainingScore} size="small" sx={{ fontWeight: 800, fontSize: '0.75rem' }} />}
-                          {latestActivity.primaryBenefit && <Chip label={BENEFIT_LABELS[latestActivity.primaryBenefit] ?? latestActivity.primaryBenefit} size="small" sx={{ fontWeight: 700, fontSize: '0.7rem', bgcolor: `${BENEFIT_COLORS[latestActivity.primaryBenefit] ?? '#58A6FF'}22`, color: BENEFIT_COLORS[latestActivity.primaryBenefit] ?? '#58A6FF', border: `1px solid ${BENEFIT_COLORS[latestActivity.primaryBenefit] ?? '#58A6FF'}44` }} />}
+                          {!!latestActivity.primaryBenefit && <Chip label={BENEFIT_LABELS[latestActivity.primaryBenefit] ?? latestActivity.primaryBenefit} size="small" sx={{ fontWeight: 700, fontSize: '0.7rem', bgcolor: `${BENEFIT_COLORS[latestActivity.primaryBenefit] ?? '#58A6FF'}22`, color: BENEFIT_COLORS[latestActivity.primaryBenefit] ?? '#58A6FF', border: `1px solid ${BENEFIT_COLORS[latestActivity.primaryBenefit] ?? '#58A6FF'}44` }} />}
                         </Stack>
                       ) : null}
                     </Box>
@@ -223,7 +222,7 @@ export default function DashboardPage() {
         {/* RIGHT SIDEBAR — FTP + W/kg */}
         <Grid item xs={12} md={6} xl={3} order={{ xs: 2, xl: 3 }}>
           <Stack spacing={1.5} sx={{ position: { xs: 'static', xl: 'sticky' }, top: { xl: 24 }, alignSelf: 'flex-start' }}>
-            {ftpProgress && (
+            {!!ftpProgress && (
               <Paper sx={{ ...surfaceSx, p: 1.75, bgcolor: alphaColor(PMC_COLORS.CTL, 0.06) }}>
                 <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 800, display: 'block', mb: 1 }}>FTP</Typography>
                 <Stack spacing={0.5}>

@@ -143,9 +143,7 @@ export default function ReadinessWidget({ readiness, onSave, isSaving = false }:
               >
                 {hasCheckIn ? 'Gotowość (check-in)' : 'Gotowość'}
               </Typography>
-              {hasCheckIn && (
-                <CheckCircleOutlineIcon sx={{ color: STATUS_COLORS.success, fontSize: 14 }} />
-              )}
+              {!!hasCheckIn && <CheckCircleOutlineIcon sx={{ color: STATUS_COLORS.success, fontSize: 14 }} />}
             </Stack>
             <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.72rem' }}>
               {readiness?.dayLabel ?? 'Brak decyzji dnia'}{updatedAt ? ` · ${updatedAt}` : ''}
@@ -154,7 +152,7 @@ export default function ReadinessWidget({ readiness, onSave, isSaving = false }:
         </Stack>
 
         {/* Health signals */}
-        {readiness?.healthSignals && (
+        {!!readiness?.healthSignals && (
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
             {readiness.healthSignals.sleepScore != null && (
               <Chip
@@ -184,7 +182,7 @@ export default function ReadinessWidget({ readiness, onSave, isSaving = false }:
         )}
 
         {/* Auto-suggestions */}
-        {autoSuggestions && Object.keys(autoSuggestions).length > 0 && (
+        {!!autoSuggestions && Object.keys(autoSuggestions).length > 0 && (
           <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
             {(Object.entries(autoSuggestions) as Array<[keyof SaveReadinessCheckInInput, number]>).map(([key, value]) => (
               <Chip

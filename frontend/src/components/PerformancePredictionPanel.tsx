@@ -1,4 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import BoltIcon from '@mui/icons-material/Bolt';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import SpeedIcon from '@mui/icons-material/Speed';
+import TimerIcon from '@mui/icons-material/Timer';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
 import {
   Box,
   Button,
@@ -15,20 +20,16 @@ import {
   Grid,
   Stack,
 } from '@mui/material';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import WhatshotIcon from '@mui/icons-material/Whatshot';
-import BoltIcon from '@mui/icons-material/Bolt';
-import TimerIcon from '@mui/icons-material/Timer';
-import SpeedIcon from '@mui/icons-material/Speed';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { usePerformancePrediction, useCurrentPerformanceState } from '@/hooks/usePerformancePrediction';
+import { tokens } from '@/theme/theme';
 import type {
   PerformancePredictionResponse,
   PerformancePredictionRequest,
   TrendDirection,
   SleepQuality,
 } from '@/types/performancePrediction';
-import { usePerformancePrediction, useCurrentPerformanceState } from '@/hooks/usePerformancePrediction';
-import { tokens } from '@/theme/theme';
 
 const FORM_STATE_CONFIG: Record<string, { color: string; label: string; description: string }> = {
   PEAK: { color: tokens.status.success, label: 'Szczyt', description: 'Optymalna forma — wysokie CTL, niskie zmeczenie' },
@@ -118,10 +119,8 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {isLoadingState && (
-        <LinearProgress sx={{ borderRadius: 2 }} />
-      )}
-      {isStateError && (
+      {!!isLoadingState && <LinearProgress sx={{ borderRadius: 2 }} />}
+      {!!isStateError && (
         <Alert severity="warning">
           Nie udalo sie pobrac aktualnych danych treningowych — uzupelnij recznie.
         </Alert>
@@ -273,20 +272,20 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
         </CardContent>
       </Card>
 
-      {isError && (
+      {!!isError && (
         <Alert severity="error">
           {(error as Error)?.message ?? 'Blad podczas prognozowania formy.'}
         </Alert>
       )}
 
-      {isPending && (
+      {!!isPending && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 3 }}>
           <CircularProgress size={24} />
           <Typography color="text.secondary">Analizuje dane treningowe...</Typography>
         </Box>
       )}
 
-      {result && (
+      {!!result && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Card>
             <CardHeader
@@ -448,7 +447,7 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
             <CardContent>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {result.recommendations.map((rec, i) => (
-                  <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                  <Box key={rec} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
                     <Typography
                       component="span"
                       sx={{ color: tokens.chart.primary, fontWeight: 700, minWidth: 16 }}

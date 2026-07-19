@@ -69,7 +69,7 @@ export default function StreakHeatmap() {
                 lastMonth = monthLabel;
                 elements.push(
                   <text
-                    key={`m-${wi}`}
+                    key={date.slice(0, 7)}
                     x={LEFT_PAD + wi * step}
                     y={TOP_PAD - 6}
                     fill="rgba(255,255,255,0.7)"
@@ -87,7 +87,7 @@ export default function StreakHeatmap() {
           {/* Day labels */}
           {DAY_LABELS_SHORT.map((label, i) => (
             <text
-              key={`d-${i}`}
+              key={['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'][i]}
               x={LEFT_PAD - 6}
               y={TOP_PAD + i * step + CELL_SIZE - 3}
               textAnchor="end"
@@ -101,7 +101,7 @@ export default function StreakHeatmap() {
           {/* Grid cells */}
           {calendar.weeks.map((week, wi) =>
             week.days.map((day, di) => (
-              <g key={`${wi}-${di}`}>
+              <g key={day.date}>
                 <title>{`${day.date} — ${day.level > 0 ? day.level : 0} jazd`}</title>
                 <rect
                   x={LEFT_PAD + wi * step}
@@ -120,8 +120,8 @@ export default function StreakHeatmap() {
           {/* Legend */}
           <g transform={`translate(${LEFT_PAD}, ${svgHeight - BOTTOM_PAD})`}>
             <text x={0} y={-6} fill="rgba(255,255,255,0.5)" fontSize={10}>Mniej</text>
-            {LEVEL_COLORS.map((c, i) => (
-              <rect key={i} x={28 + i * (CELL_SIZE + 2)} y={-CELL_SIZE} width={CELL_SIZE} height={CELL_SIZE} rx={2} fill={c} stroke="rgba(255,255,255,0.06)" strokeWidth={1} />
+            {LEVEL_COLORS.map((color, i) => (
+              <rect key={color} x={28 + i * (CELL_SIZE + 2)} y={-CELL_SIZE} width={CELL_SIZE} height={CELL_SIZE} rx={2} fill={color} stroke="rgba(255,255,255,0.06)" strokeWidth={1} />
             ))}
             <text x={28 + LEVEL_COLORS.length * (CELL_SIZE + 2) + 4} y={-6} fill="rgba(255,255,255,0.5)" fontSize={10}>Więcej</text>
           </g>

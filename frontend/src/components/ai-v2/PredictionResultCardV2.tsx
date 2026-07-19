@@ -26,16 +26,16 @@ import {
 import { useState } from 'react';
 
 import ConfidenceBreakdownChart from '@/components/ai-v2/ConfidenceBreakdownChart';
+import type {
+  PredictionResponseV2,
+  WorkoutInterval,
+} from '@/types/aiV2';
 import {
   PREDICTION_TYPE_V2_LABELS,
   PREDICTION_TYPE_V2_COLORS,
 } from '@/types/aiV2';
 import { COMMON_COLORS, STATUS_COLORS } from '@/utils/colors';
 
-import type {
-  PredictionResponseV2,
-  WorkoutInterval,
-} from '@/types/aiV2';
 
 interface PredictionResultCardV2Props {
   prediction: PredictionResponseV2;
@@ -123,7 +123,7 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
             <Typography variant="body2" sx={{ color: confidenceColor, fontWeight: 600 }}>
               {confidencePct}% — {getConfidenceLabel(prediction.confidence)}
             </Typography>
-            {prediction.confidenceBreakdown && (
+            {!!prediction.confidenceBreakdown && (
               <IconButton
                 size="small"
                 onClick={() => setShowBreakdown(!showBreakdown)}
@@ -147,7 +147,7 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
       </Box>
 
       {/* Confidence Breakdown */}
-      {prediction.confidenceBreakdown && (
+      {!!prediction.confidenceBreakdown && (
         <Collapse in={showBreakdown}>
           <Box sx={{ mb: 2, p: 2, borderRadius: 2, bgcolor: 'action.hover' }}>
             <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
@@ -159,18 +159,15 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
       )}
 
       {/* Insight */}
-      {prediction.insight && (
-        <>
+      {!!prediction.insight && <>
           <Divider sx={{ my: 2 }} />
           <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
             {prediction.insight}
           </Typography>
-        </>
-      )}
+        </>}
 
       {/* Action */}
-      {prediction.action && (
-        <>
+      {!!prediction.action && <>
           <Divider sx={{ my: 2 }} />
           <Box
             sx={{
@@ -188,12 +185,10 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
               {prediction.action}
             </Typography>
           </Box>
-        </>
-      )}
+        </>}
 
       {/* Metrics */}
-      {prediction.metrics && Object.keys(prediction.metrics).length > 0 && (
-        <>
+      {!!prediction.metrics && Object.keys(prediction.metrics).length > 0 && <>
           <Divider sx={{ my: 2 }} />
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {Object.entries(prediction.metrics).map(([key, value]) => (
@@ -206,14 +201,13 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
               />
             ))}
           </Box>
-        </>
-      )}
+        </>}
 
       {/* Warnings */}
-      {prediction.warnings && prediction.warnings.length > 0 && (
+      {!!prediction.warnings && prediction.warnings.length > 0 && (
         <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {prediction.warnings.map((warning, i) => (
-            <Alert key={i} severity="warning" variant="outlined" sx={{ py: 0 }}>
+          {prediction.warnings.map((warning) => (
+            <Alert key={warning} severity="warning" variant="outlined" sx={{ py: 0 }}>
               {warning}
             </Alert>
           ))}
@@ -221,8 +215,7 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
       )}
 
       {/* Alternatives */}
-      {prediction.alternatives && prediction.alternatives.length > 0 && (
-        <>
+      {!!prediction.alternatives && prediction.alternatives.length > 0 && <>
           <Divider sx={{ my: 2 }} />
           <Accordion
             expanded={showAlternatives}
@@ -241,9 +234,9 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
             </AccordionSummary>
             <AccordionDetails sx={{ p: 0, pt: 1 }}>
               <Stack spacing={1}>
-                {prediction.alternatives.map((alt, i) => (
+                {prediction.alternatives.map((alt) => (
                   <Box
-                    key={i}
+                    key={`${alt.scenario}-${alt.action}`}
                     sx={{
                       p: 1.5,
                       borderRadius: 2,
@@ -263,12 +256,10 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
               </Stack>
             </AccordionDetails>
           </Accordion>
-        </>
-      )}
+        </>}
 
       {/* Structured Workout */}
-      {prediction.structuredWorkout && (
-        <>
+      {!!prediction.structuredWorkout && <>
           <Divider sx={{ my: 2 }} />
           <Accordion
             expanded={showWorkout}
@@ -287,7 +278,7 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
             </AccordionSummary>
             <AccordionDetails sx={{ p: 0, pt: 1 }}>
               <Stack spacing={1.5}>
-                {prediction.structuredWorkout.warmupDescription && (
+                {!!prediction.structuredWorkout.warmupDescription && (
                   <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: `${STATUS_COLORS.info}14`, border: `1px solid ${STATUS_COLORS.info}33` }}>
                     <Typography variant="caption" sx={{ color: STATUS_COLORS.info, fontWeight: 600 }}>
                       Rozgrzewka
@@ -296,9 +287,9 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
                   </Box>
                 )}
 
-                {prediction.structuredWorkout.intervals.map((interval: WorkoutInterval, i: number) => (
+                {prediction.structuredWorkout.intervals.map((interval: WorkoutInterval) => (
                   <Box
-                    key={i}
+                    key={`${interval.description}-${interval.durationSec}-${interval.powerTarget}`}
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
@@ -323,7 +314,7 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
                         <Typography variant="caption" color="text.secondary">
                           Moc: {interval.powerTarget}
                         </Typography>
-                        {interval.cadence && (
+                        {!!interval.cadence && (
                           <Typography variant="caption" color="text.secondary">
                             Kadencja: {interval.cadence}
                           </Typography>
@@ -333,7 +324,7 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
                   </Box>
                 ))}
 
-                {prediction.structuredWorkout.cooldownDescription && (
+                {!!prediction.structuredWorkout.cooldownDescription && (
                   <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: `${STATUS_COLORS.secondary}14`, border: `1px solid ${STATUS_COLORS.secondary}33` }}>
                     <Typography variant="caption" sx={{ color: STATUS_COLORS.secondary, fontWeight: 600 }}>
                       Schłodzenie
@@ -342,7 +333,7 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
                   </Box>
                 )}
 
-                {prediction.structuredWorkout.notes && (
+                {!!prediction.structuredWorkout.notes && (
                   <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
                     {prediction.structuredWorkout.notes}
                   </Typography>
@@ -350,32 +341,28 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
               </Stack>
             </AccordionDetails>
           </Accordion>
-        </>
-      )}
+        </>}
 
       {/* References */}
-      {prediction.references && prediction.references.length > 0 && (
-        <>
+      {!!prediction.references && prediction.references.length > 0 && <>
           <Divider sx={{ my: 2 }} />
           <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
             Źródła
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {prediction.references.map((ref, i) => (
+            {prediction.references.map((ref) => (
               <Chip
-                key={i}
+                key={ref}
                 label={ref}
                 size="small"
                 sx={{ fontSize: '0.65rem', fontFamily: 'monospace' }}
               />
             ))}
           </Box>
-        </>
-      )}
+        </>}
 
       {/* Tool Call Log */}
-      {prediction.toolCallLog && prediction.toolCallLog.length > 0 && (
-        <>
+      {!!prediction.toolCallLog && prediction.toolCallLog.length > 0 && <>
           <Divider sx={{ my: 2 }} />
           <Accordion
             expanded={showToolLog}
@@ -404,8 +391,8 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {prediction.toolCallLog.map((entry, i) => (
-                      <TableRow key={i}>
+                    {prediction.toolCallLog.map((entry) => (
+                      <TableRow key={`${entry.toolName}-${entry.durationMs}-${entry.resultSummary}`}>
                         <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.7rem' }}>
                           {entry.toolName}
                         </TableCell>
@@ -468,12 +455,10 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
               )}
             </AccordionDetails>
           </Accordion>
-        </>
-      )}
+        </>}
 
       {/* Reasoning */}
-      {prediction.reasoning && (
-        <>
+      {!!prediction.reasoning && <>
           <Divider sx={{ my: 2 }} />
           <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
             Rozumowanie
@@ -481,8 +466,7 @@ export default function PredictionResultCardV2({ prediction }: PredictionResultC
           <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap', fontSize: '0.82rem' }}>
             {prediction.reasoning}
           </Typography>
-        </>
-      )}
+        </>}
     </Box>
   );
 }

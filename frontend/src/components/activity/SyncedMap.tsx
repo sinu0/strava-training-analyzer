@@ -158,9 +158,9 @@ export default function SyncedMap({ latStream, lngStream, powerStream, hoverInde
 
         {/* Full route - colored by sampled power (segmented) */}
         {segments.length > 0 ? (
-          segments.map((s, idx) => (
+          segments.map((s) => (
             <Polyline
-              key={`seg-${idx}`}
+              key={`${s.points[0]?.join(',')}-${s.points[s.points.length - 1]?.join(',')}`}
               positions={s.points}
               pathOptions={{
                 color: s.color,

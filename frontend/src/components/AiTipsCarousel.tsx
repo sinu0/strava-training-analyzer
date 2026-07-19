@@ -211,9 +211,9 @@ export default function AiTipsCarousel({ tips, loading, status }: AiTipsCarousel
       {/* Warnings */}
       {!!warnings && warnings.length > 0 && (
         <Stack spacing={0.5} sx={{ mb: 1.5 }}>
-          {warnings.map((w, i) => (
-            <Alert key={i} severity="warning" sx={{ py: 0, '& .MuiAlert-message': { py: 0.5 } }}>
-              <Typography variant="caption">{w}</Typography>
+          {warnings.map((warning) => (
+            <Alert key={warning} severity="warning" sx={{ py: 0, '& .MuiAlert-message': { py: 0.5 } }}>
+              <Typography variant="caption">{warning}</Typography>
             </Alert>
           ))}
         </Stack>
@@ -258,9 +258,9 @@ export default function AiTipsCarousel({ tips, loading, status }: AiTipsCarousel
       {/* Dot indicators */}
       {total > 1 && (
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.75, mt: 2 }}>
-          {tips.map((_, i) => (
+          {tips.map((carouselTip, i) => (
             <Box
-              key={i}
+              key={carouselTip.id}
               data-tip-dot
               onClick={() => setIndex(i)}
               sx={{

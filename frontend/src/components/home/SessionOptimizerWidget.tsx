@@ -3,8 +3,9 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import {
   Box, Chip, FormControl, MenuItem, Paper, Select, Stack, Typography,
 } from '@mui/material';
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+
 import apiClient from '@/api/client';
 import type { SessionSuggestion } from '@/types/fatigue';
 import { STATUS_COLORS } from '@/utils/colors';

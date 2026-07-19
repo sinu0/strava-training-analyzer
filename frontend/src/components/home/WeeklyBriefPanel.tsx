@@ -1,5 +1,6 @@
 import { Box, Chip, Paper, Stack, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
+
 import apiClient from '@/api/client';
 import type { WeeklyBrief } from '@/types/fatigue';
 import { STATUS_COLORS } from '@/utils/colors';
@@ -31,7 +32,7 @@ export default function WeeklyBriefPanel() {
           <MetricBox label="EF trend" value={data.efTrend > 0 ? `+${data.efTrend.toFixed(2)}` : data.efTrend.toFixed(2)} sub="wydajność tlenowa" color={data.efTrend > 0 ? STATUS_COLORS.success : STATUS_COLORS.warning} />
         </Stack>
 
-        {data.eventName && (
+        {!!data.eventName && (
           <Box sx={{ py: 1, px: 1.5, borderRadius: 2, bgcolor: `${STATUS_COLORS.info}0C`, border: `1px solid ${STATUS_COLORS.info}20` }}>
             <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
               <Box>

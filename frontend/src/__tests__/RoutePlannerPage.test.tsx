@@ -130,7 +130,7 @@ vi.mock('@/components/route-planner/RouteMap', () => ({
           <button aria-label="Następna propozycja" onClick={() => onCycleAlternative(1)} />
           {generatedAlternatives.map((alternative, index) => (
             <button
-              key={`${alternative.sourceName}-${index}`}
+              key={alternative.sourceName}
               aria-label={`Pokaż propozycję ${index + 1}`}
               onClick={() => onSelectAlternative(index)}
             >

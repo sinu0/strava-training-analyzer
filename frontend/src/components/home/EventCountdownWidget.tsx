@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import type { TrainingEvent, EventProjection } from '@/types/event';
 import { EVENT_PRIORITY_LABELS, EVENT_TYPE_LABELS } from '@/types/event';
 import { STATUS_COLORS, alphaColor } from '@/utils/colors';
@@ -132,7 +133,7 @@ export default function EventCountdownWidget({
           </Typography>
         )}
 
-        {needsTaper && (
+        {!!needsTaper && (
           <Box sx={{
             mt: 1.5, p: 1, borderRadius: 1.5,
             bgcolor: alphaColor(STATUS_COLORS.warning, 0.08),
@@ -156,7 +157,7 @@ export default function EventCountdownWidget({
           </Box>
         )}
 
-        {projection && projection.daysToEvent > 0 && (
+        {!!projection && projection.daysToEvent > 0 && (
           <Box sx={{ mt: 1.5, pt: 1, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
             <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, fontSize: '0.55rem', display: 'block', mb: 0.5 }}>
               PROJEKCJA

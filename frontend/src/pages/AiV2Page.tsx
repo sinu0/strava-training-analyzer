@@ -32,13 +32,13 @@ import {
   useKnowledgeStatus,
   useRefreshKnowledge,
 } from '@/hooks/useAiV2';
+import type { PredictionResponseV2 } from '@/types/aiV2';
 import {
   PREDICTION_TYPE_V2_LABELS,
   type PredictionTypeV2,
   type Persona,
 } from '@/types/aiV2';
 import { STATUS_COLORS } from '@/utils/colors';
-import type { PredictionResponseV2 } from '@/types/aiV2';
 
 const ALL_TYPES: PredictionTypeV2[] = [
   'FTP_PREDICTION',
@@ -113,7 +113,7 @@ export default function AiV2Page() {
                 <AiStatusWidget status={aiStatus} />
               </Section>
 
-              {knowledgeStatus && (
+              {!!knowledgeStatus && (
                 <Section title="Baza wiedzy RAG">
                   <Stack spacing={1.5}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -148,14 +148,14 @@ export default function AiV2Page() {
                     >
                       {refreshKnowledgeMutation.isPending ? 'Odświeżanie...' : 'Odśwież bazę wiedzy'}
                     </Button>
-                    {refreshKnowledgeMutation.isSuccess && (
+                    {!!refreshKnowledgeMutation.isSuccess && (
                       <Alert severity="success" sx={{ py: 0 }}>
                         {refreshKnowledgeMutation.data.documentsIndexed
                           ? `Zaindeksowano ${refreshKnowledgeMutation.data.documentsIndexed} dokumentów`
                           : 'Baza wiedzy odświeżona'}
                       </Alert>
                     )}
-                    {refreshKnowledgeMutation.isError && (
+                    {!!refreshKnowledgeMutation.isError && (
                       <Alert severity="error" sx={{ py: 0 }}>
                         {refreshKnowledgeMutation.error?.message || 'Błąd odświeżania'}
                       </Alert>

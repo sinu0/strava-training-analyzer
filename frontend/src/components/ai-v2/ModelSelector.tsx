@@ -7,9 +7,11 @@ import {
   CircularProgress,
   Typography,
 } from '@mui/material';
-import type { SelectChangeEvent } from '@mui/material';
 
 import { useAiModels } from '@/hooks/useAiV2';
+
+import type { SelectChangeEvent } from '@mui/material';
+
 
 interface ModelSelectorProps {
   value: string | undefined;
@@ -38,7 +40,7 @@ export default function ModelSelector({ value, onChange, disabled }: ModelSelect
             Domyślny
           </Typography>
         </MenuItem>
-        {isLoading && (
+        {!!isLoading && (
           <MenuItem disabled>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CircularProgress size={16} />
@@ -62,7 +64,7 @@ export default function ModelSelector({ value, onChange, disabled }: ModelSelect
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
                   {modelName}
                 </Typography>
-                {providerName && (
+                {!!providerName && (
                   <Typography variant="caption" color="text.secondary">
                     ({providerName})
                   </Typography>

@@ -9,6 +9,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
+
 import type { WorkoutEvaluationResponse } from '@/types/evaluation';
 
 const OUTCOME_LABELS: Record<string, string> = {
@@ -107,15 +108,13 @@ export default function WorkoutEvaluationCard({ evaluation }: Props) {
           <Chip label={`Dryft: ${DRIFT_LABELS[analysis.fatigueDrift] ?? analysis.fatigueDrift}`} size="small" variant="outlined" />
           <Chip label={`Stabilność: ${STABILITY_LABELS[analysis.executionStability] ?? analysis.executionStability}`} size="small" variant="outlined" />
           <Chip label={`Zmęczenie: ${FATIGUE_LABELS[contextualFactors.fatigueState] ?? contextualFactors.fatigueState}`} size="small" variant="outlined" />
-          {contextualFactors.recentFailures && (
-            <Chip label="Powtarzające się niepowodzenia" size="small" color="error" variant="outlined" />
-          )}
+          {!!contextualFactors.recentFailures && <Chip label="Powtarzające się niepowodzenia" size="small" color="error" variant="outlined" />}
         </Box>
 
         {reasons.length > 0 && (
           <Box sx={{ mb: 1.5 }}>
-            {reasons.map((reason, i) => (
-              <Typography key={i} variant="caption" display="block" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+            {reasons.map((reason) => (
+              <Typography key={reason} variant="caption" display="block" color="text.secondary" sx={{ lineHeight: 1.6 }}>
                 • {reason}
               </Typography>
             ))}

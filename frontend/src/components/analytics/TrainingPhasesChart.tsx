@@ -113,8 +113,8 @@ export default function TrainingPhasesChart({ from, to }: TrainingPhasesChartPro
                 formatter={(value) => [`${value} TSS`, 'Obciążenie']}
               />
               <Bar dataKey="tss" radius={[4, 4, 0, 0]}>
-                {chartData.map((entry, i) => (
-                  <Cell key={i} fill={PHASE_COLORS[entry.phase] || '#666'} />
+                {chartData.map((entry) => (
+                  <Cell key={entry.week} fill={PHASE_COLORS[entry.phase] || '#666'} />
                 ))}
               </Bar>
             </BarChart>

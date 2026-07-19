@@ -17,13 +17,13 @@ import ErrorBoundary from '../components/common/ErrorBoundary';
 import PageContainer from '../components/common/PageContainer';
 import Section from '../components/common/Section';
 import AchievementsSection from '../components/profile/AchievementsSection';
-import PersonalRecordWall from '../components/profile/PersonalRecordWall';
-import StreakHeatmap from '../components/profile/StreakHeatmap';
-import SeasonWrappedModal from '../components/SeasonWrappedModal';
 import FourWeekCyclingSummary from '../components/profile/FourWeekCyclingSummary';
+import PersonalRecordWall from '../components/profile/PersonalRecordWall';
 import ProfileGallery from '../components/profile/ProfileGallery';
+import StreakHeatmap from '../components/profile/StreakHeatmap';
 import SummaryStoryModal from '../components/profile/SummaryStoryModal';
 import WeeklyKmBarChart from '../components/profile/WeeklyKmBarChart';
+import SeasonWrappedModal from '../components/SeasonWrappedModal';
 import { useProfile, useUpdateProfile, useWeeklySummaries, useFtpProgress, useReadiness } from '../hooks/useAnalytics';
 import {
   BRAND_COLORS,

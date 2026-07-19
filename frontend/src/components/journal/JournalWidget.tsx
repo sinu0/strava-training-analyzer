@@ -44,7 +44,7 @@ export default function JournalWidget() {
           mb: 0.5,
         }}
       />
-      {entry.note && (
+      {!!entry.note && (
         <Typography
           variant="body2"
           color="text.secondary"
@@ -53,7 +53,7 @@ export default function JournalWidget() {
           {entry.note.length > 100 ? entry.note.slice(0, 100) + '...' : entry.note}
         </Typography>
       )}
-      {entry.tags && entry.tags.length > 0 && (
+      {!!entry.tags && entry.tags.length > 0 && (
         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
           {entry.tags.map((tag) => (
             <Chip key={tag} label={tag} size="small" variant="outlined" sx={{ fontSize: '0.6rem' }} />

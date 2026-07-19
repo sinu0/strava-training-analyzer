@@ -1,4 +1,3 @@
-import { useState } from 'react';
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -21,6 +20,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useState } from 'react';
 
 import { useCreateEquipment, useDeleteEquipment, useEquipment, type Equipment } from '@/hooks/useEquipment';
 import { STATUS_COLORS } from '@/utils/colors';
@@ -114,7 +114,7 @@ function EquipmentCard({ item, onDelete }: { item: Equipment; onDelete: () => vo
           </Button>
         </Stack>
 
-        {item.brand && (
+        {!!item.brand && (
           <Typography variant="caption" color="text.secondary">
             {item.brand} {item.model}
           </Typography>
@@ -125,7 +125,7 @@ function EquipmentCard({ item, onDelete }: { item: Equipment; onDelete: () => vo
             <Typography variant="caption" color="text.secondary">
               {item.totalKm.toFixed(0)} km
             </Typography>
-            {item.replacementIntervalKm && (
+            {!!item.replacementIntervalKm && (
               <Typography variant="caption" color={needsReplace ? 'error.main' : 'text.secondary'}>
                 Limit: {item.replacementIntervalKm} km
               </Typography>
@@ -144,7 +144,7 @@ function EquipmentCard({ item, onDelete }: { item: Equipment; onDelete: () => vo
           />
         </Box>
 
-        {needsReplace && (
+        {!!needsReplace && (
           <Alert severity="warning" icon={<WarningAmberIcon />} sx={{ mt: 1, py: 0.5, '& .MuiAlert-message': { py: 0 } }}>
             <Typography variant="caption">Czas na wymianę ({pct.toFixed(0)}% zużycia)</Typography>
           </Alert>

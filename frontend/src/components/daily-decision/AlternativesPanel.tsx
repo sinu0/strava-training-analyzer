@@ -64,7 +64,7 @@ export default function AlternativesPanel({ alternatives, onSelect }: Props) {
           <Stack spacing={1.5}>
             {alternatives.map((alt, i) => (
               <Box
-                key={i}
+                key={`${alt.type}-${alt.label}`}
                 sx={{
                   p: 1.75,
                   borderRadius: 3,
@@ -104,7 +104,7 @@ export default function AlternativesPanel({ alternatives, onSelect }: Props) {
                       label={alt.workout.difficulty}
                       variant="outlined"
                     />
-                    {alt.workout.indoor && (
+                    {!!alt.workout.indoor && (
                       <Chip
                         size="small"
                         label="Trenażer"
@@ -114,7 +114,7 @@ export default function AlternativesPanel({ alternatives, onSelect }: Props) {
                     )}
                   </Stack>
 
-                  {onSelect && (
+                  {!!onSelect && (
                     <Button
                       size="small"
                       variant="outlined"

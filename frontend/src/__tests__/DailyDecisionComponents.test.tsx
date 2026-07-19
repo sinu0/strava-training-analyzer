@@ -5,8 +5,8 @@ import { describe, expect, it, vi } from 'vitest';
 import AlternativesPanel from '@/components/daily-decision/AlternativesPanel';
 import DailyDecisionHeroCard from '@/components/daily-decision/DailyDecisionHeroCard';
 import ReasoningPanel from '@/components/daily-decision/ReasoningPanel';
-import type { DailyDecisionDto, DecisionReason } from '@/types/dailyDecision';
 import theme from '@/theme/theme';
+import type { DailyDecisionDto, DecisionReason } from '@/types/dailyDecision';
 
 function renderWithTheme(ui: React.ReactElement) {
   return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);

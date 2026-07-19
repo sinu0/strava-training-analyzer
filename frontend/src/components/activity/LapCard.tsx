@@ -1,6 +1,6 @@
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import {
   Box,
@@ -164,7 +164,7 @@ export default function LapCard({
               <Typography sx={{ color: '#8B949E', fontSize: '0.8rem', fontWeight: 700 }}>
                 {lap.name || `Okr. ${index + 1}`}
               </Typography>
-              {intensityLabel && (
+              {!!intensityLabel && (
                 <Chip
                   label={intensityLabel}
                   size="small"
@@ -178,9 +178,9 @@ export default function LapCard({
                   }}
                 />
               )}
-              {isBest && (
+              {!!isBest && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                  {isBestPower && (
+                  {!!isBestPower && (
                     <Chip
                       icon={<LocalFireDepartmentIcon sx={{ fontSize: 14 }} />}
                       label="Najmoc"
@@ -194,7 +194,7 @@ export default function LapCard({
                       }}
                     />
                   )}
-                  {isBestNP && (
+                  {!!isBestNP && (
                     <Chip
                       icon={<EmojiEventsIcon sx={{ fontSize: 14 }} />}
                       label="NP"
@@ -311,29 +311,29 @@ export default function LapCard({
           </Box>
 
           {/* Strava-style combined lap chart */}
-          {hasChartData && (
+          {!!hasChartData && (
             <Box sx={{ mb: 0.5 }}>
               {/* Legend */}
               <Box sx={{ display: 'flex', gap: 2, mb: 1, flexWrap: 'wrap' }}>
-                {hasPower && (
+                {!!hasPower && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Box sx={{ width: 12, height: 3, borderRadius: 1, bgcolor: '#FF6B35' }} />
                     <Typography sx={{ fontSize: '0.6rem', color: '#8B949E' }}>Moc</Typography>
                   </Box>
                 )}
-                {hasHr && (
+                {!!hasHr && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Box sx={{ width: 12, height: 3, borderRadius: 1, bgcolor: '#FF4444' }} />
                     <Typography sx={{ fontSize: '0.6rem', color: '#8B949E' }}>Tętno</Typography>
                   </Box>
                 )}
-                {hasSpeed && (
+                {!!hasSpeed && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Box sx={{ width: 12, height: 3, borderRadius: 1, bgcolor: '#58A6FF' }} />
                     <Typography sx={{ fontSize: '0.6rem', color: '#8B949E' }}>Prędkość</Typography>
                   </Box>
                 )}
-                {hasAlt && (
+                {!!hasAlt && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Box sx={{ width: 12, height: 3, borderRadius: 1, bgcolor: '#3FB950' }} />
                     <Typography sx={{ fontSize: '0.6rem', color: '#8B949E' }}>Przewyższenie</Typography>
@@ -351,7 +351,7 @@ export default function LapCard({
                   </defs>
                   <XAxis dataKey="t" hide />
                   {/* Power Y axis (left) */}
-                  {hasPower && (
+                  {!!hasPower && (
                     <YAxis
                       yAxisId="power"
                       orientation="left"
@@ -360,7 +360,7 @@ export default function LapCard({
                     />
                   )}
                   {/* HR Y axis (right) */}
-                  {hasHr && (
+                  {!!hasHr && (
                     <YAxis
                       yAxisId="hr"
                       orientation="right"
@@ -369,7 +369,7 @@ export default function LapCard({
                     />
                   )}
                   {/* Altitude Y axis (hidden, for scaling) */}
-                  {hasAlt && (
+                  {!!hasAlt && (
                     <YAxis
                       yAxisId="alt"
                       orientation="right"
@@ -399,7 +399,7 @@ export default function LapCard({
                   />
 
                   {/* Elevation area (background layer) */}
-                  {hasAlt && (
+                  {!!hasAlt && (
                     <Area
                       yAxisId="alt"
                       dataKey="alt"
@@ -410,7 +410,7 @@ export default function LapCard({
                   )}
 
                   {/* Speed line */}
-                  {hasSpeed && (
+                  {!!hasSpeed && (
                     <Line
                       yAxisId="power"
                       dataKey="speed"
@@ -423,7 +423,7 @@ export default function LapCard({
                   )}
 
                   {/* HR line */}
-                  {hasHr && (
+                  {!!hasHr && (
                     <Line
                       yAxisId="hr"
                       dataKey="hr"
@@ -435,7 +435,7 @@ export default function LapCard({
                   )}
 
                   {/* Power line (on top) */}
-                  {hasPower && (
+                  {!!hasPower && (
                     <Line
                       yAxisId="power"
                       dataKey="power"
@@ -447,7 +447,7 @@ export default function LapCard({
                   )}
 
                   {/* Average power reference line */}
-                  {hasPower && lap.avgPowerW != null && (
+                  {!!hasPower && lap.avgPowerW != null && (
                     <ReferenceLine
                       yAxisId="power"
                       y={lap.avgPowerW}

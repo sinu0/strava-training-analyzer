@@ -15,6 +15,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
 
 import EditorialHero from '@/components/common/EditorialHero';
 import PageContainer from '@/components/common/PageContainer';
@@ -31,7 +32,6 @@ import type {
 } from '@/types/trainingPriorities';
 import { CHART_COLORS, STATUS_COLORS } from '@/utils/colors';
 import { getPageHeroIllustrationPath } from '@/utils/illustrationAssets';
-import { useQueryClient } from '@tanstack/react-query';
 
 function getSubsystemIcon(subsystem: string) {
   switch (subsystem) {
@@ -471,7 +471,7 @@ export default function PrioritiesPage() {
             Szczegółowa analiza
           </Typography>
 
-          {data.cpModel && (
+          {!!data.cpModel && (
             <Accordion
               sx={{
                 mb: 1,
@@ -498,7 +498,7 @@ export default function PrioritiesPage() {
             </Accordion>
           )}
 
-          {data.intervalDetection && (
+          {!!data.intervalDetection && (
             <Accordion
               sx={{
                 mb: 1,
@@ -525,7 +525,7 @@ export default function PrioritiesPage() {
             </Accordion>
           )}
 
-          {data.fatigueFactors && (
+          {!!data.fatigueFactors && (
             <Accordion
               sx={{
                 mb: 1,
@@ -552,7 +552,7 @@ export default function PrioritiesPage() {
             </Accordion>
           )}
 
-          {data.durabilityProfile && (
+          {!!data.durabilityProfile && (
             <Accordion
               sx={{
                 mb: 1,
@@ -579,7 +579,7 @@ export default function PrioritiesPage() {
             </Accordion>
           )}
 
-          {data.powerPhenotype && (
+          {!!data.powerPhenotype && (
             <Accordion
               sx={{
                 mb: 1,

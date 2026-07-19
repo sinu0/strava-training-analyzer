@@ -25,8 +25,8 @@ import SessionOptionsList from '@/components/adaptive-coach/SessionOptionsList';
 import EditorialHero from '@/components/common/EditorialHero';
 import PageContainer from '@/components/common/PageContainer';
 import TabsNav from '@/components/common/TabsNav';
-import { useReadiness, useProfile, useFatigueState } from '@/hooks/useAnalytics';
 import { useAdaptiveCoachToday } from '@/hooks/useAdaptiveCoach';
+import { useReadiness, useProfile, useFatigueState } from '@/hooks/useAnalytics';
 import { STATUS_COLORS, alphaColor } from '@/utils/colors';
 import { getPageHeroIllustrationPath } from '@/utils/illustrationAssets';
 
@@ -220,7 +220,7 @@ export default function AdaptiveCoachPage() {
                     <Chip label={`Waga: ${profile?.weightKg ?? '-'}kg`} size="small" />
                     <Chip label={`HR spocz.: ${profile?.restingHrBpm ?? '-'}`} size="small" />
                   </Stack>
-                  {fatigueState && (
+                  {!!fatigueState && (
                     <Chip
                       label={`Zmeczenie: ${fatigueState.level}`}
                       size="small"
@@ -228,7 +228,7 @@ export default function AdaptiveCoachPage() {
                       variant="outlined"
                     />
                   )}
-                  {quickMode && autoSuggestion && (
+                  {!!quickMode && !!autoSuggestion && (
                     <Box sx={{
                       mt: 1, p: 1.5, borderRadius: 2,
                       bgcolor: alphaColor(STATUS_COLORS.accent, 0.08),

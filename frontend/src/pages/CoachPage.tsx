@@ -2,19 +2,19 @@ import { AutoAwesome, Bolt, FitnessCenter, Hotel, Psychology, SelfImprovement } 
 import {
   Box, Button, Chip, Divider, Grid2 as Grid, Paper, Skeleton, Stack, Typography,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import EditorialHero from '@/components/common/EditorialHero';
 import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
 import PageContainer from '@/components/common/PageContainer';
-import { useCoachToday } from '@/hooks/useCoach';
 import { useAiPredict } from '@/hooks/useAi';
-import { STATUS_COLORS, alphaColor } from '@/utils/colors';
-import { getPageHeroIllustrationPath } from '@/utils/illustrationAssets';
+import { useCoachToday } from '@/hooks/useCoach';
 import type { SessionOptionDto } from '@/types/adaptiveCoach';
 import type { PredictionResponse } from '@/types/ai';
+import { STATUS_COLORS, alphaColor } from '@/utils/colors';
+import { getPageHeroIllustrationPath } from '@/utils/illustrationAssets';
 
 const DECISION_ICONS: Record<string, React.ReactElement> = {
   TRAIN: <FitnessCenter sx={{ fontSize: 28 }} />,
@@ -157,13 +157,13 @@ export default function CoachPage() {
                 </Box>
               </Stack>
 
-              {data.insight && (
+              {!!data.insight && (
                 <Typography variant="body2" color="text.secondary" fontSize="0.82rem">
                   {data.insight}
                 </Typography>
               )}
 
-              {bestSession && (
+              {!!bestSession && (
                 <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: alphaColor(STATUS_COLORS.accent, 0.05) }}>
                   <Typography variant="caption" fontWeight={700} color={STATUS_COLORS.accent}>
                     Rekomendowana sesja
@@ -192,7 +192,7 @@ export default function CoachPage() {
         {/* Goal + AI insights */}
         <Grid size={{ xs: 12, md: 6 }}>
           <Stack spacing={2}>
-            {data.goalProgress && (
+            {!!data.goalProgress && (
               <Paper sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Bolt sx={{ color: STATUS_COLORS.warning }} />
@@ -215,7 +215,7 @@ export default function CoachPage() {
               </Paper>
             )}
 
-            {data.fatigue && (
+            {!!data.fatigue && (
               <Paper sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="overline" color="text.secondary" fontWeight={800}>Zmeczenie</Typography>
                 <Typography variant="body2">
@@ -237,7 +237,7 @@ export default function CoachPage() {
               {predictAi.isPending ? 'Analizuję...' : aiInsight ? 'Odśwież analizę AI' : 'Analizuj z AI'}
             </Button>
 
-            {aiInsight && (
+            {!!aiInsight && (
               <Paper sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: alphaColor(STATUS_COLORS.info, 0.2), bgcolor: alphaColor(STATUS_COLORS.info, 0.04) }}>
                 <Stack spacing={1}>
                   <Stack direction="row" spacing={1} alignItems="center">
@@ -247,7 +247,7 @@ export default function CoachPage() {
                   </Stack>
                   <Divider />
                   <Typography variant="body2" fontWeight={700}>{aiInsight.summary}</Typography>
-                  {aiInsight.detail && (
+                  {!!aiInsight.detail && (
                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.78rem', whiteSpace: 'pre-wrap' }}>
                       {aiInsight.detail}
                     </Typography>

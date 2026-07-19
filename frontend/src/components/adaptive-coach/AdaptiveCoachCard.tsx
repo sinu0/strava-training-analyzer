@@ -132,7 +132,7 @@ export default function AdaptiveCoachCard({ data, isLoading }: Props) {
                 size="small"
                 sx={{ bgcolor: 'tokens.activeOverlay' }}
               />
-              {best.indoor && <Chip label="Trenażer" size="small" color="info" />}
+              {!!best.indoor && <Chip label="Trenażer" size="small" color="info" />}
             </Stack>
           </Box>
 
@@ -199,7 +199,7 @@ export default function AdaptiveCoachCard({ data, isLoading }: Props) {
             <Typography variant="subtitle2" fontWeight={600} gutterBottom>
               Wynik sesji
             </Typography>
-            {best.scoreBreakdown && (
+            {!!best.scoreBreakdown && (
               <Stack spacing={1}>
                 {Object.entries(best.scoreBreakdown).map(([key, value]) => (
                   <Stack key={key} direction="row" justifyContent="space-between" alignItems="center">
@@ -221,7 +221,7 @@ export default function AdaptiveCoachCard({ data, isLoading }: Props) {
             <Typography variant="subtitle2" fontWeight={600} gutterBottom>
               Rozumowanie
             </Typography>
-            {data.aiInterpretation && data.aiInterpretation !== 'NO_INPUT' && data.aiInterpretation !== 'NONE' && (
+            {!!data.aiInterpretation && data.aiInterpretation !== 'NO_INPUT' && data.aiInterpretation !== 'NONE' && (
               <Chip
                 label={`AI: ${data.aiInterpretation}`}
                 size="small"
@@ -238,9 +238,9 @@ export default function AdaptiveCoachCard({ data, isLoading }: Props) {
               />
             )}
             <Stack spacing={0.5}>
-              {data.reasoning.map((r, i) => (
-                <Typography key={i} variant="caption" color="text.secondary">
-                  • {r}
+              {data.reasoning.map((reason) => (
+                <Typography key={reason} variant="caption" color="text.secondary">
+                  • {reason}
                 </Typography>
               ))}
             </Stack>
@@ -266,7 +266,7 @@ export default function AdaptiveCoachCard({ data, isLoading }: Props) {
           </Paper>
         )}
 
-        {data.accountability && (
+        {!!data.accountability && (
           <Paper sx={{ p: 3, borderRadius: 4 }}>
             <Typography variant="subtitle2" fontWeight={600} gutterBottom>
               Odpowiedzialność

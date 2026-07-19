@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
 
 import CloseIcon from '@mui/icons-material/Close';
 import { Box, Button, Chip, Dialog, DialogContent, IconButton, Stack, Typography } from '@mui/material';
+import { useState, useCallback } from 'react';
 
 import { useSeasonWrapped, type SeasonWrappedData } from '@/hooks/useSeasonWrapped';
 
@@ -49,13 +49,13 @@ const SLIDES: Slide[] = [
     subtitle: 'Twoje najlepsze wyniki w tym roku',
     render: (d) => (
       <Stack spacing={1.5} alignItems="center" width="100%">
-        {d.longestRideName && (
+        {!!d.longestRideName && (
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="h5" fontWeight={700} color="warning.main">{d.longestRideKm?.toFixed(0)} km</Typography>
             <Typography variant="caption" color="text.secondary">{d.longestRideName}</Typography>
           </Box>
         )}
-        {d.mostElevationName && (
+        {!!d.mostElevationName && (
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="h5" fontWeight={700} color="error.main">{d.mostElevationM?.toFixed(0)} m</Typography>
             <Typography variant="caption" color="text.secondary">{d.mostElevationName}</Typography>
@@ -139,9 +139,9 @@ export default function SeasonWrappedModal({ year, onClose }: { year: number; on
         </Box>
 
         <Box sx={{ display: 'flex', gap: 0.5 }}>
-          {SLIDES.map((_, i) => (
+          {SLIDES.map((item, i) => (
             <Box
-              key={i}
+              key={item.title}
               sx={{
                 width: i === slide ? 24 : 6,
                 height: 6,

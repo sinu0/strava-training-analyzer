@@ -106,9 +106,9 @@ const WeeklyKmBarChart = memo(function WeeklyKmBarChart() {
   }, [summaries, activeMetric]);
 
   const maxVal = Math.max(...chartData.map((d) => d.value), 1);
-  const yTicks = Array.from({ length: 5 }, (_, i) =>
-    Math.round((maxVal / 4) * i),
-  );
+  const yTicks = [...new Set(
+    Array.from({ length: 5 }, (_, i) => Math.round((maxVal / 4) * i)),
+  )];
 
   return (
     <Box>
@@ -163,9 +163,9 @@ const WeeklyKmBarChart = memo(function WeeklyKmBarChart() {
           />
           <Tooltip content={<CustomTooltip metric={activeMetric} />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
           <Bar dataKey="value" isAnimationActive={false} radius={[3, 3, 0, 0]}>
-            {chartData.map((entry, idx) => (
+            {chartData.map((entry) => (
               <Cell
-                key={idx}
+                key={entry.week}
                 fill={entry.isCurrent ? activeMetric.color : `${activeMetric.color}99`}
               />
             ))}

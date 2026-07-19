@@ -86,7 +86,7 @@ export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPow
           ))}
 
         {/* Segments as solid blocks */}
-        {segments.map((seg, i) => {
+        {segments.map((seg) => {
           const x = toX(seg.startSec);
           const w = Math.max(1, toX(seg.endSec) - x);
           const avgPower = (seg.powerLow + seg.powerHigh) / 2;
@@ -100,7 +100,7 @@ export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPow
             const points = `${x},${bottom} ${x},${y0} ${x + w},${y1} ${x + w},${bottom}`;
             return (
               <polygon
-                key={i}
+                key={`${seg.type}-${seg.startSec}-${seg.endSec}`}
                 points={points}
                 fill={fill}
                 fillOpacity={0.85}
@@ -123,7 +123,7 @@ export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPow
           const y = margin.top + contentH - bH;
           return (
             <rect
-              key={i}
+              key={`${seg.type}-${seg.startSec}-${seg.endSec}`}
               x={x}
               y={y}
               width={w}

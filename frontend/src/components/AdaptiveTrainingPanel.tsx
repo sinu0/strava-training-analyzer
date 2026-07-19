@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import {
   Box,
   Button,
@@ -13,9 +15,8 @@ import {
   useTheme,
   Alert,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import { useState } from 'react';
+
 import { useAdaptiveTraining } from '@/hooks/useAdaptiveTraining';
 import type {
   AdaptiveTrainingRequest,
@@ -68,27 +69,30 @@ const PROGRESSION_LABELS: Record<string, string> = {
   REGRESS: 'Regresja',
 };
 
+type PlannedWorkoutRow = PlannedWorkoutInput & { rowId: string };
+type RecentWorkoutRow = RecentWorkoutInput & { rowId: string };
+
 export default function AdaptiveTrainingPanel() {
   const theme = useTheme();
   const { mutate, isPending, isError, error } = useAdaptiveTraining();
   const [result, setResult] = useState<AdaptiveTrainingResponse | null>(null);
 
-  const [plannedWorkouts, setPlannedWorkouts] = useState<PlannedWorkoutInput[]>([
-    { type: 'ENDURANCE', duration: 120, targetPower: 180, intervals: 0 },
-    { type: 'THRESHOLD', duration: 75, targetPower: 250, intervals: 3 },
-    { type: 'RECOVERY', duration: 45, targetPower: 130, intervals: 0 },
-    { type: 'ENDURANCE', duration: 90, targetPower: 185, intervals: 0 },
-    { type: 'VO2_MAX', duration: 60, targetPower: 270, intervals: 5 },
-    { type: 'ENDURANCE', duration: 150, targetPower: 175, intervals: 0 },
-    { type: 'RECOVERY', duration: 45, targetPower: 120, intervals: 0 },
+  const [plannedWorkouts, setPlannedWorkouts] = useState<PlannedWorkoutRow[]>([
+    { rowId: 'planned-monday', type: 'ENDURANCE', duration: 120, targetPower: 180, intervals: 0 },
+    { rowId: 'planned-tuesday', type: 'THRESHOLD', duration: 75, targetPower: 250, intervals: 3 },
+    { rowId: 'planned-wednesday', type: 'RECOVERY', duration: 45, targetPower: 130, intervals: 0 },
+    { rowId: 'planned-thursday', type: 'ENDURANCE', duration: 90, targetPower: 185, intervals: 0 },
+    { rowId: 'planned-friday', type: 'VO2_MAX', duration: 60, targetPower: 270, intervals: 5 },
+    { rowId: 'planned-saturday', type: 'ENDURANCE', duration: 150, targetPower: 175, intervals: 0 },
+    { rowId: 'planned-sunday', type: 'RECOVERY', duration: 45, targetPower: 120, intervals: 0 },
   ]);
 
-  const [recentWorkouts, setRecentWorkouts] = useState<RecentWorkoutInput[]>([
-    { outcome: 'SUCCESS', score: 85, workoutType: 'THRESHOLD', fatigueDrift: 'LOW', hrResponse: 'OK' },
-    { outcome: 'OVERACHIEVE', score: 95, workoutType: 'VO2_MAX', fatigueDrift: 'MODERATE', hrResponse: 'HIGH' },
-    { outcome: 'PARTIAL', score: 55, workoutType: 'ENDURANCE', fatigueDrift: 'HIGH', hrResponse: 'HIGH' },
-    { outcome: 'SUCCESS', score: 80, workoutType: 'THRESHOLD', fatigueDrift: 'LOW', hrResponse: 'OK' },
-    { outcome: 'FAIL', score: 35, workoutType: 'VO2_MAX', fatigueDrift: 'HIGH', hrResponse: 'HIGH' },
+  const [recentWorkouts, setRecentWorkouts] = useState<RecentWorkoutRow[]>([
+    { rowId: 'recent-1', outcome: 'SUCCESS', score: 85, workoutType: 'THRESHOLD', fatigueDrift: 'LOW', hrResponse: 'OK' },
+    { rowId: 'recent-2', outcome: 'OVERACHIEVE', score: 95, workoutType: 'VO2_MAX', fatigueDrift: 'MODERATE', hrResponse: 'HIGH' },
+    { rowId: 'recent-3', outcome: 'PARTIAL', score: 55, workoutType: 'ENDURANCE', fatigueDrift: 'HIGH', hrResponse: 'HIGH' },
+    { rowId: 'recent-4', outcome: 'SUCCESS', score: 80, workoutType: 'THRESHOLD', fatigueDrift: 'LOW', hrResponse: 'OK' },
+    { rowId: 'recent-5', outcome: 'FAIL', score: 35, workoutType: 'VO2_MAX', fatigueDrift: 'HIGH', hrResponse: 'HIGH' },
   ]);
 
   const [loadState, setLoadState] = useState<TrainingLoadStateInput>({
@@ -105,8 +109,19 @@ export default function AdaptiveTrainingPanel() {
 
   const handleRun = () => {
     const request: AdaptiveTrainingRequest = {
-      plannedWorkouts,
-      recentWorkouts,
+      plannedWorkouts: plannedWorkouts.map(({ type, targetPower, duration, intervals }) => ({
+        type,
+        targetPower,
+        duration,
+        intervals,
+      })),
+      recentWorkouts: recentWorkouts.map(({ outcome, score, workoutType, fatigueDrift, hrResponse }) => ({
+        outcome,
+        score,
+        workoutType,
+        fatigueDrift,
+        hrResponse,
+      })),
       trainingLoad: loadState,
       fatigueSignals: signals,
       progressionState: progression,
@@ -134,7 +149,7 @@ export default function AdaptiveTrainingPanel() {
         <CardHeader title="Plan treningowy (nastepne 7 dni)" titleTypographyProps={{ variant: 'subtitle2' }} />
         <CardContent>
           {plannedWorkouts.map((w, i) => (
-            <Box key={i} sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
+            <Box key={w.rowId} sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
               <TextField
                 select
                 size="small"
@@ -186,7 +201,7 @@ export default function AdaptiveTrainingPanel() {
             onClick={() =>
               setPlannedWorkouts((prev) => [
                 ...prev,
-                { type: 'ENDURANCE', duration: 60, targetPower: 180, intervals: 0 },
+                { rowId: crypto.randomUUID(), type: 'ENDURANCE', duration: 60, targetPower: 180, intervals: 0 },
               ])
             }
           >
@@ -199,7 +214,7 @@ export default function AdaptiveTrainingPanel() {
         <CardHeader title="Ostatnie sesje (5 treningow)" titleTypographyProps={{ variant: 'subtitle2' }} />
         <CardContent>
           {recentWorkouts.map((w, i) => (
-            <Box key={i} sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1, flexWrap: 'wrap' }}>
+            <Box key={w.rowId} sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1, flexWrap: 'wrap' }}>
               <TextField
                 select
                 size="small"
@@ -368,15 +383,13 @@ export default function AdaptiveTrainingPanel() {
         Uruchom adaptacje
       </Button>
 
-      {isError && (
+      {!!isError && (
         <Alert severity="error">
           {(error as Error)?.message || 'Blad podczas adaptacji planu.'}
         </Alert>
       )}
 
-      {result && (
-        <AdaptationResult result={result} tokens={theme.tokens} />
-      )}
+      {!!result && <AdaptationResult result={result} tokens={theme.tokens} />}
     </Box>
   );
 }
@@ -451,9 +464,9 @@ function AdaptationResult({
             <Typography variant="subtitle2" color="warning.main" sx={{ mb: 1 }}>
               Ostrzezenia
             </Typography>
-            {warnings.map((w, i) => (
-              <Typography key={i} variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                • {w}
+            {warnings.map((warning) => (
+              <Typography key={warning} variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                • {warning}
               </Typography>
             ))}
           </CardContent>
@@ -462,8 +475,8 @@ function AdaptationResult({
 
       {/* Adjustments per day */}
       <Typography variant="h6">Dostosowania na kazdy dzien</Typography>
-      {adjustments.map((adj, i) => (
-        <AdjustmentDayCard key={i} adjustment={adj} tokens={tokens} />
+      {adjustments.map((adjustment) => (
+        <AdjustmentDayCard key={adjustment.day} adjustment={adjustment} tokens={tokens} />
       ))}
     </Box>
   );

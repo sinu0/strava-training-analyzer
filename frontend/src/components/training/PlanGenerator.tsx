@@ -253,7 +253,7 @@ export default function PlanGenerator({ onGenerated }: PlanGeneratorProps) {
               <Alert severity="info">
                 Generator zbuduje tydzień wokół głównego celu, limitu jakości i dostępnych okien czasowych zamiast układać luźny zestaw sesji.
               </Alert>
-              {eventDate && (
+              {!!eventDate && (
                 <Typography variant="body2" color="text.secondary">
                   Start docelowy: {eventDate}. Planner uwzględni taper, jeśli blok dochodzi do tej daty.
                 </Typography>

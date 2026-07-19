@@ -379,7 +379,7 @@ export default function RouteDrawingMap({
 
         {waypoints.map((waypoint, index) => (
           <Marker
-            key={`wp-${index}-${waypoint[0].toFixed(5)}-${waypoint[1].toFixed(5)}`}
+            key={`wp-${waypoint[0].toFixed(5)}-${waypoint[1].toFixed(5)}`}
             position={waypoint}
             icon={createWaypointIcon(index, waypoints.length)}
             draggable

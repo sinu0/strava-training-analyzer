@@ -160,10 +160,10 @@ export default function TodayRecommendation({ readiness, weather, weeklyLoad }: 
             Na podstawie:
           </Typography>
           <Stack spacing={0.5}>
-            {rec.details.map((d, i) => (
+            {rec.details.map((detail) => (
               <Chip
-                key={i}
-                label={d}
+                key={detail}
+                label={detail}
                 size="small"
                 variant="outlined"
                 sx={{

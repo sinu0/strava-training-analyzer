@@ -16,12 +16,12 @@ import { useNavigate } from 'react-router-dom';
 
 import type { ActivitySummary } from '@/types/activity';
 import type { Achievement, FtpProgress, ProgressionLevel } from '@/types/analytics';
+import { fireConfetti } from '@/utils/confetti';
 import {
   buildHomeCelebrationPayload,
   readHomeCelebrationSnapshot,
   writeHomeCelebrationSnapshot,
 } from '@/utils/homeCelebrations';
-import { fireConfetti } from '@/utils/confetti';
 
 /**
  * Fullscreen editorial carousel that celebrates newly detected milestones on Home.

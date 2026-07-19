@@ -1,7 +1,6 @@
-import { useState } from 'react';
 
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import {
   Box,
@@ -12,6 +11,7 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import PageContainer from '@/components/common/PageContainer';
@@ -47,12 +47,12 @@ export default function TrainingTimelinePage() {
         <ToggleButton value="achievement">Osiągnięcia</ToggleButton>
       </ToggleButtonGroup>
 
-      {isLoading && <CircularProgress />}
+      {!!isLoading && <CircularProgress />}
 
       <Stack spacing={0}>
-        {events?.map((event, i) => (
+        {events?.map((event) => (
           <Box
-            key={i}
+            key={`${event.date}-${event.type}-${event.title}`}
             onClick={event.link ? () => navigate(event.link!) : undefined}
             sx={{
               display: 'flex',

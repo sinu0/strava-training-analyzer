@@ -1,4 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import SaveAltIcon from '@mui/icons-material/SaveAlt';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
 import {
   Box,
   Button,
@@ -22,13 +24,12 @@ import {
   TableRow,
   Paper,
 } from '@mui/material';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import WhatshotIcon from '@mui/icons-material/Whatshot';
-import SaveAltIcon from '@mui/icons-material/SaveAlt';
-import type { OptimizePlanResponse, PlanType } from '@/types/trainingOptimizer';
-import { useOptimizePlan, useApplyOptimizedPlan } from '@/hooks/useTrainingOptimizer';
+import { useState, useEffect, useMemo } from 'react';
+
 import { useCurrentPerformanceState } from '@/hooks/usePerformancePrediction';
+import { useOptimizePlan, useApplyOptimizedPlan } from '@/hooks/useTrainingOptimizer';
 import { tokens } from '@/theme/theme';
+import type { OptimizePlanResponse, PlanType } from '@/types/trainingOptimizer';
 
 const PLAN_TYPE_CONFIG: Record<PlanType, { color: string; label: string }> = {
   CONSERVATIVE: { color: tokens.status.warning, label: 'Konserwatywny' },
@@ -126,7 +127,7 @@ export default function PlanOptimizer() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {isLoadingState && <LinearProgress sx={{ borderRadius: 2 }} />}
+      {!!isLoadingState && <LinearProgress sx={{ borderRadius: 2 }} />}
 
       <Card>
         <CardHeader
@@ -212,21 +213,21 @@ export default function PlanOptimizer() {
         {isPending ? 'Optymalizuje...' : 'Generuj zoptymalizowany plan'}
       </Button>
 
-      {isError && (
+      {!!isError && (
         <Alert severity="error">
           {(error as Error)?.message ?? 'Blad podczas optymalizacji planu.'}
         </Alert>
       )}
 
-      {result && (
+      {!!result && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {/* Apply success */}
-          {applied && (
+          {!!applied && (
             <Alert severity="success">
               Plan <strong>{PLAN_TYPE_CONFIG[selectedType].label.toLowerCase()}</strong> zapisany jako program treningowy. Przejdz do zakladki <strong>Kalendarz</strong> lub <strong>Programy</strong> aby go zobaczyc.
             </Alert>
           )}
-          {applyMutation.isError && (
+          {!!applyMutation.isError && (
             <Alert severity="error">
               Nie udalo sie zapisac planu: {(applyMutation.error as Error)?.message ?? 'Nieznany blad'}
             </Alert>
@@ -287,9 +288,7 @@ export default function PlanOptimizer() {
                                 color: PLAN_TYPE_CONFIG[plan.type].color,
                               }}
                             />
-                            {isSelected && (
-                              <Chip label="Wybrany" size="small" color="primary" variant="outlined" />
-                            )}
+                            {!!isSelected && <Chip label="Wybrany" size="small" color="primary" variant="outlined" />}
                           </Stack>
                           <Divider />
                           <Box>
@@ -331,7 +330,7 @@ export default function PlanOptimizer() {
           </Card>
 
           {/* Selected plan sessions */}
-          {selectedPlan && (
+          {!!selectedPlan && (
             <Card>
               <CardHeader
                 title={`Sesje: ${PLAN_TYPE_CONFIG[selectedType].label}`}
@@ -397,26 +396,26 @@ export default function PlanOptimizer() {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {selectedPlan.sessions.map((s, i) => (
-                            <TableRow key={i} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                              <TableCell>{s.day}</TableCell>
+                          {selectedPlan.sessions.map((session) => (
+                            <TableRow key={session.day} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                              <TableCell>{session.day}</TableCell>
                               <TableCell>
-                                <Chip label={s.type} size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
+                                <Chip label={session.type} size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
                               </TableCell>
-                              <TableCell>{s.durationMinutes}</TableCell>
+                              <TableCell>{session.durationMinutes}</TableCell>
                               <TableCell>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                   <Box sx={{
                                     width: 8, height: 8, borderRadius: '50%',
-                                    bgcolor: INTENSITY_COLORS[s.intensity] ?? tokens.status.neutral,
+                                    bgcolor: INTENSITY_COLORS[session.intensity] ?? tokens.status.neutral,
                                   }} />
-                                  <Typography variant="body2">{s.intensity}</Typography>
+                                  <Typography variant="body2">{session.intensity}</Typography>
                                 </Box>
                               </TableCell>
-                              <TableCell>{s.tss}</TableCell>
+                              <TableCell>{session.tss}</TableCell>
                               <TableCell>
                                 <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 200, display: 'block', whiteSpace: 'normal' }}>
-                                  {s.goal}
+                                  {session.goal}
                                 </Typography>
                               </TableCell>
                             </TableRow>

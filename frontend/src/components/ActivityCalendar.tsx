@@ -375,7 +375,7 @@ function ActivityCalendarDayCell({
             {day}
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0.4, width: '100%', flex: 1 }}>
-            {activities.slice(0, 3).map((activity, index) => {
+            {activities.slice(0, 3).map((activity) => {
               const color = getSportColor(activity.sportType);
               const label = getMetricLabel(activity, metricKey);
               const value = getMetricValue(activity, metricKey);
@@ -390,7 +390,7 @@ function ActivityCalendarDayCell({
 
               return (
                 <Box
-                  key={`${activity.id}-${index}`}
+                  key={activity.id}
                   onClick={(event) => {
                     event.stopPropagation();
                     onActivityClick(activity.id);
@@ -475,7 +475,7 @@ function ActivityCalendarWeekRow({
     <Box sx={{ display: 'grid', gridTemplateColumns: CALENDAR_COLUMNS, gap: 0.5 }}>
       {week.map((day, dayIndex) => (
         <ActivityCalendarDayCell
-          key={`${day ?? 'empty'}-${dayIndex}`}
+          key={PL_DAYS[dayIndex]}
           activities={day ? activitiesByDay.get(day) ?? [] : []}
           day={day}
           dayIndex={dayIndex}
