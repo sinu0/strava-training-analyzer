@@ -78,7 +78,7 @@ export const TRAINING_ZONE_COLORS = {
 } as const;
 
 export const PROFILE_GRADIENTS = {
-  hero: 'linear-gradient(135deg, #080D13 0%, #152131 50%, #0B2036 100%)',
+  hero: `linear-gradient(135deg, ${theme.palette.background.default} 0%, #152131 50%, #0B2036 100%)`,
 } as const;
 
 export const ROUTE_HEATMAP_COLORS = [

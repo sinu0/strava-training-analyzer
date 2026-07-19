@@ -8,6 +8,7 @@ import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined';
 import { Box, Grid, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
 
+import EditorialHero from '@/components/common/EditorialHero';
 import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
@@ -16,6 +17,7 @@ import PMChart from '@/components/PMChart';
 import PowerCurveChart from '@/components/PowerCurveChart';
 import MetricReadout from '@/components/v2/MetricReadout';
 import PerformanceSurface from '@/components/v2/PerformanceSurface';
+import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
 
 import { useLoadAnalytics, usePeriodComparison, usePowerAnalytics } from './useV2Analytics';
 
@@ -135,6 +137,16 @@ export default function AnalysisPage() {
 
   return (
     <PageContainer title="Laboratorium wydolności" subtitle="Porównuj okresy, obserwuj obciążenie i analizuj moc bez ukrywania jakości danych." maxWidth={1320}>
+      <EditorialHero
+        compact
+        eyebrow="Dane, nie hałas"
+        title="Zobacz, co zmienia Twój trening"
+        description="Porównuj bloki, obciążenie i moc w jednym spokojnym widoku analitycznym."
+        accentColor="#16A6C8"
+        imageSrc={getCyclingHeroIllustrationPath('analytics')}
+        imageAlt="Kokpit roweru na górskiej drodze o świcie"
+        highlights={[`${dayCount} dni`, 'Porównanie okresów', 'Moc i obciążenie']}
+      />
       <PerformanceSurface sx={{ mb: 2.5 }}>
         <Tabs value={tab} onChange={(_, value: AnalysisTab) => update('tab', value)} variant="scrollable" scrollButtons="auto">
           <Tab value="compare" icon={<CompareArrowsOutlinedIcon />} iconPosition="start" label="Porównaj" />

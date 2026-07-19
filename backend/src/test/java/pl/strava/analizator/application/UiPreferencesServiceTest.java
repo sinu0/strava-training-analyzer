@@ -41,7 +41,10 @@ class UiPreferencesServiceTest {
         assertThat(result.getRevision()).isZero();
         assertThat(result.getDashboard().getWidgets())
                 .extracting(DashboardWidgetDto::getType)
-                .containsExactly("decision", "recovery", "load", "lastActivity", "nextWorkout", "weather");
+                .containsExactly("decision", "lastActivity", "recovery", "load", "nextWorkout", "weather");
+        assertThat(result.getDashboard().getWidgets())
+                .extracting(DashboardWidgetDto::getSpan)
+                .containsExactly(8, 4, 4, 4, 6, 6);
         assertThat(result.getMobileNavigation())
                 .containsExactly("/", "/activities", "/analytics", "/training");
     }

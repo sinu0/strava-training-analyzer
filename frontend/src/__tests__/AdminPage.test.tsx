@@ -149,6 +149,7 @@ describe('AdminPage', () => {
 
     expect(screen.getByText('Integracje')).toBeDefined();
     expect(screen.getByText('Sync i dane')).toBeDefined();
+    expect(screen.getByText('Wygląd')).toBeDefined();
     expect(screen.getByText('Przetwarzanie')).toBeDefined();
     expect(screen.getByText('Połączone')).toBeDefined();
     expect(screen.getByText('Konto Strava:')).toBeDefined();

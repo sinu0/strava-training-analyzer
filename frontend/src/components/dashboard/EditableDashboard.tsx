@@ -37,6 +37,7 @@ import {
   Paper,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -70,6 +71,7 @@ interface EditableDashboardProps {
   onSave: (preferences: UiPreferences) => void | Promise<void>;
   renderWidget: (widget: DashboardWidget) => ReactNode;
   saving?: boolean;
+  toolbarStart?: ReactNode;
 }
 
 interface SortableWidgetProps {
@@ -191,6 +193,7 @@ export default function EditableDashboard({
   onSave,
   renderWidget,
   saving = false,
+  toolbarStart,
 }: EditableDashboardProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(() => structuredClone(preferences));
@@ -266,9 +269,11 @@ export default function EditableDashboard({
 
   return (
     <Stack spacing={2.5}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent="flex-end">
-        {editing ? (
-          <>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent="space-between" alignItems={{ sm: 'center' }}>
+        <Box>{toolbarStart}</Box>
+        <Stack direction="row" spacing={0.75} justifyContent="flex-end">
+          {editing ? (
+            <>
             <Button startIcon={<AddIcon />} onClick={() => setAddOpen(true)}>
               Dodaj widget
             </Button>
@@ -283,12 +288,25 @@ export default function EditableDashboard({
             >
               Zapisz układ
             </Button>
-          </>
-        ) : (
-          <Button variant="outlined" startIcon={<EditOutlinedIcon />} onClick={() => setEditing(true)}>
-            Edytuj układ
-          </Button>
-        )}
+            </>
+          ) : (
+            <Tooltip title="Edytuj układ">
+              <IconButton
+                color="primary"
+                aria-label="Edytuj układ"
+                onClick={() => setEditing(true)}
+                sx={{
+                  border: '1px solid',
+                  borderColor: (theme) => theme.tokens?.surfaceStrongBorder ?? theme.palette.divider,
+                  bgcolor: 'background.paper',
+                  boxShadow: (theme) => theme.tokens?.cardShadow ?? '0 12px 34px rgba(0,0,0,0.18)',
+                }}
+              >
+                <EditOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Stack>
       </Stack>
 
       {!!saveError && <Alert severity="error">{saveError}</Alert>}

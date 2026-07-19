@@ -1,4 +1,6 @@
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
+import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
 import PedalBikeOutlinedIcon from '@mui/icons-material/PedalBikeOutlined';
 import {
@@ -13,12 +15,14 @@ import {
   ListItemIcon,
   ListItemText,
   Toolbar,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import TopBarSyncButton from '@/components/layout/TopBarSyncButton';
+import { useColorMode } from '@/context/ThemeModeContext';
 
 import type { Theme } from '@mui/material/styles';
 
@@ -33,6 +37,7 @@ export default function TopBar({
   onToggleSidebar,
 }: TopBarProps) {
   const navigate = useNavigate();
+  const { mode, toggleMode } = useColorMode();
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
 
   return (
@@ -41,7 +46,8 @@ export default function TopBar({
         position="sticky"
         elevation={0}
         sx={{
-          bgcolor: 'rgba(8, 13, 19, 0.82)',
+          bgcolor: (theme) => theme.tokens?.topBar ?? 'rgba(8, 13, 19, 0.82)',
+          color: 'text.primary',
           borderBottom: '1px solid',
           borderColor: (t) => t.tokens.surfaceBorder,
           backdropFilter: 'blur(18px)',
@@ -96,6 +102,17 @@ export default function TopBar({
             />
             <TopBarSyncButton />
 
+            <Tooltip title={mode === 'dark' ? 'Włącz jasny motyw' : 'Włącz ciemny motyw'}>
+              <IconButton
+                aria-label={mode === 'dark' ? 'Włącz jasny motyw' : 'Włącz ciemny motyw'}
+                aria-pressed={mode === 'light'}
+                onClick={toggleMode}
+                sx={{ color: 'text.secondary' }}
+              >
+                {mode === 'dark' ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
+              </IconButton>
+            </Tooltip>
+
             <IconButton
               onClick={(e) => setAnchor(e.currentTarget)}
               sx={{ p: 0.25 }}
@@ -105,9 +122,9 @@ export default function TopBar({
                 sx={{
                   width: 38,
                   height: 38,
-                  bgcolor: 'rgba(255,107,53,0.13)',
+                  bgcolor: 'rgba(252,76,2,0.13)',
                   color: 'primary.main',
-                  border: '1px solid rgba(255,107,53,0.34)',
+                  border: '1px solid rgba(252,76,2,0.34)',
                 }}
               >
                 <PedalBikeOutlinedIcon fontSize="small" />

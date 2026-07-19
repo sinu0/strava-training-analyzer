@@ -15,6 +15,7 @@ export type EmptyStateType =
 
 export type HomeWidgetIllustration = 'weather' | 'readiness' | 'block' | 'progress';
 export type PageHeroIllustration = 'dashboard' | 'analytics' | 'training' | 'priorities';
+export type CyclingHeroIllustration = 'today' | 'analytics' | 'training' | 'routes';
 
 const WEATHER_FILE_MAP: Record<CyclistType, string> = {
   sunny: 'weather-sunny',
@@ -51,4 +52,15 @@ export function getHomeWidgetIllustrationPath(type: HomeWidgetIllustration): str
 
 export function getPageHeroIllustrationPath(type: PageHeroIllustration): string {
   return `/illustrations/hero-${type}.png`;
+}
+
+/** Original V4 editorial photography, delivered as lightweight WebP assets. */
+export function getCyclingHeroIllustrationPath(type: CyclingHeroIllustration): string {
+  const fileName: Record<CyclingHeroIllustration, string> = {
+    today: 'hero-today-road',
+    analytics: 'hero-analytics-cockpit',
+    training: 'hero-training-prep',
+    routes: 'hero-routes-climb',
+  };
+  return `/illustrations/v4/${fileName[type]}.webp`;
 }

@@ -13,12 +13,13 @@ describe('ui preferences', () => {
     expect(DEFAULT_UI_PREFERENCES.revision).toBe(0);
     expect(DEFAULT_UI_PREFERENCES.dashboard.widgets.map((widget) => widget.type)).toEqual([
       'decision',
+      'lastActivity',
       'recovery',
       'load',
-      'lastActivity',
       'nextWorkout',
       'weather',
     ]);
+    expect(DEFAULT_UI_PREFERENCES.dashboard.widgets.map((widget) => widget.span)).toEqual([8, 4, 4, 4, 6, 6]);
     expect(DEFAULT_UI_PREFERENCES.mobileNavigation).toHaveLength(4);
   });
 
@@ -42,8 +43,8 @@ describe('ui preferences', () => {
     const moved = moveDashboardWidget(widgets, widgets[0]!.id, widgets[2]!.id);
 
     expect(moved.map((widget) => widget.type).slice(0, 3)).toEqual([
+      'lastActivity',
       'recovery',
-      'load',
       'decision',
     ]);
     expect(moved.map((widget) => widget.order)).toEqual([0, 1, 2, 3, 4, 5]);
