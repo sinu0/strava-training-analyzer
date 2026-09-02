@@ -4,6 +4,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
+import { getAppThemeTokens } from '@/theme/theme';
 import { STATUS_COLORS, alphaColor } from '@/utils/colors';
 
 import MobileBottomNav from './MobileBottomNav';
@@ -97,7 +98,10 @@ export default function AppLayout() {
         }}
       />
       <Box sx={{ flexGrow: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-        <TopBar onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
+        <TopBar
+          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+          showBrand={isMobile || !sidebarOpen}
+        />
         <Box
           component="main"
           id="main-content"
@@ -105,8 +109,8 @@ export default function AppLayout() {
           sx={{
             flexGrow: 1,
             position: 'relative',
-            p: { xs: 1.5, sm: 2.5, md: 3.5, xl: 4.5 },
-            pt: { xs: 3, sm: 3.5, md: 4 },
+            px: (theme) => getAppThemeTokens(theme).space.page,
+            py: { xs: 3, sm: 3.5, md: 4 },
             pb: { xs: 11, md: 4 },
             bgcolor: 'background.default',
           }}

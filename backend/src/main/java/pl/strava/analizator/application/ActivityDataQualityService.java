@@ -3,6 +3,7 @@ package pl.strava.analizator.application;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -55,8 +56,23 @@ public class ActivityDataQualityService {
                 .assessedActivities(all.size())
                 .available(all.stream().filter(item -> "AVAILABLE".equals(item.getStatus())).count())
                 .partial(all.stream().filter(item -> "PARTIAL".equals(item.getStatus())).count())
-                .unknown(explicitlyUnknown + unassessed)
+                .unknown(explicitlyUnknown)
+                .unassessed(unassessed)
                 .build();
+    }
+
+    public int assessMissing() {
+        Set<UUID> assessedIds = qualityRepository.findAll().stream()
+                .map(ActivityDataQuality::getActivityId)
+                .collect(java.util.stream.Collectors.toSet());
+        int assessedCount = 0;
+        for (Activity activity : activityRepository.findAll()) {
+            if (activity.getId() != null && !assessedIds.contains(activity.getId())) {
+                assessAndSave(activity);
+                assessedCount++;
+            }
+        }
+        return assessedCount;
     }
 
     private boolean hasTrainingStream(Activity activity) {

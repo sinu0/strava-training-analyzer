@@ -7,6 +7,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,10 @@ import pl.strava.analizator.application.dto.ActivitySummaryDto;
 import pl.strava.analizator.application.dto.PmcDataDto;
 import pl.strava.analizator.application.dto.TodayDto;
 import pl.strava.analizator.application.dto.TrainingPlanDto;
+import pl.strava.analizator.domain.model.AthleteProfile;
+import pl.strava.analizator.domain.port.AthleteProfileRepository;
+import pl.strava.analizator.domain.port.DailyMetricRepository;
+import pl.strava.analizator.domain.vo.DateRange;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +33,9 @@ public class V2TodayService {
     private final TrainingPlanService trainingPlanService;
     private final SyncService syncService;
     private final ActivityDataQualityService dataQualityService;
+    private final DailyMetricRepository dailyMetricRepository;
+    private final AthleteProfileRepository athleteProfileRepository;
+    private final HealthService healthService;
 
     public TodayDto getToday() {
         LocalDate today = LocalDate.now();
@@ -46,6 +54,7 @@ public class V2TodayService {
         ActivityDataQualityDto latestQuality = findQuality(lastActivity, evidence);
 
         TodayDto.LoadSnapshotDto load = findLoad(today);
+        BigDecimal loadCoverage = findLoadCoverage(today);
         if (load != null) {
             evidence.add(TodayDto.EvidenceDto.builder()
                     .code("TRAINING_LOAD")
@@ -56,15 +65,32 @@ public class V2TodayService {
         }
 
         TodayDto.RecommendationDto recommendation = findRecommendation(evidence, today);
+        AthleteProfile profile = athleteProfileRepository.findFirst().orElse(null);
+        boolean profileReady = profile != null && profile.hasFtp()
+                && (profile.hasLthr() || (profile.getMaxHrBpm() != null && profile.getMaxHrBpm() > 0));
+        HealthService.RecoveryStatus health = findHealth(today);
+        boolean healthAvailable = health != null && "AVAILABLE".equals(health.availability());
+        if (profileReady) {
+            evidence.add(TodayDto.EvidenceDto.builder().code("ATHLETE_PROFILE")
+                    .message("Profil zawiera FTP i próg tętna")
+                    .source("athlete_profile").asOf(today).build());
+        }
+        if (healthAvailable) {
+            evidence.add(TodayDto.EvidenceDto.builder().code("HEALTH_RECOVERY")
+                    .message("Dane regeneracji są dostępne")
+                    .source("daily_summaries").asOf(today).build());
+        }
         TrainingPlanDto nextTraining = trainingPlanService.getPlans(today, today.plusDays(14)).stream()
                 .filter(plan -> plan.getActualActivityId() == null)
                 .min(Comparator.comparing(TrainingPlanDto::getDate))
                 .orElse(null);
 
         SyncService.SyncStatus sync = syncService.getLastSyncStatus();
-        String dataStatus = dataStatus(lastActivity, latestQuality, load, sync, recommendation);
+        String dataStatus = dataStatus(lastActivity, latestQuality, load, loadCoverage,
+                profileReady, healthAvailable, sync, recommendation);
         String confidenceLevel = confidenceLevel(
-                lastActivity, latestQuality, load, recommendation, confidenceReasons);
+                lastActivity, latestQuality, load, loadCoverage, profileReady,
+                healthAvailable, recommendation, confidenceReasons);
 
         return TodayDto.builder()
                 .asOf(today)
@@ -118,6 +144,22 @@ public class V2TodayService {
                 .build();
     }
 
+    private BigDecimal findLoadCoverage(LocalDate today) {
+        Map<LocalDate, BigDecimal> coverage = dailyMetricRepository.findNumericSeries(
+                "training_load_coverage", DateRange.of(today.minusDays(41), today));
+        if (coverage.isEmpty()) return null;
+        return coverage.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add)
+                .divide(BigDecimal.valueOf(coverage.size()), 4, java.math.RoundingMode.HALF_UP);
+    }
+
+    private HealthService.RecoveryStatus findHealth(LocalDate today) {
+        try {
+            return healthService.getRecoveryStatus(today);
+        } catch (RuntimeException exception) {
+            return null;
+        }
+    }
+
     private TodayDto.RecommendationDto findRecommendation(List<TodayDto.EvidenceDto> evidence, LocalDate today) {
         try {
             AdaptiveCoachResponse response = coachService.getTodayDecision();
@@ -144,17 +186,20 @@ public class V2TodayService {
     }
 
     private String dataStatus(ActivitySummaryDto lastActivity, ActivityDataQualityDto quality,
-                              TodayDto.LoadSnapshotDto load,
+                              TodayDto.LoadSnapshotDto load, BigDecimal loadCoverage,
+                              boolean profileReady, boolean healthAvailable,
                               SyncService.SyncStatus sync, TodayDto.RecommendationDto recommendation) {
         if (lastActivity == null) return "UNKNOWN";
         if (quality == null || !"AVAILABLE".equals(quality.getStatus())
-                || load == null || recommendation == null || "failed".equals(sync.status())
+                || load == null || !reliableCoverage(loadCoverage) || !profileReady || !healthAvailable
+                || recommendation == null || "failed".equals(sync.status())
                 || "rate_limited".equals(sync.status())) return "PARTIAL";
         return "AVAILABLE";
     }
 
     private String confidenceLevel(ActivitySummaryDto lastActivity, ActivityDataQualityDto quality,
-                                   TodayDto.LoadSnapshotDto load,
+                                   TodayDto.LoadSnapshotDto load, BigDecimal loadCoverage,
+                                   boolean profileReady, boolean healthAvailable,
                                    TodayDto.RecommendationDto recommendation, List<String> reasons) {
         if (lastActivity == null) reasons.add("Brak aktywności do porównania");
         if (quality == null) reasons.add("Brak oceny jakości ostatniej aktywności");
@@ -162,14 +207,26 @@ public class V2TodayService {
             reasons.add("Jakość ostatniej aktywności: " + quality.getStatus());
         }
         if (load == null) reasons.add("Brak wiarygodnej historii obciążenia");
+        if (loadCoverage == null) reasons.add("Brak informacji o pokryciu obciążenia aktywności");
+        else if (!reliableCoverage(loadCoverage)) {
+            reasons.add("Obciążenie rozpoznane dla " + loadCoverage.multiply(BigDecimal.valueOf(100))
+                    .setScale(0, java.math.RoundingMode.HALF_UP) + "% aktywności");
+        }
+        if (!profileReady) reasons.add("Profil wymaga FTP oraz LTHR lub tętna maksymalnego");
+        if (!healthAvailable) reasons.add("Brak pełnych danych zdrowotnych i regeneracyjnych");
         if (recommendation == null) reasons.add("Rekomendacja nie jest dostępna");
         if (lastActivity != null && quality != null && "AVAILABLE".equals(quality.getStatus())
-                && load != null && recommendation != null) {
-            reasons.add("Aktywność, jej jakość, obciążenie i rekomendacja mają aktualne źródła");
+                && load != null && reliableCoverage(loadCoverage) && profileReady && healthAvailable
+                && recommendation != null) {
+            reasons.add("Aktywność, obciążenie, profil, regeneracja i rekomendacja mają aktualne źródła");
             return "HIGH";
         }
         return lastActivity != null && (quality != null || load != null || recommendation != null)
                 ? "MEDIUM" : "LOW";
+    }
+
+    private boolean reliableCoverage(BigDecimal coverage) {
+        return coverage != null && coverage.compareTo(BigDecimal.valueOf(0.8)) >= 0;
     }
 
     private boolean isZero(BigDecimal value) {

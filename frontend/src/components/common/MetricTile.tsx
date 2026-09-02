@@ -1,6 +1,8 @@
 import { Card, CardContent, Typography, Box } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import type { ReactNode } from 'react';
 
 interface MetricTileProps {
@@ -18,7 +20,12 @@ interface MetricTileProps {
 export default function MetricTile({ label, value, unit, trend, icon }: MetricTileProps) {
   return (
     <Card sx={{ height: '100%' }}>
-      <CardContent sx={{ p: 3, '&:last-child': { pb: 3 } }}>
+      <CardContent
+        sx={{
+          p: (theme) => getAppThemeTokens(theme).space.card,
+          '&:last-child': { pb: (theme) => getAppThemeTokens(theme).space.card },
+        }}
+      >
         <Box
           sx={{
             display: 'flex',
@@ -31,8 +38,8 @@ export default function MetricTile({ label, value, unit, trend, icon }: MetricTi
             {!!icon && (
               <Box
                 sx={{
-                  width: 38,
-                  height: 38,
+                  width: (theme) => getAppThemeTokens(theme).control.md,
+                  height: (theme) => getAppThemeTokens(theme).control.md,
                   borderRadius: '50%',
                   flexShrink: 0,
                   display: 'flex',
@@ -40,6 +47,7 @@ export default function MetricTile({ label, value, unit, trend, icon }: MetricTi
                   justifyContent: 'center',
                   bgcolor: (theme) => theme.tokens?.iconBubble ?? 'action.hover',
                   color: 'text.primary',
+                  '& svg': { fontSize: (theme) => getAppThemeTokens(theme).icon.md },
                 }}
               >
                 {icon}
@@ -48,7 +56,7 @@ export default function MetricTile({ label, value, unit, trend, icon }: MetricTi
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ fontWeight: 600 }}
+              sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.medium }}
               noWrap
             >
               {label}
@@ -65,7 +73,7 @@ export default function MetricTile({ label, value, unit, trend, icon }: MetricTi
                 borderRadius: 999,
                 flexShrink: 0,
                 fontSize: '0.78rem',
-                fontWeight: 700,
+                fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label,
                 bgcolor: (theme) =>
                   alpha(trend >= 0 ? theme.palette.success.main : theme.palette.error.main, 0.12),
                 color: trend >= 0 ? 'success.dark' : 'error.main',
@@ -80,12 +88,12 @@ export default function MetricTile({ label, value, unit, trend, icon }: MetricTi
           <Typography
             variant="h3"
             component="div"
-            sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}
+            sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.display, letterSpacing: (theme) => getAppThemeTokens(theme).type.tracking.tight }}
           >
             {value}
           </Typography>
           {!!unit && (
-            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.regular }}>
               {unit}
             </Typography>
           )}

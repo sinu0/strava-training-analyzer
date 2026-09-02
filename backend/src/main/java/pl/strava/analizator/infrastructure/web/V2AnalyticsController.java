@@ -1,6 +1,7 @@
 package pl.strava.analizator.infrastructure.web;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,6 +20,8 @@ import pl.strava.analizator.application.dto.PmcDataDto;
 import pl.strava.analizator.application.dto.PowerAnalyticsDto;
 import pl.strava.analizator.application.dto.PowerCurveDto;
 import pl.strava.analizator.application.dto.WeeklySummaryDto;
+import pl.strava.analizator.domain.port.DailyMetricRepository;
+import pl.strava.analizator.domain.vo.DateRange;
 
 @RestController
 @RequestMapping("/api/v2/analytics")
@@ -26,6 +29,7 @@ import pl.strava.analizator.application.dto.WeeklySummaryDto;
 public class V2AnalyticsController {
 
     private final AnalyticsService analyticsService;
+    private final DailyMetricRepository dailyMetricRepository;
 
     @GetMapping("/overview")
     public AnalyticsOverviewDto overview(
@@ -62,8 +66,17 @@ public class V2AnalyticsController {
         List<PmcDataDto> points = analyticsService.getPmc(from, to);
         boolean available = points.stream().anyMatch(point -> nonZero(point.getCtl())
                 || nonZero(point.getAtl()) || nonZero(point.getTsb()));
+        var coverageSeries = dailyMetricRepository.findNumericSeries(
+                "training_load_coverage", DateRange.of(from, to));
+        BigDecimal coverage = coverageSeries.isEmpty() ? null : coverageSeries.values().stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .divide(BigDecimal.valueOf(coverageSeries.size()), 4, RoundingMode.HALF_UP);
+        String availability = !available ? "UNKNOWN"
+                : coverage == null || coverage.compareTo(BigDecimal.valueOf(0.7)) < 0
+                    ? "PARTIAL" : "AVAILABLE";
         return LoadAnalyticsDto.builder().from(from).to(to)
-                .availability(available ? "AVAILABLE" : "UNKNOWN")
+                .availability(availability)
+                .coverage(coverage)
                 .points(points).build();
     }
 

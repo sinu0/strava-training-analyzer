@@ -1,5 +1,6 @@
 package pl.strava.analizator.infrastructure.persistence.adapter;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,6 +29,8 @@ public class AiNoteJobRepositoryAdapter implements AiNoteJobRepository {
                 .createdAt(job.getCreatedAt())
                 .startedAt(job.getStartedAt())
                 .completedAt(job.getCompletedAt())
+                .nextAttemptAt(job.getNextAttemptAt())
+                .updatedAt(job.getUpdatedAt())
                 .errorMessage(job.getErrorMessage())
                 .retryCount(job.getRetryCount())
                 .build();
@@ -36,9 +39,16 @@ public class AiNoteJobRepositoryAdapter implements AiNoteJobRepository {
     }
 
     @Override
-    public Optional<AiNoteJob> findNextPending() {
-        return jpaRepository.findFirstByStatusOrderByCreatedAtAsc(AiNoteJob.STATUS_PENDING)
+    public Optional<AiNoteJob> findNextPending(Instant readyAt) {
+        return jpaRepository.findFirstByStatusAndNextAttemptAtLessThanEqualOrderByCreatedAtAsc(
+                        AiNoteJob.STATUS_PENDING, readyAt)
                 .map(this::toDomain);
+    }
+
+    @Override
+    public List<AiNoteJob> findStaleProcessing(Instant startedBefore) {
+        return jpaRepository.findByStatusAndStartedAtBefore(AiNoteJob.STATUS_PROCESSING, startedBefore)
+                .stream().map(this::toDomain).toList();
     }
 
     @Override
@@ -65,6 +75,8 @@ public class AiNoteJobRepositoryAdapter implements AiNoteJobRepository {
                 .createdAt(entity.getCreatedAt())
                 .startedAt(entity.getStartedAt())
                 .completedAt(entity.getCompletedAt())
+                .nextAttemptAt(entity.getNextAttemptAt())
+                .updatedAt(entity.getUpdatedAt())
                 .errorMessage(entity.getErrorMessage())
                 .retryCount(entity.getRetryCount())
                 .build();

@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -18,21 +19,27 @@ public class ImportJobService {
     private final ImportJobRunner jobRunner;
 
     public synchronized ProcessingJob create(String requestedMode) {
-        if (jobRepository.existsActive("IMPORT")) {
-            throw new IllegalStateException("An import job is already running");
+        ProcessingJob active = jobRepository.findActive("IMPORT").orElse(null);
+        if (active != null) {
+            return active;
         }
 
         String mode = normalizeMode(requestedMode);
         Instant now = Instant.now();
-        ProcessingJob job = jobRepository.save(ProcessingJob.builder()
-                .jobType("IMPORT")
-                .mode(mode)
-                .stage(SyncService.SyncStage.FETCH_SUMMARY.name())
-                .status("QUEUED")
-                .attempt(0)
-                .createdAt(now)
-                .updatedAt(now)
-                .build());
+        ProcessingJob job;
+        try {
+            job = jobRepository.save(ProcessingJob.builder()
+                    .jobType("IMPORT")
+                    .mode(mode)
+                    .stage(SyncService.SyncStage.FETCH_SUMMARY.name())
+                    .status("QUEUED")
+                    .attempt(0)
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .build());
+        } catch (DataIntegrityViolationException race) {
+            return jobRepository.findActive("IMPORT").orElseThrow(() -> race);
+        }
         jobRunner.start(job.getId());
         return job;
     }

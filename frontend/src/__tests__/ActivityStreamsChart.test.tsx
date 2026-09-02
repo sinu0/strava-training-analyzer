@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect, beforeAll } from 'vitest';
 
 import ActivityStreamsChart from '../components/ActivityStreamsChart';
@@ -29,6 +29,9 @@ describe('ActivityStreamsChart', () => {
 
     // Recharts renders an SVG with the chart
     expect(container.querySelector('.recharts-wrapper')).toBeDefined();
+    expect(screen.getByText('Moc (W)')).toBeDefined();
+    expect(screen.getByText('Tętno (bpm)')).toBeDefined();
+    expect(screen.queryByText('Kadencja (rpm)')).toBeNull();
   });
 
   it('renders nothing when no data', () => {

@@ -32,6 +32,10 @@ describe('PMChart', () => {
     );
     expect(container.querySelector('.recharts-wrapper')).toBeDefined();
     expect(screen.getByRole('img', { name: /Wykres obciążenia PMC.*CTL 56.*ATL 68.*forma -12/i })).toBeDefined();
+    expect(screen.getByText('Kondycja długoterminowa (CTL)')).toBeDefined();
+    expect(screen.getByText('Zmęczenie krótkoterminowe (ATL)')).toBeDefined();
+    expect(screen.getByText('Forma treningowa (TSB)')).toBeDefined();
+    expect(screen.getByText(/CTL pokazuje trend około 42 dni/i)).toBeDefined();
   });
 
   it('shows empty state when no data', () => {

@@ -20,6 +20,7 @@ import {
   useSetWeightGoal,
   useWeightOverview,
 } from '@/hooks/useWeight';
+import { getAppThemeTokens } from '@/theme/theme';
 import { getApiErrorMessage } from '@/utils/errorHandling';
 
 import type { FormEvent } from 'react';
@@ -212,7 +213,7 @@ export default function WeightPage() {
             <Section title="Stan dziś" subtitle="Najważniejszy status: aktualna waga, tempo zmian i cel." accentColor="primary.main">
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
-                  <Typography variant="h3" sx={{ fontWeight: 800 }}>
+                  <Typography variant="h3">
                     {overview?.currentWeightKg != null ? `${Number(overview.currentWeightKg).toFixed(1)} kg` : '—'}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -225,7 +226,7 @@ export default function WeightPage() {
                       ? `Cel: ${Number(goal.targetWeightKg).toFixed(1)} kg do ${new Date(goal.targetDate).toLocaleDateString('pl-PL')}`
                       : 'Brak ustawionego celu wagowego'}
                   </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  <Typography variant="body2" sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label }}>
                     {weeklyChange != null
                       ? `${weeklyChange > 0 ? '+' : ''}${weeklyChange.toFixed(1)} kg / tydzień`
                       : 'Brak trendu tygodniowego'}

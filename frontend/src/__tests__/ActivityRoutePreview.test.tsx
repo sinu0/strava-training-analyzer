@@ -30,7 +30,9 @@ describe('ActivityRoutePreview', () => {
   it('renders an immediate non-interactive route map from the summary polyline', async () => {
     renderPreview('_p~iF~ps|U_ulLnnqC_mqNvxq`@');
 
-    expect(screen.getByLabelText('Mapa trasy: Morning Ride')).toBeDefined();
+    const preview = screen.getByLabelText('Mapa trasy: Morning Ride');
+    expect(preview).toBeDefined();
+    expect(preview.getAttribute('data-map-overlay')).toBe('none');
     expect(await screen.findByTestId('preview-leaflet-map')).toBeDefined();
     expect(screen.getByText('Trasa GPS')).toBeDefined();
   });

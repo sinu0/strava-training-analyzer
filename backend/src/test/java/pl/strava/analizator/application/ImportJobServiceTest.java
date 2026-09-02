@@ -1,11 +1,13 @@
 package pl.strava.analizator.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +35,7 @@ class ImportJobServiceTest {
     @Test
     void createPersistsObservableJobAndStartsIt() {
         UUID id = UUID.randomUUID();
-        when(jobRepository.existsActive("IMPORT")).thenReturn(false);
+        when(jobRepository.findActive("IMPORT")).thenReturn(Optional.empty());
         when(jobRepository.save(any())).thenAnswer(invocation -> {
             ProcessingJob job = invocation.getArgument(0);
             return job.toBuilder().id(id).build();
@@ -48,11 +50,22 @@ class ImportJobServiceTest {
     }
 
     @Test
-    void createRejectsConcurrentImportJob() {
-        when(jobRepository.existsActive("IMPORT")).thenReturn(true);
+    void createReturnsTheAlreadyRunningImportInsteadOfStartingASecondOne() {
+        UUID id = UUID.randomUUID();
+        ProcessingJob active = ProcessingJob.builder()
+                .id(id)
+                .jobType("IMPORT")
+                .mode("RECENT")
+                .stage("FETCH_DETAIL")
+                .status("RUNNING")
+                .attempt(1)
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
+        when(jobRepository.findActive("IMPORT")).thenReturn(Optional.of(active));
 
-        assertThatThrownBy(() -> service.create("FULL"))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("already running");
+        assertThat(service.create("FULL")).isSameAs(active);
+        verify(jobRepository, never()).save(any());
+        verify(jobRunner, never()).start(any());
     }
 }

@@ -275,7 +275,7 @@ export default function EditableDashboard({
   };
 
   return (
-    <Stack spacing={2.5}>
+    <Stack spacing={editing ? 2.5 : 1.5}>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent="space-between" alignItems={{ sm: 'center' }}>
         <Box>{toolbarStart}</Box>
         <Stack direction="row" spacing={0.75} justifyContent="flex-end">

@@ -7,6 +7,7 @@ import type { ActivityStreams, ActivityV2Detail, HistoryPageResponse } from './t
 
 export interface HistoryFilters {
   sportType?: string;
+  query?: string;
   from?: string;
   to?: string;
   page: number;

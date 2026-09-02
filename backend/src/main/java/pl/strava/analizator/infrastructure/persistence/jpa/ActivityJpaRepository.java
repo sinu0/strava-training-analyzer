@@ -62,6 +62,10 @@ public interface ActivityJpaRepository extends JpaRepository<ActivityEntity, UUI
                    a.updatedAt AS updatedAt
             FROM ActivityEntity a
             WHERE (:sportType IS NULL OR a.sportType = :sportType)
+              AND (:searchQuery IS NULL
+                   OR LOWER(COALESCE(a.name, '')) LIKE CONCAT('%', :searchQuery, '%')
+                   OR LOWER(COALESCE(a.description, '')) LIKE CONCAT('%', :searchQuery, '%')
+                   OR LOWER(COALESCE(a.sportType, '')) LIKE CONCAT('%', :searchQuery, '%'))
               AND a.startedAt >= :fromDate
               AND a.startedAt <= :toDate
             ORDER BY a.startedAt DESC
@@ -69,11 +73,16 @@ public interface ActivityJpaRepository extends JpaRepository<ActivityEntity, UUI
             countQuery = """
             SELECT COUNT(a) FROM ActivityEntity a
             WHERE (:sportType IS NULL OR a.sportType = :sportType)
+              AND (:searchQuery IS NULL
+                   OR LOWER(COALESCE(a.name, '')) LIKE CONCAT('%', :searchQuery, '%')
+                   OR LOWER(COALESCE(a.description, '')) LIKE CONCAT('%', :searchQuery, '%')
+                   OR LOWER(COALESCE(a.sportType, '')) LIKE CONCAT('%', :searchQuery, '%'))
               AND a.startedAt >= :fromDate
               AND a.startedAt <= :toDate
             """)
     Page<ActivityCoreProjection> findV2Summaries(
             @Param("sportType") String sportType,
+            @Param("searchQuery") String searchQuery,
             @Param("fromDate") OffsetDateTime from,
             @Param("toDate") OffsetDateTime to,
             Pageable pageable);

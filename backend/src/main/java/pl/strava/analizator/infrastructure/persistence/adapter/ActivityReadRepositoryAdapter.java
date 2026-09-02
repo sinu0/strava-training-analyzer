@@ -21,9 +21,9 @@ public class ActivityReadRepositoryAdapter implements ActivityReadRepository {
     private final ActivityJpaRepository jpaRepository;
 
     @Override
-    public ActivityCorePage findSummaries(String sportType, OffsetDateTime from, OffsetDateTime to,
+    public ActivityCorePage findSummaries(String sportType, String query, OffsetDateTime from, OffsetDateTime to,
                                           int page, int size) {
-        var result = jpaRepository.findV2Summaries(sportType, from, to, PageRequest.of(page, size));
+        var result = jpaRepository.findV2Summaries(sportType, query, from, to, PageRequest.of(page, size));
         return new ActivityCorePage(
                 result.getContent().stream().map(this::toDomain).toList(),
                 result.getTotalElements(), result.getNumber(), result.getSize(), result.getTotalPages());

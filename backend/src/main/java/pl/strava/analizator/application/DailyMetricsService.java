@@ -7,10 +7,12 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Scheduled;
@@ -86,12 +88,14 @@ public class DailyMetricsService {
         double profileFtpValue = (profile != null && profile.hasFtp()) ? profile.getFtpWatts() : 0;
         double effectiveFtp = Math.max(estimatedFtp, profileFtpValue);
 
-        List<DailyTrainingLoad> loads = buildDailyLoads(activities, effectiveFtp);
-        if (loads.isEmpty()) {
+        DailyLoadBuild loadBuild = buildDailyLoads(activities, effectiveFtp);
+        if (loadBuild.loads().isEmpty()) {
             return;
         }
+        List<DailyTrainingLoad> loads = loadBuild.loads();
 
         saveDailyTss(loads);
+        saveDailyLoadQuality(loadBuild);
         savePmc(loads);
         saveTrainingMonotony(loads, profile);
         // Write today's effective FTP; full history is backfilled once by backfillFtpHistory()
@@ -121,15 +125,18 @@ public class DailyMetricsService {
     private void saveDailyActivityMetrics(List<Activity> activities) {
         Map<LocalDate, List<BigDecimal>> efByDate = new TreeMap<>();
         Map<LocalDate, List<BigDecimal>> npByDate = new TreeMap<>();
+        List<UUID> activityIds = activities.stream().map(Activity::getId).filter(java.util.Objects::nonNull).toList();
+        Map<UUID, BigDecimal> efValues = activityMetricRepository.findNumericValues(activityIds, EF_METRIC);
+        Map<UUID, BigDecimal> npValues = activityMetricRepository.findNumericValues(activityIds, NP_METRIC);
 
         for (Activity activity : activities) {
             if (activity.getStartedAt() == null) continue;
             LocalDate date = activity.getStartedAt().toLocalDate();
 
-            activityMetricRepository.findNumericValue(activity.getId(), EF_METRIC)
-                    .ifPresent(v -> efByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(v));
-            activityMetricRepository.findNumericValue(activity.getId(), NP_METRIC)
-                    .ifPresent(v -> npByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(v));
+            BigDecimal ef = efValues.get(activity.getId());
+            if (ef != null) efByDate.computeIfAbsent(date, ignored -> new ArrayList<>()).add(ef);
+            BigDecimal np = npValues.get(activity.getId());
+            if (np != null) npByDate.computeIfAbsent(date, ignored -> new ArrayList<>()).add(np);
         }
 
         efByDate.forEach((date, values) -> {
@@ -145,34 +152,48 @@ public class DailyMetricsService {
         });
     }
 
-    private List<DailyTrainingLoad> buildDailyLoads(List<Activity> activities, double effectiveFtp) {
+    private DailyLoadBuild buildDailyLoads(List<Activity> activities, double effectiveFtp) {
         Map<LocalDate, BigDecimal> byDate = new TreeMap<>();
+        Map<LocalDate, Integer> activityCountByDate = new TreeMap<>();
+        Map<LocalDate, Integer> knownCountByDate = new TreeMap<>();
+        Map<LocalDate, Map<String, Integer>> sourcesByDate = new TreeMap<>();
+        List<UUID> activityIds = activities.stream().map(Activity::getId).filter(java.util.Objects::nonNull).toList();
+        Map<UUID, BigDecimal> powerTss = activityMetricRepository.findNumericValues(activityIds, TSS_METRIC);
+        Map<UUID, BigDecimal> heartRateTss = activityMetricRepository.findNumericValues(activityIds, HR_TSS_METRIC);
+        Map<UUID, BigDecimal> normalizedPower = activityMetricRepository.findNumericValues(activityIds, NP_METRIC);
 
         for (Activity activity : activities) {
             if (activity.getStartedAt() == null) {
                 continue;
             }
-            BigDecimal tss = activityMetricRepository.findNumericValue(activity.getId(), TSS_METRIC)
-                    .or(() -> activityMetricRepository.findNumericValue(activity.getId(), HR_TSS_METRIC))
-                    .orElse(null);
+            LocalDate date = activity.getStartedAt().toLocalDate();
+            activityCountByDate.merge(date, 1, Integer::sum);
+            BigDecimal tss = powerTss.get(activity.getId());
+            String source = tss != null ? "POWER_TSS" : null;
+            if (tss == null) {
+                tss = heartRateTss.get(activity.getId());
+                if (tss != null) source = "HR_TSS";
+            }
 
             // Estimate TSS from NP if not available and we have an effective FTP
             if (tss == null && effectiveFtp > 0) {
-                tss = estimateTssFromNp(activity, effectiveFtp);
+                tss = estimateTssFromNp(activity, effectiveFtp, normalizedPower.get(activity.getId()));
+                if (tss != null) source = "NP_ESTIMATE";
             }
 
-            if (tss == null) {
-                tss = BigDecimal.ZERO;
+            if (tss != null) {
+                byDate.merge(date, tss, BigDecimal::add);
+                knownCountByDate.merge(date, 1, Integer::sum);
             }
-
-            byDate.merge(activity.getStartedAt().toLocalDate(), tss, BigDecimal::add);
+            sourcesByDate.computeIfAbsent(date, ignored -> new LinkedHashMap<>())
+                    .merge(source != null ? source : "UNKNOWN", 1, Integer::sum);
         }
 
-        if (byDate.isEmpty()) {
-            return List.of();
+        if (activityCountByDate.isEmpty()) {
+            return new DailyLoadBuild(List.of(), Map.of(), Map.of());
         }
 
-        LocalDate start = byDate.keySet().iterator().next();
+        LocalDate start = activityCountByDate.keySet().iterator().next();
         LocalDate end = LocalDate.now(ZoneOffset.UTC);
         List<DailyTrainingLoad> loads = new ArrayList<>();
         for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
@@ -181,22 +202,42 @@ public class DailyMetricsService {
                     .tss(byDate.getOrDefault(date, BigDecimal.ZERO))
                     .build());
         }
-        return loads;
+        Map<LocalDate, BigDecimal> coverageByDate = new TreeMap<>();
+        activityCountByDate.forEach((date, total) -> coverageByDate.put(date,
+                BigDecimal.valueOf(knownCountByDate.getOrDefault(date, 0))
+                        .divide(BigDecimal.valueOf(total), 4, RoundingMode.HALF_UP)));
+        return new DailyLoadBuild(loads, coverageByDate, sourcesByDate);
     }
 
     /**
      * Estimate TSS from NP: TSS = (duration × NP × IF) / (FTP × 3600) × 100
      * where IF = NP / FTP
      */
-    private BigDecimal estimateTssFromNp(Activity activity, double ftp) {
-        Optional<BigDecimal> npOpt = activityMetricRepository.findNumericValue(activity.getId(), NP_METRIC);
-        if (npOpt.isEmpty() || activity.getMovingTimeSec() == null) {
+    private BigDecimal estimateTssFromNp(Activity activity, double ftp, BigDecimal normalizedPower) {
+        if (normalizedPower == null || activity.getMovingTimeSec() == null) {
             return null;
         }
-        double np = npOpt.get().doubleValue();
+        double np = normalizedPower.doubleValue();
         double intensityFactor = np / ftp;
         double tss = (activity.getMovingTimeSec() * np * intensityFactor) / (ftp * 3600.0) * 100.0;
         return BigDecimal.valueOf(tss).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private void saveDailyLoadQuality(DailyLoadBuild build) {
+        build.coverageByDate().forEach((date, coverage) -> {
+            dailyMetricRepository.save(date, MetricResult.numeric("training_load_coverage", coverage)
+                    .withProvenance("load-coverage-v1", "activity-load-sources", date));
+            Map<String, Object> provenance = new LinkedHashMap<>();
+            provenance.putAll(build.sourcesByDate().getOrDefault(date, Map.of()));
+            dailyMetricRepository.save(date, MetricResult.json("training_load_provenance", provenance)
+                    .withProvenance("load-coverage-v1", "activity-load-sources", date));
+        });
+    }
+
+    private record DailyLoadBuild(
+            List<DailyTrainingLoad> loads,
+            Map<LocalDate, BigDecimal> coverageByDate,
+            Map<LocalDate, Map<String, Integer>> sourcesByDate) {
     }
 
     /**

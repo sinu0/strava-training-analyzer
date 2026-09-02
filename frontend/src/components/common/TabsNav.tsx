@@ -1,6 +1,8 @@
 import { Tabs, Tab, Box } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 interface TabItem {
   label: string;
   value: number;
@@ -21,7 +23,7 @@ export default function TabsNav({ tabs, value, onChange }: TabsNavProps) {
   return (
     <Box
       sx={{
-        mb: 3,
+        mb: { xs: 2.5, md: 3 },
         display: 'flex',
         maxWidth: '100%',
       }}
@@ -52,6 +54,7 @@ export default function TabsNav({ tabs, value, onChange }: TabsNavProps) {
               mr: 0.5,
               color: 'text.secondary',
               transition: (theme) => theme.tokens?.transition ?? 'all 160ms ease',
+              fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label,
               '&.Mui-selected': {
                 bgcolor: 'primary.main',
                 color: 'primary.contrastText',

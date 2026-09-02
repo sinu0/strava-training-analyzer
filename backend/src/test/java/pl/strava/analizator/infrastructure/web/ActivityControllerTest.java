@@ -157,13 +157,14 @@ class ActivityControllerTest {
         ActivityHeatmapDto heatmap = new ActivityHeatmapDto(
                 List.of(new HeatmapSegmentDto(50.05, 19.95, 50.06, 19.96, 2)),
                 1,
+                1,
                 new ActivityHeatmapBoundsDto(49.9, 19.8, 50.2, 20.1),
                 12.5,
                 2,
                 "ready"
         );
 
-        when(activityService.getRouteHeatmap()).thenReturn(heatmap);
+        when(activityService.getRouteHeatmap(true)).thenReturn(heatmap);
 
         mockMvc.perform(get("/api/activities/heatmap"))
                 .andExpect(status().isOk())

@@ -1,12 +1,11 @@
 import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import { Badge, CircularProgress, IconButton, Tooltip } from '@mui/material';
-import { useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-  useCheckNewActivities,
-  useSyncRecent,
-  useSyncStatus,
-} from '@/hooks/useAnalytics';
+import { useCreateImportJob, useProcessingJob } from '@/features/data/useDataJobs';
+import { invalidateAfterTrainingSync } from '@/hooks/queryInvalidation';
+import { useCheckNewActivities, useSyncStatus } from '@/hooks/useAnalytics';
 
 import type { Theme } from '@mui/material/styles';
 
@@ -43,25 +42,47 @@ interface TopBarSyncButtonProps {
  * Shows a badge with the count of new activities and triggers syncRecent on click.
  */
 export default function TopBarSyncButton({ onSyncComplete }: TopBarSyncButtonProps) {
+  const queryClient = useQueryClient();
   const { data: checkData } = useCheckNewActivities();
   const { data: syncStatus } = useSyncStatus();
-  const syncRecent = useSyncRecent();
+  const createImportJob = useCreateImportJob();
+  const [jobId, setJobId] = useState<string>();
+  const job = useProcessingJob(jobId);
+  const handledTerminalJob = useRef<string | undefined>(undefined);
 
-  const isSyncing = syncStatus?.status === 'in_progress' || syncRecent.isPending;
-  const isRateLimited = syncStatus?.status === 'rate_limited';
+  const isJobActive = job.data?.status === 'QUEUED' || job.data?.status === 'RUNNING';
+  const isSyncing = syncStatus?.status === 'in_progress' || createImportJob.isPending || isJobActive;
+  const isRateLimited = syncStatus?.status === 'rate_limited' || job.data?.status === 'RETRYABLE';
+  const hasFailed = job.data?.status === 'FAILED' || createImportJob.isError || job.isError;
   const hasNew = checkData?.hasNew ?? false;
   const newCount = checkData?.count ?? 0;
 
   const handleSync = useCallback(() => {
-    syncRecent.mutate(undefined, {
-      onSuccess: () => onSyncComplete?.(),
+    createImportJob.mutate('RECENT', {
+      onSuccess: created => {
+        handledTerminalJob.current = undefined;
+        setJobId(created.id);
+      },
     });
-  }, [syncRecent, onSyncComplete]);
+  }, [createImportJob]);
+
+  useEffect(() => {
+    if (!job.data || handledTerminalJob.current === job.data.id) return;
+    if (job.data.status === 'COMPLETED') {
+      handledTerminalJob.current = job.data.id;
+      invalidateAfterTrainingSync(queryClient);
+      onSyncComplete?.();
+    } else if (job.data.status === 'FAILED' || job.data.status === 'RETRYABLE') {
+      handledTerminalJob.current = job.data.id;
+    }
+  }, [job.data, onSyncComplete, queryClient]);
 
   const tooltip = isSyncing
     ? 'Synchronizacja w toku...'
     : isRateLimited
       ? 'API Strava zablokowane'
+      : hasFailed
+        ? 'Synchronizacja nie powiodła się — sprawdź Dane i zadania'
       : hasNew
         ? `Sync: ${newCount} nowych aktywności`
         : 'Sync ostatnich treningów';
@@ -84,7 +105,7 @@ export default function TopBarSyncButton({ onSyncComplete }: TopBarSyncButtonPro
         <IconButton
           onClick={handleSync}
           disabled={isSyncing || isRateLimited}
-          aria-label="Sync ostatnich treningów"
+          aria-label="Synchronizuj ostatnie treningi"
           sx={[
             roundButtonSx,
             {

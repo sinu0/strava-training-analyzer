@@ -110,7 +110,7 @@ function AdminGroup({ title, subtitle, icon, defaultExpanded = false, children }
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
           <Box sx={{ display: 'flex', color: 'primary.main' }}>{icon}</Box>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>{title}</Typography>
+            <Typography variant="h6">{title}</Typography>
             <Typography variant="body2" color="text.secondary">{subtitle}</Typography>
           </Box>
         </Box>

@@ -87,8 +87,9 @@ public class ActivityController {
     }
 
     @GetMapping("/heatmap")
-    public ResponseEntity<ActivityHeatmapDto> getActivityHeatmap() {
-        return ResponseEntity.ok(activityService.getRouteHeatmap());
+    public ResponseEntity<ActivityHeatmapDto> getActivityHeatmap(
+            @RequestParam(defaultValue = "true") boolean includeSegments) {
+        return ResponseEntity.ok(activityService.getRouteHeatmap(includeSegments));
     }
 
     @PostMapping("/{id}/recalculate-metrics")

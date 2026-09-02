@@ -1,6 +1,8 @@
 import { Box, Paper, Stack, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 type EditorialHeroProps = {
   eyebrow: string;
   title: string;
@@ -22,6 +24,7 @@ export default function EditorialHero({
   description,
   imageSrc,
   imageAlt,
+  accentColor,
   highlights = [],
   imagePosition = 'center',
   compact = false,
@@ -32,7 +35,7 @@ export default function EditorialHero({
       sx={{
         p: compact ? { xs: 1.25, md: 1.5 } : { xs: 1.5, md: 2 },
         mb: compact ? { xs: 1.5, md: 2 } : { xs: 2, md: 2.5 },
-        borderRadius: { xs: 3, md: 3.5 },
+        borderRadius: (currentTheme) => `${getAppThemeTokens(currentTheme).radius.card}px`,
         border: '1px solid',
         borderColor: (currentTheme) => currentTheme.tokens.surfaceBorder,
         bgcolor: 'background.paper',
@@ -48,14 +51,13 @@ export default function EditorialHero({
               sx={{
                 display: 'block',
                 mb: 0.25,
-                color: 'text.primary',
-                letterSpacing: '0.09em',
-                fontWeight: 800,
+                color: accentColor,
+                letterSpacing: (currentTheme) => getAppThemeTokens(currentTheme).type.tracking.eyebrow,
               }}
             >
               {eyebrow}
             </Typography>
-            <Typography variant={compact ? 'h5' : 'h4'} sx={{ fontWeight: 900, lineHeight: 1.05, maxWidth: 620 }}>
+            <Typography variant={compact ? 'h5' : 'h4'} sx={{ maxWidth: 620 }}>
               {title}
             </Typography>
             <Typography variant={compact ? 'body2' : 'body2'} color="text.secondary" sx={{ mt: compact ? 0.75 : 1, maxWidth: 720, ...(compact && { fontSize: '0.82rem' }) }}>
@@ -72,10 +74,12 @@ export default function EditorialHero({
                     px: compact ? 0.9 : 1.1,
                     py: compact ? 0.45 : 0.7,
                     borderRadius: 999,
-                    bgcolor: (currentTheme) => currentTheme.tokens.iconBubble,
+                    bgcolor: (currentTheme) => getAppThemeTokens(currentTheme).iconBubble,
+                    border: '1px solid',
+                    borderColor: (currentTheme) => currentTheme.tokens.surfaceBorder,
                   }}
                 >
-                  <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 700 }}>
+                  <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: (currentTheme) => getAppThemeTokens(currentTheme).type.weight.label }}>
                     {highlight}
                   </Typography>
                 </Box>
@@ -89,9 +93,9 @@ export default function EditorialHero({
             position: 'relative',
             flexBasis: { xs: 'auto', md: '40%' },
             minWidth: { md: 280 },
-            borderRadius: 3,
+            borderRadius: (currentTheme) => `${getAppThemeTokens(currentTheme).radius.panel}px`,
             overflow: 'hidden',
-            minHeight: { xs: compact ? 120 : 160, md: compact ? 150 : 220 },
+            minHeight: { xs: compact ? 92 : 150, md: compact ? 120 : 210 },
             border: '1px solid',
             borderColor: (currentTheme) => currentTheme.tokens.surfaceBorder,
           }}

@@ -65,8 +65,8 @@ class DailyMetricsServiceTest {
                 .build();
 
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(activity));
-        when(activityMetricRepository.findNumericValue(activityId, "training_stress_score"))
-                .thenReturn(Optional.of(BigDecimal.valueOf(75)));
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "training_stress_score"))
+                .thenReturn(Map.of(activityId, BigDecimal.valueOf(75)));
         when(athleteProfileRepository.findFirst())
                 .thenReturn(Optional.of(AthleteProfile.builder().ftpWatts((short) 280).build()));
 
@@ -136,14 +136,12 @@ class DailyMetricsServiceTest {
                 .thenReturn(Optional.of(powerCurve));
 
         // TSS and HR-TSS not available; NP available for TSS estimation (lenient: may not be reached)
-        when(activityMetricRepository.findNumericValue(activityId, "training_stress_score"))
-                .thenReturn(Optional.empty());
-        when(activityMetricRepository.findNumericValue(activityId, "hr_training_stress_score"))
-                .thenReturn(Optional.empty());
-        // normalized_power is needed for estimateTssFromNp — lenient because path depends on tss lookup
-        org.mockito.Mockito.lenient()
-                .when(activityMetricRepository.findNumericValue(activityId, "normalized_power"))
-                .thenReturn(Optional.of(BigDecimal.valueOf(270)));
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "training_stress_score"))
+                .thenReturn(Map.of());
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "hr_training_stress_score"))
+                .thenReturn(Map.of());
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "normalized_power"))
+                .thenReturn(Map.of(activityId, BigDecimal.valueOf(270)));
 
         service.recalculateAll();
 
@@ -204,14 +202,37 @@ class DailyMetricsServiceTest {
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(activity));
         when(activityMetricRepository.findJsonValue(activityId, "power_curve"))
                 .thenReturn(Optional.empty());
-        when(activityMetricRepository.findNumericValue(eq(activityId), any()))
-                .thenReturn(Optional.empty());
-
         service.recalculateAll();
 
         // No FTP should be saved if estimation returns 0 and no profile FTP
         verify(dailyMetricRepository, never()).save(any(),
                 argThat(m -> "ftp".equals(m.getMetricName())));
+    }
+
+    @Test
+    void recalculateAllPersistsUnknownLoadCoverageAndProvenance() {
+        UUID knownId = UUID.randomUUID();
+        UUID unknownId = UUID.randomUUID();
+        LocalDate date = LocalDate.of(2026, 8, 20);
+        Activity known = Activity.builder().id(knownId).startedAt(date.atStartOfDay().atOffset(ZoneOffset.UTC)).build();
+        Activity unknown = Activity.builder().id(unknownId).startedAt(date.atTime(18, 0).atOffset(ZoneOffset.UTC)).build();
+        List<UUID> ids = List.of(knownId, unknownId);
+        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(known, unknown));
+        when(athleteProfileRepository.findFirst()).thenReturn(Optional.empty());
+        when(activityMetricRepository.findNumericValues(ids, "training_stress_score"))
+                .thenReturn(Map.of(knownId, BigDecimal.valueOf(60)));
+        when(activityMetricRepository.findNumericValues(ids, "hr_training_stress_score")).thenReturn(Map.of());
+        when(activityMetricRepository.findNumericValues(ids, "normalized_power")).thenReturn(Map.of());
+
+        service.recalculateAll();
+
+        verify(dailyMetricRepository).save(eq(date), argThat(metric ->
+                "training_load_coverage".equals(metric.getMetricName())
+                        && metric.getNumericValue().compareTo(BigDecimal.valueOf(0.5)) == 0));
+        verify(dailyMetricRepository).save(eq(date), argThat(metric ->
+                "training_load_provenance".equals(metric.getMetricName())
+                        && Integer.valueOf(1).equals(metric.getJsonValue().get("POWER_TSS"))
+                        && Integer.valueOf(1).equals(metric.getJsonValue().get("UNKNOWN"))));
     }
 
     @Test

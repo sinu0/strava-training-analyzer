@@ -1,5 +1,7 @@
 import { Box, Card, CardContent, CardHeader, Typography } from '@mui/material';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import type { ReactNode } from 'react';
 
 interface DataCardProps {
@@ -22,14 +24,15 @@ export default function DataCard({ title, subtitle, icon, children, action }: Da
           icon ? (
             <Box
               sx={{
-                width: 38,
-                height: 38,
+                width: (theme) => getAppThemeTokens(theme).control.md,
+                height: (theme) => getAppThemeTokens(theme).control.md,
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 bgcolor: (theme) => theme.tokens?.iconBubble ?? 'action.hover',
                 color: 'text.primary',
+                '& svg': { fontSize: (theme) => getAppThemeTokens(theme).icon.md },
               }}
             >
               {icon}
@@ -37,7 +40,7 @@ export default function DataCard({ title, subtitle, icon, children, action }: Da
           ) : undefined
         }
         title={
-          <Typography variant="subtitle1" sx={{ fontWeight: 800, letterSpacing: '-0.01em' }}>
+          <Typography variant="subtitle1">
             {title}
           </Typography>
         }
@@ -50,8 +53,8 @@ export default function DataCard({ title, subtitle, icon, children, action }: Da
         }
         action={action}
         sx={{
-          px: 3,
-          pt: 3,
+          px: (theme) => getAppThemeTokens(theme).space.card,
+          pt: (theme) => getAppThemeTokens(theme).space.card,
           pb: 1.5,
           alignItems: 'center',
           '& .MuiCardHeader-avatar': { mr: 1.5 },
@@ -59,7 +62,16 @@ export default function DataCard({ title, subtitle, icon, children, action }: Da
           '& .MuiCardHeader-action': { alignSelf: 'center', mt: 0, mr: 0 },
         }}
       />
-      <CardContent sx={{ px: 3, pt: 0, pb: 3, '&:last-child': { pb: 3 } }}>{children}</CardContent>
+      <CardContent
+        sx={{
+          px: (theme) => getAppThemeTokens(theme).space.card,
+          pt: 0,
+          pb: (theme) => getAppThemeTokens(theme).space.card,
+          '&:last-child': { pb: (theme) => getAppThemeTokens(theme).space.card },
+        }}
+      >
+        {children}
+      </CardContent>
     </Card>
   );
 }

@@ -1,6 +1,6 @@
 import { Box, Paper, Typography, Stack, Chip, Alert } from '@mui/material';
 
-import { UI_COLORS } from '../../utils/colors';
+import { getAppThemeTokens } from '../../theme/theme';
 
 import type { RoutePreview } from '../../types/route';
 
@@ -43,7 +43,7 @@ function StatBox({ label, value }: { label: string; value: string }) {
       <Typography variant="caption" color="text.secondary">
         {label}
       </Typography>
-      <Typography variant="body2" fontWeight={600}>
+      <Typography variant="body2" sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label }}>
         {value}
       </Typography>
     </Box>
@@ -76,7 +76,14 @@ export default function RouteStats({
   isRouting,
 }: RouteStatsProps) {
   return (
-    <Paper sx={{ p: 2, backgroundColor: UI_COLORS.backgroundDefault, border: `1px solid ${UI_COLORS.divider}` }}>
+    <Paper
+      sx={{
+        p: (theme) => getAppThemeTokens(theme).space.card,
+        backgroundColor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'divider',
+      }}
+    >
       <Typography variant="subtitle2" gutterBottom>
         Statystyki
       </Typography>

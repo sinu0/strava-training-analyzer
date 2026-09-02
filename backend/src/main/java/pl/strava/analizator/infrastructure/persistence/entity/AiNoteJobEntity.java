@@ -43,6 +43,12 @@ public class AiNoteJobEntity {
     @Column(name = "completed_at")
     private Instant completedAt;
 
+    @Column(name = "next_attempt_at")
+    private Instant nextAttemptAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
     @Column(name = "error_message", columnDefinition = "TEXT")
     private String errorMessage;
 

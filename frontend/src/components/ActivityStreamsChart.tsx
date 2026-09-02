@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useMemo } from 'react';
 import {
@@ -59,9 +59,24 @@ export default function ActivityStreamsChart({
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
+  const legend: Array<{ label: string; color: string; style: 'solid' | 'dashed' | 'area' }> = [];
+  if (powerStream) legend.push({ label: 'Moc (W)', color: theme.tokens?.chart.primary ?? theme.palette.primary.main, style: 'solid' });
+  if (heartrateStream) legend.push({ label: 'Tętno (bpm)', color: STATUS_COLORS.error, style: 'solid' });
+  if (cadenceStream) legend.push({ label: 'Kadencja (rpm)', color: theme.tokens?.chart.secondary ?? theme.palette.secondary.main, style: 'dashed' });
+  if (altitudeStream) legend.push({ label: 'Wysokość (m)', color: theme.tokens?.chart.grid ?? theme.palette.divider, style: 'area' });
+
   return (
-    <Box sx={{ width: '100%', height: 350 }}>
-      <ResponsiveContainer width="100%" height="100%">
+    <Box sx={{ width: '100%' }}>
+      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 1 }}>
+        {legend.map((item) => (
+          <Box key={item.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <Box sx={{ width: 22, height: item.style === 'area' ? 8 : 0, borderTop: item.style === 'area' ? 'none' : `3px ${item.style} ${item.color}`, bgcolor: item.style === 'area' ? item.color : undefined, opacity: item.style === 'area' ? 0.55 : 1 }} />
+            <Typography variant="caption" color="text.secondary">{item.label}</Typography>
+          </Box>
+        ))}
+      </Box>
+      <Box sx={{ width: '100%', height: 330 }}>
+        <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data}>
           <CartesianGrid {...chart.grid} />
           <XAxis
@@ -134,7 +149,8 @@ export default function ActivityStreamsChart({
             />
           )}
         </ComposedChart>
-      </ResponsiveContainer>
+        </ResponsiveContainer>
+      </Box>
     </Box>
   );
 }

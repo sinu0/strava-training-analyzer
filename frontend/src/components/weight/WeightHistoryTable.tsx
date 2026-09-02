@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 
 import Section from '@/components/common/Section';
 import type { WeightRecord } from '@/types/weight';
+import { getPolishPaginationAriaLabel } from '@/utils/accessibility';
 
 interface WeightHistoryTableProps {
   history: WeightRecord[];
@@ -78,6 +79,7 @@ export default function WeightHistoryTable({
                 onChange={(_, nextPage) => setPage(nextPage)}
                 size="small"
                 color="primary"
+                getItemAriaLabel={getPolishPaginationAriaLabel}
               />
             </Box>
           )}

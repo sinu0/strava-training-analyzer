@@ -3,6 +3,7 @@ package pl.strava.analizator.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -61,7 +62,7 @@ class ActivityDataQualityServiceTest {
     }
 
     @Test
-    void unassessedActivitiesAreReportedAsUnknownInSummary() {
+    void unassessedActivitiesAreReportedSeparatelyFromExplicitlyUnknown() {
         when(activityRepository.count()).thenReturn(10L);
         when(qualityRepository.findAll()).thenReturn(List.of(
                 ActivityDataQuality.builder().activityId(UUID.randomUUID()).status("AVAILABLE")
@@ -73,6 +74,27 @@ class ActivityDataQualityServiceTest {
 
         assertThat(result.getTotalActivities()).isEqualTo(10);
         assertThat(result.getAssessedActivities()).isEqualTo(2);
-        assertThat(result.getUnknown()).isEqualTo(9);
+        assertThat(result.getUnknown()).isEqualTo(1);
+        assertThat(result.getUnassessed()).isEqualTo(8);
+    }
+
+    @Test
+    void backfillAssessesOnlyActivitiesWithoutStoredQuality() {
+        UUID assessedId = UUID.randomUUID();
+        UUID missingId = UUID.randomUUID();
+        Activity assessed = Activity.builder().id(assessedId).timeStream(new int[]{0, 1})
+                .powerStream(new int[]{100, 110}).build();
+        Activity missing = Activity.builder().id(missingId).timeStream(new int[]{0, 1})
+                .heartrateStream(new int[]{120, 125}).build();
+        when(activityRepository.findAll()).thenReturn(List.of(assessed, missing));
+        when(qualityRepository.findAll()).thenReturn(List.of(
+                ActivityDataQuality.builder().activityId(assessedId).status("AVAILABLE")
+                        .issues(List.of()).assessedAt(Instant.now()).build()));
+
+        int assessedCount = service.assessMissing();
+
+        assertThat(assessedCount).isEqualTo(1);
+        verify(qualityRepository).save(org.mockito.ArgumentMatchers.argThat(
+                quality -> missingId.equals(quality.getActivityId())));
     }
 }

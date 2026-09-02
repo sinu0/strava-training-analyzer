@@ -45,12 +45,18 @@ public class V2ActivityService {
 
     public ActivitySummaryPageDto findActivities(String sportType, OffsetDateTime from, OffsetDateTime to,
                                                   int page, int size) {
+        return findActivities(sportType, null, from, to, page, size);
+    }
+
+    public ActivitySummaryPageDto findActivities(String sportType, String query,
+                                                  OffsetDateTime from, OffsetDateTime to,
+                                                  int page, int size) {
         int safePage = Math.max(0, page);
         int safeSize = Math.max(1, Math.min(size, 100));
         OffsetDateTime safeFrom = from != null ? from : EARLIEST_ACTIVITY;
         OffsetDateTime safeTo = to != null ? to : LATEST_ACTIVITY;
         var result = activityReadRepository.findSummaries(
-                blankToNull(sportType), safeFrom, safeTo, safePage, safeSize);
+                blankToNull(sportType), normalizedQuery(query), safeFrom, safeTo, safePage, safeSize);
         Map<UUID, ActivityTrainingEffect> effects = trainingEffectRepository.findByActivityIds(
                 result.items().stream().map(ActivityCoreView::getId).toList());
         List<ActivitySummaryDto> items = result.items().stream()
@@ -63,6 +69,11 @@ public class V2ActivityService {
                 .size(result.size())
                 .totalPages(result.totalPages())
                 .build();
+    }
+
+    private String normalizedQuery(String value) {
+        String normalized = blankToNull(value);
+        return normalized != null ? normalized.toLowerCase(Locale.ROOT) : null;
     }
 
     public ActivityV2DetailDto findActivity(UUID id) {
@@ -271,6 +282,6 @@ public class V2ActivityService {
     }
 
     private String blankToNull(String value) {
-        return value == null || value.isBlank() ? null : value;
+        return value == null || value.isBlank() ? null : value.trim();
     }
 }

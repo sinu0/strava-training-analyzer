@@ -12,6 +12,7 @@ import PageContainer from '@/components/common/PageContainer';
 import MobileNavigationSettings from '@/components/settings/MobileNavigationSettings';
 import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import { useSaveUiPreferences, useUiPreferences } from '@/hooks/useUiPreferences';
+import { getAppThemeTokens } from '@/theme/theme';
 
 const items = [
   { label: 'Pogoda', description: 'Prognoza, lokalizacje i ustawienia', path: '/weather', icon: <CloudOutlinedIcon /> },
@@ -39,7 +40,15 @@ export default function MorePage() {
             <PerformanceSurface interactive accent={index === 0} sx={{ height: '100%' }}>
               <ButtonBase
                 onClick={() => navigate(item.path)}
-                sx={{ width: '100%', height: '100%', p: { xs: 2, md: 2.5 }, textAlign: 'left', alignItems: 'stretch' }}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  p: (theme) => getAppThemeTokens(theme).space.card,
+                  borderRadius: (theme) => `${getAppThemeTokens(theme).radius.card}px`,
+                  textAlign: 'left',
+                  alignItems: 'stretch',
+                  '&:focus-visible': { boxShadow: (theme) => getAppThemeTokens(theme).focusRing },
+                }}
               >
                 <Stack direction="row" spacing={1.6} sx={{ width: '100%' }}>
                   <Box
@@ -51,13 +60,14 @@ export default function MorePage() {
                       placeItems: 'center',
                       borderRadius: 2,
                       color: index === 0 ? '#fff' : 'primary.main',
-                      bgcolor: index === 0 ? 'primary.main' : 'rgba(255,107,53,0.09)',
+                      bgcolor: index === 0 ? 'primary.main' : (theme) => theme.tokens.activeOverlay,
+                      '& svg': { fontSize: (theme) => getAppThemeTokens(theme).icon.lg },
                     }}
                   >
                     {item.icon}
                   </Box>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 760 }}>{item.label}</Typography>
+                    <Typography variant="subtitle1">{item.label}</Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.35 }}>{item.description}</Typography>
                   </Box>
                   <ArrowForwardRoundedIcon sx={{ color: 'text.secondary', alignSelf: 'center' }} />

@@ -11,5 +11,7 @@ public interface ProcessingJobRepository {
 
     Optional<ProcessingJob> findById(UUID id);
 
+    Optional<ProcessingJob> findActive(String jobType);
+
     boolean existsActive(String jobType);
 }

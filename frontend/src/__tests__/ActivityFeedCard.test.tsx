@@ -10,7 +10,7 @@ import type { MaxValues } from '../types/metrics';
 
 vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: { children?: React.ReactNode }) => <div data-testid="map-container">{children}</div>,
-  TileLayer: ({ url }: { url: string }) => <div data-testid="tile-layer" data-url={url} />,
+  TileLayer: ({ url }: { url: string }) => <div className="leaflet-tile" data-testid="tile-layer" data-url={url} />,
   Polyline: () => <div data-testid="polyline" />,
 }));
 
@@ -85,6 +85,7 @@ describe('ActivityFeedCard', () => {
     expect(screen.getByText('cycling')).toBeDefined();
     expect(screen.getByText('40km')).toBeDefined();
     expect(tileLayer.getAttribute('data-url')).toContain('openstreetmap.org');
+    expect(window.getComputedStyle(tileLayer).filter).toBe('none');
     expect(Number.parseFloat(window.getComputedStyle(preview).width)).toBeGreaterThanOrEqual(270);
     expect(Number.parseFloat(window.getComputedStyle(preview).height)).toBeGreaterThanOrEqual(150);
     expect(Number.parseFloat(window.getComputedStyle(bubble).width)).toBeGreaterThanOrEqual(69);

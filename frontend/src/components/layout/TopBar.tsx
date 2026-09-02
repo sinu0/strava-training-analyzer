@@ -26,9 +26,11 @@ import { useNavigate } from 'react-router-dom';
 
 import TopBarSyncButton from '@/components/layout/TopBarSyncButton';
 import { useColorMode } from '@/context/ThemeModeContext';
+import { getAppThemeTokens } from '@/theme/theme';
 
 interface TopBarProps {
   onToggleSidebar: () => void;
+  showBrand?: boolean;
 }
 
 /**
@@ -36,8 +38,8 @@ interface TopBarProps {
  * Stays opaque on hover; the token overlay only tints the surface slightly.
  */
 const roundActionButtonSx = (theme: Theme) => ({
-  width: 40,
-  height: 40,
+  width: getAppThemeTokens(theme).control.md,
+  height: getAppThemeTokens(theme).control.md,
   flexShrink: 0,
   bgcolor: theme.tokens.searchPill,
   color: theme.palette.text.primary,
@@ -55,6 +57,7 @@ const roundActionButtonSx = (theme: Theme) => ({
  */
 export default function TopBar({
   onToggleSidebar,
+  showBrand = true,
 }: TopBarProps) {
   const navigate = useNavigate();
   const { mode, toggleMode } = useColorMode();
@@ -95,24 +98,28 @@ export default function TopBar({
             >
               <MenuIcon />
             </IconButton>
-            <Box
-              sx={{
-                width: 34,
-                height: 34,
-                display: 'grid',
-                placeItems: 'center',
-                flexShrink: 0,
-                borderRadius: '12px',
-                color: '#fff',
-                background: (theme) => theme.tokens.gradients.strava,
-                boxShadow: '0 8px 20px rgba(252,76,2,0.28)',
-              }}
-            >
-              <PedalBikeOutlinedIcon sx={{ fontSize: 20 }} />
-            </Box>
-            <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2, whiteSpace: 'nowrap' }}>
-              Training Lab
-            </Typography>
+            {showBrand ? (
+              <>
+                <Box
+                  sx={{
+                    width: 34,
+                    height: 34,
+                    display: 'grid',
+                    placeItems: 'center',
+                    flexShrink: 0,
+                    borderRadius: '12px',
+                    color: '#fff',
+                    background: (theme) => theme.tokens.gradients.strava,
+                    boxShadow: '0 8px 20px rgba(252,76,2,0.28)',
+                  }}
+                >
+                  <PedalBikeOutlinedIcon sx={{ fontSize: 20 }} />
+                </Box>
+                <Typography variant="subtitle1" sx={{ lineHeight: 1.2, whiteSpace: 'nowrap' }}>
+                  Training Lab
+                </Typography>
+              </>
+            ) : null}
           </Box>
 
           {/* Center: global search pill */}
@@ -123,7 +130,7 @@ export default function TopBar({
                 alignItems: 'center',
                 gap: 0.75,
                 width: '100%',
-                minHeight: 42,
+                minHeight: (theme) => getAppThemeTokens(theme).control.md,
                 px: 1.75,
                 borderRadius: 999,
                 bgcolor: (theme) => theme.tokens.searchPill,
@@ -134,16 +141,16 @@ export default function TopBar({
                 },
               }}
             >
-              <SearchIcon sx={{ fontSize: 20, color: 'text.secondary', flexShrink: 0 }} />
+              <SearchIcon sx={{ fontSize: (theme) => getAppThemeTokens(theme).icon.md, color: 'text.secondary', flexShrink: 0 }} />
               <InputBase
                 fullWidth
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 onKeyDown={handleSearchKeyDown}
-                placeholder="Szukaj aktywności lub metryk…"
-                inputProps={{ 'aria-label': 'Szukaj aktywności lub metryk' }}
+                placeholder="Szukaj aktywności…"
+                inputProps={{ 'aria-label': 'Szukaj aktywności' }}
                 sx={{
-                  fontSize: '0.9rem',
+                  fontSize: '0.875rem',
                   color: 'text.primary',
                 }}
               />
@@ -199,8 +206,8 @@ export default function TopBar({
             >
               <Avatar
                 sx={{
-                  width: 38,
-                  height: 38,
+                  width: (theme) => getAppThemeTokens(theme).control.md,
+                  height: (theme) => getAppThemeTokens(theme).control.md,
                   bgcolor: (theme) => alpha(theme.palette.primary.main, 0.13),
                   color: 'primary.main',
                   border: (theme) => `1px solid ${alpha(theme.palette.primary.main, 0.34)}`,
@@ -234,7 +241,7 @@ export default function TopBar({
         }}
       >
         <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          <Typography variant="body2" sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label }}>
             Użytkownik
           </Typography>
         </Box>
@@ -251,7 +258,7 @@ export default function TopBar({
             </ListItemIcon>
             <ListItemText
               primary="Profil"
-              primaryTypographyProps={{ fontSize: '0.85rem' }}
+              primaryTypographyProps={{ fontSize: '0.85rem', fontWeight: 550 }}
             />
           </ListItemButton>
         </List>

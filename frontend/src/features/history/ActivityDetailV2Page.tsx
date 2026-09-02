@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
+import ActivityMetricGrid from '@/components/activity/ActivityMetricGrid';
 import ActivityRoutePreview from '@/components/activity/ActivityRoutePreview';
 import ActivityStreamsChart from '@/components/ActivityStreamsChart';
 import EmptyState from '@/components/common/EmptyState';
@@ -111,7 +112,7 @@ export default function ActivityDetailV2Page() {
                 md: 7
               }}>
               <PerformanceSurface sx={{ p: 2.5 }}>
-                <Typography variant="h6" fontWeight={750}>Podsumowanie</Typography>
+                <Typography variant="h6">Podsumowanie</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, whiteSpace: 'pre-wrap' }}>
                   {data.description || 'Brak opisu aktywności.'}
                 </Typography>
@@ -123,12 +124,8 @@ export default function ActivityDetailV2Page() {
                 md: 5
               }}>
               <PerformanceSurface sx={{ p: 2.5 }}>
-                <Typography variant="h6" fontWeight={750}>Metryki i jakość</Typography>
-                <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1.5 }}>
-                  {data.metrics.length > 0 ? data.metrics.filter(item => item.numericValue != null).slice(0, 8).map(item => (
-                    <Chip key={item.name} label={`${item.name}: ${metric(item.numericValue)}`} variant="outlined" />
-                  )) : <Typography variant="body2" color="text.secondary">Brak policzonych metryk.</Typography>}
-                </Stack>
+                <Typography variant="h6">Metryki i jakość</Typography>
+                <ActivityMetricGrid metrics={data.metrics} />
               </PerformanceSurface>
             </Grid>
           </Grid>
@@ -141,7 +138,7 @@ export default function ActivityDetailV2Page() {
             {streamData != null && streamData.returnedPoints > 0 ? (
               <>
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-                  <Typography variant="h6" fontWeight={750}>Przebieg sesji</Typography>
+                  <Typography variant="h6">Przebieg sesji</Typography>
                   <Chip size="small" label={`${streamData.returnedPoints}/${streamData.originalPoints} punktów`} />
                 </Stack>
                 <ActivityStreamsChart

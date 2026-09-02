@@ -13,6 +13,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -32,7 +33,7 @@ import {
   useWeatherPointGradient,
 } from '@/hooks/useAnalytics';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import theme from '@/theme/theme';
+import { getAppThemeTokens } from '@/theme/theme';
 import { alphaColor, CHART_COLORS, STATUS_COLORS } from '@/utils/colors';
 import { getWeatherIllustrationPath } from '@/utils/illustrationAssets';
 import {
@@ -43,6 +44,8 @@ import {
 } from '@/utils/weatherScoring';
 
 export default function WeatherPage() {
+  const theme = useTheme();
+  const themeTokens = getAppThemeTokens(theme);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: locations = [] } = useWeatherLocations();
@@ -118,8 +121,8 @@ export default function WeatherPage() {
             display: 'flex',
             alignItems: 'center',
             gap: 2,
-            p: { xs: 1.5, md: 2 },
-            borderRadius: 3,
+            p: (currentTheme) => getAppThemeTokens(currentTheme).space.card,
+            borderRadius: (currentTheme) => `${getAppThemeTokens(currentTheme).radius.card}px`,
             border: '1px solid',
             borderColor: alphaColor(CHART_COLORS.secondary, 0.18),
             bgcolor: 'background.paper',
@@ -128,11 +131,11 @@ export default function WeatherPage() {
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
               variant="overline"
-              sx={{ color: 'text.secondary', letterSpacing: '0.08em', fontWeight: 800, fontSize: '0.68rem' }}
+              sx={{ color: 'text.secondary', fontSize: '0.68rem' }}
             >
               Pogoda
             </Typography>
-            <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.15, mt: 0.25 }}>
+            <Typography variant="h6" sx={{ lineHeight: 1.15, mt: 0.25 }}>
               Studio pogody dla decyzji treningowych
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
@@ -151,7 +154,7 @@ export default function WeatherPage() {
                     bgcolor: alphaColor(theme.palette.background.default, 0.28),
                   }}
                 >
-                  <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 700, fontSize: '0.68rem' }}>
+                  <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: (currentTheme) => getAppThemeTokens(currentTheme).type.weight.label, fontSize: '0.68rem' }}>
                     {tag}
                   </Typography>
                 </Box>
@@ -186,7 +189,7 @@ export default function WeatherPage() {
               <Section
                 title="Punkt fokusowy"
                 subtitle="Kliknij na mapie lub wybierz zapisane miejsce, aby przebudować całą analizę."
-                accentColor={theme.tokens.chart.secondary}
+                accentColor={themeTokens.chart.secondary}
               >
                 <Stack spacing={1.5}>
                   <WeatherStudioMap
@@ -205,7 +208,7 @@ export default function WeatherPage() {
               <Section
                 title="Dzień i tydzień"
                 subtitle="Histogram i forecast przeliczone dokładnie według Twoich ustawień."
-                accentColor={theme.tokens.chart.secondary}
+                accentColor={themeTokens.chart.secondary}
               >
                 {pointGradient ? (
                   <WeatherForecastViews
@@ -237,7 +240,7 @@ export default function WeatherPage() {
               <Section
                 title="Decyzja treningowa"
                 subtitle="Ta sama logika forecastu, ale z pełną kontrolą nad interpretacją."
-                accentColor={theme.tokens.status.accent}
+                accentColor={themeTokens.status.accent}
                 action={
                   <Tooltip title="Odśwież dane pogodowe">
                     <IconButton
@@ -245,10 +248,10 @@ export default function WeatherPage() {
                       onClick={handleRefresh}
                       disabled={refreshCache.isPending}
                       sx={{
-                        color: theme.tokens.status.accent,
-                        bgcolor: alphaColor(theme.tokens.status.accent, 0.08),
-                        border: `1px solid ${alphaColor(theme.tokens.status.accent, 0.25)}`,
-                        '&:hover': { bgcolor: alphaColor(theme.tokens.status.accent, 0.16) },
+                        color: themeTokens.status.accent,
+                        bgcolor: alphaColor(themeTokens.status.accent, 0.08),
+                        border: `1px solid ${alphaColor(themeTokens.status.accent, 0.25)}`,
+                        '&:hover': { bgcolor: alphaColor(themeTokens.status.accent, 0.16) },
                       }}
                     >
                       <RefreshIcon sx={{ fontSize: 18 }} />
@@ -289,10 +292,10 @@ export default function WeatherPage() {
                             bgcolor: alphaColor(STATUS_COLORS.accent, 0.04),
                           }}
                         >
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography variant="body2" sx={{ fontWeight: (currentTheme) => getAppThemeTokens(currentTheme).type.weight.label }}>
                             Najlepsze okno dziś
                           </Typography>
-                          <Typography variant="h5" sx={{ mt: 0.5, fontWeight: 800 }}>
+                          <Typography variant="h5" sx={{ mt: 0.5 }}>
                             {today?.bestWindowStart ?? '—'} — {today?.bestWindowEnd ?? '—'}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
@@ -314,10 +317,10 @@ export default function WeatherPage() {
                             bgcolor: alphaColor(STATUS_COLORS.accent, 0.04),
                           }}
                         >
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography variant="body2" sx={{ fontWeight: (currentTheme) => getAppThemeTokens(currentTheme).type.weight.label }}>
                             Jutro
                           </Typography>
-                          <Typography variant="h5" sx={{ mt: 0.5, fontWeight: 800 }}>
+                          <Typography variant="h5" sx={{ mt: 0.5 }}>
                             {tomorrow?.bestWindowStart ?? '—'} — {tomorrow?.bestWindowEnd ?? '—'}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
@@ -335,7 +338,7 @@ export default function WeatherPage() {
               <Section
                 title="Sterowanie algorytmem"
                 subtitle="Parametry są stale pod ręką i od razu wpływają na histogram oraz rekomendacje."
-                accentColor={theme.tokens.chart.primary}
+                accentColor={themeTokens.chart.primary}
               >
                 <WeatherAlgorithmPanel profile={profile} onChange={handleProfileChange} />
               </Section>
@@ -343,7 +346,7 @@ export default function WeatherPage() {
               <Section
                 title="Szybkie akcje"
                 subtitle="Najkrótsza droga z explorera pogody do dalszych działań."
-                accentColor={theme.tokens.status.highlight}
+                accentColor={themeTokens.status.highlight}
               >
                 <Stack spacing={1.2}>
                   <Button

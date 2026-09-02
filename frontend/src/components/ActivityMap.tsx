@@ -29,6 +29,7 @@ function MapLifecycleSync({ positions }: { positions: [number, number][] }) {
 
   useEffect(() => {
     const bounds = getRouteBounds(positions);
+    let resizeFrameId: number | null = null;
 
     const syncMapSize = () => {
       map.invalidateSize(false);
@@ -37,15 +38,31 @@ function MapLifecycleSync({ positions }: { positions: [number, number][] }) {
       }
     };
 
-    const frameId = window.requestAnimationFrame(syncMapSize);
-    const timeoutId = window.setTimeout(syncMapSize, 140);
+    const scheduleMapSync = () => {
+      if (resizeFrameId != null) {
+        window.cancelAnimationFrame(resizeFrameId);
+      }
+      resizeFrameId = window.requestAnimationFrame(syncMapSize);
+    };
 
-    window.addEventListener('resize', syncMapSize);
+    const frameId = window.requestAnimationFrame(syncMapSize);
+    const timeoutId = window.setTimeout(syncMapSize, 180);
+    const resizeObserver = typeof ResizeObserver === 'undefined'
+      ? null
+      : new ResizeObserver(scheduleMapSync);
+
+    resizeObserver?.observe(map.getContainer());
+
+    window.addEventListener('resize', scheduleMapSync);
 
     return () => {
       window.cancelAnimationFrame(frameId);
+      if (resizeFrameId != null) {
+        window.cancelAnimationFrame(resizeFrameId);
+      }
       window.clearTimeout(timeoutId);
-      window.removeEventListener('resize', syncMapSize);
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', scheduleMapSync);
     };
   }, [map, positions]);
 
@@ -89,11 +106,6 @@ export default function ActivityMap({
         height: minHeight > 0 ? minHeight : '100%',
         minHeight: minHeight > 0 ? minHeight : 0,
         '.leaflet-container': { height: '100%', borderRadius: preview ? 0 : 1 },
-        ...(preview ? {
-          '.leaflet-tile': {
-            filter: 'contrast(1.18) saturate(0.78) brightness(0.72)',
-          },
-        } : {}),
       }}
     >
       <MapContainer

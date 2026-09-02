@@ -29,6 +29,12 @@ public class ProcessingJobRepositoryAdapter implements ProcessingJobRepository {
     }
 
     @Override
+    public Optional<ProcessingJob> findActive(String jobType) {
+        return jpaRepository.findFirstByJobTypeAndStatusInOrderByCreatedAtDesc(
+                jobType, List.of("QUEUED", "RUNNING")).map(this::toDomain);
+    }
+
+    @Override
     public boolean existsActive(String jobType) {
         return jpaRepository.existsByJobTypeAndStatusIn(jobType, List.of("QUEUED", "RUNNING"));
     }

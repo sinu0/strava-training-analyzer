@@ -5,7 +5,7 @@ import ShowChartOutlinedIcon from '@mui/icons-material/ShowChartOutlined';
 import StraightenOutlinedIcon from '@mui/icons-material/StraightenOutlined';
 import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined';
 import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined';
-import { Box, Grid, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
+import { Alert, Box, Grid, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
 
 import EditorialHero from '@/components/common/EditorialHero';
@@ -13,6 +13,7 @@ import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
 import PageContainer from '@/components/common/PageContainer';
+import PolishDateField from '@/components/common/PolishDateField';
 import PMChart from '@/components/PMChart';
 import PowerCurveChart from '@/components/PowerCurveChart';
 import MetricReadout from '@/components/v2/MetricReadout';
@@ -88,7 +89,7 @@ export default function AnalysisPage() {
               }}>
               <PerformanceSurface accent={index === 0} sx={{ p: { xs: 2, md: 2.75 }, height: '100%' }}>
                 <Typography variant="overline" color="text.secondary">{index === 0 ? 'Wybrany okres' : 'Poprzedni okres'}</Typography>
-                <Typography variant="h6" fontWeight={750}>{period.from} — {period.to}</Typography>
+                <Typography variant="h6">{period.from} — {period.to}</Typography>
                 <Grid container spacing={2.25} sx={{ mt: 0.75 }}>
                   <Grid size={6}>
                     <MetricReadout
@@ -124,7 +125,16 @@ export default function AnalysisPage() {
     if (tab === 'load' && load.data) {
       return load.data.availability === 'UNKNOWN'
         ? <EmptyState title="Brak obciążenia" description="Brak danych nie jest prezentowany jako zerowa forma." />
-        : <PerformanceSurface sx={{ p: { xs: 1.25, md: 2.25 } }}><PMChart data={load.data.points} /></PerformanceSurface>;
+        : (
+          <PerformanceSurface sx={{ p: { xs: 1.25, md: 2.25 } }}>
+            {load.data.availability === 'PARTIAL' ? (
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                Wykres jest orientacyjny: rozpoznano obciążenie dla {Math.round((load.data.coverage ?? 0) * 100)}% aktywności w tym zakresie.
+              </Alert>
+            ) : null}
+            <PMChart data={load.data.points} />
+          </PerformanceSurface>
+        );
     }
 
     if (tab === 'power' && power.data) {
@@ -142,20 +152,36 @@ export default function AnalysisPage() {
         eyebrow="Dane, nie hałas"
         title="Zobacz, co zmienia Twój trening"
         description="Porównuj bloki, obciążenie i moc w jednym spokojnym widoku analitycznym."
-        accentColor="#16A6C8"
+        accentColor="secondary.main"
         imageSrc={getCyclingHeroIllustrationPath('analytics')}
         imageAlt="Kokpit roweru na górskiej drodze o świcie"
         highlights={[`${dayCount} dni`, 'Porównanie okresów', 'Moc i obciążenie']}
       />
       <PerformanceSurface sx={{ mb: 2.5 }}>
-        <Tabs value={tab} onChange={(_, value: AnalysisTab) => update('tab', value)} variant="scrollable" scrollButtons="auto">
+        <Tabs
+          value={tab}
+          onChange={(_, value: AnalysisTab) => update('tab', value)}
+          variant="fullWidth"
+          aria-label="Widoki analizy"
+          sx={{
+            '& .MuiTab-root': {
+              minWidth: 0,
+              px: { xs: 0.5, sm: 1.5 },
+              fontSize: { xs: '0.68rem', sm: '0.8rem' },
+              lineHeight: 1.15,
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: { xs: 0.4, sm: 0.75 },
+            },
+            '& .MuiTab-iconWrapper': { m: '0 !important' },
+          }}
+        >
           <Tab value="compare" icon={<CompareArrowsOutlinedIcon />} iconPosition="start" label="Porównaj" />
           <Tab value="load" icon={<TimelineOutlinedIcon />} iconPosition="start" label="Obciążenie i regeneracja" />
           <Tab value="power" icon={<ShowChartOutlinedIcon />} iconPosition="start" label="Moc i trwałość" />
         </Tabs>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-          <TextField type="date" size="small" label="Od" value={from} onChange={event => update('from', event.target.value)} InputLabelProps={{ shrink: true }} />
-          <TextField type="date" size="small" label="Do" value={to} onChange={event => update('to', event.target.value)} InputLabelProps={{ shrink: true }} />
+          <PolishDateField size="small" label="Od" value={from} onChange={value => update('from', value)} InputLabelProps={{ shrink: true }} />
+          <PolishDateField size="small" label="Do" value={to} onChange={value => update('to', value)} InputLabelProps={{ shrink: true }} />
           <Box sx={{ flex: 1 }} />
           <Typography variant="caption" color="text.secondary" alignSelf="center">Zakres jest zapisany w URL</Typography>
         </Stack>

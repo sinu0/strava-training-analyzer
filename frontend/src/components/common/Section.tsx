@@ -1,5 +1,7 @@
 import { Box, Typography } from '@mui/material';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import type { SxProps, Theme } from '@mui/material/styles';
 import type { ReactNode } from 'react';
 
@@ -23,7 +25,7 @@ export default function Section({
   action,
   noPadding,
   accentColor,
-  interactive = true,
+  interactive = false,
   contentSx,
   children,
 }: SectionProps) {
@@ -31,9 +33,9 @@ export default function Section({
     ? contentSx ?? {}
     : [
         {
-          px: { xs: 2, md: 2.5, lg: 3 },
-          pb: { xs: 2, md: 2.5, lg: 3 },
-          pt: title ? 1 : { xs: 2, md: 2.5 },
+          px: (theme) => getAppThemeTokens(theme).space.card,
+          pb: (theme) => getAppThemeTokens(theme).space.card,
+          pt: title ? 1 : (theme) => getAppThemeTokens(theme).space.card,
         },
         ...(Array.isArray(contentSx) ? contentSx : contentSx ? [contentSx] : []),
       ];
@@ -42,7 +44,7 @@ export default function Section({
     <Box
       sx={{
         bgcolor: 'background.paper',
-        borderRadius: 3,
+        borderRadius: (theme) => `${getAppThemeTokens(theme).radius.card}px`,
         border: (theme) => `1px solid ${theme.tokens?.surfaceBorder ?? theme.palette.divider}`,
         boxShadow: (theme) => theme.tokens?.cardShadow ?? 'none',
         overflow: 'hidden',
@@ -74,8 +76,8 @@ export default function Section({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            px: { xs: 2, md: 2.5, lg: 3 },
-            pt: { xs: 2, md: 2.5 },
+            px: (theme) => getAppThemeTokens(theme).space.card,
+            pt: (theme) => getAppThemeTokens(theme).space.card,
             pb: subtitle ? 0.5 : 1.5,
           }}
         >
@@ -84,8 +86,8 @@ export default function Section({
               <Typography
                 variant="subtitle1"
                 sx={{
-                  fontWeight: 800,
-                  letterSpacing: '-0.01em',
+                  fontWeight: (theme) => getAppThemeTokens(theme).type.weight.heading,
+                  letterSpacing: (theme) => getAppThemeTokens(theme).type.tracking.heading,
                 }}
               >
                 {title}

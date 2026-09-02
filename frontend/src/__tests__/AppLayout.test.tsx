@@ -102,13 +102,13 @@ describe('TopBar search pill', () => {
   it('renders the global search input', async () => {
     await renderRealTopBar('/');
 
-    expect(screen.getByRole('textbox', { name: 'Szukaj aktywności lub metryk' })).toBeDefined();
+    expect(screen.getByRole('textbox', { name: 'Szukaj aktywności' })).toBeDefined();
   });
 
   it('navigates to activities with the search query on Enter', async () => {
     await renderRealTopBar('/');
 
-    const input = screen.getByRole('textbox', { name: 'Szukaj aktywności lub metryk' });
+    const input = screen.getByRole('textbox', { name: 'Szukaj aktywności' });
     fireEvent.change(input, { target: { value: 'tempo ride' } });
     fireEvent.keyDown(input, { key: 'Enter' });
 

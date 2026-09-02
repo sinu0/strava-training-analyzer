@@ -17,11 +17,11 @@ export default function SectionHeading({ eyebrow, title, description, icon, acti
         ) : null}
         <Box sx={{ minWidth: 0 }}>
           {eyebrow ? (
-            <Typography variant="overline" color="primary" sx={{ fontWeight: 800, lineHeight: 1.3, letterSpacing: '0.1em' }}>
+            <Typography variant="overline" color="primary" sx={{ lineHeight: 1.3 }}>
               {eyebrow}
             </Typography>
           ) : null}
-          <Typography variant="h6" sx={{ fontWeight: 780, letterSpacing: '-0.015em' }}>{title}</Typography>
+          <Typography variant="h6">{title}</Typography>
           {description ? <Typography variant="body2" color="text.secondary" sx={{ mt: 0.35 }}>{description}</Typography> : null}
         </Box>
       </Stack>

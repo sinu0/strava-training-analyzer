@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 
+import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
 import PageContainer from '@/components/common/PageContainer';
@@ -57,7 +58,7 @@ export default function DataJobsPage() {
             md: 5
           }}>
           <PerformanceSurface accent sx={{ p: 2.5, height: '100%' }}>
-            <Stack direction="row" spacing={1} alignItems="center"><DataObjectOutlinedIcon color="primary" /><Typography variant="h6" fontWeight={750}>Jakość danych</Typography></Stack>
+            <Stack direction="row" spacing={1} alignItems="center"><DataObjectOutlinedIcon color="primary" /><Typography variant="h6">Jakość danych</Typography></Stack>
             {quality.isLoading ? <LoadingState message="Sprawdzanie jakości…" /> : null}
             {quality.isError ? <ErrorState message="Nie udało się pobrać jakości danych." onRetry={() => void quality.refetch()} /> : null}
             {quality.data ? (
@@ -66,6 +67,11 @@ export default function DataJobsPage() {
                 <Grid size={6}><MetricReadout label="Dostępnych" value={quality.data.available} tone="success" /></Grid>
                 <Grid size={6}><MetricReadout label="Częściowych" value={quality.data.partial} tone="warning" /></Grid>
                 <Grid size={6}><MetricReadout label="Nieznanych" value={quality.data.unknown} /></Grid>
+                {quality.data.unassessed > 0 ? (
+                  <Grid size={12}>
+                    <Alert severity="info">Nieocenionych: {quality.data.unassessed}. Uruchom „Przelicz metryki”, aby wykonać backfill ocen.</Alert>
+                  </Grid>
+                ) : null}
               </Grid>
             ) : null}
           </PerformanceSurface>
@@ -77,7 +83,7 @@ export default function DataJobsPage() {
             md: 7
           }}>
           <PerformanceSurface sx={{ p: 2.5, height: '100%' }}>
-            <Stack direction="row" spacing={1} alignItems="center"><SyncOutlinedIcon color="primary" /><Typography variant="h6" fontWeight={750}>Uruchom zadanie</Typography></Stack>
+            <Stack direction="row" spacing={1} alignItems="center"><SyncOutlinedIcon color="primary" /><Typography variant="h6">Uruchom zadanie</Typography></Stack>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Każde zadanie zapisuje etap, próbę i błąd. Import nie uruchomi się równolegle drugi raz.</Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} sx={{ mt: 2.5 }}>
               <Button variant="contained" disabled={busy} onClick={() => startImport('RECENT')}>Import ostatnich</Button>
@@ -91,7 +97,7 @@ export default function DataJobsPage() {
           <Grid size={12}>
             <PerformanceSurface sx={{ p: 2.5 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
-                <Box><Typography variant="overline" color="text.secondary">{activeJob.jobType} · próba {activeJob.attempt}</Typography><Typography variant="h6" fontWeight={750}>{activeJob.stage}</Typography></Box>
+                <Box><Typography variant="overline" color="text.secondary">{activeJob.jobType} · próba {activeJob.attempt}</Typography><Typography variant="h6">{activeJob.stage}</Typography></Box>
                 <Chip label={activeJob.status} color={activeJob.status === 'COMPLETED' ? 'success' : activeJob.status === 'FAILED' ? 'error' : 'primary'} variant="outlined" />
               </Stack>
               <LinearProgress variant="determinate" value={progress} sx={{ mt: 2, height: 8, borderRadius: 4 }} />
@@ -101,7 +107,17 @@ export default function DataJobsPage() {
               ) : null}
             </PerformanceSurface>
           </Grid>
-        ) : null}
+        ) : (
+          <Grid size={12}>
+            <PerformanceSurface>
+              <EmptyState
+                icon={<DataObjectOutlinedIcon />}
+                title="Brak aktywnego zadania"
+                description="Uruchom import lub przeliczenie metryk. Postęp i ewentualne błędy pojawią się w tym miejscu."
+              />
+            </PerformanceSurface>
+          </Grid>
+        )}
       </Grid>
     </PageContainer>
   );

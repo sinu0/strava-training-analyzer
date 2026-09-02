@@ -17,4 +17,5 @@ public class DataQualitySummaryDto {
     private long available;
     private long partial;
     private long unknown;
+    private long unassessed;
 }

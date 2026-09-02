@@ -59,7 +59,7 @@ export default function EmptyState({
           {icon ?? <InboxIcon sx={{ fontSize: 32 }} />}
         </Box>
       )}
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'text.primary' }}>
+      <Typography variant="subtitle1" sx={{ color: 'text.primary' }}>
         {title}
       </Typography>
       {!!description && (

@@ -28,11 +28,12 @@ public class V2ActivityController {
     @GetMapping
     public ActivitySummaryPageDto findActivities(
             @RequestParam(required = false) String sportType,
+            @RequestParam(name = "q", required = false) String query,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime to,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return activityService.findActivities(sportType, from, to, page, size);
+        return activityService.findActivities(sportType, query, from, to, page, size);
     }
 
     @GetMapping("/{id}")

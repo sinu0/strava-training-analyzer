@@ -1,6 +1,7 @@
 package pl.strava.analizator.application.dto;
 
 import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -18,5 +19,6 @@ public class LoadAnalyticsDto {
     private LocalDate from;
     private LocalDate to;
     private String availability;
+    private BigDecimal coverage;
     private List<PmcDataDto> points;
 }

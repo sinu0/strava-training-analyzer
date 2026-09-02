@@ -48,7 +48,8 @@ public class MetricRegistry {
                                 activity.getStartedAt() != null ? activity.getStartedAt().toLocalDate() : null);
                 results.put(calculator.metricName(), result);
             } catch (MetricCalculationException e) {
-                log.warn("Metric calculation failed for {}: {}", calculator.metricName(), e.getMessage());
+                log.debug("Metric {} is unavailable for activity {}: {}",
+                        calculator.metricName(), activity.getId(), e.getMessage());
             } catch (Exception e) {
                 log.warn("Unexpected error in metric calculator {}: {}", calculator.metricName(), e.getMessage(), e);
             }

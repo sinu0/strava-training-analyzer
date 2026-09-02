@@ -1,4 +1,5 @@
 import { Box, Stack, Typography } from '@mui/material';
+import { alpha, useTheme, type Theme } from '@mui/material/styles';
 import L, { type LeafletEvent, type LeafletMouseEvent } from 'leaflet';
 import { useCallback, useEffect, useRef } from 'react';
 import {
@@ -15,10 +16,10 @@ import {
 import 'leaflet/dist/leaflet.css';
 import { MAP_TILE_CONFIG, type MapTileVariant } from '../../constants/mapTiles';
 import { getWeatherIconConfig } from '../../constants/weatherIcons';
+import { getAppThemeTokens } from '../../theme/theme';
 import {
   COMMON_COLORS,
   ROUTE_COLORS,
-  UI_COLORS,
   alphaColor,
 } from '../../utils/colors';
 import { getWeatherUiIconPath } from '../../utils/illustrationAssets';
@@ -76,7 +77,7 @@ function createWaypointIcon(index: number, total: number): L.DivIcon {
       justify-content: center;
       font-weight: 700;
       font-size: 13px;
-      font-family: Inter, system-ui, sans-serif;
+      font-family: "Manrope Variable", Manrope, system-ui, sans-serif;
     ">${index + 1}</div>`,
     iconSize: [34, 34],
     iconAnchor: [17, 17],
@@ -88,6 +89,7 @@ function createWeatherBubbleIcon(
   label: string,
   weather?: WeatherData | null,
   isLoading?: boolean,
+  theme?: Theme,
 ): L.DivIcon {
   const temperature = weather ? `${Math.round(weather.temperature)}°` : '...';
   const wind = weather ? `${Math.round(weather.windSpeed)} km/h` : 'Ładowanie';
@@ -101,13 +103,13 @@ function createWeatherBubbleIcon(
       min-width: 88px;
       padding: 8px 10px;
       border-radius: 16px;
-      background: ${alphaColor(UI_COLORS.backgroundDefault, 0.92)};
+      background: ${alpha(theme?.palette.background.paper ?? '#FFFFFF', 0.94)};
       border: 1px solid ${alphaColor(COMMON_COLORS.white, 0.12)};
       box-shadow: 0 14px 32px ${alphaColor(COMMON_COLORS.black, 0.24)};
-      color: ${UI_COLORS.textPrimary};
+      color: ${theme?.palette.text.primary ?? '#111827'};
       transform: translateY(-36px);
       backdrop-filter: blur(10px);
-      font-family: Inter, system-ui, sans-serif;
+      font-family: "Manrope Variable", Manrope, system-ui, sans-serif;
     ">
       <div style="display:flex; align-items:center; gap:6px; font-size:15px; font-weight:700;">
         ${icon}
@@ -288,6 +290,7 @@ export default function RouteDrawingMap({
   onRemoveWaypoint,
   highlightIndex,
 }: RouteDrawingMapProps) {
+  const theme = useTheme();
   const displayedPositions = polyline.length > 1 ? polyline : waypoints;
   const skipNextMapClickRef = useRef(false);
 
@@ -367,7 +370,7 @@ export default function RouteDrawingMap({
             <Marker
               key={stop.id}
               position={stop.position}
-              icon={createWeatherBubbleIcon(stop.label, stop.weather, stop.isLoading)}
+              icon={createWeatherBubbleIcon(stop.label, stop.weather, stop.isLoading, theme)}
               keyboard={false}
               bubblingMouseEvents={false}
             >
@@ -417,12 +420,12 @@ export default function RouteDrawingMap({
           px: 1.25,
           py: 0.75,
           borderRadius: 999,
-          bgcolor: alphaColor(UI_COLORS.backgroundDefault, 0.84),
+          bgcolor: (currentTheme) => alpha(currentTheme.palette.background.paper, 0.88),
           border: `1px solid ${alphaColor(COMMON_COLORS.white, 0.12)}`,
           backdropFilter: 'blur(10px)',
         }}
       >
-        <Typography variant="caption" sx={{ color: UI_COLORS.textPrimary, fontWeight: 700 }}>
+        <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: (currentTheme) => getAppThemeTokens(currentTheme).type.weight.label }}>
           Profil rowerowy · {MAP_TILE_CONFIG[mapVariant].label}
         </Typography>
       </Box>

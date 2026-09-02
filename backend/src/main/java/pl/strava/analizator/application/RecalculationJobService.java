@@ -15,8 +15,9 @@ public class RecalculationJobService {
     private final RecalculationJobRunner jobRunner;
 
     public synchronized ProcessingJob create() {
-        if (jobRepository.existsActive("RECALCULATION")) {
-            throw new IllegalStateException("A recalculation job is already running");
+        ProcessingJob active = jobRepository.findActive("RECALCULATION").orElse(null);
+        if (active != null) {
+            return active;
         }
         Instant now = Instant.now();
         ProcessingJob job = jobRepository.save(ProcessingJob.builder()

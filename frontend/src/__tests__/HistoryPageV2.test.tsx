@@ -15,10 +15,10 @@ vi.mock('@/features/history/useHistory', () => ({
   useHistoryActivities: vi.fn(),
 }));
 
-function renderPage() {
+function renderPage(initialEntry = '/activities') {
   return render(
     <ThemeProvider theme={theme}>
-      <MemoryRouter initialEntries={['/activities']}>
+      <MemoryRouter initialEntries={[initialEntry]}>
         <HistoryPage />
       </MemoryRouter>
     </ThemeProvider>,
@@ -66,5 +66,15 @@ describe('HistoryPage V2', () => {
     expect(screen.getByText('57,5 km')).toBeDefined();
     expect(screen.getByText('161 W')).toBeDefined();
     expect(screen.getByText('149 bpm')).toBeDefined();
+  });
+
+  it('passes the global search query to the activities request', () => {
+    renderPage('/activities?q=Morning%20Ride');
+
+    expect(useHistoryActivities).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'Morning Ride' }),
+      true,
+    );
+    expect(screen.getByText('Wyniki dla „Morning Ride”')).toBeDefined();
   });
 });

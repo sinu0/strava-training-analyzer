@@ -64,7 +64,7 @@ function NavButton({ item, selected, onClick }: { item: AppNavigationItem; selec
         primary={item.label}
         primaryTypographyProps={{
           fontSize: '0.88rem',
-          fontWeight: selected ? 700 : 500,
+          fontWeight: selected ? 650 : 500,
           color: selected ? 'text.primary' : 'text.secondary',
         }}
       />
@@ -82,11 +82,10 @@ function GroupLabel({ label }: { label: string }) {
         pt: 2.25,
         pb: 0.5,
         fontSize: '0.68rem',
-        fontWeight: 600,
+        fontWeight: 650,
         color: 'text.secondary',
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
-        opacity: 0.76,
       }}
     >
       {label}
@@ -136,13 +135,6 @@ export default function Sidebar({
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            inset: 0,
-            background: (t) => t.tokens.pageGlow,
-            pointerEvents: 'none',
-          },
           '& > *': {
             position: 'relative',
             zIndex: 1,
@@ -167,7 +159,7 @@ export default function Sidebar({
           <SpeedOutlinedIcon />
         </Box>
         <Box sx={{ minWidth: 0 }}>
-          <Typography color="text.primary" noWrap sx={{ fontWeight: 800, fontSize: '0.92rem', letterSpacing: '0.055em' }}>
+          <Typography color="text.primary" noWrap sx={{ fontWeight: 700, fontSize: '0.92rem', letterSpacing: '0.05em' }}>
             TRAINING LAB
           </Typography>
           <Typography variant="caption" color="text.secondary" noWrap sx={{ fontSize: '0.68rem' }}>

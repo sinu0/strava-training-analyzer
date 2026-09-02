@@ -10,11 +10,12 @@ import {
   IconButton,
   Button,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 
+import { getAppThemeTokens } from '../../theme/theme';
 import {
   COMMON_COLORS,
   ROUTE_COLORS,
-  UI_COLORS,
   alphaColor,
 } from '../../utils/colors';
 import RouteDrawingMap, { type RouteWeatherMarker } from '../route/RouteDrawingMap';
@@ -95,8 +96,9 @@ export default function RouteMap({
       sx={{
         height: '100%',
         overflow: 'hidden',
-        backgroundColor: UI_COLORS.backgroundDefault,
-        border: `1px solid ${UI_COLORS.divider}`,
+        backgroundColor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'divider',
         position: 'relative',
       }}
     >
@@ -123,7 +125,7 @@ export default function RouteMap({
             maxWidth: 'calc(100% - 20px)',
             p: 1.25,
             borderRadius: 3,
-            bgcolor: alphaColor(UI_COLORS.backgroundDefault, 0.9),
+            bgcolor: (theme) => alpha(theme.palette.background.paper, 0.92),
             border: `1px solid ${alphaColor(COMMON_COLORS.white, 0.14)}`,
             backdropFilter: 'blur(12px)',
             boxShadow: `0 20px 40px ${alphaColor(COMMON_COLORS.black, 0.35)}`,
@@ -138,7 +140,7 @@ export default function RouteMap({
                   color="primary"
                   variant="outlined"
                 />
-                <Typography variant="body2" fontWeight={700}>
+                <Typography variant="body2" sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label }}>
                   {generatedAlternatives[selectedAlternativeIndex]?.sourceName}
                 </Typography>
               </Stack>
@@ -147,7 +149,7 @@ export default function RouteMap({
                   size="small"
                   aria-label="Poprzednia propozycja"
                   onClick={() => onCycleAlternative(-1)}
-                  sx={{ color: UI_COLORS.textPrimary }}
+                  sx={{ color: 'text.primary' }}
                 >
                   <ArrowBackIosNewRoundedIcon sx={{ fontSize: 16 }} />
                 </IconButton>
@@ -155,13 +157,13 @@ export default function RouteMap({
                   size="small"
                   aria-label="Następna propozycja"
                   onClick={() => onCycleAlternative(1)}
-                  sx={{ color: UI_COLORS.textPrimary }}
+                  sx={{ color: 'text.primary' }}
                 >
                   <ArrowForwardIosRoundedIcon sx={{ fontSize: 16 }} />
                 </IconButton>
               </Stack>
             </Stack>
-            <Typography variant="caption" sx={{ color: alphaColor(UI_COLORS.textPrimary, 0.72) }}>
+            <Typography variant="caption" color="text.secondary">
               {generatedAlternatives[selectedAlternativeIndex]?.strategy}
             </Typography>
             <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
@@ -198,7 +200,7 @@ export default function RouteMap({
                      cursor: 'pointer',
                      bgcolor: index === selectedAlternativeIndex
                        ? ROUTE_COLORS.alternative
-                       : alphaColor(UI_COLORS.textPrimary, 0.28),
+                       : (theme) => alpha(theme.palette.text.primary, 0.28),
                    }}
                  />
               ))}

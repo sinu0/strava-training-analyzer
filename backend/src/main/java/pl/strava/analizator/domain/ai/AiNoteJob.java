@@ -21,6 +21,8 @@ public class AiNoteJob {
     private Instant createdAt;
     private Instant startedAt;
     private Instant completedAt;
+    private Instant nextAttemptAt;
+    private Instant updatedAt;
     private String errorMessage;
     private int retryCount;
 

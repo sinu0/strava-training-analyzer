@@ -12,7 +12,11 @@ vi.mock('leaflet', () => ({}));
 vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: { children?: React.ReactNode }) => <div data-testid="heatmap-map">{children}</div>,
   TileLayer: ({ url }: { url: string }) => <div data-testid="heatmap-tile" data-url={url} />,
-  useMap: () => ({ fitBounds: vi.fn() }),
+  useMap: () => ({
+    fitBounds: vi.fn(),
+    invalidateSize: vi.fn(),
+    getContainer: () => document.createElement('div'),
+  }),
 }));
 
 const useRouteHeatmapMock = vi.fn();
@@ -26,6 +30,7 @@ function renderWithTheme(ui: React.ReactElement) {
 
 const mockData: ActivityHeatmapData = {
   routeCount: 7,
+  segmentCount: 4,
   segments: [
     // A simple chain of 3 segments: A→B→C→D
     { lat1: 50.06000, lon1: 19.94000, lat2: 50.06100, lon2: 19.94100, count: 3 },
@@ -53,7 +58,7 @@ describe('RouteHeatmap', () => {
 
   it('renders empty state when there are no routes', () => {
     useRouteHeatmapMock.mockReturnValue({
-      data: { segments: [], routeCount: 0, bounds: null, totalDistanceKm: 0, maxCount: 0 },
+      data: { segments: [], segmentCount: 0, routeCount: 0, bounds: null, totalDistanceKm: 0, maxCount: 0 },
       isLoading: false,
       isError: false,
     });
@@ -69,11 +74,24 @@ describe('RouteHeatmap', () => {
       isError: false,
     });
     renderWithTheme(<RouteHeatmap />);
-    expect(screen.getByTestId('route-heatmap')).toBeDefined();
+    expect(screen.getByTestId('route-heatmap').style.height).toBe('72vh');
     expect(screen.getByTestId('heatmap-map')).toBeDefined();
     const tiles = screen.getAllByTestId('heatmap-tile');
     expect(tiles[0]?.getAttribute('data-url')).toContain('openstreetmap.org');
     expect(tiles[1]?.getAttribute('data-url')).toContain('/api/activities/heatmap/tile');
+  });
+
+  it('renders the tile heatmap from a lightweight summary without segment geometry', () => {
+    useRouteHeatmapMock.mockReturnValue({
+      data: { ...mockData, segments: [], segmentCount: 20_739 },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithTheme(<RouteHeatmap />);
+
+    expect(screen.getByTestId('route-heatmap')).toBeDefined();
+    expect(screen.getAllByTestId('heatmap-tile')[1]?.getAttribute('data-url')).toContain('/api/activities/heatmap/tile');
   });
 
   it('renders stats overlay with activity count and total distance', () => {

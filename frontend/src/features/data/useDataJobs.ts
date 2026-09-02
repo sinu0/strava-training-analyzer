@@ -8,6 +8,7 @@ export interface DataQualitySummary {
   available: number;
   partial: number;
   unknown: number;
+  unassessed: number;
 }
 
 export interface ProcessingJob {

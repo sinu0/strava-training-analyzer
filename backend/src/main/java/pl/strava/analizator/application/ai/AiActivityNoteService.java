@@ -1,6 +1,7 @@
 package pl.strava.analizator.application.ai;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -177,6 +178,8 @@ public class AiActivityNoteService {
                 .activityId(activityId)
                 .status(AiNoteJob.STATUS_PENDING)
                 .createdAt(Instant.now())
+                .nextAttemptAt(Instant.now())
+                .updatedAt(Instant.now())
                 .retryCount(0)
                 .build();
         jobRepository.save(job);
@@ -191,13 +194,16 @@ public class AiActivityNoteService {
             return false;
         }
 
-        return jobRepository.findNextPending().map(job -> {
+        Instant now = Instant.now();
+        return jobRepository.findNextPending(now).map(job -> {
             AiNoteJob processing = AiNoteJob.builder()
                     .id(job.getId())
                     .activityId(job.getActivityId())
                     .status(AiNoteJob.STATUS_PROCESSING)
                     .createdAt(job.getCreatedAt())
-                    .startedAt(Instant.now())
+                    .startedAt(now)
+                    .nextAttemptAt(null)
+                    .updatedAt(now)
                     .retryCount(job.getRetryCount())
                     .build();
             jobRepository.save(processing);
@@ -214,16 +220,31 @@ public class AiActivityNoteService {
                         .createdAt(job.getCreatedAt())
                         .startedAt(processing.getStartedAt())
                         .completedAt(Instant.now())
+                        .nextAttemptAt(null)
+                        .updatedAt(Instant.now())
                         .retryCount(job.getRetryCount())
                         .build();
                 jobRepository.save(completed);
                 log.info("AI note generated for activity {}", job.getActivityId());
                 return true;
             } catch (Exception e) {
-                log.error("Failed to generate AI note for activity {}: {}", job.getActivityId(), e.getMessage(), e);
                 int newRetryCount = job.getRetryCount() + 1;
                 String newStatus = newRetryCount >= AiNoteJob.MAX_RETRIES
                         ? AiNoteJob.STATUS_FAILED : AiNoteJob.STATUS_PENDING;
+                Instant failedAt = Instant.now();
+                Instant nextAttemptAt = AiNoteJob.STATUS_PENDING.equals(newStatus)
+                        ? failedAt.plus(retryDelay(newRetryCount))
+                        : null;
+
+                if (AiNoteJob.STATUS_FAILED.equals(newStatus)) {
+                    log.error("AI note permanently failed for activity {} after {} attempts: {}",
+                            job.getActivityId(), newRetryCount, abbreviateError(e));
+                } else {
+                    log.warn("AI note attempt {}/{} failed for activity {}; next retry at {}: {}",
+                            newRetryCount, AiNoteJob.MAX_RETRIES, job.getActivityId(), nextAttemptAt,
+                            abbreviateError(e));
+                    log.debug("AI note retry failure details", e);
+                }
 
                 AiNoteJob failed = AiNoteJob.builder()
                         .id(job.getId())
@@ -231,14 +252,60 @@ public class AiActivityNoteService {
                         .status(newStatus)
                         .createdAt(job.getCreatedAt())
                         .startedAt(processing.getStartedAt())
-                        .completedAt(Instant.now())
-                        .errorMessage(e.getMessage())
+                        .completedAt(failedAt)
+                        .nextAttemptAt(nextAttemptAt)
+                        .updatedAt(failedAt)
+                        .errorMessage(abbreviateError(e))
                         .retryCount(newRetryCount)
                         .build();
                 jobRepository.save(failed);
                 return false;
             }
         }).orElse(false);
+    }
+
+    public boolean isDefaultProviderAvailable() {
+        if (!enabled || !providerRegistry.hasProvider(defaultProvider)) {
+            return false;
+        }
+        try {
+            return providerRegistry.getProvider(defaultProvider).isAvailable(defaultModel);
+        } catch (Exception exception) {
+            log.debug("AI provider availability check failed: {}", abbreviateError(exception));
+            return false;
+        }
+    }
+
+    public int recoverStaleJobs(Duration staleAfter) {
+        Instant now = Instant.now();
+        List<AiNoteJob> staleJobs = jobRepository.findStaleProcessing(now.minus(staleAfter));
+        staleJobs.forEach(job -> jobRepository.save(AiNoteJob.builder()
+                .id(job.getId())
+                .activityId(job.getActivityId())
+                .status(AiNoteJob.STATUS_PENDING)
+                .createdAt(job.getCreatedAt())
+                .nextAttemptAt(now)
+                .updatedAt(now)
+                .errorMessage("Recovered after interrupted processing")
+                .retryCount(job.getRetryCount())
+                .build()));
+        if (!staleJobs.isEmpty()) {
+            log.warn("Recovered {} stale AI note job(s)", staleJobs.size());
+        }
+        return staleJobs.size();
+    }
+
+    private Duration retryDelay(int retryCount) {
+        int exponent = Math.min(Math.max(0, retryCount - 1), 6);
+        return Duration.ofMinutes(1L << exponent);
+    }
+
+    private String abbreviateError(Exception exception) {
+        String message = exception.getMessage();
+        if (message == null || message.isBlank()) {
+            message = exception.getClass().getSimpleName();
+        }
+        return message.length() <= 500 ? message : message.substring(0, 500);
     }
 
     // ------- Internal -------

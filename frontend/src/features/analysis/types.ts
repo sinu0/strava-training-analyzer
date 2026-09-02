@@ -19,6 +19,7 @@ export interface LoadAnalytics {
   from: string;
   to: string;
   availability: 'UNKNOWN' | 'PARTIAL' | 'AVAILABLE';
+  coverage?: number | null;
   points: PmcData[];
 }
 

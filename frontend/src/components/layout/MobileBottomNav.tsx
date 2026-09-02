@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useUiPreferences } from '@/hooks/useUiPreferences';
 import { PRIMARY_NAVIGATION_BY_PATH } from '@/navigation/appNavigation';
+import { getAppThemeTokens } from '@/theme/theme';
 import { DEFAULT_UI_PREFERENCES } from '@/utils/uiPreferences';
 
 interface MobileNavigationItem {
@@ -70,6 +71,7 @@ export default function MobileBottomNav() {
           },
           '& .MuiBottomNavigationAction-label': {
             fontSize: '0.74rem',
+            fontWeight: (theme) => getAppThemeTokens(theme).type.weight.medium,
             mt: 0.25,
           },
           '& .Mui-selected': {

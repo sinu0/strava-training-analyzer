@@ -91,7 +91,9 @@ export function useRouteHeatmap() {
   return useQuery<ActivityHeatmapData>({
     queryKey: ['activityRouteHeatmap'],
     queryFn: async () => {
-      const { data } = await apiClient.get<ActivityHeatmapData>('/activities/heatmap');
+      const { data } = await apiClient.get<ActivityHeatmapData>('/activities/heatmap', {
+        params: { includeSegments: false },
+      });
       return data;
     },
     refetchInterval: (query) =>

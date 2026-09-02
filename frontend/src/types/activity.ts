@@ -109,6 +109,7 @@ export interface HeatmapSegmentData {
 
 export interface ActivityHeatmapData {
   segments: HeatmapSegmentData[];
+  segmentCount: number;
   routeCount: number;
   bounds: ActivityHeatmapBounds | null;
   totalDistanceKm: number;

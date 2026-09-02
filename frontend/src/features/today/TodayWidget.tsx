@@ -10,11 +10,11 @@ import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
 import { Box, Button, IconButton, Stack, Typography } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 
-
 import LightweightRoutePreview from '@/components/activity/LightweightRoutePreview';
 import { LoadDotMatrix, RecoveryFormGauge } from '@/components/today/TrainingVisualizations';
 import MetricReadout from '@/components/v2/MetricReadout';
 import PerformanceSurface from '@/components/v2/PerformanceSurface';
+import { getAppThemeTokens } from '@/theme/theme';
 import type { DashboardWidget } from '@/types/uiPreferences';
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
 
@@ -50,20 +50,20 @@ function WidgetHeader({ icon, title }: { icon: React.ReactNode; title: string })
     <Stack direction="row" spacing={1.2} alignItems="center">
       <Box
         sx={{
-          width: 38,
-          height: 38,
+          width: (currentTheme) => getAppThemeTokens(currentTheme).control.md,
+          height: (currentTheme) => getAppThemeTokens(currentTheme).control.md,
           display: 'grid',
           placeItems: 'center',
           flexShrink: 0,
           borderRadius: '50%',
           bgcolor: (currentTheme) => currentTheme.tokens?.iconBubble ?? 'rgba(255,255,255,0.05)',
           color: 'text.primary',
-          '& svg': { fontSize: 20 },
+          '& svg': { fontSize: (currentTheme) => getAppThemeTokens(currentTheme).icon.md },
         }}
       >
         {icon}
       </Box>
-      <Typography variant="subtitle1" fontWeight={800}>{title}</Typography>
+      <Typography variant="subtitle1">{title}</Typography>
     </Stack>
   );
 }
@@ -82,10 +82,10 @@ function HeroMetric({ label, value }: { label: string; value: string }) {
         WebkitBackdropFilter: 'blur(12px)',
       }}
     >
-      <Typography variant="caption" sx={{ display: 'block', color: 'rgba(255,255,255,0.72)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+      <Typography variant="caption" sx={{ display: 'block', color: 'rgba(255,255,255,0.72)', fontWeight: 650, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
         {label}
       </Typography>
-      <Typography variant="body2" sx={{ color: '#fff', fontWeight: 800 }}>
+      <Typography variant="body2" sx={{ color: '#fff', fontWeight: 650 }}>
         {value}
       </Typography>
     </Box>
@@ -95,7 +95,7 @@ function HeroMetric({ label, value }: { label: string; value: string }) {
 function RouteMetric({ label, value }: { label: string; value: string }) {
   return (
     <Box sx={{ minWidth: 0 }}>
-      <Typography variant="h6" noWrap sx={{ fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.15 }}>
+      <Typography variant="h6" noWrap sx={{ lineHeight: 1.15 }}>
         {value}
       </Typography>
       <Typography variant="caption" color="text.secondary" noWrap>
@@ -158,7 +158,7 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
               WebkitBackdropFilter: 'blur(12px)',
             }}
           >
-            <Typography variant="caption" sx={{ color: '#fff', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            <Typography variant="caption" sx={{ color: '#fff', fontWeight: 650, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               {title}
             </Typography>
           </Box>
@@ -182,14 +182,14 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
               }}
             >
               <Stack direction="row" spacing={0.5} alignItems="baseline">
-                <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: '1.65rem', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+                <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1.65rem', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                   {primaryMetric.value}
                 </Typography>
-                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>
                   {primaryMetric.unit}
                 </Typography>
               </Stack>
-              <Typography variant="caption" sx={{ display: 'block', mt: 0.2, color: 'rgba(255,255,255,0.75)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              <Typography variant="caption" sx={{ display: 'block', mt: 0.2, color: 'rgba(255,255,255,0.75)', fontWeight: 650, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                 {primaryMetric.label}
               </Typography>
             </Box>
@@ -207,11 +207,11 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
               <Typography
                 component="h2"
                 variant="h3"
-                sx={{ color: '#fff', fontWeight: 800, maxWidth: 640, fontSize: 'clamp(2rem, 1.55rem + 1.5vw, 2.6rem)', letterSpacing: '-0.03em' }}
+                sx={{ color: '#fff', maxWidth: 640, fontSize: 'clamp(2rem, 1.55rem + 1.5vw, 2.6rem)' }}
               >
                 {recommendation?.sessionType ?? recommendation?.decision ?? 'Najpierw uzupełnij dane'}
               </Typography>
-              <Typography variant="caption" sx={{ display: 'block', mt: 0.6, color: 'rgba(255,255,255,0.8)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              <Typography variant="caption" sx={{ display: 'block', mt: 0.6, color: 'rgba(255,255,255,0.8)', fontWeight: 650, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                 Dzisiaj · {todayCaption}
               </Typography>
               <Typography variant="body1" sx={{ mt: 1.1, maxWidth: 600, color: 'rgba(255,255,255,0.82)' }}>
@@ -294,7 +294,7 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
           <WidgetHeader icon={<DirectionsBikeOutlinedIcon />} title={title} />
           {data.lastActivity ? (
             <>
-              <Typography variant="h5" sx={{ mt: 1.45, fontWeight: 800, letterSpacing: '-0.02em' }} noWrap>{data.lastActivity.name}</Typography>
+              <Typography variant="h5" sx={{ mt: 1.45 }} noWrap>{data.lastActivity.name}</Typography>
               <Stack direction="row" spacing={{ xs: 1.5, md: 3 }} useFlexGap flexWrap="wrap" sx={{ mt: 1.25 }}>
                 <RouteMetric label="Dystans" value={data.lastActivity.distanceM ? `${(data.lastActivity.distanceM / 1000).toFixed(1)} km` : '—'} />
                 <RouteMetric label="Przewyższenie" value={data.lastActivity.elevationGainM ? `${Math.round(data.lastActivity.elevationGainM)} m` : '—'} />
@@ -303,7 +303,7 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
             </>
           ) : (
             <>
-              <Typography variant="h6" sx={{ mt: 1.6, fontWeight: 800 }}>Zaplanuj następny przejazd</Typography>
+              <Typography variant="h6" sx={{ mt: 1.6 }}>Zaplanuj następny przejazd</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.7 }}>Po synchronizacji pojawi się tutaj ostatnia trasa i jej parametry.</Typography>
               <Button size="small" endIcon={<ArrowForwardIcon fontSize="small" />} onClick={() => navigate('/routes')} sx={{ mt: 1.1, px: 0 }}>Otwórz trasy</Button>
             </>
@@ -344,7 +344,7 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
         <WidgetHeader icon={<EventOutlinedIcon />} title={title} />
         {data.nextTraining ? (
           <>
-            <Typography variant="h5" sx={{ mt: 2, fontWeight: 800 }}>{data.nextTraining.plannedType}</Typography>
+            <Typography variant="h5" sx={{ mt: 2 }}>{data.nextTraining.plannedType}</Typography>
             <Typography variant="body2" color="text.secondary">
               {new Date(data.nextTraining.date).toLocaleDateString('pl-PL')} · {data.nextTraining.plannedDurationMin ?? '—'} min
             </Typography>

@@ -2,6 +2,8 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Breadcrumbs, Box, Link, Typography, type Breakpoint } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import type { ReactNode } from 'react';
 
 interface PageBreadcrumb {
@@ -88,18 +90,18 @@ export default function PageContainer({
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: 1.5,
-            mb: { xs: 2.5, md: 3.5 },
+            gap: (theme) => getAppThemeTokens(theme).space.cluster,
+            mb: { xs: 3, md: 4 },
           }}
         >
           <Box sx={{ minWidth: 0 }}>
             {!!title && (
-              <Typography component="h1" variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
+              <Typography component="h1" variant="h4">
                 {title}
               </Typography>
             )}
             {!!subtitle && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75, maxWidth: 760, lineHeight: 1.55 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75, maxWidth: 760 }}>
                 {subtitle}
               </Typography>
             )}

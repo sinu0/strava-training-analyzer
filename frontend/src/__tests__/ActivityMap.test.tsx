@@ -7,14 +7,30 @@ import theme from '../theme/theme';
 
 const fitBoundsMock = vi.fn();
 const invalidateSizeMock = vi.fn();
+const observeMock = vi.fn();
+const disconnectMock = vi.fn();
+let resizeCallback: ResizeObserverCallback | undefined;
+
+class ResizeObserverMock {
+  constructor(callback: ResizeObserverCallback) {
+    resizeCallback = callback;
+  }
+
+  observe = observeMock;
+  disconnect = disconnectMock;
+  unobserve = vi.fn();
+}
+
+vi.stubGlobal('ResizeObserver', ResizeObserverMock);
 
 vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: { children?: React.ReactNode }) => <div data-testid="leaflet-map">{children}</div>,
-  TileLayer: () => <div data-testid="tile-layer" />,
+  TileLayer: () => <div className="leaflet-tile" data-testid="tile-layer" />,
   Polyline: () => <div data-testid="polyline" />,
   useMap: () => ({
     fitBounds: fitBoundsMock,
     invalidateSize: invalidateSizeMock,
+    getContainer: () => document.createElement('div'),
   }),
 }));
 
@@ -26,6 +42,9 @@ describe('ActivityMap', () => {
   beforeEach(() => {
     fitBoundsMock.mockClear();
     invalidateSizeMock.mockClear();
+    observeMock.mockClear();
+    disconnectMock.mockClear();
+    resizeCallback = undefined;
   });
 
   it('uses explicit preview height so the inline map can render before interaction', () => {
@@ -55,5 +74,28 @@ describe('ActivityMap', () => {
 
     expect(styles.height).toBe('100%');
     expect(styles.minHeight).toBe('0px');
+  });
+
+  it('refits the route after the map container changes size', async () => {
+    renderWithTheme(<ActivityMap summaryPolyline="_p~iF~ps|U_ulLnnqC_mqNvxq`@" minHeight={360} />);
+
+    await waitFor(() => expect(observeMock).toHaveBeenCalledOnce());
+    const callsBeforeResize = fitBoundsMock.mock.calls.length;
+
+    resizeCallback?.([], {} as ResizeObserver);
+
+    await waitFor(() => expect(fitBoundsMock.mock.calls.length).toBeGreaterThan(callsBeforeResize));
+  });
+
+  it('keeps preview tiles at their native brightness', () => {
+    renderWithTheme(
+      <ActivityMap
+        summaryPolyline="_p~iF~ps|U_ulLnnqC_mqNvxq`@"
+        minHeight={360}
+        preview
+      />,
+    );
+
+    expect(window.getComputedStyle(screen.getByTestId('tile-layer')).filter).not.toContain('brightness(0.72)');
   });
 });

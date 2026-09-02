@@ -53,6 +53,7 @@ class ActivityServiceHeatmapTest {
         ActivityHeatmapDto result = activityService.getRouteHeatmap();
 
         assertThat(result.segments()).isEmpty();
+        assertThat(result.segmentCount()).isZero();
         assertThat(result.routeCount()).isZero();
         assertThat(result.bounds()).isNull();
         assertThat(result.maxCount()).isZero();
@@ -77,6 +78,7 @@ class ActivityServiceHeatmapTest {
         ActivityHeatmapDto result = activityService.getRouteHeatmap();
 
         assertThat(result.segments()).hasSize(1);
+        assertThat(result.segmentCount()).isEqualTo(1);
         assertThat(result.segments().get(0).lat1()).isEqualTo(50.0);
         assertThat(result.segments().get(0).lon1()).isEqualTo(19.0);
         assertThat(result.segments().get(0).lat2()).isEqualTo(50.1);
@@ -91,6 +93,28 @@ class ActivityServiceHeatmapTest {
         assertThat(result.bounds().west()).isEqualTo(19.0);
         assertThat(result.bounds().east()).isEqualTo(19.1);
         assertThat(result.status()).isEqualTo("ready");
+    }
+
+    @Test
+    void lightweightHeatmapSummaryOmitsGeometryButKeepsSegmentCount() {
+        HeatmapSegment segment = HeatmapSegment.builder()
+                .lat1(50.0).lon1(19.0)
+                .lat2(50.1).lon2(19.1)
+                .traversalCount(3)
+                .gridKeyA("a").gridKeyB("b")
+                .build();
+
+        when(heatmapSegmentRepository.findAll()).thenReturn(List.of(segment));
+        when(heatmapSegmentRepository.findMaxTraversalCount()).thenReturn(3);
+        when(activityRepository.countActivitiesWithPolylines()).thenReturn(5);
+        when(activityRepository.sumDistanceMetersForActivitiesWithPolylines()).thenReturn(100_000.0);
+
+        ActivityHeatmapDto result = activityService.getRouteHeatmap(false);
+
+        assertThat(result.segments()).isEmpty();
+        assertThat(result.segmentCount()).isEqualTo(1);
+        assertThat(result.bounds()).isNotNull();
+        assertThat(result.routeCount()).isEqualTo(5);
     }
 
     @Test
@@ -113,4 +137,3 @@ class ActivityServiceHeatmapTest {
         assertThat(activityService.getHeatmapMaxCount()).isEqualTo(42);
     }
 }
-

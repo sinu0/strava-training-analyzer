@@ -53,7 +53,7 @@ class V2ActivityServiceTest {
                 .name("Lekka projekcja")
                 .startedAt(OffsetDateTime.now())
                 .build();
-        when(activityReadRepository.findSummaries(isNull(), any(OffsetDateTime.class),
+        when(activityReadRepository.findSummaries(isNull(), isNull(), any(OffsetDateTime.class),
                 any(OffsetDateTime.class), eq(0), eq(20)))
                 .thenReturn(new ActivityCorePage(List.of(summary), 1, 0, 20, 1));
         when(trainingEffectRepository.findByActivityIds(List.of(id))).thenReturn(Map.of());
@@ -66,9 +66,22 @@ class V2ActivityServiceTest {
         verify(trainingEffectRepository).findByActivityIds(List.of(id));
         ArgumentCaptor<OffsetDateTime> from = ArgumentCaptor.forClass(OffsetDateTime.class);
         ArgumentCaptor<OffsetDateTime> to = ArgumentCaptor.forClass(OffsetDateTime.class);
-        verify(activityReadRepository).findSummaries(isNull(), from.capture(), to.capture(), eq(0), eq(20));
+        verify(activityReadRepository).findSummaries(isNull(), isNull(), from.capture(), to.capture(), eq(0), eq(20));
         assertThat(from.getValue()).isBefore(summary.getStartedAt());
         assertThat(to.getValue()).isAfter(summary.getStartedAt());
+    }
+
+    @Test
+    void listPassesNormalizedSearchQueryToReadRepository() {
+        when(activityReadRepository.findSummaries(isNull(), eq("morning ride"),
+                any(OffsetDateTime.class), any(OffsetDateTime.class), eq(0), eq(20)))
+                .thenReturn(new ActivityCorePage(List.of(), 0, 0, 20, 0));
+        when(trainingEffectRepository.findByActivityIds(List.of())).thenReturn(Map.of());
+
+        service.findActivities(null, "  Morning Ride  ", null, null, 0, 20);
+
+        verify(activityReadRepository).findSummaries(isNull(), eq("morning ride"),
+                any(OffsetDateTime.class), any(OffsetDateTime.class), eq(0), eq(20));
     }
 
     @Test

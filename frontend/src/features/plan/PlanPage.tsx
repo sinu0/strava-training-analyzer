@@ -1,7 +1,7 @@
 import AutoGraphOutlinedIcon from '@mui/icons-material/AutoGraphOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import FitnessCenterOutlinedIcon from '@mui/icons-material/FitnessCenterOutlined';
-import { Box, Grid, List, ListItem, ListItemText, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
+import { Box, Grid, List, ListItem, ListItemText, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useSearchParams } from 'react-router-dom';
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -11,6 +11,7 @@ import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
 import PageContainer from '@/components/common/PageContainer';
+import PolishDateField from '@/components/common/PolishDateField';
 import TrainingCalendar from '@/components/training/TrainingCalendar';
 import WorkoutLibrary from '@/components/training/WorkoutLibrary';
 import MetricReadout from '@/components/v2/MetricReadout';
@@ -56,7 +57,7 @@ export default function PlanPage() {
         eyebrow="Kierunek sezonu"
         title="Trening, który ma swoje miejsce w planie"
         description="Zbuduj tydzień, wybierz sesję i sprawdź konsekwencje dla obciążenia, zanim wsiądziesz na rower."
-        accentColor="#FC4C02"
+        accentColor="primary.main"
         imageSrc={getCyclingHeroIllustrationPath('training')}
         imageAlt="Przygotowane akcesoria kolarskie i mapa trasy"
         highlights={['Kalendarz', 'Biblioteka sesji', 'Scenariusz CTL / ATL']}
@@ -74,11 +75,11 @@ export default function PlanPage() {
         <PerformanceSurface accent sx={{ p: { xs: 1.5, md: 2.75 } }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} alignItems={{ sm: 'center' }} sx={{ mb: 2.5 }}>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h6" fontWeight={780}>Scenariusz przyszłego obciążenia</Typography>
+              <Typography variant="h6">Scenariusz przyszłego obciążenia</Typography>
               <Typography variant="body2" color="text.secondary">Zakres pozostaje w URL i może zostać odtworzony po powrocie.</Typography>
             </Box>
-            <TextField size="small" type="date" label="Od" value={from} onChange={event => changeRange('from', event.target.value)} InputLabelProps={{ shrink: true }} />
-            <TextField size="small" type="date" label="Do" value={to} onChange={event => changeRange('to', event.target.value)} InputLabelProps={{ shrink: true }} />
+            <PolishDateField size="small" label="Od" value={from} onChange={value => changeRange('from', value)} InputLabelProps={{ shrink: true }} />
+            <PolishDateField size="small" label="Do" value={to} onChange={value => changeRange('to', value)} InputLabelProps={{ shrink: true }} />
           </Stack>
           {scenario.isLoading ? <LoadingState message="Liczenie scenariusza…" /> : null}
           {scenario.isError ? <ErrorState message="Nie udało się policzyć scenariusza." onRetry={() => void scenario.refetch()} /> : null}
@@ -87,7 +88,7 @@ export default function PlanPage() {
           ) : null}
           {scenario.data?.availability === 'AVAILABLE' ? (
             <>
-              <Typography variant="h6" fontWeight={750}>Jeśli wykonasz obecny plan</Typography>
+              <Typography variant="h6">Jeśli wykonasz obecny plan</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                 To scenariusz matematyczny CTL/ATL, a nie obietnica wyniku sportowego.
               </Typography>

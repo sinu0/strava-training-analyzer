@@ -1,6 +1,7 @@
 import ArrowOutwardIcon from '@mui/icons-material/ArrowOutward';
 import { Box, Paper, Stack, Typography } from '@mui/material';
 
+import { getAppThemeTokens } from '@/theme/theme';
 import { alphaColor } from '@/utils/colors';
 
 type HomeWidgetResponsiveValue =
@@ -50,19 +51,22 @@ export default function HomeWidgetCard({
       data-testid={testId}
       onClick={onClick}
       sx={{
-        p: { xs: 2.5, md: 3 },
+        p: (theme) => getAppThemeTokens(theme).space.card,
         height: 'auto',
         aspectRatio,
         minHeight: minHeight ?? (artwork ? { xs: 360, sm: 400 } : undefined),
         minWidth: 0,
-        borderRadius: 3.5,
+        borderRadius: (theme) => `${getAppThemeTokens(theme).radius.card}px`,
         border: '1px solid',
         borderColor: (theme) => theme.tokens?.surfaceBorder ?? theme.palette.divider,
         bgcolor: 'background.paper',
         overflow: 'hidden',
         boxShadow: (theme: { tokens?: { cardShadow?: string } }) => theme.tokens?.cardShadow ?? 'none',
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease',
+        transition: (theme) => {
+          const tokens = getAppThemeTokens(theme);
+          return `transform ${tokens.motion.standard}, border-color ${tokens.motion.standard}, box-shadow ${tokens.motion.standard}`;
+        },
         '&:hover': onClick
           ? {
               transform: 'translateY(-2px)',
@@ -86,7 +90,6 @@ export default function HomeWidgetCard({
               variant="subtitle1"
               sx={{
                 color: 'text.primary',
-                fontWeight: 800,
                 lineHeight: 1.2,
                 display: 'block',
                 overflow: 'hidden',

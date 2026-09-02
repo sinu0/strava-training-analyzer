@@ -107,13 +107,28 @@ public class SyncService {
     @PostConstruct
     public void loadSyncStateFromDb() {
         syncStateRepository.findFirst().ifPresent(state -> {
-            lastSyncStatus = new SyncStatus(
+            SyncStatus persistedStatus = new SyncStatus(
                     state.getStatus(),
                     state.getLastSyncAt(),
                     state.getImportedTotal(),
                     state.getSkippedTotal(),
                     state.getRateLimitResetsAt()
             );
+
+            if ("in_progress".equals(persistedStatus.status())) {
+                log.warn("Recovering interrupted Strava sync started at {}", persistedStatus.lastSyncAt());
+                lastSyncStatus = new SyncStatus(
+                        "failed",
+                        persistedStatus.lastSyncAt(),
+                        persistedStatus.imported(),
+                        persistedStatus.skipped(),
+                        null
+                );
+                persistSyncStatus(lastSyncStatus);
+                return;
+            }
+
+            lastSyncStatus = persistedStatus;
         });
     }
 
@@ -164,7 +179,7 @@ public class SyncService {
         } catch (RateLimitException e) {
             log.warn("Full sync paused due to rate limit at page {} ({} imported, {} skipped). Resets at {}",
                     page, totalImported, totalSkipped, e.getResetsAt());
-            recalculateDailyMetrics();
+            recalculateDailyMetricsIfChanged(totalImported);
             lastSyncStatus = new SyncStatus("rate_limited", Instant.now(), totalImported, totalSkipped, e.getResetsAt());
             persistSyncStatus(lastSyncStatus);
             return lastSyncStatus;
@@ -175,10 +190,7 @@ public class SyncService {
             throw e;
         }
 
-        progress.onStage(SyncStage.UPDATE_DAILY);
-        recalculateDailyMetrics();
-        progress.onStage(SyncStage.DERIVE_INSIGHTS);
-        detectPersonalRecords();
+        updateDerivedDataIfChanged(totalImported, progress);
         progress.onStage(SyncStage.COMPLETE);
         lastSyncStatus = new SyncStatus("completed", Instant.now(), totalImported, totalSkipped, null);
         persistSyncStatus(lastSyncStatus);
@@ -225,7 +237,7 @@ public class SyncService {
         } catch (RateLimitException e) {
             log.warn("Recent sync paused due to rate limit ({} imported, {} skipped). Resets at {}",
                     totalImported, totalSkipped, e.getResetsAt());
-            recalculateDailyMetrics();
+            recalculateDailyMetricsIfChanged(totalImported);
             lastSyncStatus = new SyncStatus("rate_limited", Instant.now(), totalImported, totalSkipped, e.getResetsAt());
             persistSyncStatus(lastSyncStatus);
             return lastSyncStatus;
@@ -236,10 +248,7 @@ public class SyncService {
             throw e;
         }
 
-        progress.onStage(SyncStage.UPDATE_DAILY);
-        recalculateDailyMetrics();
-        progress.onStage(SyncStage.DERIVE_INSIGHTS);
-        detectPersonalRecords();
+        updateDerivedDataIfChanged(totalImported, progress);
         progress.onStage(SyncStage.COMPLETE);
         lastSyncStatus = new SyncStatus("completed", Instant.now(), totalImported, totalSkipped, null);
         persistSyncStatus(lastSyncStatus);
@@ -396,6 +405,23 @@ public class SyncService {
     private AthleteProfile getProfile() {
         return profileRepository.findFirst()
                 .orElseThrow(() -> new ProfileNotFoundException("No athlete profile found. Connect Strava first."));
+    }
+
+    private void updateDerivedDataIfChanged(int imported, SyncProgressListener progress) {
+        if (imported <= 0) {
+            log.debug("Skipping derived-data rebuild: import did not change any activities");
+            return;
+        }
+        progress.onStage(SyncStage.UPDATE_DAILY);
+        recalculateDailyMetrics();
+        progress.onStage(SyncStage.DERIVE_INSIGHTS);
+        detectPersonalRecords();
+    }
+
+    private void recalculateDailyMetricsIfChanged(int imported) {
+        if (imported > 0) {
+            recalculateDailyMetrics();
+        }
     }
 
     private void recalculateDailyMetrics() {
@@ -593,13 +619,19 @@ public class SyncService {
     @Scheduled(fixedDelayString = "${strava.auto-sync.poll-ms:60000}")
     public synchronized void autoSyncRecent() {
         SyncStatus current = lastSyncStatus;
-        if ("in_progress".equals(current.status()) || "rate_limited".equals(current.status())) {
-            log.debug("Skipping auto-sync: current status is {}", current.status());
+        Instant now = Instant.now();
+        if ("in_progress".equals(current.status())) {
+            log.debug("Skipping auto-sync: current status is in_progress");
+            return;
+        }
+        if ("rate_limited".equals(current.status())
+                && current.rateLimitResetsAt() != null
+                && now.isBefore(current.rateLimitResetsAt())) {
+            log.debug("Skipping auto-sync: Strava rate limit resets at {}", current.rateLimitResetsAt());
             return;
         }
 
         int intervalMinutes = Math.max(1, autoSyncConfigPort.getIntervalMinutes());
-        Instant now = Instant.now();
         if (lastAutoSyncCheckAt != null
                 && now.isBefore(lastAutoSyncCheckAt.plusSeconds(intervalMinutes * 60L))) {
             log.debug("Skipping auto-sync poll: configured interval is {} minutes", intervalMinutes);

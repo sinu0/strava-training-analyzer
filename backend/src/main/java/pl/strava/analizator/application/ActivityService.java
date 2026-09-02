@@ -132,18 +132,22 @@ public class ActivityService {
     }
 
     public ActivityHeatmapDto getRouteHeatmap() {
+        return getRouteHeatmap(true);
+    }
+
+    public ActivityHeatmapDto getRouteHeatmap(boolean includeSegments) {
         if (heatmapBuildService.isRebuilding()) {
-            return new ActivityHeatmapDto(List.of(), 0, null, 0.0, 0, "rebuilding");
+            return new ActivityHeatmapDto(List.of(), 0, 0, null, 0.0, 0, "rebuilding");
         }
 
         List<HeatmapSegment> segments = heatmapSegmentRepository.findAll();
         if (segments.isEmpty()) {
             int activitiesWithPolylines = activityRepository.countActivitiesWithPolylines();
             if (activitiesWithPolylines == 0) {
-                return new ActivityHeatmapDto(List.of(), 0, null, 0.0, 0, "ready");
+                return new ActivityHeatmapDto(List.of(), 0, 0, null, 0.0, 0, "ready");
             }
             heatmapBuildService.rebuildAll(); // async — returns immediately
-            return new ActivityHeatmapDto(List.of(), 0, null, 0.0, 0, "rebuilding");
+            return new ActivityHeatmapDto(List.of(), 0, 0, null, 0.0, 0, "rebuilding");
         }
 
         int maxCount = heatmapSegmentRepository.findMaxTraversalCount();
@@ -152,11 +156,13 @@ public class ActivityService {
 
         ActivityHeatmapBoundsDto bounds = computeBoundsFromSegments(segments);
 
-        List<HeatmapSegmentDto> dtos = segments.stream()
-                .map(s -> new HeatmapSegmentDto(s.getLat1(), s.getLon1(), s.getLat2(), s.getLon2(), s.getTraversalCount()))
-                .toList();
+        List<HeatmapSegmentDto> dtos = includeSegments
+                ? segments.stream()
+                    .map(s -> new HeatmapSegmentDto(s.getLat1(), s.getLon1(), s.getLat2(), s.getLon2(), s.getTraversalCount()))
+                    .toList()
+                : List.of();
 
-        return new ActivityHeatmapDto(dtos, routeCount, bounds, totalDistanceKm, maxCount, "ready");
+        return new ActivityHeatmapDto(dtos, segments.size(), routeCount, bounds, totalDistanceKm, maxCount, "ready");
     }
 
     private ActivityHeatmapBoundsDto computeBoundsFromSegments(List<HeatmapSegment> segments) {

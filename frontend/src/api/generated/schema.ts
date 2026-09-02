@@ -4207,6 +4207,8 @@ export interface components {
             partial?: number;
             /** Format: int64 */
             unknown?: number;
+            /** Format: int64 */
+            unassessed?: number;
         };
         ActivityDataQualityDto: {
             /** Format: uuid */
@@ -4293,6 +4295,7 @@ export interface components {
             /** Format: date */
             to?: string;
             availability?: string;
+            coverage?: number;
             points?: components["schemas"]["PmcDataDto"][];
         };
         PmcDataDto: {
@@ -5161,6 +5164,8 @@ export interface components {
         };
         ActivityHeatmapDto: {
             segments?: components["schemas"]["HeatmapSegmentDto"][];
+            /** Format: int32 */
+            segmentCount?: number;
             /** Format: int32 */
             routeCount?: number;
             bounds?: components["schemas"]["ActivityHeatmapBoundsDto"];
@@ -7586,6 +7591,7 @@ export interface operations {
         parameters: {
             query?: {
                 sportType?: string;
+                q?: string;
                 from?: string;
                 to?: string;
                 page?: number;
@@ -9296,7 +9302,9 @@ export interface operations {
     };
     getActivityHeatmap: {
         parameters: {
-            query?: never;
+            query?: {
+                includeSegments?: boolean;
+            };
             header?: never;
             path?: never;
             cookie?: never;

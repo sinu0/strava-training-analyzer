@@ -13,7 +13,6 @@ import {
   Paper,
   Select,
   Stack,
-  TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
@@ -26,6 +25,9 @@ import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
 import PageContainer from '@/components/common/PageContainer';
+import PolishDateField from '@/components/common/PolishDateField';
+import { getAppThemeTokens } from '@/theme/theme';
+import { getPolishPaginationAriaLabel } from '@/utils/accessibility';
 
 import { useHistoryActivities } from './useHistory';
 
@@ -44,12 +46,14 @@ export default function HistoryPage() {
   const view: HistoryView = rawView === 'calendar' || rawView === 'map' ? rawView : 'list';
   const page = Math.max(0, Number(params.get('page') ?? 0));
   const sportType = params.get('sportType') ?? '';
+  const query = params.get('q')?.trim() ?? '';
   const from = params.get('from') ?? '';
   const to = params.get('to') ?? '';
   const activities = useHistoryActivities({
     page,
     size: view === 'calendar' ? 100 : 20,
     sportType: sportType || undefined,
+    query: query || undefined,
     from: dateBoundary(from),
     to: dateBoundary(to, true),
   }, view !== 'map');
@@ -128,6 +132,7 @@ export default function HistoryPage() {
             count={activities.data.totalPages}
             page={page + 1}
             onChange={(_, value) => updateParam('page', String(value - 1))}
+            getItemAriaLabel={getPolishPaginationAriaLabel}
             sx={{ alignSelf: 'center', pt: 2 }}
           />
         )}
@@ -144,14 +149,20 @@ export default function HistoryPage() {
       <Paper
         elevation={0}
         sx={{
-          p: { xs: 1.5, md: 2 },
+          p: (theme) => getAppThemeTokens(theme).space.card,
           mb: 2.5,
           border: '1px solid',
           borderColor: 'divider',
-          borderRadius: 3,
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012))',
+          borderRadius: (theme) => `${getAppThemeTokens(theme).radius.card}px`,
+          bgcolor: 'background.paper',
+          boxShadow: (theme) => theme.tokens.cardShadow,
         }}
       >
+        {query ? (
+          <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 700 }}>
+            Wyniki dla „{query}”
+          </Typography>
+        ) : null}
         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
           <TuneOutlinedIcon color="primary" fontSize="small" />
           <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>Widok i filtry</Typography>
@@ -176,8 +187,8 @@ export default function HistoryPage() {
               <MenuItem value="virtual_ride">Wirtualna jazda</MenuItem>
             </Select>
           </FormControl>
-          <TextField size="small" type="date" label="Od" value={from} onChange={event => updateParam('from', event.target.value)} InputLabelProps={{ shrink: true }} />
-          <TextField size="small" type="date" label="Do" value={to} onChange={event => updateParam('to', event.target.value)} InputLabelProps={{ shrink: true }} />
+          <PolishDateField size="small" label="Od" value={from} onChange={value => updateParam('from', value)} InputLabelProps={{ shrink: true }} />
+          <PolishDateField size="small" label="Do" value={to} onChange={value => updateParam('to', value)} InputLabelProps={{ shrink: true }} />
           {(sportType || from || to) ? (
             <Button
               startIcon={<RestartAltOutlinedIcon />}

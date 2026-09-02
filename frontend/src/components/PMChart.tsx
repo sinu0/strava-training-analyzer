@@ -82,12 +82,28 @@ const PMChart = memo(function PMChart({ data }: PMChartProps) {
   const latest = data[data.length - 1]!;
 
   return (
-    <Box
-      role="img"
-      aria-label={`Wykres obciążenia PMC. ${data.length} punktów od ${data[0]!.date} do ${latest.date}. Ostatnie wartości: CTL ${latest.ctl}, ATL ${latest.atl}, forma ${latest.tsb}.`}
-      sx={{ width: '100%', height: 400 }}
-    >
-      <ResponsiveContainer width="100%" height="100%">
+    <Box sx={{ width: '100%' }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        CTL pokazuje trend około 42 dni, ATL krótkie zmęczenie około 7 dni, a TSB różnicę między nimi.
+      </Typography>
+      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 1.25 }}>
+        {[
+          ['Kondycja długoterminowa (CTL)', PMC_COLORS.CTL, 'solid'],
+          ['Zmęczenie krótkoterminowe (ATL)', PMC_COLORS.ATL, 'solid'],
+          ['Forma treningowa (TSB)', PMC_COLORS.TSB, 'dashed'],
+        ].map(([label, color, style]) => (
+          <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <Box sx={{ width: 24, borderTop: `3px ${style} ${color}` }} />
+            <Typography variant="caption" color="text.secondary">{label}</Typography>
+          </Box>
+        ))}
+      </Box>
+      <Box
+        role="img"
+        aria-label={`Wykres obciążenia PMC. ${data.length} punktów od ${data[0]!.date} do ${latest.date}. Ostatnie wartości: CTL ${latest.ctl}, ATL ${latest.atl}, forma ${latest.tsb}.`}
+        sx={{ width: '100%', height: 350 }}
+      >
+        <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
           <CartesianGrid {...chart.grid} />
             <XAxis
@@ -109,7 +125,8 @@ const PMChart = memo(function PMChart({ data }: PMChartProps) {
           <Line type="monotone" dataKey="atl" stroke={PMC_COLORS.ATL} strokeWidth={2.5} dot={false} name="ATL (Fatigue)" />
           <Line type="monotone" dataKey="tsb" stroke={PMC_COLORS.TSB} strokeWidth={2.5} strokeDasharray="5 5" dot={false} name="TSB (Form)" />
         </ComposedChart>
-      </ResponsiveContainer>
+        </ResponsiveContainer>
+      </Box>
     </Box>
   );
 });

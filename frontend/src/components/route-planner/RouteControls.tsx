@@ -19,7 +19,7 @@ import {
   Switch,
 } from '@mui/material';
 
-import { UI_COLORS } from '../../utils/colors';
+import { getAppThemeTokens } from '../../theme/theme';
 
 import type { MapTileVariant } from '../../constants/mapTiles';
 import type { GeneratedRouteStyle, RoutePlanningPreferences, RoutePreview } from '../../types/route';
@@ -107,7 +107,14 @@ export default function RouteControls({
   onSave,
 }: RouteControlsProps) {
   return (
-    <Paper sx={{ p: 2, backgroundColor: UI_COLORS.backgroundDefault, border: `1px solid ${UI_COLORS.divider}` }}>
+    <Paper
+      sx={{
+        p: (theme) => getAppThemeTokens(theme).space.card,
+        backgroundColor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'divider',
+      }}
+    >
       <Typography variant="subtitle2" gutterBottom>
         Nowa trasa
       </Typography>
@@ -250,7 +257,7 @@ export default function RouteControls({
           Kliknij trasę dokładnie tam, gdzie chcesz wstawić punkt pośredni — meta zostaje
           ostatnim punktem. Potem przeciągnij numerowany marker, aby dopracować przebieg.
         </Typography>
-        <Divider sx={{ borderColor: UI_COLORS.divider }} />
+        <Divider />
         <Stack spacing={1.2}>
           <Typography variant="subtitle2">
             Generator z historii

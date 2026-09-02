@@ -29,8 +29,21 @@ export const getThemeTokens = (mode: AppColorMode) => {
   const elevated = isLight ? '#FFFFFF' : '#121B26';
   const muted = isLight ? '#ECF0F7' : '#182433';
   const ink = isLight ? '#111827' : '#F4F7FB';
-  const quietInk = isLight ? '#697586' : '#A5B1C2';
+  const quietInk = isLight ? '#5F6B7A' : '#A5B1C2';
   const border = isLight ? 'rgba(26, 43, 62, 0.07)' : 'rgba(255,255,255,0.085)';
+  const fastMotion = '160ms cubic-bezier(0.2, 0, 0, 1)';
+  const standardMotion = '220ms cubic-bezier(0.2, 0, 0, 1)';
+  const action = {
+    primary: isLight ? '#D93F00' : '#FF8051',
+    primaryContrast: isLight ? '#FFFFFF' : '#081018',
+    secondary: isLight ? '#08758D' : '#54D0EB',
+    secondaryContrast: '#081018',
+    success: isLight ? '#237A49' : '#65D68F',
+    warning: isLight ? '#9A5D00' : '#FFC25A',
+    error: isLight ? '#B93333' : '#FF7A7A',
+    info: isLight ? '#176BAD' : '#74B9F2',
+    statusContrast: isLight ? '#FFFFFF' : '#081018',
+  } as const;
 
   return {
     mode,
@@ -53,10 +66,43 @@ export const getThemeTokens = (mode: AppColorMode) => {
       hero: 30,
       pill: 999,
     },
+    space: {
+      card: { xs: '20px', sm: '24px', md: '28px' },
+      section: { xs: '24px', sm: '28px', md: '36px' },
+      page: { xs: '16px', sm: '24px', md: '32px', xl: '40px' },
+      cluster: '12px',
+      inline: '8px',
+    },
     control: {
       sm: 36,
-      md: 42,
-      lg: 48,
+      md: 44,
+      lg: 50,
+    },
+    icon: {
+      xs: 14,
+      sm: 18,
+      md: 20,
+      lg: 24,
+      xl: 28,
+    },
+    type: {
+      weight: {
+        regular: 450,
+        medium: 550,
+        label: 650,
+        heading: 650,
+        display: 700,
+      },
+      tracking: {
+        tight: '-0.03em',
+        heading: '-0.02em',
+        label: '0.01em',
+        eyebrow: '0.075em',
+      },
+    },
+    motion: {
+      fast: fastMotion,
+      standard: standardMotion,
     },
     pageGlow: isLight
       ? 'radial-gradient(circle at 88% 4%, rgba(252,76,2,0.06), transparent 26%), radial-gradient(circle at 48% 94%, rgba(22,166,200,0.045), transparent 30%)'
@@ -66,8 +112,10 @@ export const getThemeTokens = (mode: AppColorMode) => {
       : 'linear-gradient(90deg, rgba(5,10,16,0.86) 0%, rgba(5,10,16,0.48) 57%, rgba(5,10,16,0.18) 100%)',
     cardShadow: isLight ? '0 24px 56px rgba(49, 56, 90, 0.10)' : '0 12px 34px rgba(0,0,0,0.18)',
     cardShadowHover: isLight ? '0 32px 68px rgba(49, 56, 90, 0.15)' : '0 20px 48px rgba(0,0,0,0.28)',
-    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    transition: `all ${standardMotion}`,
+    focusRing: `0 0 0 3px ${isLight ? 'rgba(252,76,2,0.20)' : 'rgba(255,128,81,0.28)'}`,
     status: STATUS,
+    action,
     chart: {
       primary: '#FC4C02',
       secondary: '#16A6C8',
@@ -108,33 +156,49 @@ export const getThemeTokens = (mode: AppColorMode) => {
 
 export type AppThemeTokens = ReturnType<typeof getThemeTokens>;
 
+/**
+ * Returns application tokens even when a component is embedded under MUI's
+ * bare default theme (for example in isolated tests or external previews).
+ */
+export function getAppThemeTokens(theme: Theme): AppThemeTokens {
+  const candidate = (theme as Theme & { tokens?: AppThemeTokens }).tokens;
+  return candidate ?? getThemeTokens(theme.palette.mode === 'dark' ? 'dark' : 'light');
+}
+
 export function createAppTheme(mode: AppColorMode = 'light'): Theme {
   const tokens = getThemeTokens(mode);
   const isLight = mode === 'light';
+  const actionAccent = tokens.action.primary;
+  const actionContrast = tokens.action.primaryContrast;
   const theme = createTheme({
     palette: {
       mode,
-      primary: { main: tokens.chart.primary, contrastText: '#FFFFFF' },
-      secondary: { main: tokens.chart.secondary, contrastText: '#06202A' },
+      primary: { main: actionAccent, contrastText: actionContrast },
+      secondary: { main: tokens.action.secondary, contrastText: tokens.action.secondaryContrast },
       background: { default: tokens.canvas, paper: tokens.surfaceElevated },
-      text: { primary: isLight ? '#111827' : '#F4F7FB', secondary: isLight ? '#697586' : '#A5B1C2' },
+      text: { primary: isLight ? '#111827' : '#F4F7FB', secondary: tokens.chart.tick },
       divider: tokens.surfaceBorder,
-      success: { main: STATUS.success, light: STATUS.successLight },
-      warning: { main: STATUS.warning, dark: STATUS.warningStrong },
-      error: { main: STATUS.error },
-      info: { main: STATUS.info },
+      success: { main: tokens.action.success, light: STATUS.successLight, contrastText: tokens.action.statusContrast },
+      warning: { main: tokens.action.warning, dark: STATUS.warningStrong, contrastText: tokens.action.statusContrast },
+      error: { main: tokens.action.error, contrastText: tokens.action.statusContrast },
+      info: { main: tokens.action.info, contrastText: tokens.action.statusContrast },
     },
     typography: {
-      fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      h3: { fontWeight: 800, fontSize: 'clamp(1.75rem, 1.35rem + 1.35vw, 2.35rem)', letterSpacing: '-0.035em', lineHeight: 1.14 },
-      h4: { fontWeight: 800, fontSize: 'clamp(1.5rem, 1.18rem + 0.95vw, 1.95rem)', letterSpacing: '-0.025em', lineHeight: 1.2 },
-      h5: { fontWeight: 700, fontSize: 'clamp(1.1rem, 1rem + 0.45vw, 1.35rem)', lineHeight: 1.3 },
-      h6: { fontWeight: 700, lineHeight: 1.4 },
-      subtitle1: { fontWeight: 600, lineHeight: 1.5 },
-      subtitle2: { fontWeight: 700, fontSize: '0.75rem', letterSpacing: '0.04em', lineHeight: 1.4 },
-      body1: { fontSize: 'clamp(0.95rem, 0.92rem + 0.15vw, 1rem)', lineHeight: 1.6 },
-      body2: { fontSize: 'clamp(0.875rem, 0.82rem + 0.28vw, 1rem)', lineHeight: 1.55 },
-      caption: { fontSize: 'clamp(0.75rem, 0.72rem + 0.16vw, 0.82rem)', lineHeight: 1.45, letterSpacing: '0.01em' },
+      fontFamily: '"Manrope Variable", Manrope, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      allVariants: { fontVariantNumeric: 'tabular-nums', textRendering: 'optimizeLegibility' },
+      h1: { fontWeight: tokens.type.weight.display, fontSize: 'clamp(2rem, 1.55rem + 1.8vw, 3rem)', letterSpacing: tokens.type.tracking.tight, lineHeight: 1.08 },
+      h2: { fontWeight: tokens.type.weight.display, fontSize: 'clamp(1.8rem, 1.45rem + 1.3vw, 2.5rem)', letterSpacing: tokens.type.tracking.tight, lineHeight: 1.1 },
+      h3: { fontWeight: tokens.type.weight.display, fontSize: 'clamp(1.65rem, 1.32rem + 1.15vw, 2.2rem)', letterSpacing: tokens.type.tracking.tight, lineHeight: 1.14 },
+      h4: { fontWeight: tokens.type.weight.display, fontSize: 'clamp(1.45rem, 1.18rem + 0.82vw, 1.9rem)', letterSpacing: tokens.type.tracking.heading, lineHeight: 1.18 },
+      h5: { fontWeight: tokens.type.weight.heading, fontSize: 'clamp(1.08rem, 1rem + 0.38vw, 1.3rem)', letterSpacing: '-0.012em', lineHeight: 1.3 },
+      h6: { fontWeight: tokens.type.weight.heading, fontSize: '1rem', letterSpacing: '-0.008em', lineHeight: 1.4 },
+      subtitle1: { fontWeight: tokens.type.weight.label, lineHeight: 1.48 },
+      subtitle2: { fontWeight: tokens.type.weight.label, fontSize: '0.78rem', letterSpacing: tokens.type.tracking.label, lineHeight: 1.4 },
+      body1: { fontWeight: tokens.type.weight.regular, fontSize: 'clamp(0.94rem, 0.91rem + 0.14vw, 1rem)', lineHeight: 1.62 },
+      body2: { fontWeight: tokens.type.weight.regular, fontSize: 'clamp(0.84rem, 0.81rem + 0.18vw, 0.94rem)', lineHeight: 1.56 },
+      button: { fontWeight: tokens.type.weight.label, fontSize: '0.875rem', letterSpacing: '-0.005em', lineHeight: 1.35, textTransform: 'none' },
+      caption: { fontWeight: tokens.type.weight.medium, fontSize: 'clamp(0.72rem, 0.7rem + 0.12vw, 0.8rem)', lineHeight: 1.45, letterSpacing: '0.005em' },
+      overline: { fontWeight: tokens.type.weight.label, fontSize: '0.7rem', lineHeight: 1.6, letterSpacing: tokens.type.tracking.eyebrow },
     },
     // MUI multiplies numeric `sx.borderRadius` values by this base unit.
     // Keep the standard 8px scale so local values such as `borderRadius: 3`
@@ -151,9 +215,17 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
             backgroundAttachment: 'fixed',
             scrollbarColor: `${tokens.surfaceStrongBorder} ${tokens.canvas}`,
             scrollPaddingBottom: 'calc(88px + env(safe-area-inset-bottom))',
+            WebkitFontSmoothing: 'antialiased',
+            MozOsxFontSmoothing: 'grayscale',
           },
-          ':focus-visible': { outline: '3px solid rgba(38,135,217,0.9)', outlineOffset: 3 },
+          'button, input, textarea, select': { font: 'inherit' },
+          ':focus-visible': { outline: `2px solid ${tokens.chart.primary}`, outlineOffset: 3 },
           '::selection': { backgroundColor: 'rgba(252,76,2,0.28)', color: '#FFFFFF' },
+          '.leaflet-tile': {
+            width: '257px !important',
+            height: '257px !important',
+            mixBlendMode: 'normal !important',
+          },
           '.recharts-wrapper': {
             fontFamily: 'inherit',
             '& .recharts-cartesian-grid-horizontal line': {
@@ -165,12 +237,12 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
             '& .recharts-cartesian-axis-tick-value': {
               fill: `${tokens.chart.tick} !important`,
               fontSize: '11px',
-              fontWeight: 600,
+              fontWeight: tokens.type.weight.medium,
             },
             '& .recharts-legend-item-text': {
               color: `${tokens.chart.tick} !important`,
               fontSize: '12px',
-              fontWeight: 700,
+              fontWeight: tokens.type.weight.label,
             },
             '& .recharts-default-tooltip': {
               backgroundColor: `${tokens.surfaceElevated} !important`,
@@ -181,7 +253,7 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
             },
           },
           '@keyframes sectionFadeInUp': {
-            from: { opacity: 0, transform: 'translateY(8px)' }, to: { opacity: 1, transform: 'translateY(0)' },
+            from: { transform: 'translateY(8px)' }, to: { transform: 'translateY(0)' },
           },
           '@media (prefers-reduced-motion: reduce)': {
             '*, *::before, *::after': {
@@ -214,7 +286,7 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
           root: {
             borderRadius: tokens.radius.pill,
             textTransform: 'none',
-            fontWeight: 700,
+            fontWeight: tokens.type.weight.label,
             letterSpacing: '-0.005em',
             minHeight: tokens.control.md,
             paddingLeft: 20,
@@ -238,18 +310,39 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
       MuiIconButton: {
         styleOverrides: {
           root: {
+            width: tokens.control.md,
+            height: tokens.control.md,
             borderRadius: '50%',
             transition: tokens.transition,
             '&:hover': { backgroundColor: tokens.hoverOverlay },
+            '&:focus-visible': { boxShadow: tokens.focusRing },
             '&.Mui-disabled': { opacity: 0.42 },
+            '& .MuiSvgIcon-root': { fontSize: tokens.icon.lg },
           },
-          sizeSmall: { width: tokens.control.sm, height: tokens.control.sm },
+          sizeSmall: {
+            width: tokens.control.sm,
+            height: tokens.control.sm,
+            '& .MuiSvgIcon-root': { fontSize: tokens.icon.sm },
+          },
+          sizeLarge: {
+            width: tokens.control.lg,
+            height: tokens.control.lg,
+            '& .MuiSvgIcon-root': { fontSize: tokens.icon.lg },
+          },
         },
       },
       MuiChip: {
         styleOverrides: {
-          root: { borderRadius: tokens.radius.pill, fontWeight: 700, letterSpacing: '0.01em' },
+          root: { height: 32, borderRadius: tokens.radius.pill, fontWeight: tokens.type.weight.label, letterSpacing: tokens.type.tracking.label },
           sizeSmall: { height: 28, fontSize: '0.72rem' },
+        },
+      },
+      MuiInputBase: {
+        styleOverrides: {
+          root: { fontWeight: tokens.type.weight.medium },
+          input: {
+            '&::placeholder': { color: tokens.chart.tick, opacity: 0.82 },
+          },
         },
       },
       MuiOutlinedInput: {
@@ -263,10 +356,11 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
             '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: tokens.surfaceStrongBorder },
             '&.Mui-focused': {
               backgroundColor: tokens.surfaceElevated,
-              boxShadow: `0 0 0 3px ${tokens.activeOverlay}`,
+              boxShadow: tokens.focusRing,
               '& .MuiOutlinedInput-notchedOutline': { borderColor: tokens.chart.primary, borderWidth: 2 },
             },
             '&.Mui-disabled': { backgroundColor: tokens.surfaceSubtle, opacity: 0.62 },
+            '&.MuiInputBase-sizeSmall': { minHeight: 40 },
           },
           input: { paddingTop: 12, paddingBottom: 12, fontWeight: 500 },
           inputSizeSmall: { paddingTop: 8, paddingBottom: 8 },
@@ -316,7 +410,34 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
         },
       },
       MuiFormControlLabel: {
-        styleOverrides: { label: { fontSize: '0.9rem', fontWeight: 600, color: tokens.chart.tooltipText } },
+        styleOverrides: { label: { fontSize: '0.9rem', fontWeight: tokens.type.weight.medium, color: tokens.chart.tooltipText } },
+      },
+      MuiFormLabel: {
+        styleOverrides: { root: { fontWeight: tokens.type.weight.label, color: tokens.chart.tick } },
+      },
+      MuiSelect: {
+        styleOverrides: { icon: { color: tokens.chart.tick } },
+      },
+      MuiAutocomplete: {
+        styleOverrides: {
+          root: {
+            '& .MuiOutlinedInput-root': { paddingTop: 4, paddingBottom: 4 },
+            '& .MuiAutocomplete-tag': { margin: 3 },
+          },
+          popper: { marginTop: 6 },
+          paper: {
+            border: `1px solid ${tokens.surfaceBorder}`,
+            borderRadius: tokens.radius.panel,
+            boxShadow: tokens.cardShadowHover,
+          },
+          option: {
+            minHeight: 44,
+            margin: '2px 6px',
+            borderRadius: 12,
+            fontWeight: tokens.type.weight.medium,
+            '&[aria-selected="true"]': { backgroundColor: tokens.activeOverlay },
+          },
+        },
       },
       MuiToggleButtonGroup: {
         styleOverrides: {
@@ -336,15 +457,15 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
             border: 0,
             borderRadius: `${tokens.radius.pill}px !important`,
             color: tokens.chart.tick,
-            fontWeight: 700,
+            fontWeight: tokens.type.weight.label,
             paddingLeft: 14,
             paddingRight: 14,
             textTransform: 'none',
             '&.Mui-selected': {
-              color: '#FFFFFF',
-              backgroundColor: tokens.chart.primary,
+              color: actionContrast,
+              backgroundColor: actionAccent,
               boxShadow: '0 6px 14px rgba(252,76,2,0.22)',
-              '&:hover': { backgroundColor: tokens.brand.stravaHover },
+              '&:hover': { backgroundColor: isLight ? '#C23800' : '#FF966F' },
             },
             '&:hover': { backgroundColor: tokens.hoverOverlay },
           },
@@ -354,13 +475,13 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
         styleOverrides: {
           root: {
             textTransform: 'none',
-            fontWeight: 700,
+            fontWeight: tokens.type.weight.label,
             letterSpacing: 0,
             minHeight: 44,
             paddingLeft: 18,
             paddingRight: 18,
             color: tokens.chart.tick,
-            '&.Mui-selected': { color: tokens.chart.primary },
+            '&.Mui-selected': { color: actionAccent },
             '&.Mui-disabled': { opacity: 0.45 },
           },
         },
@@ -372,7 +493,7 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
           tooltip: {
             borderRadius: 10,
             fontSize: '0.78rem',
-            fontWeight: 600,
+            fontWeight: tokens.type.weight.medium,
             padding: '7px 10px',
             backgroundColor: isLight ? '#202936' : '#EAF0F7',
             color: isLight ? '#FFFFFF' : '#111827',
@@ -392,9 +513,33 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
           },
         },
       },
+      MuiPopover: {
+        styleOverrides: {
+          paper: {
+            border: `1px solid ${tokens.surfaceBorder}`,
+            borderRadius: tokens.radius.panel,
+            boxShadow: tokens.cardShadowHover,
+          },
+        },
+      },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            minHeight: 44,
+            margin: '2px 6px',
+            padding: '10px 12px',
+            borderRadius: 12,
+            fontWeight: tokens.type.weight.medium,
+            transition: `background-color ${tokens.motion.fast}`,
+            '&:hover': { backgroundColor: tokens.hoverOverlay },
+            '&.Mui-selected': { backgroundColor: tokens.activeOverlay },
+          },
+        },
+      },
       MuiListItemButton: {
         styleOverrides: {
           root: {
+            minHeight: 44,
             borderRadius: 12,
             transition: tokens.transition,
             '&:hover': { backgroundColor: tokens.hoverOverlay },
@@ -429,6 +574,39 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
           },
         },
       },
+      MuiBackdrop: {
+        styleOverrides: { root: { backgroundColor: isLight ? 'rgba(17,24,39,0.28)' : 'rgba(0,0,0,0.58)', backdropFilter: 'blur(3px)' } },
+      },
+      MuiAccordion: {
+        styleOverrides: {
+          root: {
+            overflow: 'hidden',
+            border: `1px solid ${tokens.surfaceBorder}`,
+            borderRadius: `${tokens.radius.panel}px !important`,
+            backgroundColor: tokens.surfaceElevated,
+            boxShadow: 'none',
+            '&::before': { display: 'none' },
+            '&.Mui-expanded': { margin: 0 },
+          },
+        },
+      },
+      MuiAccordionSummary: {
+        styleOverrides: {
+          root: {
+            minHeight: 56,
+            paddingLeft: 20,
+            paddingRight: 20,
+            '&.Mui-expanded': { minHeight: 56 },
+          },
+          content: {
+            margin: '16px 0',
+            '&.Mui-expanded': { margin: '16px 0' },
+          },
+        },
+      },
+      MuiAccordionDetails: {
+        styleOverrides: { root: { padding: '4px 20px 20px' } },
+      },
       MuiTableContainer: {
         styleOverrides: {
           root: {
@@ -462,8 +640,21 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
       },
       MuiLinearProgress: {
         styleOverrides: {
-          root: { height: 7, borderRadius: tokens.radius.pill, backgroundColor: tokens.trackBg },
+          root: { height: 8, borderRadius: tokens.radius.pill, backgroundColor: tokens.trackBg },
           bar: { borderRadius: tokens.radius.pill },
+        },
+      },
+      MuiSlider: {
+        styleOverrides: {
+          root: { height: 6, padding: '16px 0' },
+          rail: { opacity: 1, backgroundColor: tokens.trackBg },
+          track: { border: 0 },
+          thumb: {
+            width: 18,
+            height: 18,
+            boxShadow: isLight ? '0 4px 12px rgba(49,56,90,0.18)' : '0 4px 12px rgba(0,0,0,0.32)',
+            '&:focus-visible, &:hover': { boxShadow: tokens.focusRing },
+          },
         },
       },
       MuiAlert: {
@@ -473,6 +664,28 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
         },
       },
       MuiSkeleton: { styleOverrides: { root: { backgroundColor: tokens.surfaceMuted, borderRadius: 8 } } },
+      MuiSnackbarContent: {
+        styleOverrides: {
+          root: {
+            borderRadius: tokens.radius.control,
+            backgroundColor: isLight ? '#202936' : '#EAF0F7',
+            color: isLight ? '#FFFFFF' : '#111827',
+            boxShadow: tokens.cardShadowHover,
+            fontWeight: tokens.type.weight.medium,
+          },
+        },
+      },
+      MuiFab: {
+        styleOverrides: {
+          root: {
+            width: 52,
+            height: 52,
+            minHeight: 52,
+            boxShadow: tokens.cardShadow,
+            '&:hover': { boxShadow: tokens.cardShadowHover },
+          },
+        },
+      },
       MuiPaginationItem: {
         styleOverrides: {
           root: {

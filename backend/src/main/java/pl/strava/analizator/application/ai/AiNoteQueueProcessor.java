@@ -1,5 +1,8 @@
 package pl.strava.analizator.application.ai;
 
+import java.time.Duration;
+import java.time.Instant;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,11 +20,18 @@ public class AiNoteQueueProcessor {
 
     private final AiActivityNoteService noteService;
     private final boolean enabled;
+    private final Duration providerCooldown;
+    private final Duration staleAfter;
+    private volatile Instant suspendedUntil;
 
     public AiNoteQueueProcessor(AiActivityNoteService noteService,
-                                 @Value("${ai.enabled:false}") boolean enabled) {
+                                 @Value("${ai.enabled:false}") boolean enabled,
+                                 @Value("${ai.note-queue.provider-cooldown:PT5M}") Duration providerCooldown,
+                                 @Value("${ai.note-queue.stale-after:PT15M}") Duration staleAfter) {
         this.noteService = noteService;
         this.enabled = enabled;
+        this.providerCooldown = providerCooldown;
+        this.staleAfter = staleAfter;
     }
 
     @Scheduled(fixedDelayString = "${ai.note-queue.interval-ms:30000}")
@@ -31,13 +41,29 @@ public class AiNoteQueueProcessor {
             return;
         }
 
+        Instant now = Instant.now();
+        if (suspendedUntil != null && now.isBefore(suspendedUntil)) {
+            return;
+        }
+
+        if (!noteService.isDefaultProviderAvailable()) {
+            suspendedUntil = now.plus(providerCooldown);
+            log.warn("AI note queue paused until {} because the configured provider/model is unavailable",
+                    suspendedUntil);
+            return;
+        }
+        suspendedUntil = null;
+
         try {
+            noteService.recoverStaleJobs(staleAfter);
             boolean processed = noteService.processNextJob();
             if (processed) {
                 log.debug("Processed one AI note job from queue");
             }
         } catch (Exception e) {
-            log.error("Error processing AI note queue: {}", e.getMessage());
+            suspendedUntil = Instant.now().plus(providerCooldown);
+            log.error("AI note queue paused until {} after processor error: {}",
+                    suspendedUntil, e.getMessage());
         }
     }
 }

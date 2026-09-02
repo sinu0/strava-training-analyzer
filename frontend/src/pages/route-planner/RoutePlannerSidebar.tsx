@@ -4,7 +4,7 @@ import SavedRoutesList from '@/components/route/SavedRoutesList';
 import RouteControls from '@/components/route-planner/RouteControls';
 import RouteStats from '@/components/route-planner/RouteStats';
 import type { useRoutePlannerState } from '@/pages/route-planner/useRoutePlannerState';
-import { SURFACE_COLORS } from '@/utils/colors';
+import { getAppThemeTokens } from '@/theme/theme';
 
 interface RoutePlannerSidebarProps {
   planner: ReturnType<typeof useRoutePlannerState>;
@@ -62,9 +62,10 @@ export default function RoutePlannerSidebar({ planner }: RoutePlannerSidebarProp
 
       <Paper
         sx={{
-          p: 2,
-          backgroundColor: 'background.default',
-          border: `1px solid ${SURFACE_COLORS.strongBorder}`,
+          p: (theme) => getAppThemeTokens(theme).space.card,
+          backgroundColor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'divider',
           flex: 1,
           minHeight: 0,
           overflow: 'auto',

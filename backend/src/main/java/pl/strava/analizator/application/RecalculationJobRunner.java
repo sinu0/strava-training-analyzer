@@ -16,6 +16,7 @@ public class RecalculationJobRunner {
     private final ProcessingJobRepository jobRepository;
     private final SyncService syncService;
     private final DailyMetricsService dailyMetricsService;
+    private final ActivityDataQualityService dataQualityService;
 
     @Async
     public void start(UUID jobId) {
@@ -28,6 +29,7 @@ public class RecalculationJobRunner {
             current = jobRepository.save(current.toBuilder()
                     .stage(SyncService.SyncStage.UPDATE_DAILY.name()).updatedAt(Instant.now()).build());
             dailyMetricsService.recalculateAll();
+            dataQualityService.assessMissing();
             jobRepository.save(current.toBuilder().stage(SyncService.SyncStage.COMPLETE.name())
                     .status("COMPLETED").completedAt(Instant.now()).updatedAt(Instant.now()).build());
         } catch (Exception exception) {

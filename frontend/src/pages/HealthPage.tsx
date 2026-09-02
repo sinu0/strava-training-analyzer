@@ -35,6 +35,7 @@ import {
 } from 'recharts';
 
 import apiClient from '@/api/client';
+import EmptyState from '@/components/common/EmptyState';
 import PageContainer from '@/components/common/PageContainer';
 import PullToRefreshPanel from '@/components/common/PullToRefreshPanel';
 import Section from '@/components/common/Section';
@@ -42,6 +43,7 @@ import SkeletonCard from '@/components/common/SkeletonCard';
 import SwipeableContent from '@/components/common/SwipeableContent';
 import TabsNav from '@/components/common/TabsNav';
 import { useHealthOverview, useHealthTimeline, useRecoveryStatus } from '@/hooks/useHealth';
+import { getAppThemeTokens } from '@/theme/theme';
 import { CHART_ACTIVE_DOT, getChartVisuals } from '@/utils/chartStyles';
 import {
   HEALTH_COLORS,
@@ -88,7 +90,7 @@ function RecoveryGauge({ score }: { score: number }) {
           justifyContent: 'center',
         }}
       >
-        <Typography variant="h3" sx={{ fontWeight: 800, color, lineHeight: 1 }}>
+        <Typography variant="h3" sx={{ color, lineHeight: 1 }}>
           {score}
         </Typography>
         <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -133,8 +135,8 @@ function MetricSummary({
     <Box
       sx={{
         flex: 1,
-        minWidth: 180,
-        p: 1.5,
+        minWidth: 0,
+        p: { xs: 1.5, sm: 2 },
         borderRadius: 2.5,
         bgcolor: alphaColor(color, 0.08),
         border: `1px solid ${alphaColor(color, 0.18)}`,
@@ -142,10 +144,10 @@ function MetricSummary({
     >
       <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
         <Box sx={{ color, display: 'flex' }}>{icon}</Box>
-        <Typography sx={{ fontWeight: 700 }}>{title}</Typography>
+        <Typography sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label }}>{title}</Typography>
         {trend ? <TrendIcon direction={trend} /> : null}
       </Stack>
-      <Typography variant="h5" sx={{ fontWeight: 800, color }}>
+      <Typography variant="h5" sx={{ color }}>
         {primary}
       </Typography>
       <Typography variant="body2" color="text.secondary">
@@ -205,6 +207,11 @@ export default function HealthPage() {
   }, [timeline]);
 
   const isLoading = loadingOverview || loadingTimeline || loadingRecovery;
+  const selectedTabHasData = tab === 0
+    ? chartData.some((day) => day.hrv != null || day.restingHr != null)
+    : tab === 1
+      ? chartData.some((day) => day.sleepScore != null || day.sleepHours != null) || sleepStageData.length > 0
+      : chartData.some((day) => day.bodyBattery != null || day.stress != null);
 
   const groupCards = overview
     ? [
@@ -212,7 +219,7 @@ export default function HealthPage() {
           title: 'Serce',
           accentColor: STATUS_COLORS.success,
           items: (
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5}>
+            <Stack spacing={1.5}>
               <MetricSummary
                 title="HRV (RMSSD)"
                 primary={overview.hrvTrend.current != null ? `${Math.round(overview.hrvTrend.current)} ms` : '—'}
@@ -236,7 +243,7 @@ export default function HealthPage() {
           title: 'Sen',
           accentColor: STATUS_COLORS.info,
           items: (
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5}>
+            <Stack spacing={1.5}>
               <MetricSummary
                 title="Wynik snu"
                 primary={overview.sleepTrend.latestScore != null ? `${overview.sleepTrend.latestScore}` : '—'}
@@ -258,7 +265,7 @@ export default function HealthPage() {
           title: 'Energia',
           accentColor: STATUS_COLORS.warning,
           items: (
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5}>
+            <Stack spacing={1.5}>
               <MetricSummary
                 title="Body Battery"
                 primary={overview.latest?.bodyBattery != null ? `${overview.latest.bodyBattery}` : '—'}
@@ -392,13 +399,13 @@ export default function HealthPage() {
                   <RecoveryGauge score={recovery.score} />
                 ) : (
                   <Box sx={{ minWidth: 150, textAlign: 'center', p: 2 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Brak danych do oceny</Typography>
+                    <Typography variant="h6">Brak danych do oceny</Typography>
                     <Typography variant="body2" color="text.secondary">Dodaj check-in, aby obliczyć regenerację.</Typography>
                   </Box>
                 )}
               </Box>
               <Stack spacing={1.25} sx={{ flex: 1, minWidth: 240 }}>
-                <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                <Typography variant="h5">
                   {recovery?.level ?? 'Brak danych'}
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
@@ -458,6 +465,14 @@ export default function HealthPage() {
 
           <TabsNav tabs={tabs} value={tab} onChange={setTab} />
 
+          {!selectedTabHasData ? (
+            <Section title="Brak danych trendu" subtitle="Wykres pojawi się, gdy dostępne będą pomiary z co najmniej jednego dnia." accentColor={STATUS_COLORS.info}>
+              <EmptyState
+                title="Uzupełnij pierwsze pomiary"
+                description="Dodaj dane ręcznie powyżej albo podłącz źródło zdrowotne. Obsługiwane są HRV, tętno spoczynkowe, sen, Body Battery i stres."
+              />
+            </Section>
+          ) : (
           <SwipeableContent onSwipeLeft={nextTab} onSwipeRight={prevTab}>
             {tab === 0 && (
               <Grid container spacing={2.5}>
@@ -676,6 +691,7 @@ export default function HealthPage() {
               </Grid>
             )}
           </SwipeableContent>
+          )}
         </Stack>
       </PullToRefreshPanel>
     </PageContainer>

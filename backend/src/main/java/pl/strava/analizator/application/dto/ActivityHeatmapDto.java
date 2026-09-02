@@ -4,6 +4,7 @@ import java.util.List;
 
 public record ActivityHeatmapDto(
         List<HeatmapSegmentDto> segments,
+        int segmentCount,
         int routeCount,
         ActivityHeatmapBoundsDto bounds,
         double totalDistanceKm,

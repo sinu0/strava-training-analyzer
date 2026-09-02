@@ -51,21 +51,14 @@ export default function ActivityRoutePreview({
       ref={rootRef}
       role="img"
       aria-label={`Mapa trasy: ${activityName}`}
+      data-map-overlay="none"
       sx={{
         position: 'relative',
         height,
         minHeight: typeof height === 'number' ? height : 160,
         overflow: 'hidden',
-        bgcolor: 'rgba(8, 12, 18, 0.94)',
+        bgcolor: 'background.default',
         isolation: 'isolate',
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          inset: 0,
-          zIndex: 410,
-          pointerEvents: 'none',
-          background: 'linear-gradient(180deg, rgba(5,8,12,0.02) 45%, rgba(5,8,12,0.52) 100%)',
-        },
       }}
     >
       {hasRoute ? (

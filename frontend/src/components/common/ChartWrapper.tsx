@@ -1,5 +1,7 @@
 import { Box, Typography } from '@mui/material';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import type { ReactNode } from 'react';
 
 interface ChartWrapperProps {
@@ -27,7 +29,7 @@ export default function ChartWrapper({ title, legend, height = 300, children }: 
           }}
         >
           {!!title && (
-            <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+            <Typography variant="body2" sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label, color: 'text.secondary' }}>
               {title}
             </Typography>
           )}

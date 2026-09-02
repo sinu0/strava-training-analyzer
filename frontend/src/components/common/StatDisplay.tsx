@@ -3,6 +3,8 @@ import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { Box, Typography } from '@mui/material';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import type { ReactNode } from 'react';
 
 type StatSize = 'sm' | 'md' | 'lg';
@@ -53,7 +55,7 @@ export default function StatDisplay({
         {!!icon && <Box sx={{ color: color ?? 'text.secondary', display: 'flex' }}>{icon}</Box>}
         <Typography
           variant="caption"
-          sx={{ color: 'text.secondary', fontSize: cfg.labelSize, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}
+          sx={{ color: 'text.secondary', fontSize: cfg.labelSize, fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label, textTransform: 'uppercase', letterSpacing: (theme) => getAppThemeTokens(theme).type.tracking.eyebrow }}
         >
           {label}
         </Typography>
@@ -61,19 +63,19 @@ export default function StatDisplay({
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
         <Typography
           variant={cfg.valueVariant}
-          sx={{ fontWeight: 800, letterSpacing: '-0.01em', color: color ?? 'text.primary' }}
+          sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.display, letterSpacing: (theme) => getAppThemeTokens(theme).type.tracking.heading, color: color ?? 'text.primary' }}
         >
           {value}
         </Typography>
         {!!unit && (
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.regular }}>
             {unit}
           </Typography>
         )}
         {!!TrendIcon && trend !== undefined && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, ml: 0.5 }}>
             <TrendIcon sx={{ fontSize: size === 'sm' ? 12 : 14, color: trendColor }} />
-            <Typography variant="caption" sx={{ color: trendColor, fontWeight: 600, fontSize: size === 'sm' ? '0.6rem' : '0.7rem' }}>
+            <Typography variant="caption" sx={{ color: trendColor, fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label, fontSize: size === 'sm' ? '0.6rem' : '0.7rem' }}>
               {trend > 0 ? '+' : ''}{trend.toFixed(1)}%
             </Typography>
           </Box>

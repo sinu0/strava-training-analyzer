@@ -134,7 +134,28 @@ export function chainSegments(rawSegments: HeatmapSegmentData[]): ChainedSegment
 function BoundsFitter({ bounds }: { bounds: L.LatLngBoundsExpression }) {
   const map = useMap();
   useEffect(() => {
-    map.fitBounds(bounds, { padding: [30, 30] });
+    let resizeFrameId: number | null = null;
+    const syncMap = () => {
+      map.invalidateSize(false);
+      map.fitBounds(bounds, { padding: [30, 30] });
+    };
+    const scheduleSync = () => {
+      if (resizeFrameId != null) window.cancelAnimationFrame(resizeFrameId);
+      resizeFrameId = window.requestAnimationFrame(syncMap);
+    };
+    const frameId = window.requestAnimationFrame(syncMap);
+    const observer = typeof ResizeObserver === 'undefined'
+      ? null
+      : new ResizeObserver(scheduleSync);
+    observer?.observe(map.getContainer());
+    window.addEventListener('resize', scheduleSync);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      if (resizeFrameId != null) window.cancelAnimationFrame(resizeFrameId);
+      observer?.disconnect();
+      window.removeEventListener('resize', scheduleSync);
+    };
   }, [map, bounds]);
   return null;
 }
@@ -270,7 +291,7 @@ export default function RouteHeatmap() {
     );
   }
 
-  if (!data || data.segments.length === 0) {
+  if (!data || data.segmentCount === 0) {
     return (
       <Box
         data-testid="heatmap-empty"
@@ -286,13 +307,17 @@ export default function RouteHeatmap() {
     );
   }
 
-  const uniqueKm = Math.round(data.segments.length * 0.00027 * 111.32);
+  const uniqueKm = Math.round(data.segmentCount * 0.00027 * 111.32);
   const leafletBounds: L.LatLngBoundsExpression | null = data.bounds
     ? [[data.bounds.south, data.bounds.west], [data.bounds.north, data.bounds.east]]
     : null;
 
   return (
-    <Box data-testid="route-heatmap" sx={{ position: 'relative', height: '100%', minHeight: 500 }}>
+    <Box
+      data-testid="route-heatmap"
+      style={{ height: '72vh' }}
+      sx={{ position: 'relative', minHeight: 500, maxHeight: 720 }}
+    >
       <MapContainer
         center={DEFAULT_CENTER}
         zoom={10}

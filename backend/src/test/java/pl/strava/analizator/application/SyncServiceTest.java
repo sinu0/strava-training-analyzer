@@ -3,6 +3,7 @@ package pl.strava.analizator.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.lenient;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,7 @@ import pl.strava.analizator.domain.metrics.LapMetricsService;
 import pl.strava.analizator.domain.model.Activity;
 import pl.strava.analizator.domain.model.AthleteProfile;
 import pl.strava.analizator.domain.model.MetricResult;
+import pl.strava.analizator.domain.model.SyncState;
 import pl.strava.analizator.domain.port.ActivityMetricRepository;
 import pl.strava.analizator.domain.port.ActivityRepository;
 import pl.strava.analizator.domain.port.ActivityTrainingEffectRepository;
@@ -143,6 +146,7 @@ class SyncServiceTest {
         assertThat(status.status()).isEqualTo("completed");
         assertThat(status.imported()).isEqualTo(0);
         assertThat(status.skipped()).isEqualTo(1);
+        verify(dailyMetricsService, never()).recalculateAll();
     }
 
     @Test
@@ -396,6 +400,75 @@ class SyncServiceTest {
 
         verify(metricRegistry).calculateAllActivityMetrics(activity1, profile);
         verify(metricRegistry).calculateAllActivityMetrics(activity2, profile);
+    }
+
+    @Test
+    void loadSyncStateFromDbMarksInterruptedSyncAsFailed() {
+        Instant interruptedAt = Instant.parse("2026-08-16T02:49:18Z");
+        SyncState interrupted = SyncState.builder()
+                .id(1L)
+                .status("in_progress")
+                .lastSyncAt(interruptedAt)
+                .importedTotal(2)
+                .skippedTotal(1)
+                .updatedAt(interruptedAt)
+                .build();
+        when(syncStateRepository.findFirst()).thenReturn(Optional.of(interrupted));
+
+        syncService.loadSyncStateFromDb();
+
+        assertThat(syncService.getLastSyncStatus().status()).isEqualTo("failed");
+        assertThat(syncService.getLastSyncStatus().lastSyncAt()).isEqualTo(interruptedAt);
+        assertThat(syncService.getLastSyncStatus().imported()).isEqualTo(2);
+        assertThat(syncService.getLastSyncStatus().skipped()).isEqualTo(1);
+        verify(syncStateRepository).save(argThat(state ->
+                state.getId().equals(1L)
+                        && state.getStatus().equals("failed")
+                        && state.getLastSyncAt().equals(interruptedAt)
+                        && state.getUpdatedAt() != null));
+    }
+
+    @Test
+    void autoSyncRetriesAfterRateLimitWindowExpires() {
+        AthleteProfile profile = AthleteProfile.builder()
+                .id(UUID.randomUUID())
+                .stravaAthleteId(123L)
+                .build();
+        OffsetDateTime latest = OffsetDateTime.now().minusHours(1);
+        SyncState expiredRateLimit = SyncState.builder()
+                .id(1L)
+                .status("rate_limited")
+                .lastSyncAt(Instant.now().minusSeconds(120))
+                .rateLimitResetsAt(Instant.now().minusSeconds(60))
+                .updatedAt(Instant.now().minusSeconds(120))
+                .build();
+        when(syncStateRepository.findFirst()).thenReturn(Optional.of(expiredRateLimit));
+        when(autoSyncConfigPort.getIntervalMinutes()).thenReturn(60);
+        when(profileRepository.findFirst()).thenReturn(Optional.of(profile));
+        when(activityRepository.findLatestStartedAtBySource("strava")).thenReturn(Optional.of(latest));
+        when(syncDataSource.countNewActivities(profile, latest.toEpochSecond())).thenReturn(0);
+        syncService.loadSyncStateFromDb();
+
+        syncService.autoSyncRecent();
+
+        verify(syncDataSource).countNewActivities(profile, latest.toEpochSecond());
+    }
+
+    @Test
+    void autoSyncWaitsWhileRateLimitWindowIsActive() {
+        SyncState activeRateLimit = SyncState.builder()
+                .id(1L)
+                .status("rate_limited")
+                .lastSyncAt(Instant.now())
+                .rateLimitResetsAt(Instant.now().plusSeconds(60))
+                .updatedAt(Instant.now())
+                .build();
+        when(syncStateRepository.findFirst()).thenReturn(Optional.of(activeRateLimit));
+        syncService.loadSyncStateFromDb();
+
+        syncService.autoSyncRecent();
+
+        verify(syncDataSource, never()).countNewActivities(any(), anyLong());
     }
 
     @Test

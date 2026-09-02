@@ -1,6 +1,6 @@
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
-import { Box, Grid, Stack, Typography } from '@mui/material';
+import { Box, Chip, Grid, Stack, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 
@@ -15,9 +15,10 @@ import {
 import { getApiErrorMessage } from '@/utils/errorHandling';
 
 export interface AiStatus {
-  batchEnabled?: boolean;
-  batchCron?: string;
-  activeProvider?: string | null;
+    batchEnabled?: boolean;
+    batchCron?: string;
+    activeProvider?: string | null;
+    modelAvailable?: boolean;
 }
 
 export interface AiBatchResult {
@@ -85,6 +86,12 @@ export default function AdminDashboard({
                       } · ${aiStatus?.activeProvider ?? '—'}`}
                 </Typography>
               </Box>
+              <Chip
+                size="small"
+                variant="outlined"
+                color={aiStatus?.modelAvailable ? 'success' : 'warning'}
+                label={aiStatus?.modelAvailable ? 'Provider gotowy' : 'Provider niedostępny'}
+              />
             </Box>
 
             {!!runAiBatchData && (

@@ -9,7 +9,7 @@ import pl.strava.analizator.domain.model.ActivityCoreView;
 
 public interface ActivityReadRepository {
 
-    ActivityCorePage findSummaries(String sportType, OffsetDateTime from, OffsetDateTime to,
+    ActivityCorePage findSummaries(String sportType, String query, OffsetDateTime from, OffsetDateTime to,
                                    int page, int size);
 
     Optional<ActivityCoreView> findCoreById(UUID id);

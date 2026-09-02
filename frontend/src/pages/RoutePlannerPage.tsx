@@ -8,6 +8,7 @@ import MobileShortcutPinButton from '@/components/settings/MobileShortcutPinButt
 import { useSaveUiPreferences, useUiPreferences } from '@/hooks/useUiPreferences';
 import RoutePlannerSidebar from '@/pages/route-planner/RoutePlannerSidebar';
 import { useRoutePlannerState } from '@/pages/route-planner/useRoutePlannerState';
+import { getAppThemeTokens } from '@/theme/theme';
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
 
 export default function RoutePlannerPage() {
@@ -25,7 +26,7 @@ export default function RoutePlannerPage() {
           minHeight: { xs: 230, md: 270 },
           mb: 2.5,
           overflow: 'hidden',
-          borderRadius: 4,
+          borderRadius: (theme) => `${getAppThemeTokens(theme).radius.hero}px`,
           border: '1px solid',
           borderColor: 'divider',
           boxShadow: (theme) => theme.tokens?.cardShadow ?? '0 14px 34px rgba(31, 47, 66, 0.12)',
@@ -33,10 +34,10 @@ export default function RoutePlannerPage() {
       >
         <Box component="img" src={getCyclingHeroIllustrationPath('routes')} alt="" aria-hidden sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
         <Box sx={{ position: 'absolute', inset: 0, background: (theme) => theme.tokens?.heroScrim ?? 'linear-gradient(90deg, rgba(5,10,16,0.86), rgba(5,10,16,0.18))' }} />
-        <Stack spacing={1.1} sx={{ position: 'relative', zIndex: 1, justifyContent: 'center', minHeight: 'inherit', p: { xs: 2.25, sm: 3, md: 4 }, color: '#fff', maxWidth: 760 }}>
+        <Stack spacing={1.1} sx={{ position: 'relative', zIndex: 1, justifyContent: 'center', minHeight: 'inherit', p: { xs: 2.5, sm: 3.5, md: 4.5 }, color: '#fff', maxWidth: 760 }}>
           <Chip label="TRASY · PLANOWANIE" size="small" sx={{ alignSelf: 'flex-start', bgcolor: 'rgba(255,255,255,0.16)', color: '#fff', border: '1px solid rgba(255,255,255,0.18)', letterSpacing: '0.06em' }} />
-          <Typography component="h1" variant="h3" sx={{ color: '#fff', fontWeight: 850 }}>Trasy</Typography>
-          <Typography component="h2" variant="h5" sx={{ color: '#fff', fontWeight: 800 }}>Zaprojektuj kolejny przejazd</Typography>
+          <Typography component="h1" variant="h3" sx={{ color: '#fff' }}>Trasy</Typography>
+          <Typography component="h2" variant="h5" sx={{ color: '#fff' }}>Zaprojektuj kolejny przejazd</Typography>
           <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.82)', maxWidth: 620 }}>Ułóż trasę, porównaj warianty i sprawdź pogodę zanim rozpoczniesz jazdę.</Typography>
           {preferences.data ? (
             <Box sx={{ pt: 0.6 }}>

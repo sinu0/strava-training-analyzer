@@ -25,6 +25,7 @@ import SummaryStoryModal from '../components/profile/SummaryStoryModal';
 import WeeklyKmBarChart from '../components/profile/WeeklyKmBarChart';
 import SeasonWrappedModal from '../components/SeasonWrappedModal';
 import { useProfile, useUpdateProfile, useWeeklySummaries, useFtpProgress, useReadiness } from '../hooks/useAnalytics';
+import { getAppThemeTokens } from '../theme/theme';
 import {
   BRAND_COLORS,
   CHART_COLORS,
@@ -63,13 +64,13 @@ function StatPill({
       }}
     >
       <Box sx={{ color: color ?? 'primary.main', mb: 0.25 }}>{icon}</Box>
-      <Typography sx={{ fontSize: '1.1rem', fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
+      <Typography sx={{ fontSize: '1.1rem', fontWeight: 650, color: 'white', lineHeight: 1.2 }}>
         {value}
       </Typography>
       <Typography
         sx={{
           fontSize: '0.78rem',
-          color: alphaColor(CHART_COLORS.tooltipText, 0.55),
+          color: 'rgba(255,255,255,0.66)',
           mt: 0.25,
           textAlign: 'center',
         }}
@@ -139,7 +140,7 @@ export default function ProfilePage() {
       <Box
         sx={{
           position: 'relative',
-          borderRadius: 4,
+          borderRadius: (theme) => `${getAppThemeTokens(theme).radius.hero}px`,
           overflow: 'hidden',
           background: PROFILE_GRADIENTS.hero,
           border: `1px solid ${SURFACE_COLORS.strongBorder}`,
@@ -177,7 +178,7 @@ export default function ProfilePage() {
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
                 variant="h5"
-                sx={{ fontWeight: 800, color: 'white', lineHeight: 1.2, mb: 0.5 }}
+                sx={{ color: 'white', lineHeight: 1.2, mb: 0.5 }}
               >
                 {profile?.name ?? 'Kolarz'}
               </Typography>

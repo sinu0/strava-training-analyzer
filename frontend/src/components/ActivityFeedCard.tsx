@@ -117,9 +117,6 @@ const ActivityPreview = memo(function ActivityPreview({
       sx={{
         ...previewFrameSx,
         '.leaflet-container': { height: '100%' },
-        '.leaflet-tile': {
-          filter: 'contrast(1.24) saturate(1.16) brightness(0.78)',
-        },
       }}
     >
       <MapContainer
