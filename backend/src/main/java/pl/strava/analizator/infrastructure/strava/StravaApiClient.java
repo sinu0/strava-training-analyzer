@@ -78,7 +78,8 @@ public class StravaApiClient {
 
     public StravaActivityDto getActivityDetail(AthleteProfile profile, String externalId) {
         String token = oAuth2Service.getValidAccessToken(profile);
-        String url = stravaConfigProvider.apiBaseUrl() + "/activities/" + externalId;
+        String url = stravaConfigProvider.apiBaseUrl() + "/activities/" + externalId
+                + "?include_all_efforts=true";
 
         try {
             return restTemplate.exchange(

@@ -59,6 +59,8 @@ public class SyncService {
     private final ActivityDataQualityService dataQualityService;
     private final PersonalRecordService personalRecordService;
     private final ChallengeService challengeService;
+    private final SegmentAnalysisService segmentAnalysisService;
+    private final RouteMatchingService routeMatchingService;
 
     public SyncService(AthleteProfileRepository profileRepository,
                        ActivityRepository activityRepository,
@@ -78,7 +80,9 @@ public class SyncService {
                        AutoSyncConfigPort autoSyncConfigPort,
                        @org.springframework.lang.Nullable ActivityDataQualityService dataQualityService,
                        PersonalRecordService personalRecordService,
-                       ChallengeService challengeService) {
+                       ChallengeService challengeService,
+                       @org.springframework.lang.Nullable SegmentAnalysisService segmentAnalysisService,
+                       @org.springframework.lang.Nullable RouteMatchingService routeMatchingService) {
         this.profileRepository = profileRepository;
         this.activityRepository = activityRepository;
         this.activityMetricRepository = activityMetricRepository;
@@ -98,6 +102,8 @@ public class SyncService {
         this.dataQualityService = dataQualityService;
         this.personalRecordService = personalRecordService;
         this.challengeService = challengeService;
+        this.segmentAnalysisService = segmentAnalysisService;
+        this.routeMatchingService = routeMatchingService;
     }
 
     @Getter
@@ -343,6 +349,20 @@ public class SyncService {
                 heatmapBuildService.updateForActivity(saved.getSummaryPolyline());
             } catch (Exception e) {
                 log.debug("Could not update heatmap for activity {}: {}", saved.getExternalId(), e.getMessage());
+            }
+
+            try {
+                if (segmentAnalysisService != null) {
+                    segmentAnalysisService.importActivity(saved, fullActivity.getSegmentEfforts(),
+                            fullActivity.getSegmentDataAvailability());
+                }
+            } catch (Exception e) {
+                log.warn("Could not import segment efforts for activity {}: {}", saved.getExternalId(), e.getMessage());
+            }
+            try {
+                if (routeMatchingService != null) routeMatchingService.matchActivity(saved);
+            } catch (Exception e) {
+                log.warn("Could not match route for activity {}: {}", saved.getExternalId(), e.getMessage());
             }
         }
 

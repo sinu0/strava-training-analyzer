@@ -10,6 +10,8 @@ vi.mock('@/components/activity/ActivityRoutePreview', () => ({
   default: () => <div data-testid="activity-route-preview" />,
 }));
 
+vi.mock('@/components/matched-rides/MatchedRideCard', () => ({ default: () => <div data-testid="matched-rides-card" /> }));
+
 vi.mock('@/features/history/useHistory', () => ({
   useV2Activity: () => ({
     data: {

@@ -49,4 +49,45 @@ public final class PolylineCodec {
                 .map(point -> new double[]{point[1], point[0]})
                 .toList();
     }
+
+    public static String encodeLatLng(double[] latitudes, double[] longitudes, int startIndex, int endIndex) {
+        if (latitudes == null || longitudes == null || latitudes.length == 0 || longitudes.length == 0) {
+            return null;
+        }
+        int start = Math.max(0, startIndex);
+        int end = Math.min(Math.min(latitudes.length, longitudes.length) - 1, endIndex);
+        if (end < start) return null;
+        StringBuilder encoded = new StringBuilder();
+        int previousLat = 0;
+        int previousLng = 0;
+        for (int i = start; i <= end; i++) {
+            int lat = (int) Math.round(latitudes[i] * 1e5);
+            int lng = (int) Math.round(longitudes[i] * 1e5);
+            encodeValue(lat - previousLat, encoded);
+            encodeValue(lng - previousLng, encoded);
+            previousLat = lat;
+            previousLng = lng;
+        }
+        return encoded.toString();
+    }
+
+    public static String encodeLatLng(List<double[]> points) {
+        if (points == null || points.isEmpty()) return null;
+        double[] latitudes = new double[points.size()];
+        double[] longitudes = new double[points.size()];
+        for (int i = 0; i < points.size(); i++) {
+            latitudes[i] = points.get(i)[0];
+            longitudes[i] = points.get(i)[1];
+        }
+        return encodeLatLng(latitudes, longitudes, 0, points.size() - 1);
+    }
+
+    private static void encodeValue(int delta, StringBuilder target) {
+        int value = delta < 0 ? ~(delta << 1) : delta << 1;
+        while (value >= 0x20) {
+            target.append((char) ((0x20 | (value & 0x1f)) + 63));
+            value >>= 5;
+        }
+        target.append((char) (value + 63));
+    }
 }

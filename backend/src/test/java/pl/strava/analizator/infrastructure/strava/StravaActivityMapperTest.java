@@ -35,6 +35,7 @@ class StravaActivityMapperTest {
                 .maxWatts(BigDecimal.valueOf(650))
                 .averageCadence(BigDecimal.valueOf(85))
                 .maxCadence(BigDecimal.valueOf(102))
+                .sufferScore(82)
                 .calories(BigDecimal.valueOf(900))
                 .map(new StravaActivityDto.MapData("polyline123"))
                 .build();
@@ -50,6 +51,7 @@ class StravaActivityMapperTest {
         assertThat(activity.getAvgHeartrate()).isEqualTo((short) 145);
         assertThat(activity.getAvgPowerW()).isEqualTo((short) 220);
         assertThat(activity.getMaxCadence()).isEqualTo((short) 102);
+        assertThat(activity.getRelativeEffort()).isEqualTo(82);
         assertThat(activity.getCalories()).isEqualTo(900);
         assertThat(activity.getSummaryPolyline()).isEqualTo("polyline123");
     }

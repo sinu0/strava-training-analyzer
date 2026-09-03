@@ -1,0 +1,7 @@
+package pl.strava.analizator.infrastructure.persistence.jpa;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import pl.strava.analizator.infrastructure.persistence.entity.AnalysisBackfillStateEntity;
+
+public interface AnalysisBackfillStateJpaRepository extends JpaRepository<AnalysisBackfillStateEntity, String> {}

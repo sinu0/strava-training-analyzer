@@ -100,6 +100,9 @@ public class ActivityEntity {
     @Column(name = "calories")
     private Integer calories;
 
+    @Column(name = "relative_effort")
+    private Integer relativeEffort;
+
     @Column(name = "avg_temp_c")
     private BigDecimal avgTempC;
 

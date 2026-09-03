@@ -28,6 +28,8 @@ public interface ActivityEntityMapper {
     @Mapping(target = "velocityStream", source = "streams", qualifiedByName = "extractVelocityStream")
     @Mapping(target = "tags", source = "tags", qualifiedByName = "arrayToList")
     @Mapping(target = "laps", source = "laps", qualifiedByName = "mapsToLaps")
+    @Mapping(target = "segmentEfforts", ignore = true)
+    @Mapping(target = "segmentDataAvailability", ignore = true)
     Activity toDomain(ActivityEntity entity);
 
     @Mapping(target = "streams", source = ".", qualifiedByName = "buildStreamsJson")

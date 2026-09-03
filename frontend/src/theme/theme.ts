@@ -115,6 +115,11 @@ export const getThemeTokens = (mode: AppColorMode) => {
     transition: `all ${standardMotion}`,
     focusRing: `0 0 0 3px ${isLight ? 'rgba(252,76,2,0.20)' : 'rgba(255,128,81,0.28)'}`,
     status: STATUS,
+    podium: {
+      gold: isLight ? '#A96808' : '#FFD166',
+      silver: isLight ? '#657184' : '#CBD5E1',
+      bronze: isLight ? '#9A4F24' : '#E09A62',
+    },
     action,
     chart: {
       primary: '#FC4C02',

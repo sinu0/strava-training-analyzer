@@ -34,4 +34,6 @@ public class ActivitySummaryDto {
     private List<String> photoUrls;
     private String primaryBenefit;
     private Integer trainingScore;
+    private int segmentCount;
+    private int newRecordCount;
 }

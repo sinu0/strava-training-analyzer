@@ -23,12 +23,14 @@ import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
 import PageContainer from '@/components/common/PageContainer';
+import MatchedRideCard from '@/components/matched-rides/MatchedRideCard';
+import ActivitySegmentsPanel from '@/components/segments/ActivitySegmentsPanel';
 import MetricReadout from '@/components/v2/MetricReadout';
 import PerformanceSurface from '@/components/v2/PerformanceSurface';
 
 import { useActivityLaps, useActivityStreams, useV2Activity } from './useHistory';
 
-type DetailTab = 'overview' | 'analysis' | 'laps';
+type DetailTab = 'overview' | 'analysis' | 'laps' | 'segments';
 
 function metric(value?: number | null, suffix = '') {
   return value == null ? '—' : `${Math.round(value * 10) / 10}${suffix}`;
@@ -39,7 +41,7 @@ export default function ActivityDetailV2Page() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const requestedTab = params.get('tab');
-  const tab: DetailTab = requestedTab === 'analysis' || requestedTab === 'laps' ? requestedTab : 'overview';
+  const tab: DetailTab = requestedTab === 'analysis' || requestedTab === 'laps' || requestedTab === 'segments' ? requestedTab : 'overview';
   const activity = useV2Activity(id);
   const streams = useActivityStreams(id, tab === 'analysis');
   const laps = useActivityLaps(id, tab === 'laps');
@@ -91,6 +93,7 @@ export default function ActivityDetailV2Page() {
           <Tab value="overview" label="Przegląd" />
           <Tab value="analysis" label="Analiza" />
           <Tab value="laps" label="Okrążenia" />
+          <Tab value="segments" label="Segmenty" />
         </Tabs>
       </PerformanceSurface>
       <Box sx={{ mt: 2.5 }}>
@@ -106,6 +109,7 @@ export default function ActivityDetailV2Page() {
                 />
               </PerformanceSurface>
             </Grid>
+            <Grid size={12}><MatchedRideCard activityId={data.id} /></Grid>
             <Grid
               size={{
                 xs: 12,
@@ -169,6 +173,7 @@ export default function ActivityDetailV2Page() {
             ) : laps.data ? <EmptyState title="Brak okrążeń" /> : null}
           </PerformanceSurface>
         )}
+        {tab === 'segments' && <ActivitySegmentsPanel activityId={data.id} />}
       </Box>
     </PageContainer>
   );

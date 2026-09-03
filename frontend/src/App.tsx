@@ -18,6 +18,9 @@ const DataJobsPage = lazy(() => import('@/features/data/DataJobsPage'));
 const RoutePlannerPage = lazy(() => import('@/pages/RoutePlannerPage'));
 const SettingsPage = lazy(() => import('@/pages/AdminPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const SegmentsPage = lazy(() => import('@/features/segments/SegmentsPage'));
+const SegmentDetailPage = lazy(() => import('@/features/segments/SegmentDetailPage'));
+const MatchedRidesPage = lazy(() => import('@/features/matched-rides/MatchedRidesPage'));
 
 type LazyPageComponent = LazyExoticComponent<ComponentType>;
 
@@ -38,6 +41,9 @@ export default function App() {
         <Route path="/profile" element={renderLazyPage(ProfilePage)} />
         <Route path="/activities" element={renderLazyPage(ActivitiesPage)} />
         <Route path="/activities/:id" element={renderLazyPage(ActivityDetailPage)} />
+        <Route path="/segments" element={renderLazyPage(SegmentsPage)} />
+        <Route path="/segments/:id" element={renderLazyPage(SegmentDetailPage)} />
+        <Route path="/matched-rides/:routeGroupId" element={renderLazyPage(MatchedRidesPage)} />
         <Route path="/analytics" element={renderLazyPage(AnalyticsPage)} />
         <Route path="/training" element={renderLazyPage(TrainingPlanPage)} />
         <Route path="/health" element={renderLazyPage(HealthPage)} />

@@ -103,4 +103,32 @@ public interface ActivityJpaRepository extends JpaRepository<ActivityEntity, UUI
             FROM ActivityEntity a WHERE a.id = :id
             """)
     Optional<ActivityCoreProjection> findV2CoreById(@Param("id") UUID id);
+
+    @Query(value = """
+            SELECT a.id FROM activities a
+            WHERE a.source = 'strava'
+              AND NOT EXISTS (SELECT 1 FROM segment_activity_imports sai WHERE sai.activity_id = a.id)
+            ORDER BY a.started_at DESC
+            """, nativeQuery = true)
+    List<UUID> findActivitiesNeedingSegmentScan(Pageable pageable);
+
+    @Query(value = """
+            SELECT COUNT(*) FROM activities a
+            WHERE a.source = 'strava'
+              AND NOT EXISTS (SELECT 1 FROM segment_activity_imports sai WHERE sai.activity_id = a.id)
+            """, nativeQuery = true)
+    long countActivitiesNeedingSegmentScan();
+
+    @Query(value = """
+            SELECT se.activity_id AS activityId,
+                   COUNT(*)::integer AS segmentCount,
+                   COUNT(*) FILTER (WHERE se.record_at_time)::integer AS newRecordCount
+            FROM segment_efforts se
+            WHERE se.activity_id IN (:activityIds)
+            GROUP BY se.activity_id
+            """, nativeQuery = true)
+    List<ActivitySegmentStatsProjection> summarizeSegments(@Param("activityIds") List<UUID> activityIds);
+
+    @Query("SELECT a.id, a.name FROM ActivityEntity a WHERE a.id IN :ids")
+    List<Object[]> findNamesByIds(@Param("ids") List<UUID> ids);
 }

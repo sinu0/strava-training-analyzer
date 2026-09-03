@@ -34,6 +34,7 @@ class StravaActivityDtoDeserializationTest {
                     "average_heartrate": 140.3,
                     "average_watts": 175.3,
                     "average_cadence": 67.1,
+                    "suffer_score": 82,
                     "calories": 870.2,
                     "map": {
                       "id": "a12345678987654321",
@@ -52,6 +53,52 @@ class StravaActivityDtoDeserializationTest {
 
         assertThat(activities).hasSize(1);
         assertThat(activities.getFirst().getCalories()).isEqualByComparingTo(BigDecimal.valueOf(870.2));
+        assertThat(activities.getFirst().getSufferScore()).isEqualTo(82);
         assertThat(activities.getFirst().getMap()).isNotNull();
+    }
+
+    @Test
+    void deserializesDetailedSegmentEffortsWithoutInventingMissingMetrics() throws Exception {
+        String json = """
+                {
+                  "id": 42,
+                  "segment_efforts": [{
+                    "id": 9001,
+                    "elapsed_time": 125,
+                    "moving_time": 123,
+                    "start_date": "2026-09-01T08:03:00Z",
+                    "start_index": 10,
+                    "end_index": 42,
+                    "average_watts": 219.4,
+                    "device_watts": true,
+                    "average_heartrate": 139.2,
+                    "pr_rank": 1,
+                    "segment": {
+                      "id": 77,
+                      "name": "Klasztorna fragment",
+                      "activity_type": "Ride",
+                      "distance": 790.3,
+                      "average_grade": 0.1,
+                      "maximum_grade": 2.4,
+                      "elevation_high": 197.0,
+                      "elevation_low": 193.0,
+                      "start_latlng": [50.1, 19.9],
+                      "end_latlng": [50.2, 19.9],
+                      "city": "Kraków",
+                      "country": "Poland"
+                    }
+                  }]
+                }
+                """;
+
+        StravaActivityDto activity = objectMapper.readValue(json, StravaActivityDto.class);
+
+        assertThat(activity.getSegmentEfforts()).hasSize(1);
+        var effort = activity.getSegmentEfforts().getFirst();
+        assertThat(effort.getId()).isEqualTo(9001L);
+        assertThat(effort.getStartIndex()).isEqualTo(10);
+        assertThat(effort.getAverageCadence()).isNull();
+        assertThat(effort.getSegment().getId()).isEqualTo(77L);
+        assertThat(effort.getSegment().getStartLatlng()).containsExactly(50.1, 19.9);
     }
 }

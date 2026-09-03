@@ -44,6 +44,7 @@ public class Activity {
     private Short maxCadence;
 
     private Integer calories;
+    private Integer relativeEffort;
     private BigDecimal avgTempC;
 
     private UUID gearId;
@@ -64,6 +65,10 @@ public class Activity {
     private double[] velocityStream;
 
     private List<Lap> laps;
+
+    // Imported with a detailed Strava activity and persisted separately.
+    private List<SegmentEffort> segmentEfforts;
+    private String segmentDataAvailability;
 
     private Instant createdAt;
     private Instant updatedAt;

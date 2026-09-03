@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import pl.strava.analizator.domain.model.AthleteProfile;
 import pl.strava.analizator.infrastructure.strava.dto.StravaStreamDto;
+import pl.strava.analizator.infrastructure.strava.dto.StravaActivityDto;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("null")
@@ -102,6 +103,18 @@ class StravaApiClientTest {
                 .thenThrow(new RestClientException("boom"));
 
         assertThat(apiClient.getActivityStreams(profile, "42")).isEmpty();
+    }
+
+    @Test
+    void activityDetailExplicitlyRequestsAllSegmentEfforts() {
+        when(restTemplate.exchange(
+                eq(Objects.requireNonNull("https://www.strava.com/api/v3/activities/42?include_all_efforts=true")),
+                eq(Objects.requireNonNull(HttpMethod.GET)),
+                any(HttpEntity.class),
+                eq(Objects.requireNonNull(StravaActivityDto.class))))
+                .thenReturn(ResponseEntity.ok(StravaActivityDto.builder().id(42L).build()));
+
+        assertThat(apiClient.getActivityDetail(profile, "42").getId()).isEqualTo(42L);
     }
 
     @Test
