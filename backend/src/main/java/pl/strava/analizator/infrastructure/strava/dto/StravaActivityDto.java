@@ -75,6 +75,9 @@ public class StravaActivityDto {
 
     private BigDecimal calories;
 
+    @JsonProperty("suffer_score")
+    private Integer sufferScore;
+
     @JsonProperty("average_temp")
     private BigDecimal averageTemp;
 
@@ -85,6 +88,9 @@ public class StravaActivityDto {
     private MapData map;
 
     private List<LapData> laps;
+
+    @JsonProperty("segment_efforts")
+    private List<SegmentEffortData> segmentEfforts;
 
     @Getter
     @Setter
@@ -141,5 +147,89 @@ public class StravaActivityDto {
 
         @JsonProperty("average_cadence")
         private BigDecimal averageCadence;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class SegmentEffortData {
+        private Long id;
+
+        @JsonProperty("elapsed_time")
+        private Integer elapsedTime;
+
+        @JsonProperty("moving_time")
+        private Integer movingTime;
+
+        @JsonProperty("start_date")
+        private String startDate;
+
+        @JsonProperty("start_index")
+        private Integer startIndex;
+
+        @JsonProperty("end_index")
+        private Integer endIndex;
+
+        @JsonProperty("average_watts")
+        private BigDecimal averageWatts;
+
+        @JsonProperty("device_watts")
+        private Boolean deviceWatts;
+
+        @JsonProperty("average_heartrate")
+        private BigDecimal averageHeartrate;
+
+        @JsonProperty("max_heartrate")
+        private BigDecimal maxHeartrate;
+
+        @JsonProperty("average_cadence")
+        private BigDecimal averageCadence;
+
+        @JsonProperty("pr_rank")
+        private Integer prRank;
+
+        private SegmentData segment;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class SegmentData {
+        private Long id;
+        private String name;
+
+        @JsonProperty("activity_type")
+        private String activityType;
+
+        private BigDecimal distance;
+
+        @JsonProperty("average_grade")
+        private BigDecimal averageGrade;
+
+        @JsonProperty("maximum_grade")
+        private BigDecimal maximumGrade;
+
+        @JsonProperty("elevation_high")
+        private BigDecimal elevationHigh;
+
+        @JsonProperty("elevation_low")
+        private BigDecimal elevationLow;
+
+        @JsonProperty("start_latlng")
+        private List<Double> startLatlng;
+
+        @JsonProperty("end_latlng")
+        private List<Double> endLatlng;
+
+        private String city;
+        private String state;
+        private String country;
+
+        @JsonProperty("private")
+        private Boolean privateSegment;
     }
 }

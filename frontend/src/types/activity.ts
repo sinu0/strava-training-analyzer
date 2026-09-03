@@ -15,6 +15,8 @@ export interface ActivitySummary {
   photoUrls?: string[] | null;
   primaryBenefit?: string | null;
   trainingScore?: number | null;
+  segmentCount?: number;
+  newRecordCount?: number;
 }
 
 export interface ActivityDetail {

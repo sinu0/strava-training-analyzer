@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Map;
 
 import pl.strava.analizator.domain.model.Activity;
 import pl.strava.analizator.domain.vo.ActivityFilter;
@@ -49,4 +50,8 @@ public interface ActivityRepository {
     double sumDistanceMetersForActivitiesWithPolylines();
 
     Optional<OffsetDateTime> findLatestStartedAtBySource(String source);
+
+    Map<UUID, String> findNamesByIds(List<UUID> ids);
+
+    List<Activity> findByIds(List<UUID> ids);
 }

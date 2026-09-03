@@ -28,6 +28,7 @@ import pl.strava.analizator.domain.port.ActivityMetricRepository;
 import pl.strava.analizator.domain.port.ActivityReadRepository;
 import pl.strava.analizator.domain.port.ActivityRepository;
 import pl.strava.analizator.domain.port.ActivityTrainingEffectRepository;
+import pl.strava.analizator.domain.port.SegmentRepository;
 
 @ExtendWith(MockitoExtension.class)
 class V2ActivityServiceTest {
@@ -36,13 +37,14 @@ class V2ActivityServiceTest {
     @Mock private ActivityRepository activityRepository;
     @Mock private ActivityMetricRepository metricRepository;
     @Mock private ActivityTrainingEffectRepository trainingEffectRepository;
+    @Mock private SegmentRepository segmentRepository;
 
     private V2ActivityService service;
 
     @BeforeEach
     void setUp() {
         service = new V2ActivityService(activityReadRepository, activityRepository,
-                metricRepository, trainingEffectRepository);
+                metricRepository, trainingEffectRepository, segmentRepository);
     }
 
     @Test

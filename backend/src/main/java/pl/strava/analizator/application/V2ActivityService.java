@@ -26,6 +26,7 @@ import pl.strava.analizator.domain.port.ActivityMetricRepository;
 import pl.strava.analizator.domain.port.ActivityReadRepository;
 import pl.strava.analizator.domain.port.ActivityRepository;
 import pl.strava.analizator.domain.port.ActivityTrainingEffectRepository;
+import pl.strava.analizator.domain.port.SegmentRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +43,7 @@ public class V2ActivityService {
     private final ActivityRepository activityRepository;
     private final ActivityMetricRepository metricRepository;
     private final ActivityTrainingEffectRepository trainingEffectRepository;
+    private final SegmentRepository segmentRepository;
 
     public ActivitySummaryPageDto findActivities(String sportType, OffsetDateTime from, OffsetDateTime to,
                                                   int page, int size) {
@@ -59,8 +61,13 @@ public class V2ActivityService {
                 blankToNull(sportType), normalizedQuery(query), safeFrom, safeTo, safePage, safeSize);
         Map<UUID, ActivityTrainingEffect> effects = trainingEffectRepository.findByActivityIds(
                 result.items().stream().map(ActivityCoreView::getId).toList());
+        var segmentStats = segmentRepository.summarizeActivities(
+                result.items().stream().map(ActivityCoreView::getId).toList());
         List<ActivitySummaryDto> items = result.items().stream()
-                .map(item -> toSummary(item, effects.get(item.getId())))
+                .map(item -> {
+                    var stats = segmentStats.get(item.getId());
+                    return toSummary(item, effects.get(item.getId()), stats);
+                })
                 .toList();
         return ActivitySummaryPageDto.builder()
                 .items(items)
@@ -166,7 +173,8 @@ public class V2ActivityService {
                 .build()).toList();
     }
 
-    private ActivitySummaryDto toSummary(ActivityCoreView activity, ActivityTrainingEffect effect) {
+    private ActivitySummaryDto toSummary(ActivityCoreView activity, ActivityTrainingEffect effect,
+                                         pl.strava.analizator.domain.model.ActivitySegmentStats segmentStats) {
         return ActivitySummaryDto.builder()
                 .id(activity.getId())
                 .externalId(activity.getExternalId())
@@ -183,6 +191,8 @@ public class V2ActivityService {
                 .summaryPolyline(activity.getSummaryPolyline())
                 .primaryBenefit(effect != null ? effect.getPrimaryBenefit() : null)
                 .trainingScore(effect != null ? effect.getTrainingScore() : null)
+                .segmentCount(segmentStats != null ? segmentStats.segmentCount() : 0)
+                .newRecordCount(segmentStats != null ? segmentStats.newRecordCount() : 0)
                 .build();
     }
 

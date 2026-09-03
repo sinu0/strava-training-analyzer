@@ -15,6 +15,10 @@ public interface SyncDataSource {
 
     Activity fetchActivityWithStreams(AthleteProfile profile, String externalId);
 
+    default Activity fetchActivityForSegmentBackfill(AthleteProfile profile, String externalId) {
+        return fetchActivityWithStreams(profile, externalId);
+    }
+
     List<String> fetchActivityPhotoUrls(AthleteProfile profile, String externalId);
 
     int countNewActivities(AthleteProfile profile, long afterEpoch);

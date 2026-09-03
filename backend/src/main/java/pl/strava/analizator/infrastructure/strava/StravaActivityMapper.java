@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import pl.strava.analizator.domain.model.Activity;
+import pl.strava.analizator.domain.model.Segment;
+import pl.strava.analizator.domain.model.SegmentEffort;
 import pl.strava.analizator.domain.vo.Lap;
 import pl.strava.analizator.infrastructure.strava.dto.StravaActivityDto;
 import pl.strava.analizator.infrastructure.strava.dto.StravaStreamDto;
@@ -49,11 +51,14 @@ public class StravaActivityMapper {
                 .avgCadence(toShort(dto.getAverageCadence()))
                 .maxCadence(resolveMaxCadence(dto, streams))
                 .calories(toInteger(dto.getCalories()))
+                .relativeEffort(dto.getSufferScore())
                 .avgTempC(dto.getAverageTemp())
                 .elevationLossM(computeElevationLoss(streamMap))
                 .gearId(null)
                 .summaryPolyline(dto.getMap() != null ? dto.getMap().getSummaryPolyline() : null)
-                .photoUrls(photoUrls != null ? photoUrls.stream().filter(Objects::nonNull).toList() : List.of());
+                .photoUrls(photoUrls != null ? photoUrls.stream().filter(Objects::nonNull).toList() : List.of())
+                .segmentDataAvailability(dto.getSegmentEfforts() == null ? "UNAVAILABLE" : "AVAILABLE")
+                .segmentEfforts(mapSegmentEfforts(dto));
 
         if (!streamMap.isEmpty()) {
             builder.powerStream(extractIntStream(streamMap.get("watts")))
@@ -115,6 +120,56 @@ public class StravaActivityMapper {
         }
 
         return builder.build();
+    }
+
+    private List<SegmentEffort> mapSegmentEfforts(StravaActivityDto dto) {
+        if (dto.getSegmentEfforts() == null) return List.of();
+        List<SegmentEffort> efforts = new ArrayList<>();
+        for (int sequence = 0; sequence < dto.getSegmentEfforts().size(); sequence++) {
+            StravaActivityDto.SegmentEffortData effort = dto.getSegmentEfforts().get(sequence);
+            StravaActivityDto.SegmentData segment = effort.getSegment();
+            if (segment == null || segment.getId() == null) continue;
+            efforts.add(SegmentEffort.builder()
+                    .externalId(effort.getId())
+                    .segmentId(segment.getId())
+                    .segment(Segment.builder()
+                            .id(segment.getId())
+                            .name(segment.getName())
+                            .activityType(segment.getActivityType())
+                            .distanceM(segment.getDistance())
+                            .averageGrade(segment.getAverageGrade())
+                            .maximumGrade(segment.getMaximumGrade())
+                            .elevationHighM(segment.getElevationHigh())
+                            .elevationLowM(segment.getElevationLow())
+                            .startLatitude(coordinate(segment.getStartLatlng(), 0))
+                            .startLongitude(coordinate(segment.getStartLatlng(), 1))
+                            .endLatitude(coordinate(segment.getEndLatlng(), 0))
+                            .endLongitude(coordinate(segment.getEndLatlng(), 1))
+                            .city(segment.getCity())
+                            .state(segment.getState())
+                            .country(segment.getCountry())
+                            .privateSegment(Boolean.TRUE.equals(segment.getPrivateSegment()))
+                            .build())
+                    .startedAt(parseDate(effort.getStartDate()))
+                    .sequence(sequence)
+                    .startIndex(effort.getStartIndex())
+                    .endIndex(effort.getEndIndex())
+                    .elapsedTimeSec(effort.getElapsedTime())
+                    .movingTimeSec(effort.getMovingTime())
+                    .distanceM(segment.getDistance())
+                    .averagePowerW(toShort(effort.getAverageWatts()))
+                    .averageHeartrate(toShort(effort.getAverageHeartrate()))
+                    .maxHeartrate(toShort(effort.getMaxHeartrate()))
+                    .averageCadence(toShort(effort.getAverageCadence()))
+                    .deviceWatts(effort.getDeviceWatts())
+                    .stravaPrRank(effort.getPrRank())
+                    .build());
+        }
+        return efforts;
+    }
+
+    private Double coordinate(List<Double> coordinates, int index) {
+        return coordinates != null && coordinates.size() > index ? coordinates.get(index) : null;
     }
 
     private BigDecimal computeElevationGain(StravaActivityDto dto, Map<String, StravaStreamDto> streamMap) {

@@ -100,6 +100,14 @@ public class StravaSyncAdapter implements ActivityDataSource, SyncDataSource {
     }
 
     @Override
+    public Activity fetchActivityForSegmentBackfill(AthleteProfile profile, String externalId) {
+        setProfile(profile);
+        StravaActivityDto detail = stravaApiClient.getActivityDetail(profile, externalId);
+        List<StravaStreamDto> streams = stravaApiClient.getActivityStreams(profile, externalId);
+        return activityMapper.toDomain(detail, streams, List.of());
+    }
+
+    @Override
     public List<String> fetchActivityPhotoUrls(AthleteProfile profile, String externalId) {
         setProfile(profile);
         return stravaApiClient.getActivityPhotos(profile, externalId).stream()

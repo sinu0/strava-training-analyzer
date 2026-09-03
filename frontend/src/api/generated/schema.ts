@@ -324,6 +324,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/analysis-data/backfill/{type}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["status"];
+        put?: never;
+        post: operations["start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/ai/predict": {
         parameters: {
             query?: never;
@@ -1108,6 +1124,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/segments/{id}/favorite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["setFavorite"];
+        trace?: never;
+    };
     "/api/weight/history": {
         parameters: {
             query?: never;
@@ -1220,6 +1252,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/segments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["findSegments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/segments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["findSegment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/segments/{id}/efforts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["findEfforts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/segments/{id}/comparison": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["compare_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/planning/load-scenario": {
         parameters: {
             query?: never;
@@ -1228,6 +1324,38 @@ export interface paths {
             cookie?: never;
         };
         get: operations["loadScenario"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/matched-rides/{groupId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["findGroup"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/matched-rides/activity/{activityId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["findForActivity"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1339,7 +1467,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["compare_1"];
+        get: operations["compare_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1436,6 +1564,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["findStreams"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/activities/{id}/segments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["findSegments_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3014,6 +3158,20 @@ export interface components {
         ImportJobRequest: {
             mode?: string;
         };
+        BackfillStatusDto: {
+            jobType?: string;
+            status?: string;
+            /** Format: int32 */
+            processed?: number;
+            /** Format: int32 */
+            total?: number;
+            capability?: string;
+            /** Format: date-time */
+            rateLimitResetsAt?: string;
+            errorMessage?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
         PredictionRequestV2Dto: {
             predictionType?: string;
             persona?: string;
@@ -4017,6 +4175,38 @@ export interface components {
             modelId?: string;
             providerName?: string;
         };
+        UpdateSegmentFavoriteRequest: {
+            favorite?: boolean;
+        };
+        SegmentSummaryDto: {
+            /** Format: int64 */
+            id?: number;
+            name?: string;
+            activityType?: string;
+            distanceM?: number;
+            averageGrade?: number;
+            maximumGrade?: number;
+            elevationHighM?: number;
+            elevationLowM?: number;
+            /** Format: double */
+            startLatitude?: number;
+            /** Format: double */
+            startLongitude?: number;
+            /** Format: double */
+            endLatitude?: number;
+            /** Format: double */
+            endLongitude?: number;
+            city?: string;
+            country?: string;
+            localFavorite?: boolean;
+            routePolyline?: string;
+            /** Format: int32 */
+            effortCount?: number;
+            /** Format: int32 */
+            bestElapsedTimeSec?: number;
+            /** Format: date-time */
+            latestEffortAt?: string;
+        };
         WeightOverviewDto: {
             currentWeightKg?: number;
             goal?: components["schemas"]["WeightGoalDto"];
@@ -4140,6 +4330,10 @@ export interface components {
             primaryBenefit?: string;
             /** Format: int32 */
             trainingScore?: number;
+            /** Format: int32 */
+            segmentCount?: number;
+            /** Format: int32 */
+            newRecordCount?: number;
         };
         ConfidenceDto: {
             level?: string;
@@ -4179,6 +4373,109 @@ export interface components {
             nextTraining?: components["schemas"]["TrainingPlanDto"];
             sync?: components["schemas"]["SyncStatus"];
         };
+        SegmentPageDto: {
+            items?: components["schemas"]["SegmentSummaryDto"][];
+            /** Format: int64 */
+            total?: number;
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int32 */
+            totalPages?: number;
+        };
+        SegmentDetailDto: {
+            segment?: components["schemas"]["SegmentSummaryDto"];
+            efforts?: components["schemas"]["SegmentEffortDto"][];
+            backfillStatus?: string;
+            personalBestConfirmed?: boolean;
+        };
+        SegmentEffortDto: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: int64 */
+            externalId?: number;
+            /** Format: int64 */
+            segmentId?: number;
+            segmentName?: string;
+            /** Format: uuid */
+            activityId?: string;
+            activityName?: string;
+            /** Format: date-time */
+            startedAt?: string;
+            /** Format: int32 */
+            sequence?: number;
+            /** Format: int32 */
+            startIndex?: number;
+            /** Format: int32 */
+            endIndex?: number;
+            /** Format: int32 */
+            elapsedTimeSec?: number;
+            /** Format: int32 */
+            movingTimeSec?: number;
+            distanceM?: number;
+            /** Format: int32 */
+            averagePowerW?: number;
+            /** Format: int32 */
+            averageHeartrate?: number;
+            averageSpeedMs?: number;
+            /** Format: int32 */
+            averageCadence?: number;
+            elevationGainM?: number;
+            deviceWatts?: boolean;
+            /** Format: int32 */
+            personalRank?: number;
+            /** Format: int32 */
+            differenceToBestSec?: number;
+            recordAtTime?: boolean;
+            /** Format: int32 */
+            previousBestElapsedTimeSec?: number;
+            achievementLabel?: string;
+            routePolyline?: string;
+        };
+        SegmentComparisonDto: {
+            /** Format: int64 */
+            segmentId?: number;
+            /** Format: uuid */
+            referenceEffortId?: string;
+            /** Format: double */
+            distanceM?: number;
+            series?: components["schemas"]["SegmentComparisonSeriesDto"][];
+        };
+        SegmentComparisonPointDto: {
+            /** Format: double */
+            distanceM?: number;
+            /** Format: double */
+            timeSec?: number;
+            /** Format: double */
+            timeDeltaSec?: number;
+            /** Format: double */
+            powerW?: number;
+            /** Format: double */
+            heartrate?: number;
+            /** Format: double */
+            speedMs?: number;
+            /** Format: double */
+            cadence?: number;
+            /** Format: double */
+            altitudeM?: number;
+            /** Format: double */
+            latitude?: number;
+            /** Format: double */
+            longitude?: number;
+        };
+        SegmentComparisonSeriesDto: {
+            /** Format: uuid */
+            effortId?: string;
+            /** Format: uuid */
+            activityId?: string;
+            activityName?: string;
+            /** Format: date-time */
+            startedAt?: string;
+            /** Format: int32 */
+            elapsedTimeSec?: number;
+            points?: components["schemas"]["SegmentComparisonPointDto"][];
+        };
         LoadScenarioDto: {
             /** Format: date */
             from?: string;
@@ -4195,6 +4492,70 @@ export interface components {
             ctl?: number;
             atl?: number;
             form?: number;
+        };
+        MatchedRidePointDto: {
+            /** Format: uuid */
+            activityId?: string;
+            activityName?: string;
+            /** Format: date-time */
+            startedAt?: string;
+            /** Format: double */
+            averageSpeedKmh?: number;
+            /** Format: int32 */
+            movingTimeSec?: number;
+            /** Format: int32 */
+            averagePowerW?: number;
+            /** Format: int32 */
+            averageHeartrate?: number;
+            /** Format: int32 */
+            relativeEffort?: number;
+            /** Format: double */
+            similarityPercent?: number;
+            /** Format: double */
+            smoothedSpeedKmh?: number;
+        };
+        RouteGroupDetailDto: {
+            /** Format: uuid */
+            routeGroupId?: string;
+            /** Format: uuid */
+            routeFamilyId?: string;
+            /** Format: int32 */
+            algorithmVersion?: number;
+            directionKey?: string;
+            /** Format: int32 */
+            rideCount?: number;
+            /** Format: double */
+            bestSpeedKmh?: number;
+            /** Format: double */
+            averageSpeedKmh?: number;
+            /** Format: double */
+            slowestSpeedKmh?: number;
+            rides?: components["schemas"]["MatchedRidePointDto"][];
+        };
+        MatchedRideSummaryDto: {
+            /** Format: uuid */
+            routeGroupId?: string;
+            /** Format: uuid */
+            routeFamilyId?: string;
+            /** Format: int32 */
+            rideCount?: number;
+            /** Format: int32 */
+            currentRank?: number;
+            /** Format: double */
+            similarityPercent?: number;
+            /** Format: double */
+            currentSpeedKmh?: number;
+            /** Format: double */
+            changeFromPreviousKmh?: number;
+            /** Format: double */
+            changeFromAverageKmh?: number;
+            /** Format: double */
+            changeFromRecordKmh?: number;
+            /** Format: double */
+            changeFromPreviousBestKmh?: number;
+            newRecord?: boolean;
+            directionVariant?: string;
+            trend?: components["schemas"]["MatchedRidePointDto"][];
         };
         DataQualitySummaryDto: {
             /** Format: int64 */
@@ -4431,6 +4792,15 @@ export interface components {
             velocity?: number[];
             latitude?: number[];
             longitude?: number[];
+        };
+        ActivitySegmentsDto: {
+            /** Format: uuid */
+            activityId?: string;
+            routePolyline?: string;
+            availability?: string;
+            backfillStatus?: string;
+            personalBestConfirmed?: boolean;
+            efforts?: components["schemas"]["SegmentEffortDto"][];
         };
         LapDto: {
             /** Format: int32 */
@@ -5886,6 +6256,50 @@ export interface operations {
             };
         };
     };
+    status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BackfillStatusDto"];
+                };
+            };
+        };
+    };
+    start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BackfillStatusDto"];
+                };
+            };
+        };
+    };
     predict: {
         parameters: {
             query?: never;
@@ -7184,6 +7598,32 @@ export interface operations {
             };
         };
     };
+    setFavorite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSegmentFavoriteRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SegmentSummaryDto"];
+                };
+            };
+        };
+    };
     getHistory: {
         parameters: {
             query?: {
@@ -7339,6 +7779,104 @@ export interface operations {
             };
         };
     };
+    findSegments: {
+        parameters: {
+            query?: {
+                q?: string;
+                favorite?: boolean;
+                minDistanceM?: number;
+                maxDistanceM?: number;
+                minAverageGrade?: number;
+                sort?: string;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SegmentPageDto"];
+                };
+            };
+        };
+    };
+    findSegment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SegmentDetailDto"];
+                };
+            };
+        };
+    };
+    findEfforts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SegmentEffortDto"][];
+                };
+            };
+        };
+    };
+    compare_1: {
+        parameters: {
+            query: {
+                effortIds: string[];
+                referenceEffortId?: string;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SegmentComparisonDto"];
+                };
+            };
+        };
+    };
     loadScenario: {
         parameters: {
             query: {
@@ -7358,6 +7896,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["LoadScenarioDto"];
+                };
+            };
+        };
+    };
+    findGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                groupId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RouteGroupDetailDto"];
+                };
+            };
+        };
+    };
+    findForActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MatchedRideSummaryDto"];
                 };
             };
         };
@@ -7495,7 +8077,7 @@ export interface operations {
             };
         };
     };
-    compare_1: {
+    compare_2: {
         parameters: {
             query: {
                 period1From: string;
@@ -7657,6 +8239,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ActivityStreamsDto"];
+                };
+            };
+        };
+    };
+    findSegments_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ActivitySegmentsDto"];
                 };
             };
         };

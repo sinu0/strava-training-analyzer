@@ -27,6 +27,7 @@ export const PRIMARY_NAVIGATION: AppNavigationItem[] = [
 ];
 
 export const SECONDARY_NAVIGATION: AppNavigationItem[] = [
+  { label: 'Segmenty', path: '/segments', icon: <RouteOutlinedIcon />, description: 'Własne próby i rekordy' },
   { label: 'Pogoda', path: '/weather', icon: <CloudOutlinedIcon />, description: 'Warunki dla treningu' },
   { label: 'Zdrowie', path: '/health', icon: <MonitorHeartOutlinedIcon />, description: 'Regeneracja i masa ciała' },
   { label: 'Profil', path: '/profile', icon: <PersonOutlineIcon />, description: 'Strefy i dane sportowe' },

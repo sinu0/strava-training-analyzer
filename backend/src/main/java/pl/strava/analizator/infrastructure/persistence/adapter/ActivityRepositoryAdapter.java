@@ -4,6 +4,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Map;
+import java.util.LinkedHashMap;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -136,5 +138,21 @@ public class ActivityRepositoryAdapter implements ActivityRepository {
     @Override
     public Optional<OffsetDateTime> findLatestStartedAtBySource(String source) {
         return jpaRepository.findLatestStartedAtBySource(source);
+    }
+
+    @Override
+    public Map<UUID, String> findNamesByIds(List<UUID> ids) {
+        if (ids == null || ids.isEmpty()) return Map.of();
+        Map<UUID, String> result = new LinkedHashMap<>();
+        for (Object[] row : jpaRepository.findNamesByIds(ids)) {
+            result.put((UUID) row[0], (String) row[1]);
+        }
+        return result;
+    }
+
+    @Override
+    public List<Activity> findByIds(List<UUID> ids) {
+        if (ids == null || ids.isEmpty()) return List.of();
+        return jpaRepository.findAllById(ids).stream().map(mapper::toDomain).toList();
     }
 }

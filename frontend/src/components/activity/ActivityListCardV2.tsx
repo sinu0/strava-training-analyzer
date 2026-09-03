@@ -112,6 +112,7 @@ export default function ActivityListCardV2({ activity, onOpen, priority = false 
 
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 'auto', pt: 2.2 }}>
           {activity.primaryBenefit ? <Chip size="small" variant="outlined" label={activity.primaryBenefit} /> : null}
+          {(activity.segmentCount ?? 0) > 0 ? <Chip size="small" variant="outlined" label={`${activity.segmentCount} segmentów · ${activity.newRecordCount ?? 0} nowe rekordy`} /> : null}
           <Box sx={{ flex: 1 }} />
           <Button endIcon={<ArrowForwardRoundedIcon />} onClick={() => onOpen(activity.id)}>
             Otwórz analizę
