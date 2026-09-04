@@ -1,0 +1,8 @@
+services:
+  frontend:
+    ports:
+      - "0.0.0.0:443:443"
+    volumes:
+      - ./frontend/nginx.https.conf:/etc/nginx/conf.d/https.conf:ro
+      - ./certs/lan.pem:/etc/nginx/certs/lan.pem:ro
+      - ./certs/lan-key.pem:/etc/nginx/certs/lan-key.pem:ro

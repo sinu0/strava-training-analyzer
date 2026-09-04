@@ -3,6 +3,7 @@ package pl.strava.analizator.application.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 public class CreateTrainingPlanRequest {
     private LocalDate date;
     private UUID workoutTemplateId;
+    private List<WorkoutStepInputDto> scaledSteps;
     private String plannedType;
     private BigDecimal plannedTss;
     private Integer plannedDurationMin;

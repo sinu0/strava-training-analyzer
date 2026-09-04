@@ -3,6 +3,7 @@ package pl.strava.analizator.infrastructure.export;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -10,11 +11,60 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import com.garmin.fit.Decode;
+import com.garmin.fit.FileIdMesg;
+import com.garmin.fit.Mesg;
+import com.garmin.fit.MesgBroadcaster;
+import com.garmin.fit.MesgNum;
+import com.garmin.fit.WorkoutMesg;
+import com.garmin.fit.WorkoutStepMesg;
+import com.garmin.fit.WktStepDuration;
+
 import pl.strava.analizator.domain.model.WorkoutCategory;
 import pl.strava.analizator.domain.model.WorkoutStep;
 import pl.strava.analizator.domain.model.WorkoutTemplate;
 
 class FitWorkoutEncoderTest {
+
+    @Test
+    void officialSdkValidatesMessageOrderUniqueFileIdAndRepeatSemantics() {
+        WorkoutTemplate template = buildTemplate("Official SDK", List.of(
+                WorkoutStep.builder().type("interval").repeat(4)
+                        .onDurationSec(240).onPowerPctFtpLow(110).onPowerPctFtpHigh(120)
+                        .offDurationSec(120).offPowerPctFtpLow(40).offPowerPctFtpHigh(50)
+                        .build(),
+                WorkoutStep.builder().type("freeRide").durationType("LAP_BUTTON")
+                        .name("Luźna jazda").instructions("Naciśnij LAP, gdy będziesz gotowy").build()));
+
+        byte[] first = FitWorkoutEncoder.encode(template, 280);
+        byte[] second = FitWorkoutEncoder.encode(template, 280);
+        List<Mesg> messages = decode(first);
+        List<Mesg> secondMessages = decode(second);
+
+        assertThat(new Decode().checkFileIntegrity(new ByteArrayInputStream(first))).isTrue();
+        assertThat(messages.get(0)).isInstanceOf(FileIdMesg.class);
+        assertThat(messages.get(1)).isInstanceOf(WorkoutMesg.class);
+        assertThat(messages.subList(2, messages.size())).allMatch(WorkoutStepMesg.class::isInstance);
+        WorkoutMesg workout = (WorkoutMesg) messages.get(1);
+        assertThat(workout.getNumValidSteps()).isEqualTo(messages.size() - 2);
+
+        FileIdMesg firstId = (FileIdMesg) messages.get(0);
+        FileIdMesg secondId = (FileIdMesg) secondMessages.get(0);
+        assertThat(firstId.getSerialNumber()).isNotEqualTo(secondId.getSerialNumber());
+
+        List<WorkoutStepMesg> steps = messages.stream()
+                .filter(WorkoutStepMesg.class::isInstance)
+                .map(WorkoutStepMesg.class::cast)
+                .toList();
+        WorkoutStepMesg repeat = steps.stream()
+                .filter(step -> step.getDurationType() == WktStepDuration.REPEAT_UNTIL_STEPS_CMPLT)
+                .findFirst().orElseThrow();
+        assertThat(repeat.getDurationValue()).isZero();
+        assertThat(repeat.getTargetValue()).isEqualTo(4);
+        assertThat(steps.getLast().getDurationType()).isEqualTo(WktStepDuration.OPEN);
+        assertThat(steps.getFirst().getCustomTargetPowerLow()).isEqualTo(110);
+        assertThat(steps.getFirst().getNotes()).contains("308 W", "FTP 280 W");
+    }
 
     @Test
     void producesNonEmptyByteArray() {
@@ -88,19 +138,19 @@ class FitWorkoutEncoderTest {
 
     @Test
     void ftpPercentOffsetAppliedToCustomTargetLow() {
-        // For 75% FTP: customTargetLow should be 75 + 1000 = 1075
+        // FIT workout_power: 0..1000 means % FTP; above 1000 means watts + 1000.
         List<FitWorkoutEncoder.FitStep> steps = FitWorkoutEncoder.expandSteps(List.of(
                 WorkoutStep.builder().type("steady").durationSec(600).powerPctFtpLow(75).powerPctFtpHigh(85).build()
         ));
 
         assertThat(steps).hasSize(1);
-        assertThat(steps.get(0).customTargetLow()).isEqualTo(1075L);
-        assertThat(steps.get(0).customTargetHigh()).isEqualTo(1085L);
+        assertThat(steps.get(0).customTargetLow()).isEqualTo(75L);
+        assertThat(steps.get(0).customTargetHigh()).isEqualTo(85L);
     }
 
     @Test
     void ftpPercentOffsetAppliedToIntervalSteps() {
-        // On: 110-120% -> 1110-1120; Off: 40-50% -> 1040-1050
+        // Percent targets are stored directly; absolute watts use the +1000 form.
         List<FitWorkoutEncoder.FitStep> steps = FitWorkoutEncoder.expandSteps(List.of(
                 WorkoutStep.builder().type("interval").repeat(1)
                         .onDurationSec(240).onPowerPctFtpLow(110).onPowerPctFtpHigh(120)
@@ -109,10 +159,10 @@ class FitWorkoutEncoderTest {
         ));
 
         assertThat(steps).hasSize(2);
-        assertThat(steps.get(0).customTargetLow()).isEqualTo(1110L);
-        assertThat(steps.get(0).customTargetHigh()).isEqualTo(1120L);
-        assertThat(steps.get(1).customTargetLow()).isEqualTo(1040L);
-        assertThat(steps.get(1).customTargetHigh()).isEqualTo(1050L);
+        assertThat(steps.get(0).customTargetLow()).isEqualTo(110L);
+        assertThat(steps.get(0).customTargetHigh()).isEqualTo(120L);
+        assertThat(steps.get(1).customTargetLow()).isEqualTo(40L);
+        assertThat(steps.get(1).customTargetHigh()).isEqualTo(50L);
     }
 
     // --- Duration encoding ---
@@ -128,12 +178,13 @@ class FitWorkoutEncoderTest {
     }
 
     @Test
-    void nullDurationFallsBackTo300Seconds() {
+    void nullDurationProducesOpenLapButtonStep() {
         List<FitWorkoutEncoder.FitStep> steps = FitWorkoutEncoder.expandSteps(List.of(
                 WorkoutStep.builder().type("steady").powerPctFtpLow(75).powerPctFtpHigh(75).build()
         ));
 
-        assertThat(steps.get(0).durationValue()).isEqualTo(300_000L);
+        assertThat(steps.get(0).durationType()).isEqualTo((byte) 5);
+        assertThat(steps.get(0).durationValue()).isZero();
     }
 
     // --- Intensity enum ---
@@ -206,8 +257,8 @@ class FitWorkoutEncoderTest {
         assertThat(steps).hasSize(3);
         FitWorkoutEncoder.FitStep repeatStep = steps.get(2);
         assertThat(repeatStep.durationType()).isEqualTo((byte) 6);   // REPEAT_UNTIL_STEPS_CMPLT
-        assertThat(repeatStep.durationValue()).isEqualTo(4L);         // repeat count
-        assertThat(repeatStep.targetValue()).isEqualTo(0L);           // index of first step
+        assertThat(repeatStep.durationValue()).isEqualTo(0L);         // index of first step
+        assertThat(repeatStep.targetValue()).isEqualTo(4L);           // repeat count
     }
 
     @Test
@@ -306,5 +357,23 @@ class FitWorkoutEncoderTest {
                 .createdBy("system")
                 .createdAt(OffsetDateTime.now())
                 .build();
+    }
+
+    private List<Mesg> decode(byte[] fit) {
+        List<Mesg> messages = new java.util.ArrayList<>();
+        MesgBroadcaster broadcaster = new MesgBroadcaster(new Decode());
+        broadcaster.addListener((com.garmin.fit.MesgListener) mesg -> {
+            if (mesg.getNum() == MesgNum.FILE_ID) {
+                messages.add(new FileIdMesg(mesg));
+            } else if (mesg.getNum() == MesgNum.WORKOUT) {
+                messages.add(new WorkoutMesg(mesg));
+            } else if (mesg.getNum() == MesgNum.WORKOUT_STEP) {
+                messages.add(new WorkoutStepMesg(mesg));
+            } else {
+                messages.add(mesg);
+            }
+        });
+        broadcaster.run(new ByteArrayInputStream(fit));
+        return messages;
     }
 }

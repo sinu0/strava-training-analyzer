@@ -39,6 +39,7 @@ import pl.strava.analizator.application.dto.TrainingPlanDto;
 import pl.strava.analizator.application.dto.TrainingPlanProgramDto;
 import pl.strava.analizator.application.dto.TrainingWeekObjectiveDto;
 import pl.strava.analizator.domain.model.Activity;
+import pl.strava.analizator.domain.model.AthleteProfile;
 import pl.strava.analizator.domain.model.AdjustmentFeedbackDecision;
 import pl.strava.analizator.domain.model.ProgramGoal;
 import pl.strava.analizator.domain.model.GoalPriority;
@@ -125,9 +126,10 @@ public class TrainingPlanService {
         BigDecimal plannedTss = request.getPlannedTss();
         Integer plannedDurationMin = request.getPlannedDurationMin();
         String plannedDescription = request.getPlannedDescription();
+        WorkoutTemplate template = null;
 
         if (request.getWorkoutTemplateId() != null) {
-            WorkoutTemplate template = workoutTemplateRepository.findById(request.getWorkoutTemplateId())
+            template = workoutTemplateRepository.findById(request.getWorkoutTemplateId())
                     .orElseThrow(() -> new IllegalArgumentException(
                             "Workout template not found: " + request.getWorkoutTemplateId()));
             if (plannedType == null) {
@@ -144,6 +146,12 @@ public class TrainingPlanService {
             }
         }
 
+        AthleteProfile thresholds = athleteProfileRepository.findFirst().orElse(null);
+        List<WorkoutStep> snapshotSteps = request.getScaledSteps() != null
+                ? request.getScaledSteps().stream().map(pl.strava.analizator.application.dto.WorkoutStepInputDto::toDomain).toList()
+                : template != null && template.getSteps() != null
+                        ? List.copyOf(new ArrayList<>(template.getSteps())) : List.of();
+
         TrainingPlan plan = TrainingPlan.builder()
                 .date(request.getDate())
                 .plannedType(plannedType)
@@ -152,6 +160,21 @@ public class TrainingPlanService {
                 .plannedDescription(plannedDescription)
                 .programId(request.getProgramId())
                 .workoutTemplateId(request.getWorkoutTemplateId())
+                .workoutTemplateRevisionId(template != null ? template.getRevisionId() : null)
+                .workoutTemplateRevision(template != null ? template.getRevision() : null)
+                .workoutNameSnapshot(template != null ? template.getName() : plannedDescription)
+                .workoutStepsSnapshot(snapshotSteps)
+                .ftpWatts(thresholds != null && thresholds.getFtpWatts() != null
+                        ? thresholds.getFtpWatts().intValue() : null)
+                .lthrBpm(thresholds != null && thresholds.getLthrBpm() != null
+                        ? thresholds.getLthrBpm().intValue() : null)
+                .maxHrBpm(thresholds != null && thresholds.getMaxHrBpm() != null
+                        ? thresholds.getMaxHrBpm().intValue() : null)
+                .restingHrBpm(thresholds != null && thresholds.getRestingHrBpm() != null
+                        ? thresholds.getRestingHrBpm().intValue() : null)
+                .deliveryMethod("ON_DEVICE")
+                .deliveryStatus("READY")
+                .activityMatchStatus("UNMATCHED")
                 .status(TrainingPlanStatus.PLANNED)
                 .notes(request.getNotes())
                 .build();
@@ -224,10 +247,10 @@ public class TrainingPlanService {
             plansByDate.put(plan.getDate(), plan);
         }
 
-        Map<LocalDate, Activity> activitiesByDate = new LinkedHashMap<>();
+        Map<LocalDate, List<Activity>> activitiesByDate = new LinkedHashMap<>();
         for (Activity activity : activities) {
             LocalDate actDate = activity.getStartedAt().toLocalDate();
-            activitiesByDate.put(actDate, activity);
+            activitiesByDate.computeIfAbsent(actDate, ignored -> new ArrayList<>()).add(activity);
         }
 
         Map<LocalDate, ProjectionContext> projectionsByDate = buildProjections(from, to, plans, coachMemory);
@@ -240,7 +263,7 @@ public class TrainingPlanService {
         Map<LocalDate, CalendarDayDto> result = new LinkedHashMap<>();
         for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
             TrainingPlan plan = plansByDate.get(date);
-            Activity activity = activitiesByDate.get(date);
+            Activity activity = resolveCalendarActivity(plan, activitiesByDate.getOrDefault(date, List.of()));
             AdaptivePlanDecision adaptivePlan = buildAdaptivePlanDecision(date, plan, coachMemory);
             TrainingPlanDto planDto = adaptivePlan != null ? adaptivePlan.planDto() : (plan != null ? toDto(plan) : null);
             CalendarActivitySummaryDto activityDto = null;
@@ -293,6 +316,15 @@ public class TrainingPlanService {
         return new ArrayList<>(result.values());
     }
 
+    private Activity resolveCalendarActivity(TrainingPlan plan, List<Activity> candidates) {
+        if (plan != null && plan.getActualActivityId() != null) {
+            return candidates.stream()
+                    .filter(activity -> plan.getActualActivityId().equals(activity.getId()))
+                    .findFirst().orElse(null);
+        }
+        return candidates.size() == 1 ? candidates.getFirst() : null;
+    }
+
     public List<TrainingPlanProgramDto> getPrograms() {
         return programRepository.findAll().stream()
                 .map(program -> enrichProgramDto(program, trainingPlanRepository.findByProgramId(program.getId())))
@@ -333,7 +365,8 @@ public class TrainingPlanService {
                 .build();
         TrainingPlanProgram savedProgram = programRepository.save(program);
 
-        short ftp = athleteProfileRepository.findFirst()
+        AthleteProfile planningProfile = athleteProfileRepository.findFirst().orElse(null);
+        short ftp = Optional.ofNullable(planningProfile)
                 .filter(p -> p.hasFtp())
                 .map(p -> p.getFtpWatts())
                 .orElse(DEFAULT_FTP_WATTS);
@@ -432,6 +465,21 @@ public class TrainingPlanService {
                         .plannedDescription(description)
                         .programId(savedProgram.getId())
                         .workoutTemplateId(bestTemplate != null ? bestTemplate.getId() : null)
+                        .workoutTemplateRevisionId(bestTemplate != null ? bestTemplate.getRevisionId() : null)
+                        .workoutTemplateRevision(bestTemplate != null ? bestTemplate.getRevision() : null)
+                        .workoutNameSnapshot(bestTemplate != null ? bestTemplate.getName() : description)
+                        .workoutStepsSnapshot(bestTemplate != null && bestTemplate.getSteps() != null
+                                ? List.copyOf(bestTemplate.getSteps()) : List.of())
+                        .ftpWatts((int) ftp)
+                        .lthrBpm(planningProfile != null && planningProfile.getLthrBpm() != null
+                                ? planningProfile.getLthrBpm().intValue() : null)
+                        .maxHrBpm(planningProfile != null && planningProfile.getMaxHrBpm() != null
+                                ? planningProfile.getMaxHrBpm().intValue() : null)
+                        .restingHrBpm(planningProfile != null && planningProfile.getRestingHrBpm() != null
+                                ? planningProfile.getRestingHrBpm().intValue() : null)
+                        .deliveryMethod("ON_DEVICE")
+                        .deliveryStatus("READY")
+                        .activityMatchStatus("UNMATCHED")
                         .targetPowerLowW(powerLow)
                         .targetPowerHighW(powerHigh)
                         .status(TrainingPlanStatus.PLANNED)
@@ -452,8 +500,8 @@ public class TrainingPlanService {
     }
 
     private TrainingPlanDto toDto(TrainingPlan plan) {
-        String templateName = null;
-        if (plan.getWorkoutTemplateId() != null) {
+        String templateName = plan.getWorkoutNameSnapshot();
+        if (templateName == null && plan.getWorkoutTemplateId() != null) {
             templateName = workoutTemplateRepository.findById(plan.getWorkoutTemplateId())
                     .map(WorkoutTemplate::getName)
                     .orElse(null);
@@ -1197,19 +1245,19 @@ public class TrainingPlanService {
             return fallbackReviewDetails(tssCompliance, durationCompliance, null, null);
         }
 
-        Optional<WorkoutTemplate> template = plan.getWorkoutTemplateId() != null
-                ? workoutTemplateRepository.findById(plan.getWorkoutTemplateId())
-                : Optional.empty();
-        short ftpWatts = athleteProfileRepository.findFirst()
+        List<WorkoutStep> plannedSteps = plan.getWorkoutStepsSnapshot();
+        if ((plannedSteps == null || plannedSteps.isEmpty()) && plan.getWorkoutTemplateId() != null) {
+            plannedSteps = workoutTemplateRepository.findById(plan.getWorkoutTemplateId())
+                    .map(WorkoutTemplate::getSteps).orElse(List.of());
+        }
+        int ftpWatts = plan.getFtpWatts() != null ? plan.getFtpWatts() : athleteProfileRepository.findFirst()
                 .map(profile -> profile.getFtpWatts() != null ? profile.getFtpWatts() : DEFAULT_FTP_WATTS)
                 .orElse(DEFAULT_FTP_WATTS);
 
-        Double intervalCompliance = template
-                .map(workoutTemplate -> calculateIntervalCompliance(workoutTemplate, activity, ftpWatts))
-                .orElse(null);
-        Double zoneCompliance = template
-                .map(workoutTemplate -> calculateTemplateCompliance(workoutTemplate, activity, ftpWatts))
-                .orElseGet(() -> calculatePlannedTypeZoneCompliance(plan.getPlannedType(), activity, ftpWatts));
+        Double intervalCompliance = calculateIntervalCompliance(plannedSteps, activity, ftpWatts);
+        Double zoneCompliance = plannedSteps != null && !plannedSteps.isEmpty()
+                ? calculateTemplateCompliance(plannedSteps, activity, ftpWatts)
+                : calculatePlannedTypeZoneCompliance(plan.getPlannedType(), activity, ftpWatts);
         return fallbackReviewDetails(tssCompliance, durationCompliance, intervalCompliance, zoneCompliance);
     }
 
@@ -1226,15 +1274,15 @@ public class TrainingPlanService {
                 determineNextDayAdvice(limiter, tssCompliance, durationCompliance, intervalCompliance, zoneCompliance));
     }
 
-    private Double calculateIntervalCompliance(WorkoutTemplate template, Activity activity, short ftpWatts) {
-        if (!activity.hasPowerData() || template.getSteps() == null || template.getSteps().isEmpty()) {
+    private Double calculateIntervalCompliance(List<WorkoutStep> steps, Activity activity, int ftpWatts) {
+        if (!activity.hasPowerData() || steps == null || steps.isEmpty()) {
             return null;
         }
 
         int cursor = 0;
         int targetSeconds = 0;
         double matchedSeconds = 0.0;
-        for (WorkoutStep step : template.getSteps()) {
+        for (WorkoutStep step : steps) {
             if (step.getRepeat() != null && step.getOnDurationSec() != null) {
                 int repeats = Math.max(1, step.getRepeat());
                 for (int index = 0; index < repeats; index++) {
@@ -1258,15 +1306,15 @@ public class TrainingPlanService {
         return compliancePercent(matchedSeconds, targetSeconds);
     }
 
-    private Double calculateTemplateCompliance(WorkoutTemplate template, Activity activity, short ftpWatts) {
-        if (!activity.hasPowerData() || template.getSteps() == null || template.getSteps().isEmpty()) {
+    private Double calculateTemplateCompliance(List<WorkoutStep> steps, Activity activity, int ftpWatts) {
+        if (!activity.hasPowerData() || steps == null || steps.isEmpty()) {
             return null;
         }
 
         int cursor = 0;
         int targetSeconds = 0;
         double matchedSeconds = 0.0;
-        for (WorkoutStep step : template.getSteps()) {
+        for (WorkoutStep step : steps) {
             if (step.getRepeat() != null && step.getOnDurationSec() != null) {
                 int repeats = Math.max(1, step.getRepeat());
                 for (int index = 0; index < repeats; index++) {
@@ -1296,7 +1344,7 @@ public class TrainingPlanService {
         return compliancePercent(matchedSeconds, targetSeconds);
     }
 
-    private Double calculatePlannedTypeZoneCompliance(String plannedType, Activity activity, short ftpWatts) {
+    private Double calculatePlannedTypeZoneCompliance(String plannedType, Activity activity, int ftpWatts) {
         if (!activity.hasPowerData() || plannedType == null) {
             return null;
         }
@@ -1328,7 +1376,7 @@ public class TrainingPlanService {
             int[] powerStream,
             int start,
             int durationSec,
-            short ftpWatts,
+            int ftpWatts,
             Integer lowPct,
             Integer highPct) {
         if (powerStream == null || powerStream.length == 0 || durationSec <= 0) {

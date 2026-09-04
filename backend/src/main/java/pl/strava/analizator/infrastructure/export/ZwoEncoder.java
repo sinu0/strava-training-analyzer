@@ -46,9 +46,12 @@ public final class ZwoEncoder {
             case "warmup" -> encodeWarmup(sb, step);
             case "cooldown" -> encodeCooldown(sb, step);
             case "interval" -> encodeInterval(sb, step);
-            case "rest" -> encodeRest(sb, step);
+            case "rest", "recovery" -> encodeRest(sb, step);
+            case "ramp" -> encodeRamp(sb, step);
+            case "freeride" -> encodeFreeRide(sb, step);
             default -> encodeSteadyState(sb, step);
         }
+        encodeInstructions(sb, step);
     }
 
     private static void encodeWarmup(StringBuilder sb, WorkoutStep step) {
@@ -94,6 +97,29 @@ public final class ZwoEncoder {
         sb.append(String.format(Locale.US,
                 "        <SteadyState Duration=\"%d\" Power=\"%.2f\" />\n",
                 duration, power));
+    }
+
+    private static void encodeRamp(StringBuilder sb, WorkoutStep step) {
+        int duration = safeInt(step.getDurationSec(), DEFAULT_DURATION);
+        double powerLow = pctToFraction(safeInt(step.getPowerPctFtpLow(), DEFAULT_POWER_LOW));
+        double powerHigh = pctToFraction(safeInt(step.getPowerPctFtpHigh(), DEFAULT_POWER_HIGH));
+        sb.append(String.format(Locale.US,
+                "        <Ramp Duration=\"%d\" PowerLow=\"%.2f\" PowerHigh=\"%.2f\" />\n",
+                duration, powerLow, powerHigh));
+    }
+
+    private static void encodeFreeRide(StringBuilder sb, WorkoutStep step) {
+        int duration = safeInt(step.getDurationSec(), DEFAULT_DURATION);
+        sb.append(String.format(Locale.US, "        <FreeRide Duration=\"%d\" />\n", duration));
+    }
+
+    private static void encodeInstructions(StringBuilder sb, WorkoutStep step) {
+        if (step.getInstructions() == null || step.getInstructions().isBlank()) {
+            return;
+        }
+        sb.append("        <textevent timeoffset=\"0\" message=\"")
+                .append(escapeXml(step.getInstructions()))
+                .append("\" />\n");
     }
 
     private static double pctToFraction(int pct) {

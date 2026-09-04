@@ -61,6 +61,7 @@ public class SyncService {
     private final ChallengeService challengeService;
     private final SegmentAnalysisService segmentAnalysisService;
     private final RouteMatchingService routeMatchingService;
+    private final WorkoutActivityMatchingService workoutActivityMatchingService;
 
     public SyncService(AthleteProfileRepository profileRepository,
                        ActivityRepository activityRepository,
@@ -82,7 +83,8 @@ public class SyncService {
                        PersonalRecordService personalRecordService,
                        ChallengeService challengeService,
                        @org.springframework.lang.Nullable SegmentAnalysisService segmentAnalysisService,
-                       @org.springframework.lang.Nullable RouteMatchingService routeMatchingService) {
+                       @org.springframework.lang.Nullable RouteMatchingService routeMatchingService,
+                       @org.springframework.lang.Nullable WorkoutActivityMatchingService workoutActivityMatchingService) {
         this.profileRepository = profileRepository;
         this.activityRepository = activityRepository;
         this.activityMetricRepository = activityMetricRepository;
@@ -104,6 +106,7 @@ public class SyncService {
         this.challengeService = challengeService;
         this.segmentAnalysisService = segmentAnalysisService;
         this.routeMatchingService = routeMatchingService;
+        this.workoutActivityMatchingService = workoutActivityMatchingService;
     }
 
     @Getter
@@ -380,6 +383,14 @@ public class SyncService {
             }
         } catch (Exception e) {
             log.debug("Could not enqueue AI note for activity {}: {}", saved.getExternalId(), e.getMessage());
+        }
+
+        try {
+            if (workoutActivityMatchingService != null) {
+                workoutActivityMatchingService.matchImported(saved);
+            }
+        } catch (Exception e) {
+            log.warn("Could not match workout execution for activity {}: {}", saved.getExternalId(), e.getMessage());
         }
 
         return true;

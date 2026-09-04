@@ -21,6 +21,8 @@ const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const SegmentsPage = lazy(() => import('@/features/segments/SegmentsPage'));
 const SegmentDetailPage = lazy(() => import('@/features/segments/SegmentDetailPage'));
 const MatchedRidesPage = lazy(() => import('@/features/matched-rides/MatchedRidesPage'));
+const ScheduledWorkoutPage = lazy(() => import('@/features/workout/ScheduledWorkoutPage'));
+const WorkoutPlayerPage = lazy(() => import('@/features/workout/WorkoutPlayerPage'));
 
 type LazyPageComponent = LazyExoticComponent<ComponentType>;
 
@@ -35,6 +37,7 @@ function renderLazyPage(Page: LazyPageComponent) {
 export default function App() {
   return (
     <Routes>
+      <Route path="/workout/:executionId" element={renderLazyPage(WorkoutPlayerPage)} />
       <Route element={<AppLayout />}>
         <Route path="/" element={renderLazyPage(TodayPage)} />
         <Route path="/dashboard" element={<Navigate to="/" replace />} />
@@ -46,6 +49,7 @@ export default function App() {
         <Route path="/matched-rides/:routeGroupId" element={renderLazyPage(MatchedRidesPage)} />
         <Route path="/analytics" element={renderLazyPage(AnalyticsPage)} />
         <Route path="/training" element={renderLazyPage(TrainingPlanPage)} />
+        <Route path="/training/workouts/:id" element={renderLazyPage(ScheduledWorkoutPage)} />
         <Route path="/health" element={renderLazyPage(HealthPage)} />
         <Route path="/weather" element={renderLazyPage(WeatherPage)} />
         <Route path="/more" element={renderLazyPage(MorePage)} />

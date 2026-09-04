@@ -10,10 +10,12 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class WorkoutTemplate {
     private final UUID id;
+    private final UUID revisionId;
+    private final int revision;
     private final String name;
     private final WorkoutCategory category;
     private final String description;

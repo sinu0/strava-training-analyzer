@@ -47,6 +47,18 @@ describe('WorkoutPowerChart', () => {
     expect(lines.length).toBeGreaterThan(0);
   });
 
+  it('keeps the FTP label inside the responsive SVG viewport', () => {
+    const clientWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientWidth');
+    Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, get: () => 390 });
+    const { container } = render(<WorkoutPowerChart steps={SAMPLE_STEPS} />);
+    const svg = container.querySelector('svg');
+    const ftpLabel = [...container.querySelectorAll('text')].find(label => label.textContent === 'FTP');
+
+    expect(Number(ftpLabel?.getAttribute('x'))).toBeLessThanOrEqual(Number(svg?.getAttribute('width')) - 24);
+    if (clientWidth) Object.defineProperty(HTMLElement.prototype, 'clientWidth', clientWidth);
+    else Reflect.deleteProperty(HTMLElement.prototype, 'clientWidth');
+  });
+
   it('compact mode renders SVG with smaller height', () => {
     const { container } = render(<WorkoutPowerChart steps={SAMPLE_STEPS} compact />);
     const svg = container.querySelector('svg');

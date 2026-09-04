@@ -5,6 +5,7 @@ import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
 import PageContainer from '@/components/common/PageContainer';
 import EditableDashboard from '@/components/dashboard/EditableDashboard';
+import PwaCapabilityBanner from '@/components/PwaCapabilityBanner';
 import { useSaveUiPreferences, useUiPreferences } from '@/hooks/useUiPreferences';
 
 import TodayWidget from './TodayWidget';
@@ -69,6 +70,7 @@ export default function TodayPage() {
         </Stack>
       )}
     >
+      <PwaCapabilityBanner />
       {data.dataStatus !== 'AVAILABLE' && (
         <Alert severity={data.dataStatus === 'UNKNOWN' ? 'info' : 'warning'} sx={{ mb: 2.5 }}>
           {data.confidence.reasons.join(' · ')}

@@ -1,0 +1,25 @@
+{
+  "name": "Strava Training Analyzer",
+  "short_name": "Trening",
+  "description": "Prywatny planer i odtwarzacz treningów kolarskich",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#080d13",
+  "theme_color": "#fc4c02",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/illustrations/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/illustrations/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

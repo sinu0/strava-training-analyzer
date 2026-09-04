@@ -115,6 +115,18 @@ class TrainingPlanControllerTest {
     }
 
     @Test
+    void updateStatus_acceptsDocumentedJsonContract() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(put("/api/training/plans/{id}/status", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"SKIPPED\"}"))
+                .andExpect(status().isNoContent());
+
+        verify(trainingPlanService).updateStatus(id, TrainingPlanStatus.SKIPPED);
+    }
+
+    @Test
     void deletePlan_returns204() throws Exception {
         UUID id = UUID.randomUUID();
 

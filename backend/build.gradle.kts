@@ -39,6 +39,9 @@ dependencies {
     // OpenAPI / Swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4")
 
+    // Official Garmin FIT SDK (Profile 21.214.0)
+    implementation("com.garmin:fit:21.214.0")
+
     // MapStruct
     implementation("org.mapstruct:mapstruct:1.6.3")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")

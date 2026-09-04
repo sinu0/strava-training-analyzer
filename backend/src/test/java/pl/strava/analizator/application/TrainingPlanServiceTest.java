@@ -32,6 +32,7 @@ import pl.strava.analizator.application.dto.RecordAdjustmentFeedbackRequest;
 import pl.strava.analizator.application.dto.TrainingGoalScorecardDto;
 import pl.strava.analizator.application.dto.TrainingPlanDto;
 import pl.strava.analizator.application.dto.TrainingPlanProgramDto;
+import pl.strava.analizator.application.dto.WorkoutStepInputDto;
 import pl.strava.analizator.domain.model.Activity;
 import pl.strava.analizator.domain.model.AdjustmentFeedbackDecision;
 import pl.strava.analizator.domain.model.AthleteProfile;
@@ -259,6 +260,55 @@ class TrainingPlanServiceTest {
     }
 
     @Test
+    void createPlan_persistsScaledImmutableSnapshotAndPlanningThresholds() {
+        UUID templateId = UUID.randomUUID();
+        List<WorkoutStep> templateSteps = List.of(
+                WorkoutStep.builder().type("steady").durationSec(600)
+                        .powerPctFtpLow(88).powerPctFtpHigh(93).build());
+        List<WorkoutStep> scaledSteps = List.of(
+                WorkoutStep.builder().type("steady").durationSec(900)
+                        .powerPctFtpLow(88).powerPctFtpHigh(93).build());
+        WorkoutTemplate template = WorkoutTemplate.builder()
+                .id(templateId)
+                .revision(3)
+                .name("Sweet Spot snapshot")
+                .category(WorkoutCategory.SWEET_SPOT)
+                .targetDurationMin(10)
+                .relativeEffort(7)
+                .steps(templateSteps)
+                .createdBy("system")
+                .build();
+        when(workoutTemplateRepository.findById(templateId)).thenReturn(Optional.of(template));
+        when(athleteProfileRepository.findFirst()).thenReturn(Optional.of(AthleteProfile.builder()
+                .ftpWatts((short) 286)
+                .lthrBpm((short) 171)
+                .maxHrBpm((short) 188)
+                .restingHrBpm((short) 48)
+                .build()));
+        when(trainingPlanRepository.save(any(TrainingPlan.class))).thenAnswer(invocation ->
+                ((TrainingPlan) invocation.getArgument(0)).toBuilder().id(UUID.randomUUID()).build());
+
+        service.createPlan(CreateTrainingPlanRequest.builder()
+                .date(LocalDate.of(2026, 9, 3))
+                .workoutTemplateId(templateId)
+                .plannedDurationMin(15)
+                .scaledSteps(scaledSteps.stream().map(WorkoutStepInputDto::fromDomain).toList())
+                .build());
+
+        ArgumentCaptor<TrainingPlan> captor = ArgumentCaptor.forClass(TrainingPlan.class);
+        verify(trainingPlanRepository).save(captor.capture());
+        TrainingPlan scheduled = captor.getValue();
+        assertThat(scheduled.getWorkoutTemplateRevision()).isEqualTo(3);
+        assertThat(scheduled.getWorkoutNameSnapshot()).isEqualTo("Sweet Spot snapshot");
+        assertThat(scheduled.getWorkoutStepsSnapshot()).containsExactlyElementsOf(scaledSteps);
+        assertThat(scheduled.getWorkoutStepsSnapshot()).isNotSameAs(scaledSteps);
+        assertThat(scheduled.getFtpWatts()).isEqualTo(286);
+        assertThat(scheduled.getLthrBpm()).isEqualTo(171);
+        assertThat(scheduled.getMaxHrBpm()).isEqualTo(188);
+        assertThat(scheduled.getRestingHrBpm()).isEqualTo(48);
+    }
+
+    @Test
     void createPlan_withoutTemplate_usesRawFields() {
         when(trainingPlanRepository.save(any(TrainingPlan.class))).thenAnswer(inv -> {
             TrainingPlan p = inv.getArgument(0);
@@ -376,6 +426,44 @@ class TrainingPlanServiceTest {
         CalendarDayDto day3 = result.get(2);
         assertThat(day3.getPlanned()).isNull();
         assertThat(day3.getActual()).isNull();
+    }
+
+    @Test
+    void getCalendarView_doesNotChooseArbitrarilyWhenTwoActivitiesShareTheDate() {
+        LocalDate day = LocalDate.of(2025, 1, 6);
+        TrainingPlan plan = buildPlan(day, BigDecimal.valueOf(80));
+        Activity first = Activity.builder().id(UUID.randomUUID()).name("Morning Ride").sportType("Ride")
+                .startedAt(day.atTime(8, 0).atOffset(ZoneOffset.UTC)).movingTimeSec(3600).build();
+        Activity second = Activity.builder().id(UUID.randomUUID()).name("Evening Ride").sportType("Ride")
+                .startedAt(day.atTime(18, 0).atOffset(ZoneOffset.UTC)).movingTimeSec(3000).build();
+        when(trainingPlanRepository.findByDateRange(day, day)).thenReturn(List.of(plan));
+        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(first, second));
+        when(activityMetricRepository.findNumericValues(any(), eq("tss"))).thenReturn(Map.of());
+
+        CalendarDayDto result = service.getCalendarView(day, day).getFirst();
+
+        assertThat(result.getActual()).isNull();
+        assertThat(result.getCompliance()).isNull();
+    }
+
+    @Test
+    void getCalendarView_usesExplicitActivityLinkAmongSameDayCandidates() {
+        LocalDate day = LocalDate.of(2025, 1, 6);
+        UUID linkedId = UUID.randomUUID();
+        TrainingPlan plan = buildPlan(day, BigDecimal.valueOf(80)).toBuilder().actualActivityId(linkedId).build();
+        Activity first = Activity.builder().id(UUID.randomUUID()).name("Morning Ride").sportType("Ride")
+                .startedAt(day.atTime(8, 0).atOffset(ZoneOffset.UTC)).movingTimeSec(3600).build();
+        Activity linked = Activity.builder().id(linkedId).name("Planned Ride").sportType("VirtualRide")
+                .startedAt(day.atTime(18, 0).atOffset(ZoneOffset.UTC)).movingTimeSec(3600).build();
+        when(trainingPlanRepository.findByDateRange(day, day)).thenReturn(List.of(plan));
+        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(first, linked));
+        when(activityMetricRepository.findNumericValues(any(), eq("tss")))
+                .thenReturn(Map.of(linkedId, BigDecimal.valueOf(80)));
+
+        CalendarDayDto result = service.getCalendarView(day, day).getFirst();
+
+        assertThat(result.getActual().getId()).isEqualTo(linkedId);
+        assertThat(result.getActual().getName()).isEqualTo("Planned Ride");
     }
 
     @Test
@@ -533,6 +621,36 @@ class TrainingPlanServiceTest {
         assertThat(result.getExecution().getZoneCompliance()).isGreaterThan(50.0);
         assertThat(result.getExecution().getPrimaryLimiter()).isEqualTo("ON_TARGET");
         assertThat(result.getExecution().getNextDayAdvice()).contains("kolejn");
+    }
+
+    @Test
+    void getCalendarView_reviewsTheScheduledSnapshotWithItsStoredFtp() {
+        LocalDate day = LocalDate.of(2026, 9, 4);
+        UUID templateId = UUID.randomUUID();
+        WorkoutStep scheduledStep = WorkoutStep.builder().type("interval").repeat(1)
+                .onDurationSec(60).onPowerPctFtpLow(95).onPowerPctFtpHigh(100).build();
+        TrainingPlan plan = TrainingPlan.builder()
+                .id(UUID.randomUUID()).date(day).plannedType("THRESHOLD")
+                .plannedTss(BigDecimal.TEN).plannedDurationMin(1)
+                .plannedDescription("Snapshot threshold").workoutTemplateId(templateId)
+                .workoutStepsSnapshot(List.of(scheduledStep)).ftpWatts(200)
+                .status(TrainingPlanStatus.PLANNED).createdAt(OffsetDateTime.now()).build();
+        when(trainingPlanRepository.findByDateRange(day, day)).thenReturn(List.of(plan));
+
+        UUID activityId = UUID.randomUUID();
+        int[] powerStream = new int[60];
+        java.util.Arrays.fill(powerStream, 195);
+        Activity activity = Activity.builder().id(activityId).name("Snapshot execution").sportType("Ride")
+                .startedAt(day.atTime(8, 0).atOffset(ZoneOffset.UTC)).movingTimeSec(60)
+                .powerStream(powerStream).avgPowerW((short) 195).build();
+        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(activity));
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "tss"))
+                .thenReturn(Map.of(activityId, BigDecimal.TEN));
+
+        CalendarDayDto result = service.getCalendarView(day, day).getFirst();
+
+        assertThat(result.getExecution().getIntervalCompliance()).isEqualTo(100.0);
+        assertThat(result.getExecution().getZoneCompliance()).isEqualTo(100.0);
     }
 
     @Test

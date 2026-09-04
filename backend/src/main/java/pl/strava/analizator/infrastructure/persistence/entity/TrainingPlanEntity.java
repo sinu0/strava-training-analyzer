@@ -16,6 +16,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "training_plans")
@@ -56,6 +58,40 @@ public class TrainingPlanEntity {
 
     @Column(name = "workout_template_id")
     private UUID workoutTemplateId;
+
+    @Column(name = "workout_template_revision_id")
+    private UUID workoutTemplateRevisionId;
+
+    @Column(name = "workout_template_revision")
+    private Integer workoutTemplateRevision;
+
+    @Column(name = "workout_name_snapshot", length = 100)
+    private String workoutNameSnapshot;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "workout_steps_snapshot", nullable = false, columnDefinition = "jsonb")
+    private String workoutStepsSnapshot;
+
+    @Column(name = "ftp_watts")
+    private Integer ftpWatts;
+
+    @Column(name = "lthr_bpm")
+    private Integer lthrBpm;
+
+    @Column(name = "max_hr_bpm")
+    private Integer maxHrBpm;
+
+    @Column(name = "resting_hr_bpm")
+    private Integer restingHrBpm;
+
+    @Column(name = "delivery_method", nullable = false, length = 30)
+    private String deliveryMethod;
+
+    @Column(name = "delivery_status", nullable = false, length = 30)
+    private String deliveryStatus;
+
+    @Column(name = "activity_match_status", nullable = false, length = 30)
+    private String activityMatchStatus;
 
     @Column(name = "target_power_low_w")
     private Integer targetPowerLowW;

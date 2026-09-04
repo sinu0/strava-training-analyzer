@@ -348,6 +348,14 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
             <Typography variant="body2" color="text.secondary">
               {new Date(data.nextTraining.date).toLocaleDateString('pl-PL')} · {data.nextTraining.plannedDurationMin ?? '—'} min
             </Typography>
+            <Button
+              variant="contained"
+              startIcon={<DirectionsBikeOutlinedIcon />}
+              onClick={() => navigate(`/training/workouts/${data.nextTraining?.id}`)}
+              sx={{ mt: 2, minHeight: 44 }}
+            >
+              Otwórz trening
+            </Button>
           </>
         ) : <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>Brak zaplanowanej sesji.</Typography>}
       </PerformanceSurface>

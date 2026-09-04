@@ -20,7 +20,7 @@ interface TooltipState {
   duration: number;
 }
 
-const MARGIN_FULL = { top: 8, right: 8, bottom: 32, left: 44 };
+const MARGIN_FULL = { top: 8, right: 32, bottom: 32, left: 44 };
 const MARGIN_COMPACT = { top: 2, right: 2, bottom: 2, left: 2 };
 
 export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPowerChartProps) {

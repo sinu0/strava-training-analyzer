@@ -20,6 +20,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/workouts/executions/{id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["feedback"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/workouts/executions/{id}/activity-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["link"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/ui-preferences": {
         parameters: {
             query?: never;
@@ -31,6 +63,22 @@ export interface paths {
         put: operations["updatePreferences"];
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/training/templates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getById"];
+        put: operations["update"];
+        post?: never;
+        delete: operations["delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -108,9 +156,9 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put: operations["update"];
+        put: operations["update_1"];
         post?: never;
-        delete: operations["delete"];
+        delete: operations["delete_1"];
         options?: never;
         head?: never;
         patch?: never;
@@ -123,10 +171,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["getById"];
-        put: operations["update_1"];
+        get: operations["getById_1"];
+        put: operations["update_2"];
         post?: never;
-        delete: operations["delete_1"];
+        delete: operations["delete_2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -140,9 +188,9 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put: operations["update_2"];
+        put: operations["update_3"];
         post?: never;
-        delete: operations["delete_2"];
+        delete: operations["delete_3"];
         options?: never;
         head?: never;
         patch?: never;
@@ -276,6 +324,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/workouts/scheduled/{id}/executions/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/workouts/executions/{id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["event"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/workouts/executions/{id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/workouts/executions/{id}/abort": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["abort"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/recalculation-jobs": {
         parameters: {
             query?: never;
@@ -333,7 +445,7 @@ export interface paths {
         };
         get: operations["status"];
         put?: never;
-        post: operations["start"];
+        post: operations["start_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -813,7 +925,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["feedback"];
+        post: operations["feedback_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1021,7 +1133,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["feedback_1"];
+        post: operations["feedback_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1228,6 +1340,134 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getCurrentWeather"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/workouts/today": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["today"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/workouts/scheduled/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["scheduled"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/workouts/scheduled/{id}/export/zwo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["exportZwo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/workouts/scheduled/{id}/export/fit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["exportFit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/workouts/executions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["execution"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/workouts/executions/{id}/activity-candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["candidates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/workouts/executions/active": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["active"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/workouts/delivery-capabilities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["capabilities"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1604,22 +1844,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/training/templates/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getById_1"];
-        put?: never;
-        post?: never;
-        delete: operations["delete_3"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/training/templates/{id}/export/zwo": {
         parameters: {
             query?: never;
@@ -1627,7 +1851,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["exportZwo"];
+        get: operations["exportZwo_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1643,7 +1867,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["exportFit"];
+        get: operations["exportFit_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2651,7 +2875,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["today"];
+        get: operations["today_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2913,6 +3137,117 @@ export interface components {
             longitude?: number;
             active?: boolean;
         };
+        WorkoutFeedbackRequest: {
+            /** Format: int32 */
+            rpe?: number;
+            feeling?: string;
+            notes?: string;
+        };
+        WorkoutExecutionDto: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            scheduledWorkoutId?: string;
+            /** Format: int32 */
+            workoutTemplateRevision?: number;
+            workoutNameSnapshot?: string;
+            stepsSnapshot?: components["schemas"]["WorkoutStep"][];
+            /** Format: int32 */
+            ftpWatts?: number;
+            /** Format: int32 */
+            lthrBpm?: number;
+            /** Format: int32 */
+            maxHrBpm?: number;
+            /** Format: int32 */
+            restingHrBpm?: number;
+            /** Format: date-time */
+            startedAt?: string;
+            /** Format: date-time */
+            finishedAt?: string;
+            status?: string;
+            /** Format: int32 */
+            currentStepIndex?: number;
+            /** Format: int64 */
+            workoutElapsedMs?: number;
+            /** Format: int64 */
+            stepElapsedMs?: number;
+            /** Format: date-time */
+            runningSince?: string;
+            /** Format: int32 */
+            intensityAdjustmentPct?: number;
+            skippedStepIndexes?: number[];
+            repeatedStepIndexes?: number[];
+            /** Format: int32 */
+            rpe?: number;
+            feeling?: string;
+            notes?: string;
+            /** Format: uuid */
+            activityId?: string;
+            activityMatchStatus?: string;
+            complianceStatus?: string;
+            /** Format: int32 */
+            complianceScore?: number;
+            complianceAlgorithmVersion?: string;
+            deliveryMethod?: string;
+            /** Format: int64 */
+            stateVersion?: number;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        WorkoutStep: {
+            type?: string;
+            name?: string;
+            instructions?: string;
+            durationType?: string;
+            /** Format: int32 */
+            durationSec?: number;
+            /** Format: int32 */
+            powerPctFtpLow?: number;
+            /** Format: int32 */
+            powerPctFtpHigh?: number;
+            /** Format: int32 */
+            heartRateBpmLow?: number;
+            /** Format: int32 */
+            heartRateBpmHigh?: number;
+            /** Format: int32 */
+            cadenceRpmLow?: number;
+            /** Format: int32 */
+            cadenceRpmHigh?: number;
+            /** Format: int32 */
+            repeat?: number;
+            /** Format: int32 */
+            onDurationSec?: number;
+            /** Format: int32 */
+            onPowerPctFtpLow?: number;
+            /** Format: int32 */
+            onPowerPctFtpHigh?: number;
+            /** Format: int32 */
+            onHeartRateBpmLow?: number;
+            /** Format: int32 */
+            onHeartRateBpmHigh?: number;
+            /** Format: int32 */
+            onCadenceRpmLow?: number;
+            /** Format: int32 */
+            onCadenceRpmHigh?: number;
+            /** Format: int32 */
+            offDurationSec?: number;
+            /** Format: int32 */
+            offPowerPctFtpLow?: number;
+            /** Format: int32 */
+            offPowerPctFtpHigh?: number;
+            /** Format: int32 */
+            offHeartRateBpmLow?: number;
+            /** Format: int32 */
+            offHeartRateBpmHigh?: number;
+            /** Format: int32 */
+            offCadenceRpmLow?: number;
+            /** Format: int32 */
+            offCadenceRpmHigh?: number;
+        };
+        WorkoutActivityLinkRequest: {
+            /** Format: uuid */
+            activityId?: string;
+        };
         DashboardLayoutDto: {
             widgets?: components["schemas"]["DashboardWidgetDto"][];
         };
@@ -2935,6 +3270,30 @@ export interface components {
             dashboard?: components["schemas"]["DashboardLayoutDto"];
             mobileNavigation?: string[];
             warnings?: string[];
+        };
+        WorkoutTemplateDto: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: int32 */
+            revision?: number;
+            name?: string;
+            category?: string;
+            description?: string;
+            targetTss?: number;
+            /** Format: int32 */
+            targetDurationMin?: number;
+            /** Format: int32 */
+            relativeEffort?: number;
+            intensityFactor?: number;
+            steps?: {
+                [key: string]: Record<string, never>;
+            }[];
+            createdBy?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        UpdatePlanStatusRequest: {
+            status?: string;
         };
         AutoSyncConfig: {
             /** Format: int32 */
@@ -3136,6 +3495,25 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string;
         };
+        StartWorkoutExecutionRequest: {
+            idempotencyKey?: string;
+            /** Format: date-time */
+            occurredAt?: string;
+            deliveryMethod?: string;
+        };
+        WorkoutExecutionEventRequest: {
+            type?: string;
+            idempotencyKey?: string;
+            /** Format: date-time */
+            occurredAt?: string;
+            /** Format: int32 */
+            intensityDeltaPct?: number;
+        };
+        FinishWorkoutExecutionRequest: {
+            idempotencyKey?: string;
+            /** Format: date-time */
+            occurredAt?: string;
+        };
         ProcessingJobDto: {
             /** Format: uuid */
             id?: string;
@@ -3248,25 +3626,6 @@ export interface components {
             predictionType?: string;
             models?: string[];
         };
-        WorkoutTemplateDto: {
-            /** Format: uuid */
-            id?: string;
-            name?: string;
-            category?: string;
-            description?: string;
-            targetTss?: number;
-            /** Format: int32 */
-            targetDurationMin?: number;
-            /** Format: int32 */
-            relativeEffort?: number;
-            intensityFactor?: number;
-            steps?: {
-                [key: string]: Record<string, never>;
-            }[];
-            createdBy?: string;
-            /** Format: date-time */
-            createdAt?: string;
-        };
         GeneratePlanRequest: {
             goal?: string;
             goalPriority?: string;
@@ -3359,6 +3718,7 @@ export interface components {
             date?: string;
             /** Format: uuid */
             workoutTemplateId?: string;
+            scaledSteps?: components["schemas"]["WorkoutStepInputDto"][];
             plannedType?: string;
             plannedTss?: number;
             /** Format: int32 */
@@ -3367,6 +3727,56 @@ export interface components {
             /** Format: uuid */
             programId?: string;
             notes?: string;
+        };
+        WorkoutStepInputDto: {
+            type?: string;
+            name?: string;
+            instructions?: string;
+            durationType?: string;
+            /** Format: int32 */
+            durationSec?: number;
+            /** Format: int32 */
+            powerPctFtpLow?: number;
+            /** Format: int32 */
+            powerPctFtpHigh?: number;
+            /** Format: int32 */
+            heartRateBpmLow?: number;
+            /** Format: int32 */
+            heartRateBpmHigh?: number;
+            /** Format: int32 */
+            cadenceRpmLow?: number;
+            /** Format: int32 */
+            cadenceRpmHigh?: number;
+            /** Format: int32 */
+            repeat?: number;
+            /** Format: int32 */
+            onDurationSec?: number;
+            /** Format: int32 */
+            onPowerPctFtpLow?: number;
+            /** Format: int32 */
+            onPowerPctFtpHigh?: number;
+            /** Format: int32 */
+            onHeartRateBpmLow?: number;
+            /** Format: int32 */
+            onHeartRateBpmHigh?: number;
+            /** Format: int32 */
+            onCadenceRpmLow?: number;
+            /** Format: int32 */
+            onCadenceRpmHigh?: number;
+            /** Format: int32 */
+            offDurationSec?: number;
+            /** Format: int32 */
+            offPowerPctFtpLow?: number;
+            /** Format: int32 */
+            offPowerPctFtpHigh?: number;
+            /** Format: int32 */
+            offHeartRateBpmLow?: number;
+            /** Format: int32 */
+            offHeartRateBpmHigh?: number;
+            /** Format: int32 */
+            offCadenceRpmLow?: number;
+            /** Format: int32 */
+            offCadenceRpmHigh?: number;
         };
         TrainingPlanDto: {
             /** Format: uuid */
@@ -3385,7 +3795,23 @@ export interface components {
             programId?: string;
             /** Format: uuid */
             workoutTemplateId?: string;
+            /** Format: uuid */
+            workoutTemplateRevisionId?: string;
+            /** Format: int32 */
+            workoutTemplateRevision?: number;
             workoutTemplateName?: string;
+            workoutStepsSnapshot?: components["schemas"]["WorkoutStep"][];
+            /** Format: int32 */
+            ftpWatts?: number;
+            /** Format: int32 */
+            lthrBpm?: number;
+            /** Format: int32 */
+            maxHrBpm?: number;
+            /** Format: int32 */
+            restingHrBpm?: number;
+            deliveryMethod?: string;
+            deliveryStatus?: string;
+            activityMatchStatus?: string;
             /** Format: int32 */
             targetPowerLowW?: number;
             /** Format: int32 */
@@ -4305,6 +4731,21 @@ export interface components {
             current?: components["schemas"]["WeatherDto"];
             hourly?: components["schemas"]["HourlySlot"][];
             daily?: components["schemas"]["DailySlot"][];
+        };
+        WorkoutActivityCandidateDto: {
+            /** Format: uuid */
+            id?: string;
+            name?: string;
+            sportType?: string;
+            /** Format: date-time */
+            startedAt?: string;
+            /** Format: int32 */
+            elapsedTimeSec?: number;
+        };
+        WorkoutDeliveryCapabilityDto: {
+            method?: string;
+            status?: string;
+            reason?: string;
         };
         ActivitySummaryDto: {
             /** Format: uuid */
@@ -5588,6 +6029,58 @@ export interface operations {
             };
         };
     };
+    feedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkoutFeedbackRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkoutExecutionDto"];
+                };
+            };
+        };
+    };
+    link: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkoutActivityLinkRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkoutExecutionDto"];
+                };
+            };
+        };
+    };
     getPreferences: {
         parameters: {
             query?: never;
@@ -5632,11 +6125,9 @@ export interface operations {
             };
         };
     };
-    updateStatus: {
+    getById: {
         parameters: {
-            query: {
-                status: string;
-            };
+            query?: never;
             header?: never;
             path: {
                 id: string;
@@ -5644,6 +6135,82 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkoutTemplateDto"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    [key: string]: Record<string, never>;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkoutTemplateDto"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateStatus: {
+        parameters: {
+            query?: {
+                status?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdatePlanStatusRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -5768,7 +6335,7 @@ export interface operations {
             };
         };
     };
-    update: {
+    update_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -5796,7 +6363,7 @@ export interface operations {
             };
         };
     };
-    delete: {
+    delete_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -5816,7 +6383,7 @@ export interface operations {
             };
         };
     };
-    getById: {
+    getById_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -5838,7 +6405,7 @@ export interface operations {
             };
         };
     };
-    update_1: {
+    update_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -5864,7 +6431,7 @@ export interface operations {
             };
         };
     };
-    delete_1: {
+    delete_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -5884,7 +6451,7 @@ export interface operations {
             };
         };
     };
-    update_2: {
+    update_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -5910,7 +6477,7 @@ export interface operations {
             };
         };
     };
-    delete_2: {
+    delete_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -6190,6 +6757,110 @@ export interface operations {
             };
         };
     };
+    start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartWorkoutExecutionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkoutExecutionDto"];
+                };
+            };
+        };
+    };
+    event: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkoutExecutionEventRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkoutExecutionDto"];
+                };
+            };
+        };
+    };
+    complete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FinishWorkoutExecutionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkoutExecutionDto"];
+                };
+            };
+        };
+    };
+    abort: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FinishWorkoutExecutionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkoutExecutionDto"];
+                };
+            };
+        };
+    };
     createRecalculationJob: {
         parameters: {
             query?: never;
@@ -6278,7 +6949,7 @@ export interface operations {
             };
         };
     };
-    start: {
+    start_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -7088,7 +7759,7 @@ export interface operations {
             };
         };
     };
-    feedback: {
+    feedback_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -7442,7 +8113,7 @@ export interface operations {
             };
         };
     };
-    feedback_1: {
+    feedback_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -7755,6 +8426,176 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["WeatherDto"];
+                };
+            };
+        };
+    };
+    today: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TrainingPlanDto"][];
+                };
+            };
+        };
+    };
+    scheduled: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TrainingPlanDto"];
+                };
+            };
+        };
+    };
+    exportZwo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
+    exportFit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
+    execution: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkoutExecutionDto"];
+                };
+            };
+        };
+    };
+    candidates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkoutActivityCandidateDto"][];
+                };
+            };
+        };
+    };
+    active: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkoutExecutionDto"];
+                };
+            };
+        };
+    };
+    capabilities: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkoutDeliveryCapabilityDto"][];
                 };
             };
         };
@@ -8287,49 +9128,7 @@ export interface operations {
             };
         };
     };
-    getById_1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["WorkoutTemplateDto"];
-                };
-            };
-        };
-    };
-    delete_3: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    exportZwo: {
+    exportZwo_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -8351,7 +9150,7 @@ export interface operations {
             };
         };
     };
-    exportFit: {
+    exportFit_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -9755,7 +10554,7 @@ export interface operations {
             };
         };
     };
-    today: {
+    today_1: {
         parameters: {
             query?: {
                 goalType?: string;

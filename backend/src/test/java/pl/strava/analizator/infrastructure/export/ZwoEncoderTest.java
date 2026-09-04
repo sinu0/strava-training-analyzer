@@ -129,6 +129,21 @@ class ZwoEncoderTest {
         assertThat(xml).contains("Power=\"1.50\"");
     }
 
+    @Test
+    void encodesRampFreeRideAndEscapedInstructions() {
+        WorkoutTemplate template = buildTemplate("Mixed", List.of(
+                WorkoutStep.builder().type("ramp").durationSec(300)
+                        .powerPctFtpLow(50).powerPctFtpHigh(90)
+                        .instructions("Płynnie & spokojnie").build(),
+                WorkoutStep.builder().type("freeRide").durationSec(180).build()));
+
+        String xml = new String(ZwoEncoder.encode(template), StandardCharsets.UTF_8);
+
+        assertThat(xml).contains("<Ramp Duration=\"300\" PowerLow=\"0.50\" PowerHigh=\"0.90\"");
+        assertThat(xml).contains("<FreeRide Duration=\"180\"");
+        assertThat(xml).contains("message=\"Płynnie &amp; spokojnie\"");
+    }
+
     private WorkoutTemplate buildTemplate(String name, List<WorkoutStep> steps) {
         return WorkoutTemplate.builder()
                 .id(UUID.randomUUID())

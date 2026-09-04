@@ -23,15 +23,21 @@ import pl.strava.analizator.domain.model.AthleteProfile;
 import pl.strava.analizator.domain.model.WorkoutCategory;
 import pl.strava.analizator.domain.model.WorkoutStep;
 import pl.strava.analizator.domain.model.WorkoutTemplate;
+import pl.strava.analizator.domain.model.TrainingPlan;
+import pl.strava.analizator.domain.model.TrainingPlanStatus;
 import pl.strava.analizator.domain.port.AthleteProfileRepository;
 import pl.strava.analizator.domain.port.WorkoutFileExporter;
 import pl.strava.analizator.domain.port.WorkoutTemplateRepository;
+import pl.strava.analizator.domain.port.TrainingPlanRepository;
 
 @ExtendWith(MockitoExtension.class)
 class WorkoutExportServiceTest {
 
     @Mock
     private WorkoutTemplateRepository workoutTemplateRepository;
+
+    @Mock
+    private TrainingPlanRepository trainingPlanRepository;
 
     @Mock
     private AthleteProfileRepository athleteProfileRepository;
@@ -97,6 +103,29 @@ class WorkoutExportServiceTest {
         service.exportAsZwo(id);
 
         verify(workoutFileExporter).encodeAsZwo(template, 200);
+    }
+
+    @Test
+    void scheduledExportUsesImmutableSnapshotAndPlanningFtp() {
+        UUID id = UUID.randomUUID();
+        List<WorkoutStep> snapshot = List.of(WorkoutStep.builder()
+                .type("steady").durationSec(900).powerPctFtpLow(92).powerPctFtpHigh(96).build());
+        TrainingPlan plan = TrainingPlan.builder().id(id).workoutTemplateId(UUID.randomUUID())
+                .workoutTemplateRevision(3).workoutNameSnapshot("Snapshot v3")
+                .workoutStepsSnapshot(snapshot).ftpWatts(286)
+                .plannedDurationMin(15).status(TrainingPlanStatus.PLANNED).build();
+        when(trainingPlanRepository.findById(id)).thenReturn(Optional.of(plan));
+        when(workoutFileExporter.encodeAsFit(any(), eq(286))).thenReturn(new byte[]{1});
+
+        service.exportScheduledAsFit(id);
+
+        org.mockito.ArgumentCaptor<WorkoutTemplate> template =
+                org.mockito.ArgumentCaptor.forClass(WorkoutTemplate.class);
+        verify(workoutFileExporter).encodeAsFit(template.capture(), eq(286));
+        assertThat(template.getValue().getName()).isEqualTo("Snapshot v3");
+        assertThat(template.getValue().getRevision()).isEqualTo(3);
+        assertThat(template.getValue().getSteps()).containsExactlyElementsOf(snapshot);
+        verify(workoutTemplateRepository, org.mockito.Mockito.never()).findById(any());
     }
 
     private WorkoutTemplate buildTemplate(UUID id) {

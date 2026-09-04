@@ -10,6 +10,7 @@ import { STALE_STANDARD } from '@/constants/queryConfig';
 import { AppUiProvider } from '@/context/AppUiContext';
 import { ThemeModeProvider } from '@/context/ThemeModeContext';
 import '@/styles/animations.css';
+import { registerPwa } from '@/pwa/registerPwa';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,3 +36,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </QueryClientProvider>
   </React.StrictMode>,
 );
+
+window.addEventListener('load', () => {
+  void registerPwa();
+});

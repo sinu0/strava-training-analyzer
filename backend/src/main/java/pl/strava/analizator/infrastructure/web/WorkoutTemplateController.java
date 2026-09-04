@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -69,6 +70,25 @@ public class WorkoutTemplateController {
                 steps, createdBy);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+    }
+
+    @SuppressWarnings("unchecked")
+    @PutMapping("/{id}")
+    public ResponseEntity<WorkoutTemplateDto> update(@PathVariable UUID id, @RequestBody Map<String, Object> body) {
+        String name = (String) body.get("name");
+        String category = (String) body.get("category");
+        String description = (String) body.get("description");
+        BigDecimal targetTss = body.get("targetTss") != null
+                ? new BigDecimal(body.get("targetTss").toString()) : null;
+        int targetDurationMin = ((Number) body.get("targetDurationMin")).intValue();
+        int relativeEffort = body.get("relativeEffort") != null
+                ? ((Number) body.get("relativeEffort")).intValue() : 5;
+        BigDecimal intensityFactor = body.get("intensityFactor") != null
+                ? new BigDecimal(body.get("intensityFactor").toString()) : null;
+        List<Map<String, Object>> steps = body.get("steps") != null
+                ? (List<Map<String, Object>>) body.get("steps") : List.of();
+        return ResponseEntity.ok(templateService.update(id, name, category, description, targetTss,
+                targetDurationMin, relativeEffort, intensityFactor, steps, (String) body.get("createdBy")));
     }
 
     @DeleteMapping("/{id}")

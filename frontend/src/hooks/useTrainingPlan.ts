@@ -160,6 +160,7 @@ export function useCreateWorkoutEntry() {
         date: entry.date,
         workoutTemplateId: entry.workoutTemplateId,
         plannedDurationMin: entry.durationMin,
+        scaledSteps: entry.scaledSteps,
         notes: entry.notes ?? null,
       };
       const { data } = await apiClient.post<TrainingPlan>('/training/plans', body);

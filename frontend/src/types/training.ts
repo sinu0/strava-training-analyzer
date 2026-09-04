@@ -42,17 +42,32 @@ export interface RaceReadinessProjection {
 // --- Workout Templates ---
 
 export interface WorkoutStep {
-  type: 'warmup' | 'interval' | 'steady' | 'cooldown';
+  type: 'warmup' | 'interval' | 'steady' | 'cooldown' | 'recovery' | 'freeRide' | 'ramp' | 'intervalOn';
+  name?: string;
+  instructions?: string;
+  durationType?: 'TIME' | 'OPEN' | 'LAP_BUTTON' | string;
   durationSec?: number;
   powerPctFtpLow?: number;
   powerPctFtpHigh?: number;
+  heartRateBpmLow?: number;
+  heartRateBpmHigh?: number;
+  cadenceRpmLow?: number;
+  cadenceRpmHigh?: number;
   repeat?: number;
   onDurationSec?: number;
   onPowerPctFtpLow?: number;
   onPowerPctFtpHigh?: number;
+  onHeartRateBpmLow?: number;
+  onHeartRateBpmHigh?: number;
+  onCadenceRpmLow?: number;
+  onCadenceRpmHigh?: number;
   offDurationSec?: number;
   offPowerPctFtpLow?: number;
   offPowerPctFtpHigh?: number;
+  offHeartRateBpmLow?: number;
+  offHeartRateBpmHigh?: number;
+  offCadenceRpmLow?: number;
+  offCadenceRpmHigh?: number;
 }
 
 export type WorkoutCategory =
@@ -67,6 +82,8 @@ export type WorkoutCategory =
 
 export interface WorkoutTemplate {
   id: string;
+  revisionId?: string | null;
+  revision?: number;
   name: string;
   category: WorkoutCategory;
   description: string | null;
@@ -123,12 +140,63 @@ export interface TrainingPlan {
   compliancePct: number | null;
   programId: string | null;
   workoutTemplateId: string | null;
+  workoutTemplateRevisionId?: string | null;
+  workoutTemplateRevision?: number | null;
   workoutTemplateName: string | null;
+  workoutStepsSnapshot?: WorkoutStep[];
+  ftpWatts?: number | null;
+  lthrBpm?: number | null;
+  maxHrBpm?: number | null;
+  restingHrBpm?: number | null;
+  deliveryMethod?: string | null;
+  deliveryStatus?: string | null;
+  activityMatchStatus?: string | null;
   targetPowerLowW: number | null;
   targetPowerHighW: number | null;
   sessionRole?: TrainingSessionRole | null;
   status: PlanStatus;
   notes: string | null;
+}
+
+export type WorkoutExecutionStatus = 'READY' | 'RUNNING' | 'PAUSED' | 'COMPLETED' | 'ABORTED';
+
+export interface WorkoutExecution {
+  id: string;
+  scheduledWorkoutId: string;
+  workoutTemplateRevision?: number | null;
+  workoutNameSnapshot: string;
+  stepsSnapshot: WorkoutStep[];
+  ftpWatts: number | null;
+  lthrBpm: number | null;
+  maxHrBpm: number | null;
+  restingHrBpm: number | null;
+  startedAt: string;
+  finishedAt: string | null;
+  status: WorkoutExecutionStatus;
+  currentStepIndex: number;
+  workoutElapsedMs: number;
+  stepElapsedMs: number;
+  runningSince: string | null;
+  intensityAdjustmentPct: number;
+  skippedStepIndexes: number[];
+  repeatedStepIndexes: number[];
+  rpe: number | null;
+  feeling: string | null;
+  notes: string | null;
+  activityId: string | null;
+  activityMatchStatus: string;
+  complianceStatus: 'UNKNOWN' | 'PARTIAL' | 'COMPLETE';
+  complianceScore: number | null;
+  complianceAlgorithmVersion: string;
+  deliveryMethod: string;
+  stateVersion: number;
+  updatedAt: string;
+}
+
+export interface WorkoutDeliveryCapability {
+  method: 'DOWNLOAD_FIT' | 'DOWNLOAD_ZWO' | 'ON_DEVICE' | 'GARMIN' | 'INTERVALS_ICU';
+  status: 'AVAILABLE' | 'UNAVAILABLE';
+  reason: string | null;
 }
 
 export interface CalendarActivity {

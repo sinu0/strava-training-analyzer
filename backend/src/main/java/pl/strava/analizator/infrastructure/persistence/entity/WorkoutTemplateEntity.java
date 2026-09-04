@@ -31,6 +31,12 @@ public class WorkoutTemplateEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "current_revision", nullable = false)
+    private int currentRevision;
+
+    @Column(name = "current_revision_id")
+    private UUID currentRevisionId;
+
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 

@@ -15,6 +15,6 @@ public class WorkoutFileExporterAdapter implements WorkoutFileExporter {
 
     @Override
     public byte[] encodeAsFit(WorkoutTemplate template, int ftpWatts) {
-        return FitWorkoutEncoder.encode(template);
+        return FitWorkoutEncoder.encode(template, ftpWatts);
     }
 }

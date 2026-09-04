@@ -73,7 +73,7 @@ class SyncServiceTest {
                 syncStateRepository, aiActivityNoteService, heatmapBuildService, lapMetricsService,
                 workoutEvaluationService, trainingEffectRepository, dailySummaryRepository,
                 autoSyncConfigPort, dataQualityService, personalRecordService, challengeService,
-                segmentAnalysisService, routeMatchingService);
+                segmentAnalysisService, routeMatchingService, null);
         lenient().when(syncStateRepository.findFirst()).thenReturn(Optional.empty());
         lenient().when(lapMetricsService.enrichLaps(any(), any()))
                 .thenAnswer(i -> ((Activity) i.getArgument(0)).getLaps());

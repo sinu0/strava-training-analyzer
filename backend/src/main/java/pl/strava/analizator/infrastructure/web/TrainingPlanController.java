@@ -29,6 +29,7 @@ import pl.strava.analizator.application.dto.OptimizePlanResponse;
 import pl.strava.analizator.application.dto.RecordAdjustmentFeedbackRequest;
 import pl.strava.analizator.application.dto.TrainingPlanDto;
 import pl.strava.analizator.application.dto.TrainingPlanProgramDto;
+import pl.strava.analizator.application.dto.UpdatePlanStatusRequest;
 import pl.strava.analizator.domain.model.TrainingPlanStatus;
 
 @RestController
@@ -55,8 +56,13 @@ public class TrainingPlanController {
     @PutMapping("/plans/{id}/status")
     public ResponseEntity<Void> updateStatus(
             @PathVariable UUID id,
-            @RequestParam String status) {
-        trainingPlanService.updateStatus(id, TrainingPlanStatus.valueOf(status));
+            @RequestParam(required = false) String status,
+            @RequestBody(required = false) UpdatePlanStatusRequest request) {
+        String resolvedStatus = status != null ? status : request != null ? request.getStatus() : null;
+        if (resolvedStatus == null) {
+            throw new IllegalArgumentException("status is required");
+        }
+        trainingPlanService.updateStatus(id, TrainingPlanStatus.valueOf(resolvedStatus));
         return ResponseEntity.noContent().build();
     }
 

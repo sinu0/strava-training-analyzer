@@ -1,14 +1,15 @@
 import CloseIcon from '@mui/icons-material/Close';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { Alert, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Chip, Stack, IconButton } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
+import { scheduledExportUrl } from '@/features/workout/workoutApi';
 
 import WorkoutPowerChart from './WorkoutPowerChart';
 import {
   useUpdatePlanStatus,
   useDeleteTrainingPlan,
-  useExportWorkout,
   useRecordAdjustmentFeedback,
-  useWorkoutTemplate,
 } from '../../hooks/useTrainingPlan';
 import { CATEGORY_LABELS, type WorkoutCategory } from '../../types/training';
 
@@ -22,11 +23,8 @@ interface CalendarDayDialogProps {
 
 export default function CalendarDayDialog({ day, open, onClose }: CalendarDayDialogProps) {
   const updateStatus = useUpdatePlanStatus();
+  const navigate = useNavigate();
   const deletePlan = useDeleteTrainingPlan();
-  const templateId = day?.planned?.workoutTemplateId ?? '';
-  const { data: template } = useWorkoutTemplate(templateId);
-  const exportFit = useExportWorkout(templateId, 'fit');
-  const exportZwo = useExportWorkout(templateId, 'zwo');
   const recordAdjustmentFeedback = useRecordAdjustmentFeedback();
 
   if (!day) return null;
@@ -69,7 +67,10 @@ export default function CalendarDayDialog({ day, open, onClose }: CalendarDayDia
             </Stack>
             {!!planned.plannedDescription && <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{planned.plannedDescription}</Typography>}
             {!!planned.workoutTemplateName && <Typography variant="body2" sx={{ mb: 1 }}>Szablon: {planned.workoutTemplateName}</Typography>}
-            {!!template && template.steps.length > 0 && <Box sx={{ mt: 1 }}><WorkoutPowerChart steps={template.steps} /></Box>}
+            {!!planned.workoutStepsSnapshot?.length && <Box sx={{ mt: 1 }}><WorkoutPowerChart steps={planned.workoutStepsSnapshot} /></Box>}
+            <Typography variant="caption" color="text.secondary">
+              Snapshot v{planned.workoutTemplateRevision ?? 'legacy'} · FTP {planned.ftpWatts ?? 'nieznane'}{planned.ftpWatts ? ' W' : ''}
+            </Typography>
           </Box>
         )}
 
@@ -192,13 +193,14 @@ export default function CalendarDayDialog({ day, open, onClose }: CalendarDayDia
       </DialogContent>
       <DialogActions sx={{ justifyContent: 'space-between', px: 2 }}>
         <Box>
-          {!!templateId && <>
-              <Button size="small" onClick={() => exportFit.mutate()}>Pobierz .fit</Button>
-              <Button size="small" onClick={() => exportZwo.mutate()}>Pobierz .zwo</Button>
+          {!!planned && <>
+              <Button size="small" component="a" href={scheduledExportUrl(planned.id, 'fit')}>Pobierz FIT</Button>
+              <Button size="small" component="a" href={scheduledExportUrl(planned.id, 'zwo')}>Pobierz ZWO</Button>
             </>}
         </Box>
         <Box>
           {!!planned && planned.status === 'PLANNED' && <>
+              <Button size="small" variant="contained" startIcon={<PlayArrowIcon />} onClick={() => { onClose(); navigate(`/training/workouts/${planned.id}`); }}>Rozpocznij</Button>
               <Button size="small" color="success" onClick={() => handleStatus('COMPLETED')}>Oznacz jako zrealizowany</Button>
               <Button size="small" color="warning" onClick={() => handleStatus('SKIPPED')}>Pomiń</Button>
             </>}

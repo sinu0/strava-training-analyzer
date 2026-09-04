@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import pl.strava.analizator.domain.model.TrainingPlan;
+import pl.strava.analizator.domain.model.WorkoutStep;
 
 @Getter
 @Builder
@@ -27,7 +29,17 @@ public class TrainingPlanDto {
     private BigDecimal compliancePct;
     private UUID programId;
     private UUID workoutTemplateId;
+    private UUID workoutTemplateRevisionId;
+    private Integer workoutTemplateRevision;
     private String workoutTemplateName;
+    private List<WorkoutStep> workoutStepsSnapshot;
+    private Integer ftpWatts;
+    private Integer lthrBpm;
+    private Integer maxHrBpm;
+    private Integer restingHrBpm;
+    private String deliveryMethod;
+    private String deliveryStatus;
+    private String activityMatchStatus;
     private Integer targetPowerLowW;
     private Integer targetPowerHighW;
     private String sessionRole;
@@ -47,7 +59,17 @@ public class TrainingPlanDto {
                 .compliancePct(plan.getCompliancePct())
                 .programId(plan.getProgramId())
                 .workoutTemplateId(plan.getWorkoutTemplateId())
+                .workoutTemplateRevisionId(plan.getWorkoutTemplateRevisionId())
+                .workoutTemplateRevision(plan.getWorkoutTemplateRevision())
                 .workoutTemplateName(workoutTemplateName)
+                .workoutStepsSnapshot(plan.getWorkoutStepsSnapshot())
+                .ftpWatts(plan.getFtpWatts())
+                .lthrBpm(plan.getLthrBpm())
+                .maxHrBpm(plan.getMaxHrBpm())
+                .restingHrBpm(plan.getRestingHrBpm())
+                .deliveryMethod(plan.getDeliveryMethod())
+                .deliveryStatus(plan.getDeliveryStatus())
+                .activityMatchStatus(plan.getActivityMatchStatus())
                 .targetPowerLowW(plan.getTargetPowerLowW())
                 .targetPowerHighW(plan.getTargetPowerHighW())
                 .sessionRole(sessionRole)
