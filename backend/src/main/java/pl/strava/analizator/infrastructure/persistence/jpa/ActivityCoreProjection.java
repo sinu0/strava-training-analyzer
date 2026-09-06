@@ -23,6 +23,7 @@ public interface ActivityCoreProjection {
     BigDecimal getMaxSpeedMs();
     Short getAvgHeartrate();
     Short getMaxHeartrate();
+    Boolean getDeviceWatts();
     Short getAvgPowerW();
     Short getMaxPowerW();
     Short getAvgCadence();

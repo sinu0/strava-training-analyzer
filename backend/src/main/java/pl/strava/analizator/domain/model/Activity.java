@@ -38,6 +38,7 @@ public class Activity {
     private Short maxHeartrate;
 
     private Short avgPowerW;
+    private Boolean deviceWatts;
     private Short maxPowerW;
 
     private Short avgCadence;

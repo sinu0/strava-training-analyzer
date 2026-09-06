@@ -15,11 +15,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ReadinessDto {
 
-    private int score;            // 0-100
+    private String availability;
+    private Integer score;        // 0-100; null when load inputs are unavailable
     private String level;         // "pełna moc", "energia", "dobra", "zmęczenie", "trudność", "wyczerpanie"
-    private double tsb;
-    private double ctl;
-    private double atl;
+    private Double tsb;
+    private Double ctl;
+    private Double atl;
     private String description;
     private String dayType;
     private String dayLabel;

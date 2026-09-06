@@ -63,32 +63,19 @@ public class V2AnalyticsController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         validateRange(from, to);
-        List<PmcDataDto> points = analyticsService.getPmc(from, to);
-        boolean available = points.stream().anyMatch(point -> nonZero(point.getCtl())
-                || nonZero(point.getAtl()) || nonZero(point.getTsb()));
-        var coverageSeries = dailyMetricRepository.findNumericSeries(
-                "training_load_coverage", DateRange.of(from, to));
-        BigDecimal coverage = coverageSeries.isEmpty() ? null : coverageSeries.values().stream()
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .divide(BigDecimal.valueOf(coverageSeries.size()), 4, RoundingMode.HALF_UP);
-        String availability = !available ? "UNKNOWN"
-                : coverage == null || coverage.compareTo(BigDecimal.valueOf(0.7)) < 0
-                    ? "PARTIAL" : "AVAILABLE";
-        return LoadAnalyticsDto.builder().from(from).to(to)
-                .availability(availability)
-                .coverage(coverage)
-                .points(points).build();
+        return new pl.strava.analizator.application.TrainingLoadService(dailyMetricRepository).getLoad(from, to);
     }
 
     @GetMapping("/power")
     public PowerAnalyticsDto power(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(defaultValue = "false") boolean includeUnverified) {
         validateRange(from, to);
-        PowerCurveDto curve = analyticsService.getPowerCurve(from, to);
+        PowerCurveDto curve = analyticsService.getPowerCurve(from, to, includeUnverified);
         boolean available = curve.getEfforts() != null && !curve.getEfforts().isEmpty();
         return PowerAnalyticsDto.builder().from(from).to(to)
-                .availability(available ? "AVAILABLE" : "UNKNOWN")
+                .availability(available ? includeUnverified ? "PARTIAL" : "AVAILABLE" : "UNKNOWN")
                 .curve(curve)
                 .ftp(analyticsService.getFtpProgress(from, to))
                 // Withheld from V2 until the sampling assumptions and backtest are validated.

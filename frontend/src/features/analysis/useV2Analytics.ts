@@ -20,10 +20,10 @@ export function useLoadAnalytics(from: string, to: string, enabled: boolean) {
   });
 }
 
-export function usePowerAnalytics(from: string, to: string, enabled: boolean) {
+export function usePowerAnalytics(from: string, to: string, enabled: boolean, includeUnverified = false) {
   return useQuery({
-    queryKey: ['v2', 'analytics', 'power', from, to],
+    queryKey: ['v2', 'analytics', 'power', from, to, includeUnverified],
     enabled,
-    queryFn: async () => (await apiClient.get<PowerAnalytics>('/v2/analytics/power', { params: { from, to } })).data,
+    queryFn: async () => (await apiClient.get<PowerAnalytics>('/v2/analytics/power', { params: { from, to, includeUnverified } })).data,
   });
 }

@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import pl.strava.analizator.application.dto.CalendarActivitySummaryDto;
 import pl.strava.analizator.application.dto.TrainingAdjustmentSuggestionDto;
 import pl.strava.analizator.application.dto.CalendarDayDto;
+import pl.strava.analizator.application.dto.CalendarSessionDto;
 import pl.strava.analizator.application.dto.CoachMemoryPreferenceDto;
 import pl.strava.analizator.application.dto.CoachMemorySummaryDto;
 import pl.strava.analizator.application.dto.CreateTrainingPlanRequest;
@@ -69,7 +70,10 @@ import pl.strava.analizator.domain.port.WorkoutTemplateRepository;
 @RequiredArgsConstructor
 public class TrainingPlanService {
 
+    private final java.time.Clock clock;
+
     private final TrainingPlanRepository trainingPlanRepository;
+    private final pl.strava.analizator.domain.port.WorkoutExecutionRepository executionRepository;
     private final TrainingPlanProgramRepository programRepository;
     private final WorkoutTemplateRepository workoutTemplateRepository;
     private final ActivityRepository activityRepository;
@@ -109,10 +113,6 @@ public class TrainingPlanService {
     private static final Set<WorkoutCategory> VO2_BLOCK_CATEGORIES = EnumSet.of(
             WorkoutCategory.VO2MAX, WorkoutCategory.ANAEROBIC, WorkoutCategory.ENDURANCE);
 
-    private static final int STIMULUS_UNKNOWN = 0;
-    private static final int STIMULUS_EASY = 1;
-    private static final int STIMULUS_MODERATE = 2;
-    private static final int STIMULUS_HARD = 3;
 
     public List<TrainingPlanDto> getPlans(LocalDate from, LocalDate to) {
         List<TrainingPlan> plans = trainingPlanRepository.findByDateRange(from, to);
@@ -237,83 +237,55 @@ public class TrainingPlanService {
 
     public List<CalendarDayDto> getCalendarView(LocalDate from, LocalDate to) {
         List<TrainingPlan> plans = trainingPlanRepository.findByDateRange(from, to);
-        OffsetDateTime fromDateTime = from.atStartOfDay().atOffset(ZoneOffset.UTC);
-        OffsetDateTime toDateTime = to.plusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC);
-        List<Activity> activities = activityRepository.findByStartedAtBetween(fromDateTime, toDateTime);
+        List<Activity> activities = activityRepository.findByStartedAtBetween(
+                from.atStartOfDay(clock.getZone()).toOffsetDateTime(),
+                to.plusDays(1).atStartOfDay(clock.getZone()).toOffsetDateTime());
         CoachMemorySummaryDto coachMemory = getCoachMemory();
-
-        Map<LocalDate, TrainingPlan> plansByDate = new LinkedHashMap<>();
-        for (TrainingPlan plan : plans) {
-            plansByDate.put(plan.getDate(), plan);
-        }
-
-        Map<LocalDate, List<Activity>> activitiesByDate = new LinkedHashMap<>();
-        for (Activity activity : activities) {
-            LocalDate actDate = activity.getStartedAt().toLocalDate();
-            activitiesByDate.computeIfAbsent(actDate, ignored -> new ArrayList<>()).add(activity);
-        }
-
-        Map<LocalDate, ProjectionContext> projectionsByDate = buildProjections(from, to, plans, coachMemory);
-
-        List<UUID> activityIds = activities.stream().map(Activity::getId).toList();
-        Map<UUID, BigDecimal> tssValues = activityIds.isEmpty()
-                ? Map.of()
-                : activityMetricRepository.findNumericValues(activityIds, "tss");
-
-        Map<LocalDate, CalendarDayDto> result = new LinkedHashMap<>();
+        Map<LocalDate, List<TrainingPlan>> plansByDate = plans.stream()
+                .collect(Collectors.groupingBy(TrainingPlan::getDate, LinkedHashMap::new, Collectors.toList()));
+        Map<LocalDate, List<Activity>> activitiesByDate = activities.stream()
+                .collect(Collectors.groupingBy(a -> a.getStartedAt().atZoneSameInstant(clock.getZone()).toLocalDate()));
+        Map<LocalDate, ProjectionContext> projections = buildProjections(from, to, plans, coachMemory);
+        List<UUID> ids = activities.stream().map(Activity::getId).toList();
+        Map<UUID, BigDecimal> tss = new ActivityLoadService(activityMetricRepository).getLoads(activities);
+        List<CalendarDayDto> result = new ArrayList<>();
         for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
-            TrainingPlan plan = plansByDate.get(date);
-            Activity activity = resolveCalendarActivity(plan, activitiesByDate.getOrDefault(date, List.of()));
-            AdaptivePlanDecision adaptivePlan = buildAdaptivePlanDecision(date, plan, coachMemory);
-            TrainingPlanDto planDto = adaptivePlan != null ? adaptivePlan.planDto() : (plan != null ? toDto(plan) : null);
-            CalendarActivitySummaryDto activityDto = null;
-            Double compliance = null;
-            TrainingExecutionAssessmentDto execution = null;
-            ProjectionContext projection = projectionsByDate.get(date);
-            TrainingAdjustmentSuggestionDto adjustment = adaptivePlan != null
-                    ? adaptivePlan.adjustment()
-                    : projection != null ? projection.adjustment() : null;
-
-            if (activity != null) {
-                BigDecimal tss = tssValues.get(activity.getId());
-                BigDecimal distanceKm = activity.getDistanceM() != null
-                        ? activity.getDistanceM().divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP)
-                        : null;
-                Integer durationMin = activity.getMovingTimeSec() != null
-                        ? activity.getMovingTimeSec() / 60
-                        : null;
-
-                activityDto = CalendarActivitySummaryDto.builder()
-                        .id(activity.getId())
-                        .name(activity.getName())
-                        .sportType(activity.getSportType())
-                        .durationMin(durationMin)
-                        .distanceKm(distanceKm)
-                        .tss(tss)
-                        .build();
-
-                if (plan != null && plan.getPlannedTss() != null && tss != null
-                        && plan.getPlannedTss().compareTo(BigDecimal.ZERO) > 0) {
-                    compliance = tss.divide(plan.getPlannedTss(), 4, RoundingMode.HALF_UP)
-                            .multiply(BigDecimal.valueOf(100))
-                            .doubleValue();
-                }
-
-                execution = assessExecution(plan, activity, activityDto, compliance);
+            List<TrainingPlan> dailyPlans = plansByDate.getOrDefault(date, List.of());
+            List<Activity> dailyActivities = activitiesByDate.getOrDefault(date, List.of());
+            List<CalendarSessionDto> sessions = new ArrayList<>();
+            for (TrainingPlan plan : dailyPlans) {
+                // A date alone cannot match one recording to several scheduled sessions.
+                Activity actual = plan.getActualActivityId() != null || dailyPlans.size() == 1
+                        ? resolveCalendarActivity(plan, dailyActivities) : null;
+                CalendarActivitySummaryDto summary = actual != null ? calendarSummary(actual, tss.get(actual.getId())) : null;
+                Double ratio = summary != null && summary.getTss() != null && plan.getPlannedTss() != null
+                        && plan.getPlannedTss().signum() > 0
+                        ? summary.getTss().divide(plan.getPlannedTss(), 4, RoundingMode.HALF_UP).doubleValue() * 100 : null;
+                // Reading the calendar must not replace an immutable scheduled snapshot.
+                sessions.add(CalendarSessionDto.builder().planned(toDto(plan)).actual(summary).compliance(ratio)
+                        .execution(assessExecution(plan, actual, summary, ratio)).build());
             }
-
-            result.put(date, CalendarDayDto.builder()
-                    .date(date)
-                    .planned(planDto)
-                    .actual(activityDto)
-                    .compliance(compliance)
-                    .execution(execution)
+            CalendarSessionDto first = sessions.isEmpty() ? null : sessions.getFirst();
+            ProjectionContext projection = projections.get(date);
+            CalendarActivitySummaryDto single = dailyActivities.size() == 1
+                    ? calendarSummary(dailyActivities.getFirst(), tss.get(dailyActivities.getFirst().getId())) : null;
+            result.add(CalendarDayDto.builder().date(date).sessions(sessions)
+                    .activities(dailyActivities.stream().map(a -> calendarSummary(a, tss.get(a.getId()))).toList())
+                    .planned(first != null ? first.getPlanned() : null)
+                    .actual(first != null ? first.getActual() : single)
+                    .compliance(first != null ? first.getCompliance() : null)
+                    .execution(first != null ? first.getExecution() : null)
                     .projection(projection != null ? projection.projection() : null)
-                    .adjustment(adjustment)
-                    .build());
+                    .adjustment(projection != null ? projection.adjustment() : null).build());
         }
+        return result;
+    }
 
-        return new ArrayList<>(result.values());
+    private CalendarActivitySummaryDto calendarSummary(Activity activity, BigDecimal tss) {
+        return CalendarActivitySummaryDto.builder().id(activity.getId()).name(activity.getName()).sportType(activity.getSportType())
+                .durationMin(activity.getMovingTimeSec() != null ? activity.getMovingTimeSec() / 60 : null)
+                .distanceKm(activity.getDistanceM() != null ? activity.getDistanceM().divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP) : null)
+                .tss(tss).build();
     }
 
     private Activity resolveCalendarActivity(TrainingPlan plan, List<Activity> candidates) {
@@ -509,105 +481,6 @@ public class TrainingPlanService {
         return TrainingPlanDto.fromDomain(plan, templateName, resolveTrainingRole(plan).name());
     }
 
-    private AdaptivePlanDecision buildAdaptivePlanDecision(LocalDate date, TrainingPlan plan, CoachMemorySummaryDto coachMemory) {
-        if (plan == null || date.isBefore(LocalDate.now(ZoneOffset.UTC)) || plan.getStatus() == TrainingPlanStatus.SKIPPED) {
-            return null;
-        }
-        if (plan.getProgramId() == null) {
-            return null;
-        }
-
-        TrainingPlanProgram program = programRepository.findById(plan.getProgramId()).orElse(null);
-        if (program == null) {
-            return null;
-        }
-
-        TrainingDayEnvironment environment = trainingDayEnvironmentPort.getEnvironmentFor(date).orElse(null);
-        boolean routeSufficient = hasSufficientRoute(plan);
-        if (!shouldAutoSwap(plan, program, environment, routeSufficient)) {
-            return null;
-        }
-
-        WorkoutTemplate replacement = findAdaptiveReplacement(plan, program).orElse(null);
-        if (replacement == null) {
-            return null;
-        }
-
-        TrainingPlanDto replacementDto = TrainingPlanDto.builder()
-                .id(plan.getId())
-                .date(plan.getDate())
-                .plannedType(replacement.getCategory().name())
-                .plannedTss(replacement.getTargetTss())
-                .plannedDurationMin(replacement.getTargetDurationMin())
-                .plannedDescription(replacement.getName())
-                .actualActivityId(plan.getActualActivityId())
-                .compliancePct(plan.getCompliancePct())
-                .programId(plan.getProgramId())
-                .workoutTemplateId(replacement.getId())
-                .workoutTemplateName(replacement.getName())
-                .targetPowerLowW(plan.getTargetPowerLowW())
-                .targetPowerHighW(plan.getTargetPowerHighW())
-                .sessionRole(resolveTrainingRole(replacement.getCategory(), replacement.getTargetDurationMin()).name())
-                .status(plan.getStatus().name())
-                .notes(plan.getNotes())
-                .createdAt(plan.getCreatedAt())
-                .build();
-
-        String weatherSummary = environment != null
-                ? "%s (%d/%d)".formatted(environment.getWeatherDescription(), environment.getOutdoorScore(), environment.getBestWindowScore())
-                : "brak sensownej trasy outdoor";
-        TrainingAdjustmentSuggestionDto adjustment = TrainingAdjustmentSuggestionDto.builder()
-                .type("AUTO_SWAP")
-                .title("Auto-swap: lepszy wariant dnia")
-                .description("Plan podmienił sesję na równoważny wariant, bo warunki outdoor są słabe albo brakuje sensownej trasy. "
-                        + "Powód: " + weatherSummary + ".")
-                .memoryHint(buildAdjustmentMemoryHint("AUTO_SWAP", coachMemory))
-                .build();
-        return new AdaptivePlanDecision(replacementDto, adjustment);
-    }
-
-    private boolean shouldAutoSwap(
-            TrainingPlan plan,
-            TrainingPlanProgram program,
-            TrainingDayEnvironment environment,
-            boolean routeSufficient) {
-        if ("INDOOR_FRIENDLY".equals(program.getEnvironmentPreference())) {
-            return false;
-        }
-        boolean weatherBlocked = environment != null
-                && Math.max(environment.getOutdoorScore(), environment.getBestWindowScore()) < OUTDOOR_BLOCK_THRESHOLD;
-        boolean routeBlocked = !routeSufficient && isLongRideLike(plan);
-        return weatherBlocked || routeBlocked;
-    }
-
-    private boolean hasSufficientRoute(TrainingPlan plan) {
-        if (!isLongRideLike(plan)) {
-            return true;
-        }
-        int minimumSeconds = Math.max(60 * 60, (int) ((plan.getPlannedDurationMin() != null ? plan.getPlannedDurationMin() : 0) * 60 * 0.7));
-        return plannedRouteRepository.findAll().stream()
-                .map(PlannedRoute::getEstimatedTimeSec)
-                .filter(duration -> duration != null)
-                .anyMatch(duration -> duration >= minimumSeconds);
-    }
-
-    private boolean isLongRideLike(TrainingPlan plan) {
-        return "ENDURANCE".equals(plan.getPlannedType())
-                && plan.getPlannedDurationMin() != null
-                && plan.getPlannedDurationMin() >= 120;
-    }
-
-    private Optional<WorkoutTemplate> findAdaptiveReplacement(TrainingPlan plan, TrainingPlanProgram program) {
-        List<WorkoutTemplate> templates = workoutTemplateRepository.findAll();
-        TrainingSessionRole role = resolveTrainingRole(plan);
-        return templates.stream()
-                .filter(template -> !template.getId().equals(plan.getWorkoutTemplateId()))
-                .filter(template -> TrainingSessionRoleResolver.matchesAdaptiveRole(role, template))
-                .filter(template -> matchesAdaptiveEnvironment(program, template))
-                .sorted(Comparator.comparingInt(template -> adaptivePriority(role, template)))
-                .findFirst();
-    }
-
     private TrainingSessionRole resolveTrainingRole(TrainingPlan plan) {
         return TrainingSessionRoleResolver.fromPlan(plan);
     }
@@ -616,36 +489,12 @@ public class TrainingPlanService {
         return TrainingSessionRoleResolver.fromCategory(category, durationMin);
     }
 
-    private boolean matchesAdaptiveEnvironment(TrainingPlanProgram program, WorkoutTemplate template) {
-        if (!"OUTDOOR_FOCUSED".equals(program.getEnvironmentPreference())) {
-            return true;
-        }
-        return template.getName().toLowerCase().contains("indoor")
-                || template.getCategory() == WorkoutCategory.SWEET_SPOT
-                || template.getTargetDurationMin() <= 90;
-    }
-
-    private int adaptivePriority(TrainingSessionRole role, WorkoutTemplate template) {
-        int priority = 0;
-        String lowerName = template.getName() != null ? template.getName().toLowerCase() : "";
-        if (lowerName.contains("indoor")) {
-            priority -= 20;
-        }
-        if (role == TrainingSessionRole.LONG_ENDURANCE && template.getCategory() == WorkoutCategory.SWEET_SPOT) {
-            priority -= 10;
-        }
-        if (template.getTargetDurationMin() <= 90) {
-            priority -= 5;
-        }
-        return priority;
-    }
-
     private Map<LocalDate, ProjectionContext> buildProjections(
             LocalDate from,
             LocalDate to,
             List<TrainingPlan> displayedPlans,
             CoachMemorySummaryDto coachMemory) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         if (!to.isAfter(today)) {
             return Map.of();
         }
@@ -655,17 +504,15 @@ public class TrainingPlanService {
                 ? trainingPlanRepository.findByDateRange(today, to)
                 : displayedPlans;
 
-        Map<LocalDate, TrainingPlan> planByDate = new LinkedHashMap<>();
-        for (TrainingPlan plan : projectionPlans) {
-            planByDate.put(plan.getDate(), plan);
-        }
+        Map<LocalDate, List<TrainingPlan>> planByDate = projectionPlans.stream().collect(Collectors.groupingBy(TrainingPlan::getDate));
 
         BigDecimal ctlValue = dailyMetricRepository.findNumericValue(today, "ctl")
                 .or(() -> dailyMetricRepository.findNumericValue(today.minusDays(1), "ctl"))
-                .orElse(BigDecimal.ZERO);
+                .orElse(null);
         BigDecimal atlValue = dailyMetricRepository.findNumericValue(today, "atl")
                 .or(() -> dailyMetricRepository.findNumericValue(today.minusDays(1), "atl"))
-                .orElse(BigDecimal.ZERO);
+                .orElse(null);
+        if (ctlValue == null || atlValue == null) return Map.of();
 
         double ctl = ctlValue.doubleValue();
         double atl = atlValue.doubleValue();
@@ -674,10 +521,11 @@ public class TrainingPlanService {
         Map<LocalDate, ProjectionContext> result = new LinkedHashMap<>();
 
         for (LocalDate date = projectionStart; !date.isAfter(to); date = date.plusDays(1)) {
-            TrainingPlan plan = planByDate.get(date);
-            double plannedTss = plan != null && plan.getStatus() != TrainingPlanStatus.SKIPPED && plan.getPlannedTss() != null
-                    ? plan.getPlannedTss().doubleValue()
-                    : 0.0;
+            List<TrainingPlan> dailyPlans = planByDate.getOrDefault(date, List.of());
+            TrainingPlan plan = dailyPlans.isEmpty() ? null : dailyPlans.getFirst();
+            if (dailyPlans.stream().anyMatch(p -> p.getStatus() != TrainingPlanStatus.SKIPPED && p.getPlannedTss() == null)) break;
+            double plannedTss = dailyPlans.stream().filter(p -> p.getStatus() != TrainingPlanStatus.SKIPPED)
+                    .map(TrainingPlan::getPlannedTss).filter(java.util.Objects::nonNull).mapToDouble(BigDecimal::doubleValue).sum();
             double projectedTsb = ctl - atl;
             double projectedCtl = ctl + (plannedTss - ctl) / 42.0;
             double projectedAtl = atl + (plannedTss - atl) / 7.0;
@@ -993,27 +841,6 @@ public class TrainingPlanService {
             TrainingAdjustmentSuggestionDto adjustment) {
     }
 
-    private record AdaptivePlanDecision(
-            TrainingPlanDto planDto,
-            TrainingAdjustmentSuggestionDto adjustment) {
-    }
-
-    private record ExecutionReviewDetails(
-            Double intervalCompliance,
-            Double zoneCompliance,
-            String primaryLimiter,
-            String nextDayAdvice) {
-        private boolean hasStructuredReview() {
-            return intervalCompliance != null || zoneCompliance != null;
-        }
-    }
-
-    private record TargetZone(int lowPct, int highPct) {
-    }
-
-    private record ExecutionOutcome(String type, String label, String description) {
-    }
-
     private record WeeklyFuelingAdvice(String label, String guidance) {
     }
 
@@ -1177,397 +1004,24 @@ public class TrainingPlanService {
         return mapProgramDto(program, weeklyObjectives, buildGoalScorecards(program, plans, weeklyObjectives));
     }
 
-    private TrainingExecutionAssessmentDto assessExecution(
-            TrainingPlan plan,
-            Activity sourceActivity,
-            CalendarActivitySummaryDto activity,
-            Double tssCompliance) {
-        if (plan == null || activity == null) {
-            return null;
-        }
-
-        Double durationCompliance = null;
-        if (plan.getPlannedDurationMin() != null && plan.getPlannedDurationMin() > 0 && activity.getDurationMin() != null) {
-            durationCompliance = BigDecimal.valueOf(activity.getDurationMin())
-                    .divide(BigDecimal.valueOf(plan.getPlannedDurationMin()), 4, RoundingMode.HALF_UP)
-                    .multiply(BigDecimal.valueOf(100))
-                    .doubleValue();
-        }
-
-        int plannedStimulus = resolvePlannedStimulus(plan.getPlannedType());
-        int actualStimulus = resolveActualStimulus(activity);
-        boolean stimulusMatch = plannedStimulus == STIMULUS_UNKNOWN
-                || actualStimulus == STIMULUS_UNKNOWN
-                || plannedStimulus == actualStimulus;
-
-        int tssScore = scoreFromCompliance(tssCompliance, 10.0, 35.0);
-        int durationScore = scoreFromCompliance(durationCompliance, 15.0, 45.0);
-        int stimulusScore = (plannedStimulus == STIMULUS_UNKNOWN || actualStimulus == STIMULUS_UNKNOWN)
-                ? 70
-                : (stimulusMatch ? 100 : 35);
-        ExecutionReviewDetails reviewDetails = buildExecutionReview(plan, sourceActivity, activity, tssCompliance, durationCompliance);
-        int reviewScore = reviewDetails.hasStructuredReview()
-                ? (int) Math.round((scoreFromCompliance(reviewDetails.intervalCompliance(), 12.0, 40.0) * 0.60)
-                + (scoreFromCompliance(reviewDetails.zoneCompliance(), 15.0, 45.0) * 0.40))
-                : 70;
-        int score = (int) Math.round((tssScore * 0.35) + (durationScore * 0.20) + (stimulusScore * 0.15) + (reviewScore * 0.30));
-
-        ExecutionOutcome outcome = determineExecutionOutcome(
-                tssCompliance,
-                durationCompliance,
-                plannedStimulus,
-                actualStimulus,
-                stimulusMatch,
-                score);
-
-        return TrainingExecutionAssessmentDto.builder()
-                .outcome(outcome.type())
-                .label(outcome.label())
-                .description(outcome.description())
-                .score(score)
-                .tssCompliance(tssCompliance)
-                .durationCompliance(durationCompliance)
-                .intervalCompliance(reviewDetails.intervalCompliance())
-                .zoneCompliance(reviewDetails.zoneCompliance())
-                .stimulusMatch(stimulusMatch)
-                .primaryLimiter(reviewDetails.primaryLimiter())
-                .nextDayAdvice(reviewDetails.nextDayAdvice())
-                .build();
-    }
-
-    private ExecutionReviewDetails buildExecutionReview(
-            TrainingPlan plan,
-            Activity activity,
-            CalendarActivitySummaryDto activityDto,
-            Double tssCompliance,
-            Double durationCompliance) {
-        if (activity == null) {
-            return fallbackReviewDetails(tssCompliance, durationCompliance, null, null);
-        }
-
-        List<WorkoutStep> plannedSteps = plan.getWorkoutStepsSnapshot();
-        if ((plannedSteps == null || plannedSteps.isEmpty()) && plan.getWorkoutTemplateId() != null) {
-            plannedSteps = workoutTemplateRepository.findById(plan.getWorkoutTemplateId())
-                    .map(WorkoutTemplate::getSteps).orElse(List.of());
-        }
-        int ftpWatts = plan.getFtpWatts() != null ? plan.getFtpWatts() : athleteProfileRepository.findFirst()
-                .map(profile -> profile.getFtpWatts() != null ? profile.getFtpWatts() : DEFAULT_FTP_WATTS)
-                .orElse(DEFAULT_FTP_WATTS);
-
-        Double intervalCompliance = calculateIntervalCompliance(plannedSteps, activity, ftpWatts);
-        Double zoneCompliance = plannedSteps != null && !plannedSteps.isEmpty()
-                ? calculateTemplateCompliance(plannedSteps, activity, ftpWatts)
-                : calculatePlannedTypeZoneCompliance(plan.getPlannedType(), activity, ftpWatts);
-        return fallbackReviewDetails(tssCompliance, durationCompliance, intervalCompliance, zoneCompliance);
-    }
-
-    private ExecutionReviewDetails fallbackReviewDetails(
-            Double tssCompliance,
-            Double durationCompliance,
-            Double intervalCompliance,
-            Double zoneCompliance) {
-        String limiter = determinePrimaryLimiter(tssCompliance, durationCompliance, intervalCompliance, zoneCompliance);
-        return new ExecutionReviewDetails(
-                intervalCompliance,
-                zoneCompliance,
-                limiter,
-                determineNextDayAdvice(limiter, tssCompliance, durationCompliance, intervalCompliance, zoneCompliance));
-    }
-
-    private Double calculateIntervalCompliance(List<WorkoutStep> steps, Activity activity, int ftpWatts) {
-        if (!activity.hasPowerData() || steps == null || steps.isEmpty()) {
-            return null;
-        }
-
-        int cursor = 0;
-        int targetSeconds = 0;
-        double matchedSeconds = 0.0;
-        for (WorkoutStep step : steps) {
-            if (step.getRepeat() != null && step.getOnDurationSec() != null) {
-                int repeats = Math.max(1, step.getRepeat());
-                for (int index = 0; index < repeats; index++) {
-                    targetSeconds += step.getOnDurationSec();
-                    matchedSeconds += matchingSeconds(activity.getPowerStream(), cursor, step.getOnDurationSec(),
-                            ftpWatts, step.getOnPowerPctFtpLow(), step.getOnPowerPctFtpHigh());
-                    cursor += step.getOnDurationSec();
-                    if (step.getOffDurationSec() != null) {
-                        cursor += step.getOffDurationSec();
-                    }
-                }
-                continue;
-            }
-            if (step.getDurationSec() != null) {
-                cursor += step.getDurationSec();
-            }
-        }
-        if (targetSeconds == 0) {
-            return null;
-        }
-        return compliancePercent(matchedSeconds, targetSeconds);
-    }
-
-    private Double calculateTemplateCompliance(List<WorkoutStep> steps, Activity activity, int ftpWatts) {
-        if (!activity.hasPowerData() || steps == null || steps.isEmpty()) {
-            return null;
-        }
-
-        int cursor = 0;
-        int targetSeconds = 0;
-        double matchedSeconds = 0.0;
-        for (WorkoutStep step : steps) {
-            if (step.getRepeat() != null && step.getOnDurationSec() != null) {
-                int repeats = Math.max(1, step.getRepeat());
-                for (int index = 0; index < repeats; index++) {
-                    targetSeconds += step.getOnDurationSec();
-                    matchedSeconds += matchingSeconds(activity.getPowerStream(), cursor, step.getOnDurationSec(),
-                            ftpWatts, step.getOnPowerPctFtpLow(), step.getOnPowerPctFtpHigh());
-                    cursor += step.getOnDurationSec();
-                    if (step.getOffDurationSec() != null) {
-                        targetSeconds += step.getOffDurationSec();
-                        matchedSeconds += matchingSeconds(activity.getPowerStream(), cursor, step.getOffDurationSec(),
-                                ftpWatts, step.getOffPowerPctFtpLow(), step.getOffPowerPctFtpHigh());
-                        cursor += step.getOffDurationSec();
-                    }
-                }
-                continue;
-            }
-            if (step.getDurationSec() != null) {
-                targetSeconds += step.getDurationSec();
-                matchedSeconds += matchingSeconds(activity.getPowerStream(), cursor, step.getDurationSec(),
-                        ftpWatts, step.getPowerPctFtpLow(), step.getPowerPctFtpHigh());
-                cursor += step.getDurationSec();
-            }
-        }
-        if (targetSeconds == 0) {
-            return null;
-        }
-        return compliancePercent(matchedSeconds, targetSeconds);
-    }
-
-    private Double calculatePlannedTypeZoneCompliance(String plannedType, Activity activity, int ftpWatts) {
-        if (!activity.hasPowerData() || plannedType == null) {
-            return null;
-        }
-        TargetZone targetZone = plannedTypeZone(plannedType);
-        return matchingSeconds(activity.getPowerStream(), 0, activity.getPowerStream().length,
-                ftpWatts, targetZone.lowPct(), targetZone.highPct()) == 0
-                ? 0.0
-                : compliancePercent(
-                matchingSeconds(activity.getPowerStream(), 0, activity.getPowerStream().length,
-                        ftpWatts, targetZone.lowPct(), targetZone.highPct()),
-                activity.getPowerStream().length);
-    }
-
-    private TargetZone plannedTypeZone(String plannedType) {
-        return switch (plannedType) {
-            case "RECOVERY" -> new TargetZone(45, 60);
-            case "ENDURANCE" -> new TargetZone(60, 75);
-            case "TEMPO" -> new TargetZone(76, 90);
-            case "SWEET_SPOT" -> new TargetZone(88, 95);
-            case "THRESHOLD" -> new TargetZone(95, 105);
-            case "VO2MAX" -> new TargetZone(106, 120);
-            case "ANAEROBIC" -> new TargetZone(121, 150);
-            case "SPRINT" -> new TargetZone(151, 220);
-            default -> new TargetZone(55, 95);
-        };
-    }
-
-    private double matchingSeconds(
-            int[] powerStream,
-            int start,
-            int durationSec,
-            int ftpWatts,
-            Integer lowPct,
-            Integer highPct) {
-        if (powerStream == null || powerStream.length == 0 || durationSec <= 0) {
-            return 0.0;
-        }
-        if (lowPct == null && highPct == null) {
-            return durationSec;
-        }
-        int safeStart = Math.max(0, start);
-        int end = Math.min(powerStream.length, safeStart + durationSec);
-        if (safeStart >= end) {
-            return 0.0;
-        }
-        double lower = lowPct != null ? ftpWatts * (lowPct / 100.0) : Double.NEGATIVE_INFINITY;
-        double upper = highPct != null ? ftpWatts * (highPct / 100.0) : Double.POSITIVE_INFINITY;
-        int matched = 0;
-        for (int index = safeStart; index < end; index++) {
-            if (powerStream[index] >= lower && powerStream[index] <= upper) {
-                matched++;
-            }
-        }
-        return matched;
-    }
-
-    private Double compliancePercent(double matched, int targetSeconds) {
-        if (targetSeconds <= 0) {
-            return null;
-        }
-        return BigDecimal.valueOf(matched)
-                .divide(BigDecimal.valueOf(targetSeconds), 4, RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(100))
-                .doubleValue();
-    }
-
-    private String determinePrimaryLimiter(
-            Double tssCompliance,
-            Double durationCompliance,
-            Double intervalCompliance,
-            Double zoneCompliance) {
-        if ((intervalCompliance != null && intervalCompliance >= 85.0)
-                && (zoneCompliance == null || zoneCompliance >= 85.0)
-                && (tssCompliance == null || tssCompliance >= 90.0)
-                && (durationCompliance == null || durationCompliance >= 90.0)) {
-            return "ON_TARGET";
-        }
-        if (intervalCompliance != null && intervalCompliance < 80.0) {
-            return "INTERVAL_QUALITY";
-        }
-        if (zoneCompliance != null && zoneCompliance < 80.0) {
-            return "PACE_CONTROL";
-        }
-        if (durationCompliance != null && durationCompliance < 90.0) {
-            return "VOLUME_SHORTFALL";
-        }
-        if (tssCompliance != null && tssCompliance < 90.0) {
-            return "LOAD_SHORTFALL";
-        }
-        if (tssCompliance != null && tssCompliance > 115.0) {
-            return "TOO_HARD";
-        }
-        return "GENERAL_EXECUTION";
-    }
-
-    private String determineNextDayAdvice(
-            String limiter,
-            Double tssCompliance,
-            Double durationCompliance,
-            Double intervalCompliance,
-            Double zoneCompliance) {
-        return switch (limiter) {
-            case "ON_TARGET" -> "Bodziec trafił. Możesz trzymać kolejny planowany krok bez dodatkowej korekty.";
-            case "INTERVAL_QUALITY" -> "Jutro zostaw spokojny tlen lub recovery, a kolejny akcent rób dopiero na świeższej nodze.";
-            case "PACE_CONTROL" -> "Kolejny dzień trzymaj spokojniej i dopilnuj równego tempa, zanim wrócisz do mocnego bodźca.";
-            case "VOLUME_SHORTFALL", "LOAD_SHORTFALL" -> "Nie dokręcaj jutro na siłę. Lepiej obroń następny jakościowy trening niż nadrabiać objętość dzień po dniu.";
-            case "TOO_HARD" -> "Jutro idź w lekki dzień i pilnuj regeneracji, bo ten trening już mocno podbił koszt tygodnia.";
-            default -> {
-                if ((intervalCompliance != null && intervalCompliance < 75.0)
-                        || (zoneCompliance != null && zoneCompliance < 75.0)
-                        || (tssCompliance != null && tssCompliance > 120.0)
-                        || (durationCompliance != null && durationCompliance > 125.0)) {
-                    yield "Jutro potraktuj jako dzień ochrony jakości: lekki tlen albo recovery.";
-                }
-                yield "Jutro możesz iść zgodnie z planem, ale bez dokładania dodatkowej intensywności.";
-            }
-        };
-    }
-
-    private int scoreFromCompliance(Double compliance, double onTargetTolerance, double maxTolerance) {
-        if (compliance == null) {
-            return 70;
-        }
-        double delta = Math.abs(100.0 - compliance);
-        if (delta <= onTargetTolerance) {
-            return 100;
-        }
-        if (delta >= maxTolerance) {
-            return 40;
-        }
-        double progress = (delta - onTargetTolerance) / (maxTolerance - onTargetTolerance);
-        return (int) Math.round(100 - (progress * 60));
-    }
-
-    private int resolvePlannedStimulus(String plannedType) {
-        if (plannedType == null) {
-            return STIMULUS_UNKNOWN;
-        }
-        return switch (plannedType) {
-            case "RECOVERY", "ENDURANCE" -> STIMULUS_EASY;
-            case "TEMPO", "SWEET_SPOT" -> STIMULUS_MODERATE;
-            case "THRESHOLD", "VO2MAX", "ANAEROBIC", "SPRINT" -> STIMULUS_HARD;
-            default -> STIMULUS_UNKNOWN;
-        };
-    }
-
-    private int resolveActualStimulus(CalendarActivitySummaryDto activity) {
-        if (activity.getTss() == null || activity.getDurationMin() == null || activity.getDurationMin() <= 0) {
-            return STIMULUS_UNKNOWN;
-        }
-        BigDecimal tssPerHour = activity.getTss()
-                .multiply(BigDecimal.valueOf(60))
-                .divide(BigDecimal.valueOf(activity.getDurationMin()), 2, RoundingMode.HALF_UP);
-        if (tssPerHour.compareTo(BigDecimal.valueOf(45)) < 0) {
-            return STIMULUS_EASY;
-        }
-        if (tssPerHour.compareTo(BigDecimal.valueOf(75)) < 0) {
-            return STIMULUS_MODERATE;
-        }
-        return STIMULUS_HARD;
-    }
-
-    private ExecutionOutcome determineExecutionOutcome(
-            Double tssCompliance,
-            Double durationCompliance,
-            int plannedStimulus,
-            int actualStimulus,
-            boolean stimulusMatch,
-            int score) {
-        double tss = tssCompliance != null ? tssCompliance : 100.0;
-        double duration = durationCompliance != null ? durationCompliance : 100.0;
-
-        if (!stimulusMatch && actualStimulus > plannedStimulus && (tss > 110.0 || duration < 95.0)) {
-            return new ExecutionOutcome(
-                    "TOO_HARD",
-                    "Za mocno",
-                    "Realizacja była cięższa niż zakładany bodziec i może niepotrzebnie podbić zmęczenie.");
-        }
-        if (!stimulusMatch && actualStimulus < plannedStimulus && (tss < 85.0 || duration < 90.0)) {
-            return new ExecutionOutcome(
-                    "MISSED_STIMULUS",
-                    "Nietrafiony bodziec",
-                    "Trening nie dowiózł jakości planowanej dla tej jednostki i warto skorygować kolejny akcent.");
-        }
-        if (tss >= 120.0 || duration >= 125.0) {
-            return new ExecutionOutcome(
-                    "TOO_HARD",
-                    "Za mocno",
-                    "Objętość albo obciążenie wyszły wyraźnie ponad plan.");
-        }
-        if (tss <= 70.0 && duration <= 80.0) {
-            return new ExecutionOutcome(
-                    "TOO_EASY",
-                    "Za lekko",
-                    "Jednostka była zbyt krótka i zbyt lekka, żeby w pełni zrealizować plan.");
-        }
-        if (stimulusMatch && score >= 85) {
-            return new ExecutionOutcome(
-                    "WELL_EXECUTED",
-                    "Trafiony bodziec",
-                    "Czas, obciążenie i charakter pracy były blisko założeń planu.");
-        }
-        return new ExecutionOutcome(
-                "PARTIAL",
-                "Częściowo trafiony",
-                "Wykonanie było użyteczne, ale odbiegało od planu na tyle, że warto mieć to na uwadze przy kolejnych dniach.");
+    private TrainingExecutionAssessmentDto assessExecution(TrainingPlan plan, Activity activity, CalendarActivitySummaryDto summary, Double tssCompliance) {
+        var execution = plan != null ? executionRepository.findLatestByScheduledWorkoutId(plan.getId()).orElse(null) : null;
+        return new TrainingExecutionAssessmentService().assess(plan, activity, summary, tssCompliance, execution);
     }
 
     private List<TrainingGoalScorecardDto> buildGoalScorecards(
             TrainingPlanProgram program,
             List<TrainingPlan> plans,
             List<TrainingWeekObjectiveDto> weeklyObjectives) {
-        OffsetDateTime from = program.getStartDate().atStartOfDay().atOffset(ZoneOffset.UTC);
-        OffsetDateTime to = program.getEndDate().plusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC);
+        OffsetDateTime from = program.getStartDate().atStartOfDay(clock.getZone()).toOffsetDateTime();
+        OffsetDateTime to = program.getEndDate().plusDays(1).atStartOfDay(clock.getZone()).toOffsetDateTime();
         List<Activity> activities = activityRepository.findByStartedAtBetween(from, to);
-        Map<LocalDate, Activity> activitiesByDate = new LinkedHashMap<>();
+        Map<LocalDate, List<Activity>> activitiesByDate = new LinkedHashMap<>();
         for (Activity activity : activities) {
-            activitiesByDate.put(activity.getStartedAt().toLocalDate(), activity);
+            activitiesByDate.computeIfAbsent(activity.getStartedAt().atZoneSameInstant(clock.getZone()).toLocalDate(), ignored -> new ArrayList<>()).add(activity);
         }
         List<UUID> activityIds = activities.stream().map(Activity::getId).toList();
-        Map<UUID, BigDecimal> tssByActivity = activityIds.isEmpty()
-                ? Map.of()
-                : activityMetricRepository.findNumericValues(activityIds, "tss");
+        Map<UUID, BigDecimal> tssByActivity = new ActivityLoadService(activityMetricRepository).getLoads(activities);
 
         Map<LocalDate, List<TrainingPlan>> plansByWeek = new LinkedHashMap<>();
         for (TrainingPlan plan : plans) {
@@ -1587,7 +1041,7 @@ public class TrainingPlanService {
     private TrainingGoalScorecardDto buildGoalScorecard(
             TrainingWeekObjectiveDto objective,
             List<TrainingPlan> weekPlans,
-            Map<LocalDate, Activity> activitiesByDate,
+            Map<LocalDate, List<Activity>> activitiesByDate,
             Map<UUID, BigDecimal> tssByActivity) {
         TrainingSessionRole goalFocusRole = resolveGoalFocusRole(objective);
         BigDecimal actualTss = BigDecimal.ZERO;
@@ -1609,7 +1063,9 @@ public class TrainingPlanService {
                 plannedGoalSessions++;
             }
 
-            Activity activity = activitiesByDate.get(plan.getDate());
+            boolean singlePlan = weekPlans.stream().filter(p -> p.getDate().equals(plan.getDate())).count() == 1;
+            Activity activity = plan.getActualActivityId() != null || singlePlan
+                    ? resolveCalendarActivity(plan, activitiesByDate.getOrDefault(plan.getDate(), List.of())) : null;
             if (activity == null) {
                 continue;
             }
@@ -1634,7 +1090,7 @@ public class TrainingPlanService {
                         .doubleValue();
             }
             TrainingExecutionAssessmentDto execution = assessExecution(plan, activity, activityDto, tssCompliance);
-            if (execution != null) {
+            if (execution != null && execution.getScore() != null) {
                 scoreSum += execution.getScore();
                 scoredDays++;
                 if (TrainingSessionRoleResolver.matchesGoalFocus(goalFocusRole, sessionRole)) {
@@ -1685,7 +1141,7 @@ public class TrainingPlanService {
     private boolean countsAsGoalStimulus(TrainingExecutionAssessmentDto execution) {
         return !"MISSED_STIMULUS".equals(execution.getOutcome())
                 && !"TOO_EASY".equals(execution.getOutcome())
-                && execution.getScore() >= 70;
+                && execution.getScore() != null && execution.getScore() >= 70;
     }
 
     private Integer calculateGoalExecutionScore(
@@ -1693,9 +1149,7 @@ public class TrainingPlanService {
             int completedGoalSessions,
             int goalScoreSum,
             int goalScoredDays) {
-        if (plannedGoalSessions == 0 && goalScoredDays == 0) {
-            return 100;
-        }
+        if (goalScoredDays == 0) return null;
         double completionScore = plannedGoalSessions == 0
                 ? 100
                 : (completedGoalSessions * 100.0) / plannedGoalSessions;
@@ -1707,6 +1161,7 @@ public class TrainingPlanService {
             int plannedGoalSessions,
             int completedGoalSessions,
             Integer goalExecutionScore) {
+        if (goalExecutionScore == null) return "UNKNOWN";
         if (plannedGoalSessions == 0) {
             return "STABLE";
         }

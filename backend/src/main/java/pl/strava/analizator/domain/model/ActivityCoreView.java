@@ -28,6 +28,7 @@ public class ActivityCoreView {
     private BigDecimal maxSpeedMs;
     private Short avgHeartrate;
     private Short maxHeartrate;
+    private Boolean deviceWatts;
     private Short avgPowerW;
     private Short maxPowerW;
     private Short avgCadence;

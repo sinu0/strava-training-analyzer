@@ -1,3 +1,4 @@
+
 import AddIcon from '@mui/icons-material/Add';
 import FlagIcon from '@mui/icons-material/Flag';
 import { Box, Button, Grid, Stack, Typography } from '@mui/material';
@@ -22,11 +23,12 @@ import {
 } from '@/hooks/useWeight';
 import { getAppThemeTokens } from '@/theme/theme';
 import { getApiErrorMessage } from '@/utils/errorHandling';
+import { localDate } from '@/utils/localDate';
 
 import type { FormEvent } from 'react';
 
 function getTodayDate(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localDate();
 }
 
 export default function WeightPage() {

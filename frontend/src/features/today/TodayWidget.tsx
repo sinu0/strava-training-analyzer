@@ -209,7 +209,7 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
                 variant="h3"
                 sx={{ color: '#fff', maxWidth: 640, fontSize: 'clamp(2rem, 1.55rem + 1.5vw, 2.6rem)' }}
               >
-                {recommendation?.sessionType ?? recommendation?.decision ?? 'Najpierw uzupełnij dane'}
+                {recommendation?.decision === 'NEEDS_INPUT' ? 'Ustaw dostępność' : recommendation?.decision === 'REST' ? 'Odpoczynek' : recommendation?.sessionType ?? 'Najpierw uzupełnij dane'}
               </Typography>
               <Typography variant="caption" sx={{ display: 'block', mt: 0.6, color: 'rgba(255,255,255,0.8)', fontWeight: 650, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                 Dzisiaj · {todayCaption}
@@ -231,8 +231,8 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
               )}
             </Box>
             <IconButton
-              aria-label="Otwórz plan"
-              onClick={() => navigate('/training')}
+              aria-label={recommendation?.decision === 'NEEDS_INPUT' ? 'Ustaw cel i dostępność' : 'Otwórz plan'}
+              onClick={() => navigate(recommendation?.decision === 'NEEDS_INPUT' ? '/training?tab=context' : '/training')}
               sx={{
                 width: 56,
                 height: 56,
@@ -346,7 +346,7 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
           <>
             <Typography variant="h5" sx={{ mt: 2 }}>{data.nextTraining.plannedType}</Typography>
             <Typography variant="body2" color="text.secondary">
-              {new Date(data.nextTraining.date).toLocaleDateString('pl-PL')} · {data.nextTraining.plannedDurationMin ?? '—'} min
+              {new Date(`${data.nextTraining.date}T12:00:00`).toLocaleDateString('pl-PL')} · {data.nextTraining.plannedDurationMin ?? '—'} min
             </Typography>
             <Button
               variant="contained"

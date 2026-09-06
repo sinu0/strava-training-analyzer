@@ -27,7 +27,7 @@ public class DailyDecisionDto {
     public static class WorkoutSuggestionDto {
         private String type;
         private int durationMin;
-        private int targetTss;
+        private Integer targetTss;
         private String difficulty;
         private String intensityDescription;
         private String description;

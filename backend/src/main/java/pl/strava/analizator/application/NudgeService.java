@@ -20,6 +20,8 @@ import pl.strava.analizator.domain.port.ActivityRepository;
 @RequiredArgsConstructor
 public class NudgeService {
 
+    private final java.time.Clock clock;
+
     private final ActivityRepository activityRepository;
     private final JournalService journalService;
     private final ChallengeService challengeService;
@@ -38,7 +40,7 @@ public class NudgeService {
 
     private void checkMorningCheckin(List<NudgeDto> nudges) {
         var latest = journalService.getLatestEntry();
-        if (latest == null || !latest.getCreatedAt().atZone(ZoneId.systemDefault()).toLocalDate().equals(LocalDate.now())) {
+        if (latest == null || !latest.getCreatedAt().atZone(clock.getZone()).toLocalDate().equals(LocalDate.now(clock))) {
             nudges.add(NudgeDto.builder()
                     .id(UUID.randomUUID().toString())
                     .type("MORNING_CHECKIN")
@@ -62,7 +64,7 @@ public class NudgeService {
                     .orElse(null);
 
             if (latestActivityDate != null) {
-                long daysSince = java.time.temporal.ChronoUnit.DAYS.between(latestActivityDate, LocalDate.now());
+                long daysSince = java.time.temporal.ChronoUnit.DAYS.between(latestActivityDate, LocalDate.now(clock));
                 if (daysSince >= 2) {
                     nudges.add(NudgeDto.builder()
                             .id(UUID.randomUUID().toString())

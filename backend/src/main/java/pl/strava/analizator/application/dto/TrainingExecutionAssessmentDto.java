@@ -13,7 +13,9 @@ public class TrainingExecutionAssessmentDto {
     private String outcome;
     private String label;
     private String description;
-    private int score;
+    private Integer score;
+    private String availability;
+    private String algorithmVersion;
     private Double tssCompliance;
     private Double durationCompliance;
     private Double intervalCompliance;

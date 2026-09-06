@@ -42,7 +42,7 @@ class AnalyticsServicePowerCurveRangeTest {
         activityMetricRepository = mock(ActivityMetricRepository.class);
         athleteProfileRepository = mock(AthleteProfileRepository.class);
         dailySummaryRepository = mock(DailySummaryRepository.class);
-        analyticsService = new AnalyticsService(
+        analyticsService = new AnalyticsService(java.time.Clock.systemDefaultZone(),
                 dailyMetricRepository, activityRepository,
                 activityMetricRepository, athleteProfileRepository, dailySummaryRepository);
 
@@ -52,6 +52,33 @@ class AnalyticsServicePowerCurveRangeTest {
     @AfterEach
     void tearDown() {
         TimeZone.setDefault(originalTimeZone);
+    }
+
+    @Test
+    void powerCurveExcludesEstimatedAndUnprovenSources() {
+        var measured = pl.strava.analizator.domain.model.Activity.builder().id(java.util.UUID.randomUUID()).deviceWatts(true).build();
+        var estimated = pl.strava.analizator.domain.model.Activity.builder().id(java.util.UUID.randomUUID()).deviceWatts(false).build();
+        var unknown = pl.strava.analizator.domain.model.Activity.builder().id(java.util.UUID.randomUUID()).build();
+        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(measured, estimated, unknown));
+        when(activityMetricRepository.findAllByActivityId(measured.getId())).thenReturn(List.of(
+                pl.strava.analizator.domain.model.MetricResult.json("power_curve", java.util.Map.of("efforts", java.util.Map.of("1200", 200)))));
+        var curve = analyticsService.getPowerCurve(LocalDate.now(), LocalDate.now());
+        assertThat(curve.getEfforts()).containsEntry(1200, 200.0);
+        org.mockito.Mockito.verify(activityMetricRepository, org.mockito.Mockito.never()).findAllByActivityId(estimated.getId());
+        org.mockito.Mockito.verify(activityMetricRepository, org.mockito.Mockito.never()).findAllByActivityId(unknown.getId());
+    }
+
+    @Test
+    void unverifiedHistoryRequiresOptInAndIsExplicitlyLabeled() {
+        var unknown = pl.strava.analizator.domain.model.Activity.builder().id(java.util.UUID.randomUUID()).build();
+        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(unknown));
+        when(activityMetricRepository.findAllByActivityId(unknown.getId())).thenReturn(List.of(
+                pl.strava.analizator.domain.model.MetricResult.json("power_curve", java.util.Map.of("efforts", java.util.Map.of("1200", 200)))));
+        var curve = analyticsService.getPowerCurve(LocalDate.now(), LocalDate.now(), true);
+        assertThat(curve.getEfforts()).containsEntry(1200, 200.0);
+        assertThat(curve.getSource()).isEqualTo("MIXED_UNVERIFIED");
+        assertThat(curve.getUnknownSourceActivities()).isEqualTo(1);
+        assertThat(curve.getMeasuredActivities()).isZero();
     }
 
     @Test

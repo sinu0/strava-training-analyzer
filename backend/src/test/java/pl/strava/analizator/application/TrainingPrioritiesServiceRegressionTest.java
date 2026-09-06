@@ -43,7 +43,7 @@ class TrainingPrioritiesServiceRegressionTest {
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of());
         when(dailyMetricRepository.findNumericSeries(any(), any())).thenReturn(Map.of());
 
-        new TrainingPrioritiesService(activityRepository, activityMetricRepository,
+        new TrainingPrioritiesService(java.time.Clock.systemDefaultZone(), activityRepository, activityMetricRepository,
                 dailyMetricRepository, athleteProfileRepository, dailySummaryRepository).getPriorities();
 
         verify(dailyMetricRepository).findNumericSeries(
@@ -81,7 +81,7 @@ class TrainingPrioritiesServiceRegressionTest {
                 AthleteProfile.builder().ftpWatts((short) 280).weightKg(BigDecimal.valueOf(75)).build()));
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(activities);
         when(dailyMetricRepository.findNumericSeries(any(), any())).thenReturn(Map.of());
-        return new TrainingPrioritiesService(activityRepository, activityMetricRepository,
+        return new TrainingPrioritiesService(java.time.Clock.systemDefaultZone(), activityRepository, activityMetricRepository,
                 dailyMetricRepository, athleteProfileRepository, dailySummaryRepository);
     }
 

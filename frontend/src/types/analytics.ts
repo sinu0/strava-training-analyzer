@@ -1,15 +1,19 @@
 export interface PmcData {
   date: string;
-  ctl: number;
-  atl: number;
-  tsb: number;
-  ctlDelta: number;
-  atlDelta: number;
-  tsbDelta: number;
+  ctl: number | null;
+  atl: number | null;
+  tsb: number | null;
+  ctlDelta: number | null;
+  atlDelta: number | null;
+  tsbDelta: number | null;
 }
 
 export interface PowerCurve {
   efforts: Record<number, number>;
+  source?: string;
+  measuredActivities?: number;
+  estimatedActivities?: number;
+  unknownSourceActivities?: number;
 }
 
 export interface WeeklySummary {
@@ -144,12 +148,13 @@ export interface FtpProgress {
 }
 
 export interface ReadinessData {
-  score: number;
-  level: string;
-  tsb: number;
-  ctl: number;
-  atl: number;
-  description: string;
+  availability?: 'AVAILABLE' | 'PARTIAL' | 'UNKNOWN';
+  score?: number | null;
+  level?: string | null;
+  tsb?: number | null;
+  ctl?: number | null;
+  atl?: number | null;
+  description?: string;
   dayType?: string;
   dayLabel?: string;
   dayFocus?: string;

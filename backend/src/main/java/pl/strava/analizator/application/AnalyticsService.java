@@ -18,6 +18,7 @@ import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -63,6 +64,8 @@ import pl.strava.analizator.domain.vo.DateRange;
 @RequiredArgsConstructor
 public class AnalyticsService {
 
+    private final java.time.Clock clock;
+
     private static final String POWER_CURVE_METRIC = "power_curve";
     private static final String TIME_IN_ZONES_METRIC = "time_in_zones";
     private static final String TSS_METRIC = "training_stress_score";
@@ -93,47 +96,23 @@ public class AnalyticsService {
      * PMC chart: CTL/ATL/TSB time series with day-over-day deltas.
      */
     public List<PmcDataDto> getPmc(LocalDate from, LocalDate to) {
-        // Fetch one extra day before 'from' to compute delta for the first requested day
-        LocalDate extendedFrom = from.minusDays(1);
-        DateRange range = DateRange.of(extendedFrom, to);
-        Map<LocalDate, BigDecimal> ctlSeries = dailyMetricRepository.findNumericSeries("ctl", range);
-        Map<LocalDate, BigDecimal> atlSeries = dailyMetricRepository.findNumericSeries("atl", range);
-        Map<LocalDate, BigDecimal> tsbSeries = dailyMetricRepository.findNumericSeries("tsb", range);
-
-        BigDecimal prevCtl = ctlSeries.getOrDefault(extendedFrom, BigDecimal.ZERO);
-        BigDecimal prevAtl = atlSeries.getOrDefault(extendedFrom, BigDecimal.ZERO);
-        BigDecimal prevTsb = tsbSeries.getOrDefault(extendedFrom, BigDecimal.ZERO);
-
-        List<PmcDataDto> result = new ArrayList<>();
-        for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
-            BigDecimal ctl = ctlSeries.getOrDefault(date, BigDecimal.ZERO);
-            BigDecimal atl = atlSeries.getOrDefault(date, BigDecimal.ZERO);
-            BigDecimal tsb = tsbSeries.getOrDefault(date, BigDecimal.ZERO);
-            result.add(PmcDataDto.builder()
-                    .date(date)
-                    .ctl(ctl)
-                    .atl(atl)
-                    .tsb(tsb)
-                    .ctlDelta(ctl.subtract(prevCtl))
-                    .atlDelta(atl.subtract(prevAtl))
-                    .tsbDelta(tsb.subtract(prevTsb))
-                    .build());
-            prevCtl = ctl;
-            prevAtl = atl;
-            prevTsb = tsb;
-        }
-        return result;
+        return new TrainingLoadService(dailyMetricRepository).getPoints(from, to);
     }
 
     /**
      * Aggregate power curve: best efforts across all activities in the date range.
      */
     public PowerCurveDto getPowerCurve(LocalDate from, LocalDate to) {
+        return getPowerCurve(from, to, false);
+    }
+
+    public PowerCurveDto getPowerCurve(LocalDate from, LocalDate to, boolean includeUnverified) {
         List<Activity> activities = findActivitiesBetween(from, to);
 
         Map<Integer, Double> bestEfforts = new TreeMap<>();
 
         for (Activity a : activities) {
+            if (!includeUnverified && !Boolean.TRUE.equals(a.getDeviceWatts())) continue;
             List<MetricResult> metrics = activityMetricRepository.findAllByActivityId(a.getId());
             for (MetricResult m : metrics) {
                 if (POWER_CURVE_METRIC.equals(m.getMetricName()) && m.getJsonValue() != null) {
@@ -150,7 +129,10 @@ public class AnalyticsService {
             }
         }
 
-        return PowerCurveDto.builder().efforts(bestEfforts).build();
+        return PowerCurveDto.builder().efforts(bestEfforts).source(includeUnverified ? "MIXED_UNVERIFIED" : "MEASURED_ONLY")
+                .measuredActivities((int)activities.stream().filter(a -> Boolean.TRUE.equals(a.getDeviceWatts())).count())
+                .estimatedActivities((int)activities.stream().filter(a -> Boolean.FALSE.equals(a.getDeviceWatts())).count())
+                .unknownSourceActivities((int)activities.stream().filter(a -> a.getDeviceWatts() == null).count()).build();
     }
 
     /**
@@ -193,7 +175,7 @@ public class AnalyticsService {
      * Weekly summaries for the last N weeks.
      */
     public List<WeeklySummaryDto> getWeeklySummaries(int weeks) {
-        LocalDate now = LocalDate.now();
+        LocalDate now = LocalDate.now(clock);
         LocalDate start = now.minusWeeks(weeks).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
         List<Activity> activities = activityRepository.findByStartedAtBetween(
@@ -256,7 +238,7 @@ public class AnalyticsService {
      * Aggregate summary for a period (last week/month/year).
      */
     public Map<String, Object> getSummary(String period) {
-        LocalDate now = LocalDate.now();
+        LocalDate now = LocalDate.now(clock);
         LocalDate from = switch (period) {
             case "week" -> now.minusWeeks(1);
             case "month" -> now.minusMonths(1);
@@ -381,7 +363,7 @@ public class AnalyticsService {
 
         Short profileFtp = profile != null ? profile.getFtpWatts() : null;
 
-        LocalDate rangeEnd   = to   != null ? to   : LocalDate.now();
+        LocalDate rangeEnd   = to   != null ? to   : LocalDate.now(clock);
         LocalDate rangeStart = from != null ? from : rangeEnd.minusDays(90);
         DateRange range = DateRange.of(rangeStart, rangeEnd);
         Map<LocalDate, BigDecimal> ftpSeries = dailyMetricRepository.findNumericSeries("ftp", range);
@@ -428,25 +410,35 @@ public class AnalyticsService {
      * Score 0-100: positive TSB = more rested, high CTL = good fitness base.
      */
     public ReadinessDto getReadiness() {
-        LocalDate today = LocalDate.now();
-        BigDecimal tsbVal = dailyMetricRepository.findNumericValue(today, "tsb")
-                .or(() -> dailyMetricRepository.findNumericValue(today.minusDays(1), "tsb"))
-                .orElse(BigDecimal.ZERO);
-        BigDecimal ctlVal = dailyMetricRepository.findNumericValue(today, "ctl")
-                .or(() -> dailyMetricRepository.findNumericValue(today.minusDays(1), "ctl"))
-                .orElse(BigDecimal.ZERO);
-        BigDecimal atlVal = dailyMetricRepository.findNumericValue(today, "atl")
-                .or(() -> dailyMetricRepository.findNumericValue(today.minusDays(1), "atl"))
-                .orElse(BigDecimal.ZERO);
+        LocalDate today = LocalDate.now(clock);
+        Optional<BigDecimal> tsbValue = dailyMetricRepository.findNumericValue(today, "tsb")
+                .or(() -> dailyMetricRepository.findNumericValue(today.minusDays(1), "tsb"));
+        Optional<BigDecimal> ctlValue = dailyMetricRepository.findNumericValue(today, "ctl")
+                .or(() -> dailyMetricRepository.findNumericValue(today.minusDays(1), "ctl"));
+        Optional<BigDecimal> atlValue = dailyMetricRepository.findNumericValue(today, "atl")
+                .or(() -> dailyMetricRepository.findNumericValue(today.minusDays(1), "atl"));
         DailySummary todaySummary = dailySummaryRepository.findByDate(today).orElse(null);
         DailySummary healthSummary = todaySummary != null
                 ? todaySummary
                 : dailySummaryRepository.findByDate(today.minusDays(1)).orElse(null);
         AthleteProfile profile = athleteProfileRepository.findFirst().orElse(null);
+        ReadinessHealthSignalsDto healthSignals = buildHealthSignals(healthSummary, profile);
+        ReadinessCheckInDto checkIn = buildCheckIn(todaySummary);
 
-        double tsb = tsbVal.doubleValue();
-        double ctl = ctlVal.doubleValue();
-        double atl = atlVal.doubleValue();
+        if (tsbValue.isEmpty() || ctlValue.isEmpty() || atlValue.isEmpty()) {
+            return ReadinessDto.builder()
+                    .availability("UNKNOWN")
+                    .description("Brak wiarygodnych danych obciążenia. Gotowość treningowa nie została obliczona.")
+                    .sessionVariants(List.of())
+                    .qualityWindows(List.of())
+                    .healthSignals(healthSignals)
+                    .checkIn(checkIn)
+                    .build();
+        }
+
+        double tsb = tsbValue.orElseThrow().doubleValue();
+        double ctl = ctlValue.orElseThrow().doubleValue();
+        double atl = atlValue.orElseThrow().doubleValue();
 
         // Readiness calculation:
         // TSB contribution: TSB range typically -30 to +30, map to 0-60 points
@@ -463,8 +455,6 @@ public class AnalyticsService {
         }
 
         int baseScore = (int) Math.round(Math.max(0, Math.min(100, tsbScore + fitnessBonus - fatiguePenalty)));
-        ReadinessHealthSignalsDto healthSignals = buildHealthSignals(healthSummary, profile);
-        ReadinessCheckInDto checkIn = buildCheckIn(todaySummary);
         int score = clampReadinessScore(baseScore
                 + (healthSignals != null ? healthSignals.getScoreAdjustment() : 0)
                 + (checkIn != null ? checkIn.getScoreAdjustment() : 0));
@@ -495,6 +485,7 @@ public class AnalyticsService {
         }
 
         return ReadinessDto.builder()
+                .availability("AVAILABLE")
                 .score(score)
                 .level(level)
                 .tsb(tsb)
@@ -515,7 +506,7 @@ public class AnalyticsService {
     }
 
     public ReadinessDto saveReadinessCheckIn(SaveReadinessCheckInRequest request) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         Instant now = Instant.now();
         DailySummary summary = dailySummaryRepository.findByDate(today)
                 .orElse(DailySummary.builder()
@@ -598,9 +589,9 @@ public class AnalyticsService {
 
     private List<ReadinessWindowDto> buildQualityWindows(int score, double tsb, double ctl, double atl) {
         return List.of(
-                buildQualityWindow("Dziś", LocalDate.now(), score, tsb, ctl, atl),
-                buildQualityWindow("Jutro", LocalDate.now().plusDays(1), forecastScore(score, tsb, 1), forecastTsb(tsb, score, 1), ctl, atl),
-                buildQualityWindow("Pojutrze", LocalDate.now().plusDays(2), forecastScore(score, tsb, 2), forecastTsb(tsb, score, 2), ctl, atl));
+                buildQualityWindow("Dziś", LocalDate.now(clock), score, tsb, ctl, atl),
+                buildQualityWindow("Jutro", LocalDate.now(clock).plusDays(1), forecastScore(score, tsb, 1), forecastTsb(tsb, score, 1), ctl, atl),
+                buildQualityWindow("Pojutrze", LocalDate.now(clock).plusDays(2), forecastScore(score, tsb, 2), forecastTsb(tsb, score, 2), ctl, atl));
     }
 
     private ReadinessWindowDto buildQualityWindow(String label, LocalDate date, int score, double tsb, double ctl, double atl) {
@@ -674,7 +665,7 @@ public class AnalyticsService {
     }
 
     public List<ProgressionLevelDto> getProgressionLevels() {
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        LocalDate today = LocalDate.now(clock);
         OffsetDateTime from = today.minusDays(42).atStartOfDay().atOffset(ZoneOffset.UTC);
         OffsetDateTime to = today.plusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC);
         List<Activity> activities = activityRepository.findByStartedAtBetween(from, to).stream()
@@ -1175,7 +1166,7 @@ public class AnalyticsService {
      *   - dangerThreshold = CTL × 7 × 1.5   (injury risk)
      */
     public List<WeeklyOptimalLoadDto> getWeeklyOptimalLoad(int weeks) {
-        LocalDate now = LocalDate.now();
+        LocalDate now = LocalDate.now(clock);
         LocalDate start = now.minusWeeks(weeks - 1).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
         List<Activity> activities = activityRepository.findByStartedAtBetween(
@@ -1291,7 +1282,7 @@ public class AnalyticsService {
      * @param futureDays number of projection days beyond today (default 21)
      */
     public List<DailyOptimalLoadDto> getDailyOptimalLoad(int pastDays, int futureDays) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         LocalDate start = today.minusDays(pastDays - 1);
         LocalDate end = today.plusDays(futureDays);
 
@@ -1736,7 +1727,7 @@ public class AnalyticsService {
      * recommend a taper strategy, and assess projected form.
      */
     public RaceReadinessProjection projectRaceReadiness(LocalDate raceDate) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         int daysUntilRace = (int) ChronoUnit.DAYS.between(today, raceDate);
 
         double currentCtl = dailyMetricRepository.findNumericValue(today, "ctl")
@@ -1835,11 +1826,11 @@ public class AnalyticsService {
     }
 
     private OffsetDateTime startOfDay(LocalDate date) {
-        return date.atStartOfDay(ZoneId.systemDefault()).toOffsetDateTime();
+        return date.atStartOfDay(clock.getZone()).toOffsetDateTime();
     }
 
     private OffsetDateTime startOfNextDay(LocalDate date) {
-        return date.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toOffsetDateTime();
+        return date.plusDays(1).atStartOfDay(clock.getZone()).toOffsetDateTime();
     }
 
     private BigDecimal round(double value) {

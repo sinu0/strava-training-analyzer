@@ -22,6 +22,7 @@ public class WorkoutExecutionRepositoryAdapter implements WorkoutExecutionReposi
     public Optional<WorkoutExecution> findByStartIdempotencyKey(String key) { return repository.findByStartIdempotencyKey(key).map(mapper::toDomain); }
     public Optional<WorkoutExecution> findByFinishIdempotencyKey(String key) { return repository.findByFinishIdempotencyKey(key).map(mapper::toDomain); }
     public Optional<WorkoutExecution> findActive() { return repository.findActive().map(mapper::toDomain); }
+    public Optional<WorkoutExecution> findLatestByScheduledWorkoutId(UUID id) { return repository.findFirstByTrainingPlanIdOrderByStartedAtDesc(id).map(mapper::toDomain); }
     public List<WorkoutExecution> findCompletedWithoutActivity() { return repository.findCompletedWithoutActivity().stream().map(mapper::toDomain).toList(); }
     public WorkoutExecution save(WorkoutExecution execution) { return mapper.toDomain(repository.save(mapper.toEntity(execution))); }
 }

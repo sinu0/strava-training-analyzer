@@ -17,6 +17,8 @@ import lombok.Setter;
 public class AdaptiveCoachResponse {
 
     private String decision;
+    private String confidence;
+    private String algorithmVersion;
     private SessionOptionDto bestSession;
     private List<SessionOptionDto> alternatives;
     private List<SessionOptionDto> allScoredSessions;
@@ -39,7 +41,7 @@ public class AdaptiveCoachResponse {
     public static class SessionOptionDto {
         private String type;
         private int durationMinutes;
-        private double targetTss;
+        private Double targetTss;
         private double intensityFactor;
         private String difficulty;
         private String description;

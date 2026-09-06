@@ -12,6 +12,7 @@ import pl.strava.analizator.infrastructure.persistence.entity.WorkoutExecutionEn
 public interface WorkoutExecutionJpaRepository extends JpaRepository<WorkoutExecutionEntity, UUID> {
     Optional<WorkoutExecutionEntity> findByStartIdempotencyKey(String key);
     Optional<WorkoutExecutionEntity> findByFinishIdempotencyKey(String key);
+    Optional<WorkoutExecutionEntity> findFirstByTrainingPlanIdOrderByStartedAtDesc(UUID scheduledWorkoutId);
 
     @Query("select e from WorkoutExecutionEntity e where e.status in ('READY','RUNNING','PAUSED') order by e.startedAt desc limit 1")
     Optional<WorkoutExecutionEntity> findActive();

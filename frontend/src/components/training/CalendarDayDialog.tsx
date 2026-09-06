@@ -1,6 +1,7 @@
 import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { Alert, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Chip, Stack, IconButton } from '@mui/material';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { scheduledExportUrl } from '@/features/workout/workoutApi';
@@ -21,13 +22,17 @@ interface CalendarDayDialogProps {
   onClose: () => void;
 }
 
-export default function CalendarDayDialog({ day, open, onClose }: CalendarDayDialogProps) {
+export default function CalendarDayDialog({ day: originalDay, open, onClose }: CalendarDayDialogProps) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const updateStatus = useUpdatePlanStatus();
   const navigate = useNavigate();
   const deletePlan = useDeleteTrainingPlan();
   const recordAdjustmentFeedback = useRecordAdjustmentFeedback();
 
-  if (!day) return null;
+  if (!originalDay) return null;
+  const sessions = originalDay.sessions ?? [];
+  const selected = sessions.find((session) => session.planned.id === selectedId) ?? sessions[0];
+  const day = selected ? { ...originalDay, ...selected, adjustment: selected === sessions[0] ? originalDay.adjustment : null } : originalDay;
   const { planned, actual } = day;
   const scenarios = buildDecisionScenarios(day);
 
@@ -54,9 +59,20 @@ export default function CalendarDayDialog({ day, open, onClose }: CalendarDayDia
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         {day.date}
-        <IconButton onClick={onClose} size="small"><CloseIcon /></IconButton>
+        <IconButton onClick={onClose} size="small" aria-label="Zamknij szczegóły dnia"><CloseIcon /></IconButton>
       </DialogTitle>
       <DialogContent dividers>
+        {sessions.length > 1 && (
+          <Stack direction="row" gap={1} sx={{ mb: 2, flexWrap: 'wrap' }} aria-label="Sesje tego dnia">
+            {sessions.map((session, index) => (
+              <Button key={session.planned.id} size="small"
+                variant={session.planned.id === planned?.id ? 'contained' : 'outlined'}
+                onClick={() => setSelectedId(session.planned.id)}>
+                Sesja {index + 1}: {session.planned.plannedDescription || session.planned.plannedType || 'Trening'}
+              </Button>
+            ))}
+          </Stack>
+        )}
         {!!planned && (
           <Box sx={{ mb: 2 }}>
             <Typography variant="subtitle2" gutterBottom>Zaplanowany trening</Typography>
@@ -150,7 +166,7 @@ export default function CalendarDayDialog({ day, open, onClose }: CalendarDayDia
           <Alert severity={executionSeverity(day.execution.outcome)} sx={{ mb: 2 }}>
             <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
               <Chip label={day.execution.label} size="small" color={executionChipColor(day.execution.outcome)} />
-              <Chip label={`Score ${day.execution.score}/100`} size="small" variant="outlined" />
+              <Chip label={day.execution.score != null ? `Score ${day.execution.score}/100` : 'Ocena niedostępna'} size="small" variant="outlined" />
               {day.execution.tssCompliance != null && (
                 <Chip label={`TSS ${Math.round(day.execution.tssCompliance)}%`} size="small" variant="outlined" />
               )}
@@ -181,11 +197,18 @@ export default function CalendarDayDialog({ day, open, onClose }: CalendarDayDia
             <Typography variant="subtitle2" gutterBottom>Zrealizowana aktywność</Typography>
             <Typography variant="body2">{actual.name}</Typography>
             <Typography variant="body2" color="text.secondary">
-              {actual.durationMin} min · {actual.distanceKm.toFixed(1)} km
+              {actual.durationMin != null ? `${actual.durationMin} min` : 'Czas nieznany'} · {actual.distanceKm != null ? `${actual.distanceKm.toFixed(1)} km` : 'Dystans nieznany'}
               {actual.tss != null ? ` · ${actual.tss} TSS` : ''}
             </Typography>
           </Box>
         )}
+
+        {(originalDay.activities ?? []).filter((activity) => activity.id !== actual?.id).map((activity) => (
+          <Box key={activity.id} sx={{ mt: 1 }}>
+            <Button size="small" onClick={() => navigate(`/activities/${activity.id}`)}>{activity.name}</Button>
+            <Typography variant="caption" color="text.secondary">Pozostała aktywność z tego dnia</Typography>
+          </Box>
+        ))}
 
         {!planned && !actual && (
           <Typography variant="body2" color="text.secondary">Brak zaplanowanych treningów i aktywności</Typography>

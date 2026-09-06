@@ -27,6 +27,7 @@ public class ActivitySummaryDto {
     private BigDecimal distanceM;
     private BigDecimal elevationGainM;
     private Short avgHeartrate;
+    private Boolean deviceWatts;
     private Short avgPowerW;
     private BigDecimal avgSpeedMs;
     private Integer calories;

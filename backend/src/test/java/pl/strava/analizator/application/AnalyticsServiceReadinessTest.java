@@ -45,7 +45,7 @@ class AnalyticsServiceReadinessTest {
         activityRepository = mock(ActivityRepository.class);
         activityMetricRepository = mock(ActivityMetricRepository.class);
         athleteProfileRepository = mock(AthleteProfileRepository.class);
-        analyticsService = new AnalyticsService(
+        analyticsService = new AnalyticsService(java.time.Clock.systemDefaultZone(),
                 dailyMetricRepository,
                 activityRepository,
                 activityMetricRepository,
@@ -138,6 +138,31 @@ class AnalyticsServiceReadinessTest {
         assertThat(readiness.getCheckIn()).isNotNull();
         assertThat(readiness.getCheckIn().getScoreAdjustment()).isEqualTo(20);
         assertThat(readiness.getCheckIn().getUpdatedAt()).isEqualTo(Instant.parse("2026-04-25T06:30:00Z"));
+    }
+
+    @Test
+    void getReadiness_missingLoadMetrics_returnsUnknownWithoutInventedZerosOrRecommendation() {
+        LocalDate today = LocalDate.now();
+        when(dailyMetricRepository.findNumericValue(eq(today), eq("tsb"))).thenReturn(Optional.empty());
+        when(dailyMetricRepository.findNumericValue(eq(today), eq("ctl"))).thenReturn(Optional.empty());
+        when(dailyMetricRepository.findNumericValue(eq(today), eq("atl"))).thenReturn(Optional.empty());
+        when(dailyMetricRepository.findNumericValue(eq(today.minusDays(1)), eq("tsb"))).thenReturn(Optional.empty());
+        when(dailyMetricRepository.findNumericValue(eq(today.minusDays(1)), eq("ctl"))).thenReturn(Optional.empty());
+        when(dailyMetricRepository.findNumericValue(eq(today.minusDays(1)), eq("atl"))).thenReturn(Optional.empty());
+        when(dailySummaryRepository.findByDate(today)).thenReturn(Optional.empty());
+        when(dailySummaryRepository.findByDate(today.minusDays(1))).thenReturn(Optional.empty());
+        when(athleteProfileRepository.findFirst()).thenReturn(Optional.empty());
+
+        ReadinessDto readiness = analyticsService.getReadiness();
+
+        assertThat(readiness.getAvailability()).isEqualTo("UNKNOWN");
+        assertThat(readiness.getScore()).isNull();
+        assertThat(readiness.getCtl()).isNull();
+        assertThat(readiness.getAtl()).isNull();
+        assertThat(readiness.getTsb()).isNull();
+        assertThat(readiness.getDayType()).isNull();
+        assertThat(readiness.getSessionVariants()).isEmpty();
+        assertThat(readiness.getDescription()).contains("Brak wiarygodnych danych obciążenia");
     }
 
     @Test

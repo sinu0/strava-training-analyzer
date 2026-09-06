@@ -36,6 +36,7 @@ public class ActivityV2DetailDto {
     private Short avgHeartrate;
     private Short maxHeartrate;
     private Short avgPowerW;
+    private Boolean deviceWatts;
     private Short maxPowerW;
     private Short avgCadence;
     private Short maxCadence;

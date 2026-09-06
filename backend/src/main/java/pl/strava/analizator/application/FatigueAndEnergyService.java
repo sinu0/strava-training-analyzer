@@ -22,6 +22,8 @@ import pl.strava.analizator.domain.vo.DateRange;
 @RequiredArgsConstructor
 public class FatigueAndEnergyService {
 
+    private final java.time.Clock clock;
+
     private final DailyMetricRepository dailyMetricRepository;
     private final AnalyticsService analyticsService;
 
@@ -30,7 +32,7 @@ public class FatigueAndEnergyService {
         DateRange range = DateRange.of(from, date);
         List<PmcDataDto> pmc = analyticsService.getPmc(from, date);
 
-        if (pmc.isEmpty()) {
+        if (pmc.isEmpty() || pmc.stream().anyMatch(p -> !TrainingLoadService.complete(p))) {
             return AthleteFatigueState.builder().score(0).level("Brak danych").calculatedAt(Instant.now()).build();
         }
 
@@ -76,7 +78,7 @@ public class FatigueAndEnergyService {
     }
 
     public LoadFocus getLoadFocus(int weeks) {
-        LocalDate to = LocalDate.now();
+        LocalDate to = LocalDate.now(clock);
         LocalDate from = to.minusDays(weeks * 7L);
         ZoneDistributionDto powerZones = analyticsService.getZoneDistribution("power", from, to);
 
@@ -176,7 +178,7 @@ public class FatigueAndEnergyService {
         if (date == null) return null;
         LocalDate yesterday = date.minusDays(1);
         List<PmcDataDto> recentPmc = analyticsService.getPmc(yesterday.minusDays(1), date);
-        if (recentPmc.size() < 2) return null;
+        if (recentPmc.size() < 2 || recentPmc.stream().anyMatch(p -> !TrainingLoadService.complete(p))) return null;
 
         double atlToday = recentPmc.get(recentPmc.size() - 1).getAtl().doubleValue();
         double atlYesterday = recentPmc.get(recentPmc.size() - 2).getAtl().doubleValue();
@@ -190,7 +192,7 @@ public class FatigueAndEnergyService {
         if (dropped <= 0) return null;
 
         double sleepHours = readMetric(date, "sleep_duration_hours");
-        if (sleepHours <= 0) sleepHours = 7.0;
+        if (sleepHours <= 0) return null;
 
         return Math.round(dropped / sleepHours * 10.0) / 10.0;
     }

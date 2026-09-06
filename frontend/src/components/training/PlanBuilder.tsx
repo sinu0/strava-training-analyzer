@@ -1,4 +1,5 @@
 
+
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -39,6 +40,7 @@ import { useApplyOptimizedPlan, useOptimizePlan } from '@/hooks/useTrainingOptim
 import { useGenerateProgram } from '@/hooks/useTrainingPlan';
 import type { OptimizePlanResponse, PlanType } from '@/types/trainingOptimizer';
 import { STATUS_COLORS } from '@/utils/colors';
+import { localDate } from '@/utils/localDate';
 
 const STEPS = ['Stan & kontekst', 'Cel i ograniczenia', 'Optymalizacja', 'Podglad i zastosuj'];
 
@@ -102,7 +104,7 @@ export default function PlanBuilder() {
 
   const [goal, setGoal] = useState('BUILD_BASE');
   const [goalPriority, setGoalPriority] = useState('B');
-  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
+  const [startDate, setStartDate] = useState(localDate());
   const [eventDate, setEventDate] = useState('');
   const [weeks, setWeeks] = useState(8);
   const [daysPerWeek, setDaysPerWeek] = useState(4);

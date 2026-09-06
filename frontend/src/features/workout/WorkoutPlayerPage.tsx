@@ -23,7 +23,7 @@ import type { WorkoutExecution, WorkoutStep } from '@/types/training';
 import {
   acquireExecutionLock, clearActiveExecution, loadActiveExecution, saveActiveExecution,
 } from './offlineStore';
-import { flushWorkoutQueue, getActiveExecution, sendExecutionMutation } from './workoutApi';
+import { flushWorkoutQueue, getActiveExecution, getExecution, sendExecutionMutation } from './workoutApi';
 import { createMonotonicClock, reconcileWorkout, totalWorkoutDurationMs, workoutReducer } from './workoutRunner';
 
 
@@ -84,8 +84,9 @@ export default function WorkoutPlayerPage() {
   const [saving, setSaving] = useState(false);
   const [locked, setLocked] = useState(false);
   const [wakeMode, setWakeMode] = useState<'ACTIVE' | 'FALLBACK' | 'OFF'>('OFF');
-  const [rpe, setRpe] = useState(5);
-  const [feeling, setFeeling] = useState('OK');
+  const [rpe, setRpe] = useState<number | null>(null);
+  const [feeling, setFeeling] = useState<string | null>(null);
+  const [feedbackError, setFeedbackError] = useState(false);
   const [notes, setNotes] = useState('');
   const persistedBucket = useRef(-1);
   const warnedStep = useRef(-1);
@@ -108,7 +109,8 @@ export default function WorkoutPlayerPage() {
       }
       if (navigator.onLine) {
         try {
-          const server = await getActiveExecution();
+          const activeServer = await getActiveExecution();
+          const server = activeServer?.id === executionId ? activeServer : await getExecution(executionId ?? '');
           if (server?.id === executionId) {
             restored = server;
             if (active) setExecution(restored);
@@ -117,6 +119,11 @@ export default function WorkoutPlayerPage() {
         } catch {
           if (active) setOnline(false);
         }
+      }
+      if (active && restored) {
+        setRpe(restored.rpe ?? null);
+        setFeeling(restored.feeling ?? null);
+        setNotes(restored.notes ?? '');
       }
       if (active && !restored) setLoadError(true);
       if (active) setLoading(false);
@@ -252,11 +259,17 @@ export default function WorkoutPlayerPage() {
   if (done) {
     const saveFeedback = async () => {
       setSaving(true);
-      await sendExecutionMutation(execution.id, 'feedback', { rpe, feeling, notes }, 'PUT');
-      await clearActiveExecution();
-      localStorage.removeItem(`workout-start-key:${execution.scheduledWorkoutId}`);
-      setSaving(false);
-      navigate(`/training/workouts/${execution.scheduledWorkoutId}`);
+      setFeedbackError(false);
+      try {
+        await sendExecutionMutation(execution.id, 'feedback', { rpe, feeling, notes }, 'PUT');
+        await clearActiveExecution();
+        localStorage.removeItem(`workout-start-key:${execution.scheduledWorkoutId}`);
+        navigate(`/training/workouts/${execution.scheduledWorkoutId}`);
+      } catch {
+        setFeedbackError(true);
+      } finally {
+        setSaving(false);
+      }
     };
     return (
       <Container maxWidth="sm" sx={{ py: { xs: 3, sm: 6 } }}>
@@ -269,14 +282,15 @@ export default function WorkoutPlayerPage() {
             <MetricReadout label="Zgodność" value={execution.complianceScore ?? '—'} unit={execution.complianceScore != null ? '%' : undefined} hint={execution.complianceStatus} />
           </Stack>
           <Alert severity="info" sx={{ mb: 3 }}>Dokładna ocena zostanie uzupełniona po synchronizacji aktywności i strumieni ze Stravy.</Alert>
-          <Typography id="rpe-label" gutterBottom>RPE: {rpe}/10</Typography>
-          <Slider value={rpe} min={1} max={10} marks onChange={(_, value) => setRpe(value as number)} aria-labelledby="rpe-label" sx={{ minHeight: 44 }} />
+          <Typography id="rpe-label" gutterBottom>{rpe == null ? 'RPE: nie podano' : `RPE: ${rpe}/10`}</Typography>
+          <Slider value={rpe ?? 5} min={1} max={10} marks onChange={(_, value) => setRpe(value as number)} aria-labelledby="rpe-label" sx={{ minHeight: 44 }} />
           <ToggleButtonGroup exclusive value={feeling} onChange={(_, value) => value && setFeeling(value)} fullWidth sx={{ my: 2 }}>
             <ToggleButton value="BAD">Słabo</ToggleButton>
             <ToggleButton value="OK">OK</ToggleButton>
             <ToggleButton value="GOOD">Dobrze</ToggleButton>
           </ToggleButtonGroup>
           <TextField label="Notatka" multiline minRows={3} fullWidth value={notes} onChange={event => setNotes(event.target.value)} />
+          {!!feedbackError && <Alert severity="error" sx={{ mt: 2 }}>Nie udało się zapisać podsumowania. Twoje odczucia pozostały w formularzu; spróbuj ponownie.</Alert>}
           <Button variant="contained" fullWidth disabled={saving} onClick={() => void saveFeedback()} sx={{ mt: 2, minHeight: 48 }}>Zapisz podsumowanie</Button>
         </PerformanceSurface>
       </Container>

@@ -1,3 +1,4 @@
+
 import {
   Dialog,
   DialogTitle,
@@ -14,6 +15,8 @@ import {
   Alert,
 } from '@mui/material';
 import { useState, useMemo } from 'react';
+
+import { localDate } from '@/utils/localDate';
 
 import WorkoutPowerChart from './WorkoutPowerChart';
 import { useCreateWorkoutEntry } from '../../hooks/useTrainingPlan';
@@ -70,7 +73,7 @@ function calcTotalSec(steps: WorkoutStep[]): number {
 function tomorrow(): string {
   const d = new Date();
   d.setDate(d.getDate() + 1);
-  return d.toISOString().slice(0, 10);
+  return localDate(d);
 }
 
 export default function AddToCalendarDialog({ template, open, onClose }: Props) {

@@ -495,24 +495,27 @@ public class TrainingDataAdapter implements TrainingDataPort {
         Map<LocalDate, BigDecimal> atlSeries = dailyMetricRepository.findNumericSeries("atl", range);
         Map<LocalDate, BigDecimal> tsbSeries = dailyMetricRepository.findNumericSeries("tsb", range);
         Map<LocalDate, BigDecimal> readinessSeries = dailyMetricRepository.findNumericSeries("readiness", range);
-        BigDecimal currentReadiness = readinessSeries.getOrDefault(today, BigDecimal.ZERO);
-        BigDecimal currentCtl = ctlSeries.getOrDefault(today, BigDecimal.ZERO);
-        BigDecimal currentAtl = atlSeries.getOrDefault(today, BigDecimal.ZERO);
-        BigDecimal currentTsb = tsbSeries.getOrDefault(today, BigDecimal.ZERO);
+        BigDecimal currentReadiness = readinessSeries.get(today);
+        BigDecimal currentCtl = ctlSeries.get(today);
+        BigDecimal currentAtl = atlSeries.get(today);
+        BigDecimal currentTsb = tsbSeries.get(today);
+        boolean complete = currentReadiness != null && currentCtl != null && currentAtl != null && currentTsb != null;
 
-        double ctl = currentCtl.doubleValue();
-        double atl = currentAtl.doubleValue();
-        double tsb = currentTsb.doubleValue();
-        double readinessScore = currentReadiness.doubleValue();
-        double atlCtlRatio = ctl > 0 ? atl / ctl : 0.0;
-
+        readiness.put("availability", complete ? "AVAILABLE" : "UNKNOWN");
         readiness.put("currentReadiness", currentReadiness);
         readiness.put("currentTSB", currentTsb);
         readiness.put("currentCTL", currentCtl);
         readiness.put("currentATL", currentAtl);
-        readiness.put("atlCtlRatio", BigDecimal.valueOf(atlCtlRatio).setScale(2, RoundingMode.HALF_UP));
-        readiness.put("trainingWindow", determineTrainingWindow(tsb, readinessScore, atlCtlRatio));
-        readiness.put("coachingGuidance", buildCoachingGuidance(tsb, readinessScore, atlCtlRatio));
+        if (complete) {
+            double ctl = currentCtl.doubleValue();
+            double atl = currentAtl.doubleValue();
+            double tsb = currentTsb.doubleValue();
+            double readinessScore = currentReadiness.doubleValue();
+            double atlCtlRatio = ctl > 0 ? atl / ctl : 0.0;
+            readiness.put("atlCtlRatio", BigDecimal.valueOf(atlCtlRatio).setScale(2, RoundingMode.HALF_UP));
+            readiness.put("trainingWindow", determineTrainingWindow(tsb, readinessScore, atlCtlRatio));
+            readiness.put("coachingGuidance", buildCoachingGuidance(tsb, readinessScore, atlCtlRatio));
+        }
         enrichWithStructuredReadiness(readiness);
         return readiness;
     }
@@ -522,6 +525,10 @@ public class TrainingDataAdapter implements TrainingDataPort {
         if (structuredReadiness == null) {
             return;
         }
+        if (structuredReadiness.getAvailability() != null) {
+            readiness.put("availability", structuredReadiness.getAvailability());
+        }
+        readiness.put("description", structuredReadiness.getDescription());
         readiness.put("dayType", structuredReadiness.getDayType());
         readiness.put("dayLabel", structuredReadiness.getDayLabel());
         readiness.put("dayFocus", structuredReadiness.getDayFocus());

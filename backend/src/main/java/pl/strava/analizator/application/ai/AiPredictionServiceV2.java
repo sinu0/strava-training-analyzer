@@ -42,7 +42,7 @@ public class AiPredictionServiceV2 {
     private final ModelCapabilityMatrix modelCapabilityMatrix;
     private final LlmProviderRegistry providerRegistry;
     private final ToolCallingLoopV2 toolCallingLoopV2;
-    private final RagServiceV2 ragServiceV2;
+    private final Optional<RagServiceV2> ragServiceV2;
     private final ResponseValidator responseValidator;
     private final KnowledgeBaseBuilder knowledgeBaseBuilder;
     private final AiPredictionRepository predictionRepository;
@@ -72,8 +72,8 @@ public class AiPredictionServiceV2 {
         Map<String, String> variables = contextToVariables(ctx);
 
         String ragContext = "";
-        if (ragServiceV2.isAvailable()) {
-            ragContext = ragServiceV2.retrieveAndFormat(type,
+        if (ragServiceV2.isPresent() && ragServiceV2.get().isAvailable()) {
+            ragContext = ragServiceV2.get().retrieveAndFormat(type,
                     ctx.getAthleteProfile() + " " + type.name(), 5);
             variables.put("knowledgeBase", ragContext);
         }
@@ -144,12 +144,13 @@ public class AiPredictionServiceV2 {
 
     public Map<String, Object> getKnowledgeStatus() {
         Map<String, Object> result = new HashMap<>();
-        result.put("ragAvailable", ragServiceV2.isAvailable());
+        result.put("ragAvailable", ragServiceV2.map(RagServiceV2::isAvailable).orElse(false));
         result.put("refreshScheduled", "0 0 2 * * 0");
         return result;
     }
 
     public Map<String, Object> refreshKnowledge() {
+        if (!enabled) throw new AiModuleDisabledException("AI module is disabled");
         Map<String, Object> result = new HashMap<>();
         try {
             int count = knowledgeBaseBuilder.rebuild();

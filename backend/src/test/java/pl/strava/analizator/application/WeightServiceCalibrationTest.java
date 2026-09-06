@@ -36,7 +36,7 @@ class WeightServiceCalibrationTest {
 
     @BeforeEach
     void setUp() {
-        weightService = new WeightService(weightRepository, profileRepository, activityRepository);
+        weightService = new WeightService(java.time.Clock.systemDefaultZone(), weightRepository, profileRepository, activityRepository);
     }
 
     private WeightRecord makeRecord(LocalDate date, double kg) {

@@ -1,3 +1,4 @@
+
 import {
   Alert,
   Card,
@@ -15,13 +16,14 @@ import CoachSummaryPanel from '@/components/training/CoachSummaryPanel';
 import ProgressionLevelsPanel from '@/components/training/ProgressionLevelsPanel';
 import { useAiPredict, useLatestAiPrediction } from '@/hooks/useAi';
 import { useBlockHealth, useDurability, useProgressionLevels, useReadiness } from '@/hooks/useAnalytics';
+import { localDate } from '@/utils/localDate';
 
 import { useCalendarView, usePrograms } from '../../hooks/useTrainingPlan';
 
 import type { CalendarDay, TrainingPlanProgram, TrainingSessionRole, TrainingWeekObjective } from '../../types/training';
 
 function formatDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
+  return localDate(date);
 }
 
 function startOfWeek(date: Date): Date {
@@ -129,7 +131,7 @@ export default function WeeklyCoachCockpit() {
     [days, todayStr],
   );
   const riskSignals = useMemo(
-    () => buildRiskSignals(days, readiness?.score, durability?.avgDurabilityScore),
+    () => buildRiskSignals(days, readiness?.score ?? undefined, durability?.avgDurabilityScore),
     [days, durability?.avgDurabilityScore, readiness?.score],
   );
 
@@ -143,7 +145,7 @@ export default function WeeklyCoachCockpit() {
           <Stack spacing={2}>
             <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
               {!!currentObjective && <Chip label={currentObjective.label} color="primary" />}
-              {!!readiness && <Chip label={`Dziś: ${readiness.dayLabel} (${readiness.score}/100)`} color={readiness.score >= 65 ? 'success' : 'warning'} />}
+              {readiness?.score != null && <Chip label={`Dziś: ${readiness.dayLabel} (${readiness.score}/100)`} color={readiness.score >= 65 ? 'success' : 'warning'} />}
               {!!durability && <Chip label={`Durability: ${durability.label}`} color={durability.avgDurabilityScore >= 65 ? 'success' : 'warning'} />}
               {!!currentScorecard && (
                 <Chip
@@ -154,7 +156,7 @@ export default function WeeklyCoachCockpit() {
               {!!currentScorecard?.plannedGoalSessions && (
                 <Chip
                   label={`${currentScorecard.completedGoalSessions ?? 0}/${currentScorecard.plannedGoalSessions} bodźców celu`}
-                  color={currentScorecard.goalExecutionStatus === 'MISSED' ? 'warning' : 'success'}
+                  color={currentScorecard.goalExecutionStatus === 'UNKNOWN' ? 'default' : currentScorecard.goalExecutionStatus === 'MISSED' ? 'warning' : 'success'}
                 />
               )}
             </Stack>

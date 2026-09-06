@@ -56,7 +56,7 @@ class AiPredictionServiceV2Test {
     void setUp() {
         service = new AiPredictionServiceV2(
                 promptEngine, trainingDataAdapter, modelCapabilityMatrix,
-                providerRegistry, toolCallingLoopV2, ragServiceV2,
+                providerRegistry, toolCallingLoopV2, java.util.Optional.of(ragServiceV2),
                 responseValidator, knowledgeBaseBuilder, predictionRepository,
                 objectMapper);
         ReflectionTestUtils.setField(service, "enabled", true);

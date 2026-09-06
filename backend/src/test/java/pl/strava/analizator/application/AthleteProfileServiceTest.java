@@ -24,6 +24,8 @@ import pl.strava.analizator.domain.port.TrainingZoneRepository;
 @ExtendWith(MockitoExtension.class)
 class AthleteProfileServiceTest {
 
+    @org.mockito.Spy private java.time.Clock clock = java.time.Clock.systemDefaultZone();
+
     @Mock
     private AthleteProfileRepository profileRepository;
 

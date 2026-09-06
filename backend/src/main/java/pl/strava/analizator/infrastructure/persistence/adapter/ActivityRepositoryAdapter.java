@@ -30,8 +30,17 @@ public class ActivityRepositoryAdapter implements ActivityRepository {
     private final ActivityEntityMapper mapper;
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public Activity save(Activity activity) {
         ActivityEntity entity = mapper.toEntity(activity);
+        if (activity.getId() != null) {
+            jpaRepository.findById(activity.getId()).ifPresent(existing -> {
+                // These JSON fields belong to infrastructure and are absent from the domain model.
+                entity.setRawData(existing.getRawData());
+                entity.setWeather(existing.getWeather());
+                if (entity.getDeviceWatts() == null) entity.setDeviceWatts(existing.getDeviceWatts());
+            });
+        }
         ActivityEntity saved = jpaRepository.save(entity);
         return mapper.toDomain(saved);
     }

@@ -203,19 +203,28 @@ export interface CalendarActivity {
   id: string;
   name: string;
   sportType: string;
-  durationMin: number;
-  distanceKm: number;
+  durationMin: number | null;
+  distanceKm: number | null;
   tss: number | null;
 }
 
 export interface CalendarDay {
   date: string;
+  sessions?: CalendarSession[];
+  activities?: CalendarActivity[];
   planned: TrainingPlan | null;
   actual: CalendarActivity | null;
   compliance: number | null;
   execution?: TrainingExecutionAssessment | null;
   projection?: TrainingDayProjection | null;
   adjustment?: TrainingAdjustmentSuggestion | null;
+}
+
+export interface CalendarSession {
+  planned: TrainingPlan;
+  actual: CalendarActivity | null;
+  compliance: number | null;
+  execution?: TrainingExecutionAssessment | null;
 }
 
 export interface TrainingPlanProgram {
@@ -282,7 +291,9 @@ export interface TrainingExecutionAssessment {
   outcome: string;
   label: string;
   description: string;
-  score: number;
+  score: number | null;
+  availability?: string;
+  algorithmVersion?: string;
   tssCompliance: number | null;
   durationCompliance: number | null;
   intervalCompliance?: number | null;

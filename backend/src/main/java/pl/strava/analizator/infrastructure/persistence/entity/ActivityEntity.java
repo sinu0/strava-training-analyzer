@@ -88,6 +88,9 @@ public class ActivityEntity {
     @Column(name = "avg_power_w")
     private Short avgPowerW;
 
+    @Column(name = "device_watts")
+    private Boolean deviceWatts;
+
     @Column(name = "max_power_w")
     private Short maxPowerW;
 

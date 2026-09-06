@@ -96,10 +96,10 @@ function Slide2({ week, readiness }: { week: WeeklySummary | undefined; readines
       )}
       {!!readiness && (
         <Box sx={{ display: 'flex', gap: 1.5, mt: 1 }}>
-          <StatBlock label="CTL" value={Math.round(readiness.ctl)} />
-          <StatBlock label="ATL" value={Math.round(readiness.atl)} />
-          <StatBlock label="TSB" value={Math.round(readiness.tsb)} />
-          <StatBlock label="Gotowość" value={`${readiness.score}%`} />
+          <StatBlock label="CTL" value={readiness.ctl == null ? '—' : Math.round(readiness.ctl)} />
+          <StatBlock label="ATL" value={readiness.atl == null ? '—' : Math.round(readiness.atl)} />
+          <StatBlock label="TSB" value={readiness.tsb == null ? '—' : Math.round(readiness.tsb)} />
+          <StatBlock label="Gotowość" value={readiness.score == null ? '—' : `${readiness.score}%`} />
         </Box>
       )}
     </SlideWrapper>

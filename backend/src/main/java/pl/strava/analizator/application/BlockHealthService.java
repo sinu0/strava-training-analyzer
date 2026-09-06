@@ -22,6 +22,8 @@ import java.time.ZoneOffset;
 @RequiredArgsConstructor
 public class BlockHealthService {
 
+    private final java.time.Clock clock;
+
     private static final List<String> MISSED_OUTCOMES = List.of("MISSED_STIMULUS", "TOO_EASY");
     private static final List<String> OVERLOAD_OUTCOMES = List.of("TOO_HARD", "OVERREACHED");
 
@@ -29,7 +31,7 @@ public class BlockHealthService {
     private final AnalyticsService analyticsService;
 
     public BlockHealthDto getCurrentBlockHealth() {
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        LocalDate today = LocalDate.now(clock);
         TrainingPlanProgramDto currentProgram = trainingPlanService.getPrograms().stream()
                 .filter(program -> !today.isBefore(program.getStartDate()) && !today.isAfter(program.getEndDate()))
                 .findFirst()

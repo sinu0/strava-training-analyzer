@@ -37,7 +37,7 @@ class AnalyticsServiceProgressionLevelsTest {
         activityMetricRepository = mock(ActivityMetricRepository.class);
         AthleteProfileRepository athleteProfileRepository = mock(AthleteProfileRepository.class);
         DailySummaryRepository dailySummaryRepository = mock(DailySummaryRepository.class);
-        analyticsService = new AnalyticsService(
+        analyticsService = new AnalyticsService(java.time.Clock.systemDefaultZone(),
                 dailyMetricRepository,
                 activityRepository,
                 activityMetricRepository,

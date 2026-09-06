@@ -23,17 +23,19 @@ import pl.strava.analizator.domain.vo.DateRange;
 @RequiredArgsConstructor
 public class TrainingStatusService {
 
+    private final java.time.Clock clock;
+
     private final AnalyticsService analyticsService;
     private final FatigueAndEnergyService fatigueService;
     private final EventService eventService;
     private final DailyMetricRepository dailyMetricRepository;
 
     public TrainingStatusDto getTrainingStatus() {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         List<PmcDataDto> pmc = analyticsService.getPmc(today.minusDays(30), today);
         AthleteFatigueState fatigue = fatigueService.getCurrentFatigue(today);
 
-        if (pmc.isEmpty()) return TrainingStatusDto.builder().status("UNKNOWN").label("Brak danych").build();
+        if (pmc.isEmpty() || pmc.stream().anyMatch(p -> !TrainingLoadService.complete(p))) return TrainingStatusDto.builder().status("UNKNOWN").label("Brak danych").build();
 
         int n = pmc.size();
         PmcDataDto current = pmc.get(n - 1);
@@ -64,7 +66,7 @@ public class TrainingStatusService {
     }
 
     public WeeklyBriefDto getWeeklyBrief() {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         TrainingStatusDto status = getTrainingStatus();
         AthleteFatigueState fatigue = fatigueService.getCurrentFatigue(today);
         LoadFocus loadFocus = fatigueService.getLoadFocus(4);

@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CalendarDayDto {
     private LocalDate date;
+    private java.util.List<CalendarSessionDto> sessions;
+    private java.util.List<CalendarActivitySummaryDto> activities;
     private TrainingPlanDto planned;
     private CalendarActivitySummaryDto actual;
     private Double compliance;

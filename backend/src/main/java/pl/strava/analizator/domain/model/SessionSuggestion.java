@@ -12,10 +12,10 @@ public class SessionSuggestion {
     private String type;
     private String label;
     private int durationMin;
-    private int estimatedTss;
-    private double estimatedIf;
+    private Integer estimatedTss;
+    private Double estimatedIf;
     private String structure;
     private String rationale;
-    private int roiScore;
+    private Integer roiScore;
     private String impact;
 }

@@ -14,7 +14,9 @@
     "test:e2e": "playwright test --config=e2e/playwright.config.ts",
     "test:e2e:critical": "playwright test --config=e2e/playwright.config.ts e2e/tests/v2-critical-flows.spec.ts",
     "typecheck": "tsc --noEmit",
-    "api:generate": "openapi-typescript http://localhost:8080/api-docs -o src/api/generated/schema.ts",
+    "api:generate": "node scripts/generate-api.mjs",
+    "api:check": "node scripts/generate-api.mjs --check",
+    "test:e2e:real": "playwright test --config=e2e/playwright.real.config.ts",
     "budget": "node scripts/check-bundle-budget.mjs",
     "quality": "npm run lint && npm run typecheck && npm run test && npm run build && npm run budget"
   },

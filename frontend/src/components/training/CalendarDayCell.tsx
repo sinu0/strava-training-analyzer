@@ -24,6 +24,7 @@ function statusBorderColor(day: CalendarDay): string {
 export default function CalendarDayCell({ day, date, dateNum, isCurrentMonth, isToday, onClick }: CalendarDayCellProps) {
   const border = day ? statusBorderColor(day) : 'transparent';
   const hasBorder = border !== 'transparent';
+  const plans = day?.sessions?.map((session) => session.planned) ?? (day?.planned ? [day.planned] : []);
 
   return (
     <ButtonBase
@@ -50,14 +51,17 @@ export default function CalendarDayCell({ day, date, dateNum, isCurrentMonth, is
         {dateNum}
       </Typography>
 
-      {!!day?.planned && (
+      {plans.slice(0, 2).map((plan) => (
         <Chip
-          label={`${categoryLabel(day.planned.plannedType)} ${day.planned.plannedTss ?? ''}`}
+          key={plan.id}
+          label={`${categoryLabel(plan.plannedType)} ${plan.plannedTss ?? ''}`}
           size="small"
           sx={{ fontSize: '0.65rem', height: 20, mt: 0.25, maxWidth: '100%' }}
           color="warning"
         />
-      )}
+      ))}
+      {plans.length > 2 && <Typography variant="caption">+{plans.length - 2} sesje</Typography>}
+      {(day?.activities?.length ?? 0) > 1 && <Typography variant="caption" display="block">Aktywności: {day?.activities?.length}</Typography>}
 
       {!!day?.projection && (
         <Typography variant="caption" display="block" noWrap sx={{ mt: 0.25, color: 'text.secondary', fontSize: '0.65rem', fontWeight: 600 }}>

@@ -34,11 +34,10 @@ class V2TodayServiceTest {
 
     @Mock private CoachService coachService;
     @Mock private V2ActivityService activityService;
-    @Mock private AnalyticsService analyticsService;
+    @Mock private TrainingLoadService trainingLoadService;
     @Mock private TrainingPlanService trainingPlanService;
     @Mock private SyncService syncService;
     @Mock private ActivityDataQualityService dataQualityService;
-    @Mock private DailyMetricRepository dailyMetricRepository;
     @Mock private AthleteProfileRepository athleteProfileRepository;
     @Mock private HealthService healthService;
 
@@ -46,8 +45,8 @@ class V2TodayServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new V2TodayService(coachService, activityService, analyticsService,
-                trainingPlanService, syncService, dataQualityService, dailyMetricRepository,
+        service = new V2TodayService(java.time.Clock.systemDefaultZone(), coachService, activityService, trainingLoadService,
+                trainingPlanService, syncService, dataQualityService,
                 athleteProfileRepository, healthService);
     }
 
@@ -55,7 +54,7 @@ class V2TodayServiceTest {
     void noDataIsUnknownAndNeverPresentedAsZeroLoad() {
         when(activityService.findActivities(isNull(), isNull(), any(), anyInt(), anyInt()))
                 .thenReturn(ActivitySummaryPageDto.builder().items(List.of()).build());
-        when(analyticsService.getPmc(any(), any())).thenReturn(List.of());
+        when(trainingLoadService.getLoad(any(), any())).thenReturn(pl.strava.analizator.application.dto.LoadAnalyticsDto.builder().availability("UNKNOWN").points(List.of()).build());
         when(trainingPlanService.getPlans(any(), any())).thenReturn(List.of());
         when(syncService.getLastSyncStatus())
                 .thenReturn(new SyncService.SyncStatus("idle", null, 0, 0, null));
@@ -79,7 +78,7 @@ class V2TodayServiceTest {
                 .thenReturn(ActivitySummaryPageDto.builder().items(List.of(activity)).build());
         when(dataQualityService.get(activityId)).thenReturn(ActivityDataQualityDto.builder()
                 .activityId(activityId).status("PARTIAL").issues(List.of("MISSING_TRAINING_STREAM")).build());
-        when(analyticsService.getPmc(any(), any())).thenReturn(List.of());
+        when(trainingLoadService.getLoad(any(), any())).thenReturn(pl.strava.analizator.application.dto.LoadAnalyticsDto.builder().availability("UNKNOWN").points(List.of()).build());
         when(trainingPlanService.getPlans(any(), any())).thenReturn(List.of());
         when(syncService.getLastSyncStatus())
                 .thenReturn(new SyncService.SyncStatus("completed", null, 0, 0, null));
@@ -102,11 +101,10 @@ class V2TodayServiceTest {
                 .thenReturn(ActivitySummaryPageDto.builder().items(List.of(activity)).build());
         when(dataQualityService.get(activityId)).thenReturn(ActivityDataQualityDto.builder()
                 .activityId(activityId).status("AVAILABLE").issues(List.of()).build());
-        when(analyticsService.getPmc(any(), any())).thenReturn(List.of(PmcDataDto.builder()
-                .date(today).ctl(BigDecimal.valueOf(42)).atl(BigDecimal.valueOf(50))
-                .tsb(BigDecimal.valueOf(-8)).build()));
-        when(dailyMetricRepository.findNumericSeries(org.mockito.ArgumentMatchers.eq("training_load_coverage"), any()))
-                .thenReturn(Map.of(today, BigDecimal.valueOf(0.4)));
+        when(trainingLoadService.getLoad(any(), any())).thenReturn(pl.strava.analizator.application.dto.LoadAnalyticsDto.builder()
+                .availability("PARTIAL").coverage(BigDecimal.valueOf(0.4)).temporalCoverage(BigDecimal.ONE)
+                .points(List.of(PmcDataDto.builder().date(today).ctl(BigDecimal.valueOf(42)).atl(BigDecimal.valueOf(50))
+                        .tsb(BigDecimal.valueOf(-8)).build())).build());
         when(athleteProfileRepository.findFirst()).thenReturn(Optional.of(AthleteProfile.builder()
                 .ftpWatts((short) 230).lthrBpm((short) 171).build()));
         when(healthService.getRecoveryStatus(today)).thenReturn(
@@ -116,7 +114,7 @@ class V2TodayServiceTest {
         when(coachService.getTodayDecision()).thenReturn(AdaptiveCoachResponse.builder()
                 .decision("TRAIN").reasoning(List.of()).insight("Trening")
                 .bestSession(AdaptiveCoachResponse.SessionOptionDto.builder()
-                        .type("ENDURANCE").durationMinutes(60).targetTss(50).description("Spokojnie").build())
+                        .type("ENDURANCE").durationMinutes(60).targetTss(50.0).description("Spokojnie").build())
                 .build());
 
         var result = service.getToday();

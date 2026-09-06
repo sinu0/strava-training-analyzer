@@ -19,6 +19,8 @@ import pl.strava.analizator.domain.port.TrainingZoneRepository;
 @RequiredArgsConstructor
 public class AthleteProfileService {
 
+    private final java.time.Clock clock;
+
     private final AthleteProfileRepository profileRepository;
     private final TrainingZoneRepository trainingZoneRepository;
 
@@ -54,7 +56,7 @@ public class AthleteProfileService {
     }
 
     private AthleteProfileDto toDto(AthleteProfile profile) {
-        List<TrainingZoneDto> currentZones = trainingZoneRepository.findCurrentZones(LocalDate.now()).stream()
+        List<TrainingZoneDto> currentZones = trainingZoneRepository.findCurrentZones(LocalDate.now(clock)).stream()
             .map(this::toZoneDto)
             .toList();
 

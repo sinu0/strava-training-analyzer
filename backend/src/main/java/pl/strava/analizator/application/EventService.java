@@ -14,6 +14,8 @@ import pl.strava.analizator.domain.port.EventRepository;
 @RequiredArgsConstructor
 public class EventService {
 
+    private final java.time.Clock clock;
+
     private final EventRepository eventRepository;
 
     public List<Event> findAll() {
@@ -31,7 +33,7 @@ public class EventService {
                 .type(type != null ? type : "OTHER")
                 .priority(priority != null ? priority : "B")
                 .active(true)
-                .createdAt(LocalDate.now())
+                .createdAt(LocalDate.now(clock))
                 .build();
         return eventRepository.save(event);
     }

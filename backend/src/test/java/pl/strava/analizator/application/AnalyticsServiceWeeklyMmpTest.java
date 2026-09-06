@@ -47,7 +47,7 @@ class AnalyticsServiceWeeklyMmpTest {
         activityMetricRepository = mock(ActivityMetricRepository.class);
         athleteProfileRepository = mock(AthleteProfileRepository.class);
         dailySummaryRepository = mock(DailySummaryRepository.class);
-        analyticsService = new AnalyticsService(
+        analyticsService = new AnalyticsService(java.time.Clock.systemDefaultZone(),
                 dailyMetricRepository, activityRepository,
                 activityMetricRepository, athleteProfileRepository, dailySummaryRepository);
     }

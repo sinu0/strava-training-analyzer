@@ -30,6 +30,8 @@ import pl.strava.analizator.domain.port.TrainingPlanRepository;
 @RequiredArgsConstructor
 public class TrainingPlanOptimizerService {
 
+    private final java.time.Clock clock;
+
     private static final double TAU_FITNESS = 42.0;
     private static final double TAU_FATIGUE = 7.0;
     private static final double CTL_RAMP_MAX = 8.0;
@@ -53,10 +55,10 @@ public class TrainingPlanOptimizerService {
         double atl = request.getCurrentAtl() != null
                 ? request.getCurrentAtl().doubleValue() : 45;
         int ftp = request.getFtp() > 0 ? request.getFtp() : 250;
-        LocalDate startDate = LocalDate.now().plusDays(1);
+        LocalDate startDate = LocalDate.now(clock).plusDays(1);
 
         int daysToPeak = request.getEventDate() != null
-                ? (int) LocalDate.now().until(request.getEventDate()).getDays()
+                ? (int) LocalDate.now(clock).until(request.getEventDate()).getDays()
                 : 99;
 
         String focus = daysToPeak < 14 ? "TAPER" : daysToPeak > 21 ? "BUILD" : "MAINTAIN";
@@ -195,7 +197,7 @@ public class TrainingPlanOptimizerService {
 
     private double applyTaperFactor(double tss, String focus, int daysToPeak, LocalDate day) {
         if (!"TAPER".equals(focus)) return tss;
-        long daysUntil = LocalDate.now().until(day).getDays();
+        long daysUntil = LocalDate.now(clock).until(day).getDays();
         long daysUntilPeak = daysToPeak - daysUntil;
         if (daysUntilPeak <= 3) return tss * 0.40;
         if (daysUntilPeak <= 7) return tss * 0.60;
@@ -208,12 +210,12 @@ public class TrainingPlanOptimizerService {
     record SessionData(double tss, int dayOffset) {}
 
     private SessionData toSessionData(SessionPlan sp) {
-        return new SessionData(sp.tss, (int) (LocalDate.now().plusDays(1).until(sp.day).getDays()));
+        return new SessionData(sp.tss, (int) (LocalDate.now(clock).plusDays(1).until(sp.day).getDays()));
     }
 
     private SessionData toSessionData(OptimizedSessionDto s) {
         double tss = s.getTss() != null ? s.getTss().doubleValue() : 50;
-        int offset = (int) (LocalDate.now().plusDays(1).until(s.getDay()).getDays());
+        int offset = (int) (LocalDate.now(clock).plusDays(1).until(s.getDay()).getDays());
         return new SessionData(tss, Math.max(0, offset));
     }
 
@@ -250,11 +252,11 @@ public class TrainingPlanOptimizerService {
         double gain = 0;
         double fatigue = 0;
         int maxDay = plan.stream()
-                .mapToInt(s -> (int) (LocalDate.now().plusDays(1).until(s.day).getDays()))
+                .mapToInt(s -> (int) (LocalDate.now(clock).plusDays(1).until(s.day).getDays()))
                 .max().orElse(28);
 
         for (var s : plan) {
-            int day = (int) (LocalDate.now().plusDays(1).until(s.day).getDays());
+            int day = (int) (LocalDate.now(clock).plusDays(1).until(s.day).getDays());
             double tss = s.tss();
             double f = tss * (1 - Math.exp(-1.0 / TAU_FITNESS)) * Math.exp(-(maxDay - day) / TAU_FITNESS);
             double fa = tss * (1 - Math.exp(-1.0 / TAU_FATIGUE)) * Math.exp(-(maxDay - day) / TAU_FATIGUE);
@@ -347,7 +349,7 @@ public class TrainingPlanOptimizerService {
         LocalDate startDate = request.getSessions().stream()
                 .map(s -> s.getDay())
                 .min(LocalDate::compareTo)
-                .orElse(LocalDate.now().plusDays(1));
+                .orElse(LocalDate.now(clock).plusDays(1));
         LocalDate endDate = request.getSessions().stream()
                 .map(s -> s.getDay())
                 .max(LocalDate::compareTo)

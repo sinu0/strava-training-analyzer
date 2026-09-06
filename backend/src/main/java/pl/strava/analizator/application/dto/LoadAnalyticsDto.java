@@ -18,7 +18,9 @@ import lombok.Setter;
 public class LoadAnalyticsDto {
     private LocalDate from;
     private LocalDate to;
+    private LocalDate asOf;
     private String availability;
     private BigDecimal coverage;
+    private BigDecimal temporalCoverage;
     private List<PmcDataDto> points;
 }

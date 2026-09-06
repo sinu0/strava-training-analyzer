@@ -6,3 +6,9 @@ services:
       - ./frontend/nginx.https.conf:/etc/nginx/conf.d/https.conf:ro
       - ./certs/lan.pem:/etc/nginx/certs/lan.pem:ro
       - ./certs/lan-key.pem:/etc/nginx/certs/lan-key.pem:ro
+      - type: bind
+        source: ./secrets/lan.htpasswd
+        target: /etc/nginx/secrets/lan.htpasswd
+        read_only: true
+        bind:
+          create_host_path: false

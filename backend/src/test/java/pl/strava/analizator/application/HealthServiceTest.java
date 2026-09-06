@@ -31,7 +31,7 @@ class HealthServiceTest {
 
     @BeforeEach
     void setUp() {
-        healthService = new HealthService(dailySummaryRepository);
+        healthService = new HealthService(java.time.Clock.systemDefaultZone(), dailySummaryRepository);
     }
 
     // --- getOverview tests ---

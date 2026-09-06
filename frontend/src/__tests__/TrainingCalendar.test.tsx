@@ -1,8 +1,11 @@
+
 import { ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi } from 'vitest';
+
+import { localDate } from '@/utils/localDate';
 
 import TrainingCalendar from '../components/training/TrainingCalendar';
 import theme from '../theme/theme';
@@ -12,13 +15,13 @@ import type { CalendarDay } from '../types/training';
 const recordAdjustmentFeedbackMutate = vi.fn();
 
 function todayStr() {
-  return new Date().toISOString().slice(0, 10);
+  return localDate();
 }
 
 function tomorrowStr() {
   const d = new Date();
   d.setDate(d.getDate() + 1);
-  return d.toISOString().slice(0, 10);
+  return localDate(d);
 }
 
 function makeMockDays(): CalendarDay[] {

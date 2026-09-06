@@ -64,6 +64,9 @@ public class StravaActivityDto {
     @JsonProperty("average_watts")
     private BigDecimal averageWatts;
 
+    @JsonProperty("device_watts")
+    private Boolean deviceWatts;
+
     @JsonProperty("max_watts")
     private BigDecimal maxWatts;
 

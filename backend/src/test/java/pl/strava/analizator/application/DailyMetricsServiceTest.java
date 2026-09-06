@@ -47,7 +47,7 @@ class DailyMetricsServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new DailyMetricsService(
+        service = new DailyMetricsService(java.time.Clock.systemDefaultZone(),
                 activityRepository,
                 activityMetricRepository,
                 athleteProfileRepository,
@@ -59,7 +59,7 @@ class DailyMetricsServiceTest {
     @Test
     void recalculateAll_savesDerivedDailyMetrics() {
         UUID activityId = UUID.randomUUID();
-        Activity activity = Activity.builder()
+        Activity activity = Activity.builder().deviceWatts(true)
                 .id(activityId)
                 .startedAt(OffsetDateTime.of(2024, 6, 1, 8, 0, 0, 0, ZoneOffset.UTC))
                 .build();
@@ -85,7 +85,7 @@ class DailyMetricsServiceTest {
     @Test
     void recalculateAll_savesEstimatedFtpFromPowerCurves_evenWhenProfileFtpIsSet() {
         UUID activityId = UUID.randomUUID();
-        Activity activity = Activity.builder()
+        Activity activity = Activity.builder().deviceWatts(true)
                 .id(activityId)
                 .startedAt(OffsetDateTime.of(2024, 6, 1, 8, 0, 0, 0, ZoneOffset.UTC))
                 .build();
@@ -117,9 +117,9 @@ class DailyMetricsServiceTest {
     }
 
     @Test
-    void recalculateAll_usesBetterOfProfileOrEstimatedFtp_forTssCalculations() {
+    void recalculateAll_doesNotApplyTodaysFtpToHistoricalMissingTss() {
         UUID activityId = UUID.randomUUID();
-        Activity activity = Activity.builder()
+        Activity activity = Activity.builder().deviceWatts(true)
                 .id(activityId)
                 .movingTimeSec(3600)
                 .startedAt(OffsetDateTime.of(2024, 6, 1, 8, 0, 0, 0, ZoneOffset.UTC))
@@ -156,12 +156,19 @@ class DailyMetricsServiceTest {
                 .orElse(-1.0);
 
         assertThat(savedFtp).isGreaterThanOrEqualTo(300.0);
+        assertThat(metricCaptor.getAllValues()).anySatisfy(metric -> {
+            assertThat(metric.getMetricName()).isEqualTo("training_load_coverage");
+            assertThat(metric.getNumericValue()).isZero();
+        });
+        verify(dailyMetricRepository, never()).save(eq(LocalDate.of(2024, 6, 1)),
+                argThat(metric -> "daily_tss".equals(metric.getMetricName())));
+        verify(dailyMetricRepository, never()).saveAll(any(), any());
     }
 
     @Test
     void recalculateAll_usesProfileFtpAsFloor_whenEstimateIsLowerThanProfileFtp() {
         UUID activityId = UUID.randomUUID();
-        Activity activity = Activity.builder()
+        Activity activity = Activity.builder().deviceWatts(true)
                 .id(activityId)
                 .startedAt(OffsetDateTime.of(2024, 6, 1, 8, 0, 0, 0, ZoneOffset.UTC))
                 .build();
@@ -193,7 +200,7 @@ class DailyMetricsServiceTest {
     @Test
     void recalculateAll_doesNotSaveFtp_whenNoPowerDataAndNoProfileFtp() {
         UUID activityId = UUID.randomUUID();
-        Activity activity = Activity.builder()
+        Activity activity = Activity.builder().deviceWatts(true)
                 .id(activityId)
                 .startedAt(OffsetDateTime.of(2024, 6, 1, 8, 0, 0, 0, ZoneOffset.UTC))
                 .build();
@@ -210,12 +217,36 @@ class DailyMetricsServiceTest {
     }
 
     @Test
+    void recalculateAll_doesNotAggregatePowerMetricsFromUnverifiedActivity() {
+        UUID activityId = UUID.randomUUID();
+        LocalDate date = LocalDate.now();
+        Activity activity = Activity.builder().id(activityId)
+                .startedAt(date.atStartOfDay().atOffset(ZoneOffset.UTC)).build();
+        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(activity));
+        when(athleteProfileRepository.findFirst()).thenReturn(Optional.empty());
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "training_stress_score"))
+                .thenReturn(Map.of());
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "hr_training_stress_score"))
+                .thenReturn(Map.of(activityId, BigDecimal.valueOf(40)));
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "normalized_power"))
+                .thenReturn(Map.of(activityId, BigDecimal.valueOf(210)));
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "efficiency_factor"))
+                .thenReturn(Map.of(activityId, BigDecimal.valueOf(1.4)));
+
+        service.recalculateAll();
+
+        verify(dailyMetricRepository, never()).save(eq(date), argThat(metric ->
+                "normalized_power".equals(metric.getMetricName())
+                        || "efficiency_factor".equals(metric.getMetricName())));
+    }
+
+    @Test
     void recalculateAllPersistsUnknownLoadCoverageAndProvenance() {
         UUID knownId = UUID.randomUUID();
         UUID unknownId = UUID.randomUUID();
         LocalDate date = LocalDate.of(2026, 8, 20);
-        Activity known = Activity.builder().id(knownId).startedAt(date.atStartOfDay().atOffset(ZoneOffset.UTC)).build();
-        Activity unknown = Activity.builder().id(unknownId).startedAt(date.atTime(18, 0).atOffset(ZoneOffset.UTC)).build();
+        Activity known = Activity.builder().deviceWatts(true).id(knownId).startedAt(date.atStartOfDay().atOffset(ZoneOffset.UTC)).build();
+        Activity unknown = Activity.builder().deviceWatts(true).id(unknownId).startedAt(date.atTime(18, 0).atOffset(ZoneOffset.UTC)).build();
         List<UUID> ids = List.of(knownId, unknownId);
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(known, unknown));
         when(athleteProfileRepository.findFirst()).thenReturn(Optional.empty());
@@ -239,7 +270,7 @@ class DailyMetricsServiceTest {
     void backfillFtpHistory_doesNotLeakCurrentProfileFtpIntoHistoricalDates() {
         UUID activityId = UUID.randomUUID();
         LocalDate historicalDate = LocalDate.of(2024, 6, 1);
-        Activity activity = Activity.builder()
+        Activity activity = Activity.builder().deviceWatts(true)
                 .id(activityId)
                 .startedAt(historicalDate.atStartOfDay().atOffset(ZoneOffset.UTC))
                 .build();

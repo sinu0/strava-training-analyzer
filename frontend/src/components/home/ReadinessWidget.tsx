@@ -80,8 +80,8 @@ export default function ReadinessWidget({ readiness, onSave, isSaving = false }:
     setDraft(getInitialCheckIn(readiness));
   }, [readiness]);
 
-  const score = readiness?.score ?? 55;
-  const accentColor = getReadinessColor(score);
+  const score = readiness?.score;
+  const accentColor = score == null ? STATUS_COLORS.neutral : getReadinessColor(score);
   const updatedAt = formatUpdatedAt(readiness?.checkIn?.updatedAt);
   const hasCheckIn = !!readiness?.checkIn;
 
@@ -122,7 +122,7 @@ export default function ReadinessWidget({ readiness, onSave, isSaving = false }:
           >
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h6" sx={{ fontWeight: 900, lineHeight: 1, color: accentColor }}>
-                {score}
+                {score ?? '—'}
               </Typography>
               <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.5rem' }}>
                 /100

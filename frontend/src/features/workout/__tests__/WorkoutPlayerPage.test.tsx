@@ -14,7 +14,7 @@ const store = vi.hoisted(() => ({
   load: vi.fn(), save: vi.fn(), clear: vi.fn(), lock: vi.fn(),
 }));
 const api = vi.hoisted(() => ({
-  active: vi.fn(), send: vi.fn(), flush: vi.fn(),
+  active: vi.fn(), get: vi.fn(), send: vi.fn(), flush: vi.fn(),
 }));
 
 vi.mock('../offlineStore', () => ({
@@ -25,6 +25,7 @@ vi.mock('../offlineStore', () => ({
 }));
 vi.mock('../workoutApi', () => ({
   getActiveExecution: api.active,
+  getExecution: api.get,
   sendExecutionMutation: api.send,
   flushWorkoutQueue: api.flush,
 }));
@@ -65,6 +66,7 @@ describe('WorkoutPlayerPage', () => {
     store.save.mockResolvedValue(undefined);
     store.clear.mockResolvedValue(undefined);
     api.active.mockResolvedValue(null);
+    api.get.mockRejectedValue(new Error('Execution unavailable'));
     api.send.mockResolvedValue(null);
     api.flush.mockResolvedValue(0);
     Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
@@ -107,8 +109,20 @@ describe('WorkoutPlayerPage', () => {
     renderPlayer();
     expect(await screen.findByText('Trening ukończony')).toBeInTheDocument();
     expect(screen.getByText(/Dokładna ocena zostanie uzupełniona/)).toBeInTheDocument();
-    expect(screen.getByText('RPE: 5/10')).toBeInTheDocument();
+    expect(screen.getByText('RPE: nie podano')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Zapisz podsumowanie' })).toHaveStyle({ minHeight: '48px' });
+  });
+
+  it('restores a completed execution by id when it is no longer active', async () => {
+    store.load.mockResolvedValue(null);
+    api.get.mockResolvedValue({ ...execution('COMPLETED'), rpe: 8, feeling: 'GOOD', notes: 'Mocno, ale równo' });
+
+    renderPlayer();
+
+    expect(await screen.findByText('Trening ukończony')).toBeInTheDocument();
+    expect(screen.getByText('RPE: 8/10')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Mocno, ale równo')).toBeInTheDocument();
+    expect(api.get).toHaveBeenCalledWith('execution-1');
   });
 
   it('blocks a second active player', async () => {

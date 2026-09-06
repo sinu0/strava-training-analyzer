@@ -29,8 +29,8 @@ function buildRecommendation(
   const details: string[] = [];
 
   // Analyze each factor
-  const readinessOk = readiness && readiness.score >= 40;
-  const readinessHigh = readiness && readiness.score >= 70;
+  const readinessOk = readiness?.score != null && readiness.score >= 40;
+  const readinessHigh = readiness?.score != null && readiness.score >= 70;
   const weatherOk = weather && weather.outdoorScore >= 60;
   const weatherGood = weather && weather.outdoorScore >= 80;
   const lowTemp = weather && weather.temperature < 8;
@@ -39,7 +39,7 @@ function buildRecommendation(
   const precipitation = weather && weather.precipitation > 0;
 
   // Readiness factor
-  if (readiness) {
+  if (readiness?.score != null) {
     if (readinessHigh) details.push('Organizm wypoczęty — gotowy na obciążenie');
     else if (readinessOk) details.push('Umiarkowana gotowość — trening możliwy');
     else details.push('Organizm zmęczony — zalecana regeneracja');

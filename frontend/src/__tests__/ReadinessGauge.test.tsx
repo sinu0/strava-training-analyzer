@@ -11,6 +11,26 @@ function renderWithTheme(ui: Parameters<typeof render>[0]) {
 }
 
 describe('ReadinessGauge', () => {
+  it('shows an explicit unavailable state without inventing a score', () => {
+    renderWithTheme(
+      <ReadinessGauge
+        data={{
+          availability: 'UNKNOWN',
+          score: null,
+          level: null,
+          tsb: null,
+          ctl: null,
+          atl: null,
+          description: 'Brak wiarygodnych danych obciążenia. Gotowość treningowa nie została obliczona.',
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Gotowość niedostępna')).toBeTruthy();
+    expect(screen.getByText(/Brak wiarygodnych danych obciążenia/)).toBeTruthy();
+    expect(screen.queryByText('/100')).toBeNull();
+  });
+
   it('renders day type label and focus when available', () => {
     renderWithTheme(
       <ReadinessGauge

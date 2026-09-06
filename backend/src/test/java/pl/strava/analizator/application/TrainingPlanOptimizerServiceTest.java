@@ -23,6 +23,8 @@ import pl.strava.analizator.domain.port.TrainingPlanRepository;
 @ExtendWith(MockitoExtension.class)
 class TrainingPlanOptimizerServiceTest {
 
+    @org.mockito.Spy private java.time.Clock clock = java.time.Clock.systemDefaultZone();
+
     @Mock
     private TrainingPlanRepository trainingPlanRepository;
     @Mock

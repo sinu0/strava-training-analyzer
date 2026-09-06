@@ -16,6 +16,11 @@ import pl.strava.analizator.infrastructure.persistence.jpa.WorkoutExecutionEvent
 public class WorkoutExecutionEventRepositoryAdapter implements WorkoutExecutionEventRepository {
     private final WorkoutExecutionEventJpaRepository repository;
 
+    public boolean hasTimelineChanges(UUID executionId) {
+        return repository.existsByExecutionIdAndEventTypeIn(executionId,
+                java.util.List.of("PAUSE", "INTENSITY", "SKIP_STEP", "PREVIOUS_STEP", "REPEAT_STEP", "LAP"));
+    }
+
     public Optional<WorkoutExecutionEvent> findByExecutionIdAndIdempotencyKey(UUID executionId, String key) {
         return repository.findByExecutionIdAndIdempotencyKey(executionId, key).map(this::toDomain);
     }

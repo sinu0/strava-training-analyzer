@@ -32,19 +32,36 @@ class WorkoutActivityMatchingServiceTest {
     @Mock WorkoutExecutionRepository executionRepository;
     @Mock TrainingPlanRepository planRepository;
     @Mock ActivityRepository activityRepository;
+    @Mock pl.strava.analizator.domain.port.WorkoutExecutionEventRepository events;
     private WorkoutActivityMatchingService service;
 
     @BeforeEach
     void setUp() {
         service = new WorkoutActivityMatchingService(executionRepository, planRepository, activityRepository,
-                Clock.fixed(START.plusSeconds(4000), ZoneOffset.UTC));
+                Clock.fixed(START.plusSeconds(4000), ZoneOffset.UTC), events);
         when(executionRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    }
+
+    @Test
+    void restoredIntensityDoesNotEraseTimelineChanges() {
+        WorkoutExecution execution = execution();
+        int[] watts = new int[61];
+        java.util.Arrays.fill(watts, 200);
+        Activity activity = activity("Ride", 0, 60, watts, java.util.stream.IntStream.rangeClosed(0, 60).toArray())
+                .toBuilder().deviceWatts(true).build();
+        when(executionRepository.findById(execution.getId())).thenReturn(Optional.of(execution));
+        when(activityRepository.findById(activity.getId())).thenReturn(Optional.of(activity));
+        when(events.hasTimelineChanges(execution.getId())).thenReturn(true);
+        assertThat(service.linkManually(execution.getId(), activity.getId()).getComplianceScore()).isNull();
     }
 
     @Test
     void linksOnlyCredibleCyclingActivityAndEvaluatesSnapshot() {
         WorkoutExecution execution = execution();
-        Activity matching = activity("Ride", 60, 60, new int[]{200, 205}, new int[]{5, 30});
+        int[] power = new int[61];
+        java.util.Arrays.fill(power, 200);
+        Activity matching = activity("Ride", 0, 60, power, java.util.stream.IntStream.rangeClosed(0, 60).toArray())
+                .toBuilder().deviceWatts(true).build();
         Activity run = activity("Run", 30, 60, null, null);
         when(executionRepository.findCompletedWithoutActivity()).thenReturn(List.of(execution));
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(run, matching));
@@ -59,6 +76,7 @@ class WorkoutActivityMatchingServiceTest {
         assertThat(captor.getValue().getActivityMatchStatus()).isEqualTo("AUTO");
         assertThat(captor.getValue().getComplianceStatus()).isEqualTo("COMPLETE");
         assertThat(captor.getValue().getComplianceScore()).isEqualTo(100);
+        assertThat(captor.getValue().getComplianceAlgorithmVersion()).isEqualTo("workout-compliance-v2");
     }
 
     @Test

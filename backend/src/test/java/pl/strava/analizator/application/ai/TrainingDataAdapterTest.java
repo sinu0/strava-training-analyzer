@@ -311,6 +311,28 @@ class TrainingDataAdapterTest {
     }
 
     @Test
+    void buildContext_missingReadinessInputs_doesNotInventZeroMetricsOrTrainingGuidance() {
+        when(athleteProfileRepository.findFirst()).thenReturn(Optional.empty());
+        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(Collections.emptyList());
+        when(dailyMetricRepository.findNumericSeries(any(), any())).thenReturn(new TreeMap<>());
+        when(analyticsService.getReadiness()).thenReturn(ReadinessDto.builder()
+                .availability("UNKNOWN")
+                .description("Brak wiarygodnych danych obciążenia.")
+                .sessionVariants(List.of())
+                .qualityWindows(List.of())
+                .build());
+
+        TrainingContext context = adapter.buildContext(PredictionType.TRAINING_TYPE_RECOMMENDATION);
+
+        assertThat(context.getReadiness()).containsEntry("availability", "UNKNOWN");
+        assertThat(context.getReadiness()).containsEntry("currentReadiness", null);
+        assertThat(context.getReadiness()).containsEntry("currentTSB", null);
+        assertThat(context.getReadiness()).containsEntry("currentCTL", null);
+        assertThat(context.getReadiness()).containsEntry("currentATL", null);
+        assertThat(context.getReadiness()).doesNotContainKeys("trainingWindow", "coachingGuidance", "atlCtlRatio");
+    }
+
+    @Test
     void buildContext_includesProgressionLevelsCoachSummaryAndCoachMemory() {
         when(athleteProfileRepository.findFirst()).thenReturn(Optional.empty());
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(Collections.emptyList());

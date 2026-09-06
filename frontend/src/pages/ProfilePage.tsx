@@ -1,3 +1,4 @@
+
 import BarChartIcon from '@mui/icons-material/BarChart';
 import BoltIcon from '@mui/icons-material/Bolt';
 import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
@@ -12,6 +13,8 @@ import {
 } from '@mui/material';
 import { useMemo, lazy, Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { localDate } from '@/utils/localDate';
 
 import ErrorBoundary from '../components/common/ErrorBoundary';
 import PageContainer from '../components/common/PageContainer';
@@ -116,7 +119,7 @@ export default function ProfilePage() {
     const to = new Date();
     const from = new Date();
     from.setDate(to.getDate() - 7 * 12);
-    const fmt = (d: Date) => d.toISOString().slice(0, 10);
+    const fmt = (d: Date) => localDate(d);
     return { from: fmt(from), to: fmt(to) };
   }, []);
 
@@ -294,7 +297,7 @@ export default function ProfilePage() {
                 color={STATUS_COLORS.error}
               />
             </Box>
-            {!!readiness && <>
+            {readiness?.ctl != null && <>
               <Divider orientation="vertical" flexItem sx={{ borderColor: alphaColor(CHART_COLORS.tooltipText, 0.08) }} />
               <StatPill
                 icon={<TrendingUpIcon fontSize="small" />}

@@ -1,0 +1,42 @@
+name: strava-coherence-test
+services:
+  db:
+    image: stravaanalizator-db:latest
+    environment:
+      POSTGRES_DB: strava_test
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: isolated-test-only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U test_user -d strava_test"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+  backend:
+    image: strava-coherence-test-backend
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/strava_test
+      SPRING_DATASOURCE_USERNAME: test_user
+      SPRING_DATASOURCE_PASSWORD: isolated-test-only
+      APP_SCHEDULING_ENABLED: "false"
+      AI_ENABLED: "false"
+      APP_TIMEZONE: Europe/Warsaw
+      APP_FRONTEND_URL: http://127.0.0.1:18081
+      TZ: Europe/Warsaw
+    ports: ["127.0.0.1:18080:8080"]
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/api/sync/status"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+      start_period: 30s
+  frontend:
+    image: strava-coherence-test-frontend
+    build: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports: ["127.0.0.1:18081:80"]

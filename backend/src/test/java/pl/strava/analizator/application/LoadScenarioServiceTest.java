@@ -29,10 +29,10 @@ class LoadScenarioServiceTest {
     }
 
     @Test
-    void returnsUnknownInsteadOfCalculatingFromFabricatedZeroBaseline() {
+    void returnsUnknownInsteadOfCalculatingFromMissingBaseline() {
         LocalDate from = LocalDate.of(2026, 7, 20);
         PmcDataDto missing = PmcDataDto.builder().date(from.minusDays(1))
-                .ctl(BigDecimal.ZERO).atl(BigDecimal.ZERO).tsb(BigDecimal.ZERO).build();
+                .ctl(null).atl(null).tsb(null).build();
         when(analyticsService.getPmc(from.minusDays(1), from.minusDays(1))).thenReturn(List.of(missing));
 
         var result = service.calculate(from, from.plusDays(7));

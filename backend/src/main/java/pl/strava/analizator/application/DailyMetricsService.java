@@ -36,6 +36,8 @@ import pl.strava.analizator.domain.port.DailyMetricRepository;
 @RequiredArgsConstructor
 public class DailyMetricsService {
 
+    private final java.time.Clock clock;
+
     private static final String TSS_METRIC = "training_stress_score";
     private static final String HR_TSS_METRIC = "hr_training_stress_score";
     private static final String EF_METRIC = "efficiency_factor";
@@ -60,7 +62,7 @@ public class DailyMetricsService {
      * Daily rollup at 00:30 UTC — extends CTL/ATL/TSB to today even without a manual sync.
      * Ensures the PMC chart always has today's data point.
      */
-    @Scheduled(cron = "0 30 0 * * *")
+    @Scheduled(cron = "0 5 0 * * *", zone = "${app.timezone}")
     public void scheduledDailyRollup() {
         log.info("Running scheduled daily metrics rollup");
         try {
@@ -72,8 +74,8 @@ public class DailyMetricsService {
 
     public void recalculateAll() {
         List<Activity> activities = activityRepository.findByStartedAtBetween(
-                OffsetDateTime.now(ZoneOffset.UTC).minusYears(20),
-                OffsetDateTime.now(ZoneOffset.UTC).plusDays(1));
+                OffsetDateTime.now(clock).minusYears(20),
+                OffsetDateTime.now(clock).plusDays(1));
         if (activities.isEmpty()) {
             return;
         }
@@ -89,15 +91,12 @@ public class DailyMetricsService {
         double effectiveFtp = Math.max(estimatedFtp, profileFtpValue);
 
         DailyLoadBuild loadBuild = buildDailyLoads(activities, effectiveFtp);
-        if (loadBuild.loads().isEmpty()) {
-            return;
-        }
-        List<DailyTrainingLoad> loads = loadBuild.loads();
-
-        saveDailyTss(loads);
         saveDailyLoadQuality(loadBuild);
-        savePmc(loads);
-        saveTrainingMonotony(loads, profile);
+        saveDailyTss(loadBuild.dailyLoads());
+        if (!loadBuild.pmcLoads().isEmpty()) {
+            savePmc(loadBuild.pmcLoads());
+            saveTrainingMonotony(loadBuild.pmcLoads(), profile);
+        }
         // Write today's effective FTP; full history is backfilled once by backfillFtpHistory()
         saveFtp(effectiveFtp);
         saveDailyActivityMetrics(activities);
@@ -109,8 +108,8 @@ public class DailyMetricsService {
      */
     public void rebuildFtpHistory() {
         List<Activity> all = activityRepository.findByStartedAtBetween(
-                OffsetDateTime.now(ZoneOffset.UTC).minusYears(20),
-                OffsetDateTime.now(ZoneOffset.UTC).plusDays(1));
+                OffsetDateTime.now(clock).minusYears(20),
+                OffsetDateTime.now(clock).plusDays(1));
         if (all.isEmpty()) return;
         AthleteProfile profile = athleteProfileRepository.findFirst().orElse(null);
         double floor = (profile != null && profile.hasFtp()) ? profile.getFtpWatts() : 0;
@@ -130,8 +129,8 @@ public class DailyMetricsService {
         Map<UUID, BigDecimal> npValues = activityMetricRepository.findNumericValues(activityIds, NP_METRIC);
 
         for (Activity activity : activities) {
-            if (activity.getStartedAt() == null) continue;
-            LocalDate date = activity.getStartedAt().toLocalDate();
+            if (activity.getStartedAt() == null || !Boolean.TRUE.equals(activity.getDeviceWatts())) continue;
+            LocalDate date = activity.getStartedAt().atZoneSameInstant(clock.getZone()).toLocalDate();
 
             BigDecimal ef = efValues.get(activity.getId());
             if (ef != null) efByDate.computeIfAbsent(date, ignored -> new ArrayList<>()).add(ef);
@@ -166,17 +165,18 @@ public class DailyMetricsService {
             if (activity.getStartedAt() == null) {
                 continue;
             }
-            LocalDate date = activity.getStartedAt().toLocalDate();
+            LocalDate date = activity.getStartedAt().atZoneSameInstant(clock.getZone()).toLocalDate();
             activityCountByDate.merge(date, 1, Integer::sum);
-            BigDecimal tss = powerTss.get(activity.getId());
+            BigDecimal tss = Boolean.TRUE.equals(activity.getDeviceWatts()) ? powerTss.get(activity.getId()) : null;
             String source = tss != null ? "POWER_TSS" : null;
             if (tss == null) {
                 tss = heartRateTss.get(activity.getId());
                 if (tss != null) source = "HR_TSS";
             }
 
-            // Estimate TSS from NP if not available and we have an effective FTP
-            if (tss == null && effectiveFtp > 0) {
+            // An undated current FTP must never be applied retrospectively.
+            if (tss == null && effectiveFtp > 0 && date.equals(LocalDate.now(clock))
+                    && Boolean.TRUE.equals(activity.getDeviceWatts())) {
                 tss = estimateTssFromNp(activity, effectiveFtp, normalizedPower.get(activity.getId()));
                 if (tss != null) source = "NP_ESTIMATE";
             }
@@ -190,23 +190,33 @@ public class DailyMetricsService {
         }
 
         if (activityCountByDate.isEmpty()) {
-            return new DailyLoadBuild(List.of(), Map.of(), Map.of());
+            return new DailyLoadBuild(List.of(), List.of(), Map.of(), Map.of());
         }
 
         LocalDate start = activityCountByDate.keySet().iterator().next();
-        LocalDate end = LocalDate.now(ZoneOffset.UTC);
-        List<DailyTrainingLoad> loads = new ArrayList<>();
+        LocalDate end = LocalDate.now(clock);
+        List<DailyTrainingLoad> dailyLoads = new ArrayList<>();
+        List<DailyTrainingLoad> pmcLoads = new ArrayList<>();
+        boolean pmcInputsComplete = true;
         for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
-            loads.add(DailyTrainingLoad.builder()
+            int activityCount = activityCountByDate.getOrDefault(date, 0);
+            boolean dayComplete = knownCountByDate.getOrDefault(date, 0) == activityCount;
+            if (!dayComplete) {
+                pmcInputsComplete = false;
+                continue;
+            }
+            DailyTrainingLoad load = DailyTrainingLoad.builder()
                     .date(date)
                     .tss(byDate.getOrDefault(date, BigDecimal.ZERO))
-                    .build());
+                    .build();
+            dailyLoads.add(load);
+            if (pmcInputsComplete) pmcLoads.add(load);
         }
         Map<LocalDate, BigDecimal> coverageByDate = new TreeMap<>();
         activityCountByDate.forEach((date, total) -> coverageByDate.put(date,
                 BigDecimal.valueOf(knownCountByDate.getOrDefault(date, 0))
                         .divide(BigDecimal.valueOf(total), 4, RoundingMode.HALF_UP)));
-        return new DailyLoadBuild(loads, coverageByDate, sourcesByDate);
+        return new DailyLoadBuild(dailyLoads, pmcLoads, coverageByDate, sourcesByDate);
     }
 
     /**
@@ -235,7 +245,8 @@ public class DailyMetricsService {
     }
 
     private record DailyLoadBuild(
-            List<DailyTrainingLoad> loads,
+            List<DailyTrainingLoad> dailyLoads,
+            List<DailyTrainingLoad> pmcLoads,
             Map<LocalDate, BigDecimal> coverageByDate,
             Map<LocalDate, Map<String, Integer>> sourcesByDate) {
     }
@@ -261,6 +272,7 @@ public class DailyMetricsService {
         double best60min = 0;
 
         for (Activity activity : activities) {
+            if (!Boolean.TRUE.equals(activity.getDeviceWatts())) continue;
             Optional<Map<String, Object>> curveOpt =
                     activityMetricRepository.findJsonValue(activity.getId(), POWER_CURVE_METRIC);
             if (curveOpt.isEmpty()) continue;
@@ -391,7 +403,7 @@ public class DailyMetricsService {
 
     private void saveFtp(double effectiveFtp) {
         if (effectiveFtp > 0) {
-            dailyMetricRepository.save(LocalDate.now(ZoneOffset.UTC), MetricResult.numeric("ftp", effectiveFtp));
+            dailyMetricRepository.save(LocalDate.now(clock), MetricResult.numeric("ftp", effectiveFtp));
         }
     }
 
@@ -403,8 +415,8 @@ public class DailyMetricsService {
     public void backfillFtpHistory(List<Activity> allActivities, double currentProfileFtp) {
         // Collect unique dates (one per calendar day), sorted ascending
         List<LocalDate> activityDates = allActivities.stream()
-                .filter(a -> a.getStartedAt() != null)
-                .map(a -> a.getStartedAt().toLocalDate())
+                .filter(a -> a.getStartedAt() != null && Boolean.TRUE.equals(a.getDeviceWatts()))
+                .map(a -> a.getStartedAt().atZoneSameInstant(clock.getZone()).toLocalDate())
                 .distinct()
                 .sorted()
                 .toList();
@@ -413,8 +425,8 @@ public class DailyMetricsService {
 
         // For efficiency: sort activities by date and process incrementally
         List<Activity> sorted = allActivities.stream()
-                .filter(a -> a.getStartedAt() != null)
-                .sorted(Comparator.comparing(a -> a.getStartedAt().toLocalDate()))
+                .filter(a -> a.getStartedAt() != null && Boolean.TRUE.equals(a.getDeviceWatts()))
+                .sorted(Comparator.comparing(a -> a.getStartedAt().atZoneSameInstant(clock.getZone()).toLocalDate()))
                 .toList();
 
         double prev = 0;
@@ -424,7 +436,7 @@ public class DailyMetricsService {
         for (LocalDate date : activityDates) {
             // Accumulate activities up to and including this date
             while (actIdx < sorted.size()
-                    && !sorted.get(actIdx).getStartedAt().toLocalDate().isAfter(date)) {
+                    && !sorted.get(actIdx).getStartedAt().atZoneSameInstant(clock.getZone()).toLocalDate().isAfter(date)) {
                 Activity a = sorted.get(actIdx++);
                 Optional<Map<String, Object>> curveOpt =
                         activityMetricRepository.findJsonValue(a.getId(), POWER_CURVE_METRIC);
@@ -461,7 +473,7 @@ public class DailyMetricsService {
         // Always write today's value
         double currentFtp = Math.max(prev, currentProfileFtp);
         if (currentFtp > 0) {
-            dailyMetricRepository.save(LocalDate.now(ZoneOffset.UTC), MetricResult.numeric("ftp", currentFtp));
+            dailyMetricRepository.save(LocalDate.now(clock), MetricResult.numeric("ftp", currentFtp));
         }
     }
 

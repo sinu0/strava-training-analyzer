@@ -20,16 +20,17 @@ public class SportsScienceIndexer {
     private static final Logger log = LoggerFactory.getLogger(SportsScienceIndexer.class);
 
     private final KnowledgeIndexPort knowledgeIndexPort;
-    private final EmbeddingPort embeddingPort;
+    private final java.util.Optional<EmbeddingPort> embeddingPort;
 
     public SportsScienceIndexer(KnowledgeIndexPort knowledgeIndexPort,
-                                EmbeddingPort embeddingPort) {
+                                java.util.Optional<EmbeddingPort> embeddingPort) {
         this.knowledgeIndexPort = knowledgeIndexPort;
         this.embeddingPort = embeddingPort;
     }
 
     public List<KnowledgeDocument> indexContent(KnowledgeSource source, KnowledgeType type,
                                                  String url, String title, String content) {
+        EmbeddingPort embeddings = embeddingPort.orElseThrow(() -> new IllegalStateException("Brak skonfigurowanego dostawcy embeddingów"));
         ContentChunker chunker = new ContentChunker();
         List<String> topics = chunker.extractTopics(content);
         List<String> chunks = chunker.chunk(content);
@@ -39,7 +40,7 @@ public class SportsScienceIndexer {
         for (int i = 0; i < chunks.size(); i++) {
             try {
                 String chunk = chunks.get(i);
-                float[] embedding = embeddingPort.embed(chunk);
+                float[] embedding = embeddings.embed(chunk);
                 KnowledgeDocument doc = KnowledgeDocument.builder()
                         .source(source)
                         .url(url)

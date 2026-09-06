@@ -19,4 +19,8 @@ import lombok.Setter;
 public class PowerCurveDto {
 
     private Map<Integer, Double> efforts;
+    private String source;
+    private int measuredActivities;
+    private int estimatedActivities;
+    private int unknownSourceActivities;
 }

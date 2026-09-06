@@ -43,6 +43,8 @@ import pl.strava.analizator.domain.vo.DateRange;
 @Slf4j
 public class TrainingPrioritiesService {
 
+    private final java.time.Clock clock;
+
     private final ActivityRepository activityRepository;
     private final ActivityMetricRepository activityMetricRepository;
     private final DailyMetricRepository dailyMetricRepository;
@@ -377,7 +379,7 @@ public class TrainingPrioritiesService {
     private FatigueFactorsDto computeFatigue(List<Activity> activities, AthleteProfile profile) {
         // ATL fatigue from PMC
         double atl = 50, ctl = 50;
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        LocalDate today = LocalDate.now(clock);
         DateRange lastWeek = new DateRange(today.minusDays(7), today);
         DateRange lastSixWeeks = new DateRange(today.minusDays(42), today);
 

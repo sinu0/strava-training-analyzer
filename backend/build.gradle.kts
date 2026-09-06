@@ -70,3 +70,17 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.test {
+    useJUnitPlatform { excludeTags("integration") }
+}
+
+tasks.register<Test>("integrationTest") {
+    description = "Real PostgreSQL, Flyway, persistence and HTTP contract tests (requires Docker)"
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    useJUnitPlatform { includeTags("integration") }
+    systemProperty("api.version", System.getenv("DOCKER_API_VERSION") ?: "1.44")
+    shouldRunAfter(tasks.test)
+}

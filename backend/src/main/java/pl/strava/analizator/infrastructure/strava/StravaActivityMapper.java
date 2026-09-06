@@ -47,6 +47,7 @@ public class StravaActivityMapper {
                 .avgHeartrate(toShort(dto.getAverageHeartrate()))
                 .maxHeartrate(toShort(dto.getMaxHeartrate()))
                 .avgPowerW(toShort(dto.getAverageWatts()))
+                .deviceWatts(dto.getDeviceWatts())
                 .maxPowerW(toShort(dto.getMaxWatts()))
                 .avgCadence(toShort(dto.getAverageCadence()))
                 .maxCadence(resolveMaxCadence(dto, streams))

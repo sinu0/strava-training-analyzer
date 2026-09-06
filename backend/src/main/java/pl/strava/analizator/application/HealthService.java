@@ -21,10 +21,12 @@ import pl.strava.analizator.domain.vo.DateRange;
 @RequiredArgsConstructor
 public class HealthService {
 
+    private final java.time.Clock clock;
+
     private final DailySummaryRepository dailySummaryRepository;
 
     public void updateHealthMetrics(Map<String, Object> body) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         DailySummary existing = dailySummaryRepository.findByDate(today).orElse(null);
         DailySummary.DailySummaryBuilder builder = existing != null
                 ? existing.toBuilder()

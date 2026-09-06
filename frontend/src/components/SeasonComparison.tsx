@@ -1,5 +1,8 @@
+
 import { Box, Typography, Grid } from '@mui/material';
 import { useState } from 'react';
+
+import { localDate } from '@/utils/localDate';
 
 import DateRangePicker from './common/DateRangePicker';
 import { useComparePeriods } from '../hooks/useAnalytics';
@@ -10,8 +13,8 @@ function defaultRange(monthsAgo: number) {
   const from = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1);
   const to = new Date(now.getFullYear(), now.getMonth() - monthsAgo + 1, 0);
   return {
-    from: from.toISOString().slice(0, 10),
-    to: to.toISOString().slice(0, 10),
+    from: localDate(from),
+    to: localDate(to),
   };
 }
 

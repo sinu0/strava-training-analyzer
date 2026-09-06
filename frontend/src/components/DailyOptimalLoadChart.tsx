@@ -1,3 +1,4 @@
+
 import { Box, Typography, Stack } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
@@ -17,6 +18,7 @@ import {
 
 import { getChartVisuals } from '@/utils/chartStyles';
 import { CHART_COLORS, LOAD_COLORS, alphaColor } from '@/utils/colors';
+import { localDate } from '@/utils/localDate';
 import { getLoadStatusColor } from '@/utils/statusColors';
 
 import type { DailyOptimalLoad } from '../types/analytics';
@@ -92,7 +94,7 @@ const DailyOptimalLoadChart = memo(function DailyOptimalLoadChart({
 }: Props) {
   const theme = useTheme();
   const chart = getChartVisuals(theme);
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = localDate();
   const chartData = useMemo(() => mapDailyOptimalLoadChartData(data), [data]);
 
   if (!chartData.length) {

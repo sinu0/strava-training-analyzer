@@ -52,7 +52,7 @@ public class ActivityReadRepositoryAdapter implements ActivityReadRepository {
                 .maxSpeedMs(projection.getMaxSpeedMs())
                 .avgHeartrate(projection.getAvgHeartrate())
                 .maxHeartrate(projection.getMaxHeartrate())
-                .avgPowerW(projection.getAvgPowerW())
+                .avgPowerW(projection.getAvgPowerW()).deviceWatts(projection.getDeviceWatts())
                 .maxPowerW(projection.getMaxPowerW())
                 .avgCadence(projection.getAvgCadence())
                 .maxCadence(projection.getMaxCadence())

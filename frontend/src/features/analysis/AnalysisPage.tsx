@@ -1,3 +1,4 @@
+
 import CompareArrowsOutlinedIcon from '@mui/icons-material/CompareArrowsOutlined';
 import DirectionsBikeOutlinedIcon from '@mui/icons-material/DirectionsBikeOutlined';
 import LandscapeOutlinedIcon from '@mui/icons-material/LandscapeOutlined';
@@ -5,7 +6,7 @@ import ShowChartOutlinedIcon from '@mui/icons-material/ShowChartOutlined';
 import StraightenOutlinedIcon from '@mui/icons-material/StraightenOutlined';
 import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined';
 import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined';
-import { Alert, Box, Grid, Stack, Tab, Tabs, Typography } from '@mui/material';
+import { Alert, Box, Checkbox, FormControlLabel, Grid, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
 
 import EditorialHero from '@/components/common/EditorialHero';
@@ -19,6 +20,7 @@ import PowerCurveChart from '@/components/PowerCurveChart';
 import MetricReadout from '@/components/v2/MetricReadout';
 import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
+import { localDate } from '@/utils/localDate';
 
 import { useLoadAnalytics, usePeriodComparison, usePowerAnalytics } from './useV2Analytics';
 
@@ -31,7 +33,7 @@ function dateOffset(value: string, days: number) {
 }
 
 function defaultTo() {
-  return new Date().toISOString().slice(0, 10);
+  return localDate();
 }
 
 function formatSummary(value: number, kind: 'distance' | 'time' | 'elevation') {
@@ -63,7 +65,8 @@ export default function AnalysisPage() {
     period2To,
   }, tab === 'compare');
   const load = useLoadAnalytics(from, to, tab === 'load');
-  const power = usePowerAnalytics(from, to, tab === 'power');
+  const includeUnverified = params.get('powerSources') === 'all';
+  const power = usePowerAnalytics(from, to, tab === 'power', includeUnverified);
 
   const update = (key: string, value: string) => {
     const next = new URLSearchParams(params);
@@ -129,7 +132,7 @@ export default function AnalysisPage() {
           <PerformanceSurface sx={{ p: { xs: 1.25, md: 2.25 } }}>
             {load.data.availability === 'PARTIAL' ? (
               <Alert severity="warning" sx={{ mb: 2 }}>
-                Wykres jest orientacyjny: rozpoznano obciążenie dla {Math.round((load.data.coverage ?? 0) * 100)}% aktywności w tym zakresie.
+                Niepełne dane. Pokrycie obciążenia: {load.data.coverage == null ? 'nieznane' : `${Math.round(load.data.coverage * 100)}%`}. Dostępność dni: {load.data.temporalCoverage == null ? 'nieznana' : `${Math.round(load.data.temporalCoverage * 100)}%`}. Ostatnie obliczenie: {load.data.asOf ?? 'brak'}. Luki oznaczają brak danych.
               </Alert>
             ) : null}
             <PMChart data={load.data.points} />
@@ -138,9 +141,12 @@ export default function AnalysisPage() {
     }
 
     if (tab === 'power' && power.data) {
-      return power.data.availability === 'UNKNOWN'
-        ? <EmptyState title="Brak krzywej mocy" description="Wybierz okres z aktywnościami zawierającymi pomiar mocy." />
-        : <PerformanceSurface sx={{ p: { xs: 1.25, md: 2.25 } }}><PowerCurveChart data={power.data.curve} /></PerformanceSurface>;
+      return <PerformanceSurface sx={{ p: { xs: 1.25, md: 2.25 } }}>
+        <Alert severity={includeUnverified ? 'warning' : 'info'} sx={{ mb: 2 }}>{includeUnverified ? 'Widok mieszany: zawiera estymacje i źródła niepotwierdzone. Nie traktuj tej krzywej jako zweryfikowanego pomiaru ani podstawy do wyznaczania FTP.' : 'Krzywa obejmuje wyłącznie potwierdzony pomiar mocy.'} Aktywności z pomiarem: {power.data.curve.measuredActivities ?? 'brak informacji'}, z estymacją: {power.data.curve.estimatedActivities ?? 'brak informacji'}, bez potwierdzonego źródła: {power.data.curve.unknownSourceActivities ?? 'brak informacji'}.</Alert>
+        {power.data.availability === 'UNKNOWN'
+          ? <EmptyState title="Brak krzywej mocy" description="Wybierz okres z aktywnościami zawierającymi potwierdzony pomiar mocy." />
+          : <PowerCurveChart data={power.data.curve} />}
+      </PerformanceSurface>;
     }
     return null;
   };
@@ -177,11 +183,12 @@ export default function AnalysisPage() {
         >
           <Tab value="compare" icon={<CompareArrowsOutlinedIcon />} iconPosition="start" label="Porównaj" />
           <Tab value="load" icon={<TimelineOutlinedIcon />} iconPosition="start" label="Obciążenie i regeneracja" />
-          <Tab value="power" icon={<ShowChartOutlinedIcon />} iconPosition="start" label="Moc i trwałość" />
+          <Tab value="power" icon={<ShowChartOutlinedIcon />} iconPosition="start" label="Moc" />
         </Tabs>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
           <PolishDateField size="small" label="Od" value={from} onChange={value => update('from', value)} InputLabelProps={{ shrink: true }} />
           <PolishDateField size="small" label="Do" value={to} onChange={value => update('to', value)} InputLabelProps={{ shrink: true }} />
+          {tab === 'power' && <FormControlLabel control={<Checkbox checked={includeUnverified} onChange={(_, checked) => update('powerSources', checked ? 'all' : 'measured')} />} label="Pokaż także źródła niepotwierdzone" />}
           <Box sx={{ flex: 1 }} />
           <Typography variant="caption" color="text.secondary" alignSelf="center">Zakres jest zapisany w URL</Typography>
         </Stack>

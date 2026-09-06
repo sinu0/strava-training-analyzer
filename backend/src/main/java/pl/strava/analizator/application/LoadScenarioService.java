@@ -66,9 +66,7 @@ public class LoadScenarioService {
     }
 
     private boolean isMissingBaseline(PmcDataDto baseline) {
-        return baseline.getCtl() == null || baseline.getAtl() == null
-                || (baseline.getCtl().compareTo(BigDecimal.ZERO) == 0
-                && baseline.getAtl().compareTo(BigDecimal.ZERO) == 0);
+        return baseline.getCtl() == null || baseline.getAtl() == null;
     }
 
     private BigDecimal decimal(double value) {

@@ -11,6 +11,7 @@ public interface WorkoutExecutionRepository {
     Optional<WorkoutExecution> findByStartIdempotencyKey(String key);
     Optional<WorkoutExecution> findByFinishIdempotencyKey(String key);
     Optional<WorkoutExecution> findActive();
+    Optional<WorkoutExecution> findLatestByScheduledWorkoutId(UUID id);
     List<WorkoutExecution> findCompletedWithoutActivity();
     WorkoutExecution save(WorkoutExecution execution);
 }

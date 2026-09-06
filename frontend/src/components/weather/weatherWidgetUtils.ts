@@ -1,5 +1,7 @@
+
 import type { GradientDay } from '@/types/analytics';
 import { WEATHER_SCORE_COLORS } from '@/utils/colors';
+import { localDate } from '@/utils/localDate';
 import { getScoreColor } from '@/utils/scoreColor';
 
 export type CyclistType =
@@ -121,7 +123,7 @@ export function formatDayName(dateStr: string): string {
 }
 
 export function isToday(dateStr: string): boolean {
-  return dateStr === new Date().toISOString().slice(0, 10);
+  return dateStr === localDate();
 }
 
 export function getTodayData(days: GradientDay[]): GradientDay | undefined {

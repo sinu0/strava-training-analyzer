@@ -1,3 +1,4 @@
+
 import { Box, Typography, Stack } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
@@ -13,6 +14,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 
+import { localDate } from '@/utils/localDate';
 import { getLoadStatusColor } from '@/utils/statusColors';
 
 import { getChartVisuals } from '../utils/chartStyles';
@@ -32,7 +34,7 @@ function currentWeekMonday(): string {
   const mon = new Date(now);
   mon.setDate(now.getDate() - dow);
   mon.setHours(0, 0, 0, 0);
-  return mon.toISOString().slice(0, 10);
+  return localDate(mon);
 }
 
 /** How many days have elapsed so far in the current ISO week (1 on Monday, 7 on Sunday) */

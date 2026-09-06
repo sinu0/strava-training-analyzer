@@ -61,6 +61,8 @@ import pl.strava.analizator.domain.port.WorkoutTemplateRepository;
 @ExtendWith(MockitoExtension.class)
 class TrainingPlanServiceTest {
 
+    @org.mockito.Spy private java.time.Clock clock = java.time.Clock.systemDefaultZone();
+
     @Mock
     private TrainingPlanRepository trainingPlanRepository;
     @Mock
@@ -81,6 +83,8 @@ class TrainingPlanServiceTest {
     private TrainingDayEnvironmentPort trainingDayEnvironmentPort;
     @Mock
     private TrainingAdjustmentFeedbackRepository trainingAdjustmentFeedbackRepository;
+
+    @Mock private pl.strava.analizator.domain.port.WorkoutExecutionRepository executionRepository;
 
     @InjectMocks
     private TrainingPlanService service;
@@ -179,7 +183,7 @@ class TrainingPlanServiceTest {
         UUID thresholdActivityId = UUID.randomUUID();
         UUID enduranceActivityId = UUID.randomUUID();
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(
-                Activity.builder()
+                Activity.builder().deviceWatts(true)
                         .id(thresholdActivityId)
                         .name("Threshold Ride")
                         .sportType("Ride")
@@ -187,7 +191,7 @@ class TrainingPlanServiceTest {
                         .movingTimeSec(62 * 60)
                         .distanceM(BigDecimal.valueOf(36000))
                         .build(),
-                Activity.builder()
+                Activity.builder().deviceWatts(true)
                         .id(enduranceActivityId)
                         .name("Long Endurance")
                         .sportType("Ride")
@@ -196,7 +200,7 @@ class TrainingPlanServiceTest {
                         .distanceM(BigDecimal.valueOf(65000))
                         .build()
         ));
-        when(activityMetricRepository.findNumericValues(List.of(thresholdActivityId, enduranceActivityId), "tss"))
+        when(activityMetricRepository.findNumericValues(List.of(thresholdActivityId, enduranceActivityId), "training_stress_score"))
                 .thenReturn(Map.of(
                         thresholdActivityId, BigDecimal.valueOf(95),
                         enduranceActivityId, BigDecimal.valueOf(75)));
@@ -206,15 +210,15 @@ class TrainingPlanServiceTest {
         assertThat(scorecard.getPlannedTss()).isEqualByComparingTo(BigDecimal.valueOf(180));
         assertThat(scorecard.getActualTss()).isEqualByComparingTo(BigDecimal.valueOf(170));
         assertThat(scorecard.getPlannedQualityDays()).isEqualTo(1);
-        assertThat(scorecard.getCompletedQualityDays()).isEqualTo(1);
+        assertThat(scorecard.getCompletedQualityDays()).isEqualTo(0);
         assertThat(scorecard.getGoalFocusLabel()).isEqualTo("Budowa progu");
         assertThat(scorecard.getGoalFocusRole()).isEqualTo("THRESHOLD_QUALITY");
         assertThat(scorecard.getPlannedGoalSessions()).isEqualTo(1);
-        assertThat(scorecard.getCompletedGoalSessions()).isEqualTo(1);
-        assertThat(scorecard.getGoalExecutionScore()).isGreaterThanOrEqualTo(80);
-        assertThat(scorecard.getGoalExecutionStatus()).isEqualTo("ON_TARGET");
-        assertThat(scorecard.getAvgExecutionScore()).isGreaterThanOrEqualTo(80);
-        assertThat(scorecard.isOnTrack()).isTrue();
+        assertThat(scorecard.getCompletedGoalSessions()).isEqualTo(0);
+        assertThat(scorecard.getGoalExecutionScore()).isNull();
+        assertThat(scorecard.getGoalExecutionStatus()).isEqualTo("UNKNOWN");
+        assertThat(scorecard.getAvgExecutionScore()).isNull();
+        assertThat(scorecard.isOnTrack()).isFalse();
     }
 
     @Test
@@ -389,6 +393,33 @@ class TrainingPlanServiceTest {
     }
 
     @Test
+    void getCalendarView_keepsEverySessionAndDoesNotReuseUnlinkedActivity() {
+        LocalDate date = LocalDate.of(2025, 1, 6);
+        UUID activityId = UUID.randomUUID();
+        TrainingPlan morning = buildPlan(date, BigDecimal.valueOf(30)).toBuilder().actualActivityId(activityId).build();
+        TrainingPlan evening = buildPlan(date, BigDecimal.valueOf(40));
+        Activity activity = Activity.builder().deviceWatts(true).id(activityId).name("Morning Ride").sportType("Ride")
+                .startedAt(date.atTime(8, 0).atOffset(ZoneOffset.UTC)).movingTimeSec(1800).build();
+        when(trainingPlanRepository.findByDateRange(date, date)).thenReturn(List.of(morning, evening));
+        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(activity));
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "training_stress_score")).thenReturn(Map.of(activityId, BigDecimal.valueOf(30)));
+
+        CalendarDayDto day = service.getCalendarView(date, date).getFirst();
+
+        assertThat(day.getSessions()).hasSize(2);
+        assertThat(day.getSessions().get(0).getActual().getId()).isEqualTo(activityId);
+        assertThat(day.getSessions().get(1).getActual()).isNull();
+        assertThat(day.getActivities()).hasSize(1);
+    }
+
+    @Test
+    void getCalendarView_doesNotProjectFitnessFromMissingBaseline() {
+        LocalDate date = LocalDate.now(clock).plusDays(1);
+        when(trainingPlanRepository.findByDateRange(date, date)).thenReturn(List.of(buildPlan(date, BigDecimal.TEN)));
+        assertThat(service.getCalendarView(date, date).getFirst().getProjection()).isNull();
+    }
+
+    @Test
     void getCalendarView_mergesPlannedAndActual() {
         LocalDate from = LocalDate.of(2025, 1, 6);
         LocalDate to = LocalDate.of(2025, 1, 8);
@@ -397,7 +428,7 @@ class TrainingPlanServiceTest {
         when(trainingPlanRepository.findByDateRange(from, to)).thenReturn(List.of(plan));
 
         UUID activityId = UUID.randomUUID();
-        Activity activity = Activity.builder()
+        Activity activity = Activity.builder().deviceWatts(true)
                 .id(activityId)
                 .name("Morning Ride")
                 .sportType("Ride")
@@ -406,7 +437,7 @@ class TrainingPlanServiceTest {
                 .distanceM(BigDecimal.valueOf(40000))
                 .build();
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(activity));
-        when(activityMetricRepository.findNumericValues(List.of(activityId), "tss"))
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "training_stress_score"))
                 .thenReturn(Map.of(activityId, BigDecimal.valueOf(85)));
 
         List<CalendarDayDto> result = service.getCalendarView(from, to);
@@ -421,7 +452,8 @@ class TrainingPlanServiceTest {
         assertThat(day1.getCompliance()).isNotNull();
         assertThat(day1.getCompliance()).isCloseTo(106.25, org.assertj.core.data.Offset.offset(0.01));
         assertThat(day1.getExecution()).isNotNull();
-        assertThat(day1.getExecution().getOutcome()).isEqualTo("TOO_HARD");
+        assertThat(day1.getExecution().getOutcome()).isEqualTo("UNKNOWN");
+        assertThat(day1.getExecution().getScore()).isNull();
 
         CalendarDayDto day3 = result.get(2);
         assertThat(day3.getPlanned()).isNull();
@@ -432,13 +464,13 @@ class TrainingPlanServiceTest {
     void getCalendarView_doesNotChooseArbitrarilyWhenTwoActivitiesShareTheDate() {
         LocalDate day = LocalDate.of(2025, 1, 6);
         TrainingPlan plan = buildPlan(day, BigDecimal.valueOf(80));
-        Activity first = Activity.builder().id(UUID.randomUUID()).name("Morning Ride").sportType("Ride")
+        Activity first = Activity.builder().deviceWatts(true).id(UUID.randomUUID()).name("Morning Ride").sportType("Ride")
                 .startedAt(day.atTime(8, 0).atOffset(ZoneOffset.UTC)).movingTimeSec(3600).build();
-        Activity second = Activity.builder().id(UUID.randomUUID()).name("Evening Ride").sportType("Ride")
+        Activity second = Activity.builder().deviceWatts(true).id(UUID.randomUUID()).name("Evening Ride").sportType("Ride")
                 .startedAt(day.atTime(18, 0).atOffset(ZoneOffset.UTC)).movingTimeSec(3000).build();
         when(trainingPlanRepository.findByDateRange(day, day)).thenReturn(List.of(plan));
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(first, second));
-        when(activityMetricRepository.findNumericValues(any(), eq("tss"))).thenReturn(Map.of());
+        when(activityMetricRepository.findNumericValues(any(), eq("training_stress_score"))).thenReturn(Map.of());
 
         CalendarDayDto result = service.getCalendarView(day, day).getFirst();
 
@@ -451,13 +483,13 @@ class TrainingPlanServiceTest {
         LocalDate day = LocalDate.of(2025, 1, 6);
         UUID linkedId = UUID.randomUUID();
         TrainingPlan plan = buildPlan(day, BigDecimal.valueOf(80)).toBuilder().actualActivityId(linkedId).build();
-        Activity first = Activity.builder().id(UUID.randomUUID()).name("Morning Ride").sportType("Ride")
+        Activity first = Activity.builder().deviceWatts(true).id(UUID.randomUUID()).name("Morning Ride").sportType("Ride")
                 .startedAt(day.atTime(8, 0).atOffset(ZoneOffset.UTC)).movingTimeSec(3600).build();
-        Activity linked = Activity.builder().id(linkedId).name("Planned Ride").sportType("VirtualRide")
+        Activity linked = Activity.builder().deviceWatts(true).id(linkedId).name("Planned Ride").sportType("VirtualRide")
                 .startedAt(day.atTime(18, 0).atOffset(ZoneOffset.UTC)).movingTimeSec(3600).build();
         when(trainingPlanRepository.findByDateRange(day, day)).thenReturn(List.of(plan));
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(first, linked));
-        when(activityMetricRepository.findNumericValues(any(), eq("tss")))
+        when(activityMetricRepository.findNumericValues(any(), eq("training_stress_score")))
                 .thenReturn(Map.of(linkedId, BigDecimal.valueOf(80)));
 
         CalendarDayDto result = service.getCalendarView(day, day).getFirst();
@@ -467,7 +499,7 @@ class TrainingPlanServiceTest {
     }
 
     @Test
-    void getCalendarView_marksThresholdSessionAsWellExecutedWhenItMatchesPlan() {
+    void getCalendarView_doesNotInferIntervalExecutionFromSimilarTotals() {
         LocalDate day = LocalDate.of(2025, 1, 6);
         TrainingPlan plan = TrainingPlan.builder()
                 .id(UUID.randomUUID())
@@ -482,7 +514,7 @@ class TrainingPlanServiceTest {
         when(trainingPlanRepository.findByDateRange(day, day)).thenReturn(List.of(plan));
 
         UUID activityId = UUID.randomUUID();
-        Activity activity = Activity.builder()
+        Activity activity = Activity.builder().deviceWatts(true)
                 .id(activityId)
                 .name("Threshold Ride")
                 .sportType("Ride")
@@ -491,15 +523,15 @@ class TrainingPlanServiceTest {
                 .distanceM(BigDecimal.valueOf(35000))
                 .build();
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(activity));
-        when(activityMetricRepository.findNumericValues(List.of(activityId), "tss"))
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "training_stress_score"))
                 .thenReturn(Map.of(activityId, BigDecimal.valueOf(95)));
 
         CalendarDayDto result = service.getCalendarView(day, day).getFirst();
 
         assertThat(result.getExecution()).isNotNull();
-        assertThat(result.getExecution().getOutcome()).isEqualTo("WELL_EXECUTED");
-        assertThat(result.getExecution().isStimulusMatch()).isTrue();
-        assertThat(result.getExecution().getScore()).isGreaterThanOrEqualTo(85);
+        assertThat(result.getExecution().getOutcome()).isEqualTo("UNKNOWN");
+        assertThat(result.getExecution().isStimulusMatch()).isFalse();
+        assertThat(result.getExecution().getScore()).isNull();
     }
 
     @Test
@@ -509,7 +541,7 @@ class TrainingPlanServiceTest {
         when(trainingPlanRepository.findByDateRange(day, day)).thenReturn(List.of(plan));
 
         UUID activityId = UUID.randomUUID();
-        Activity activity = Activity.builder()
+        Activity activity = Activity.builder().deviceWatts(true)
                 .id(activityId)
                 .name("Race pace ride")
                 .sportType("Ride")
@@ -518,7 +550,7 @@ class TrainingPlanServiceTest {
                 .distanceM(BigDecimal.valueOf(50000))
                 .build();
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(activity));
-        when(activityMetricRepository.findNumericValues(List.of(activityId), "tss"))
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "training_stress_score"))
                 .thenReturn(Map.of(activityId, BigDecimal.valueOf(110)));
 
         CalendarDayDto result = service.getCalendarView(day, day).getFirst();
@@ -526,7 +558,8 @@ class TrainingPlanServiceTest {
         assertThat(result.getExecution()).isNotNull();
         assertThat(result.getExecution().getOutcome()).isEqualTo("TOO_HARD");
         assertThat(result.getExecution().isStimulusMatch()).isFalse();
-        assertThat(result.getExecution().getLabel()).isEqualTo("Za mocno");
+        assertThat(result.getExecution().getLabel()).isEqualTo("Ponad plan");
+        assertThat(result.getExecution().getScore()).isNull();
     }
 
     @Test
@@ -553,7 +586,7 @@ class TrainingPlanServiceTest {
     }
 
     @Test
-    void getCalendarView_addsDetailedReviewForTemplateBasedSession() {
+    void getCalendarView_doesNotUseCurrentTemplateAndFtpToReviewHistoricalSession() {
         LocalDate day = LocalDate.of(2025, 1, 6);
         UUID templateId = UUID.randomUUID();
         TrainingPlan plan = TrainingPlan.builder()
@@ -582,10 +615,6 @@ class TrainingPlanServiceTest {
                 ))
                 .createdBy("system")
                 .build()));
-        when(athleteProfileRepository.findFirst()).thenReturn(Optional.of(AthleteProfile.builder()
-                .ftpWatts((short) 280)
-                .build()));
-
         UUID activityId = UUID.randomUUID();
         int[] powerStream = new int[3600];
         for (int i = 0; i < powerStream.length; i++) {
@@ -600,7 +629,7 @@ class TrainingPlanServiceTest {
         for (int i = 1920; i < 2400; i++) {
             powerStream[i] = 270;
         }
-        Activity activity = Activity.builder()
+        Activity activity = Activity.builder().deviceWatts(true)
                 .id(activityId)
                 .name("Threshold Ride")
                 .sportType("Ride")
@@ -611,16 +640,16 @@ class TrainingPlanServiceTest {
                 .distanceM(BigDecimal.valueOf(32000))
                 .build();
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(activity));
-        when(activityMetricRepository.findNumericValues(List.of(activityId), "tss"))
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "training_stress_score"))
                 .thenReturn(Map.of(activityId, BigDecimal.valueOf(94)));
 
         CalendarDayDto result = service.getCalendarView(day, day).getFirst();
 
         assertThat(result.getExecution()).isNotNull();
-        assertThat(result.getExecution().getIntervalCompliance()).isGreaterThan(80.0);
-        assertThat(result.getExecution().getZoneCompliance()).isGreaterThan(50.0);
-        assertThat(result.getExecution().getPrimaryLimiter()).isEqualTo("ON_TARGET");
-        assertThat(result.getExecution().getNextDayAdvice()).contains("kolejn");
+        assertThat(result.getExecution().getIntervalCompliance()).isNull();
+        assertThat(result.getExecution().getZoneCompliance()).isNull();
+        assertThat(result.getExecution().getPrimaryLimiter()).isEqualTo("UNKNOWN");
+        assertThat(result.getExecution().getDescription()).contains("historycznego");
     }
 
     @Test
@@ -640,11 +669,12 @@ class TrainingPlanServiceTest {
         UUID activityId = UUID.randomUUID();
         int[] powerStream = new int[60];
         java.util.Arrays.fill(powerStream, 195);
-        Activity activity = Activity.builder().id(activityId).name("Snapshot execution").sportType("Ride")
+        Activity activity = Activity.builder().deviceWatts(true).id(activityId).name("Snapshot execution").sportType("Ride")
                 .startedAt(day.atTime(8, 0).atOffset(ZoneOffset.UTC)).movingTimeSec(60)
-                .powerStream(powerStream).avgPowerW((short) 195).build();
+                .powerStream(powerStream).deviceWatts(true)
+                .timeStream(java.util.stream.IntStream.range(0, 60).toArray()).avgPowerW((short) 195).build();
         when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of(activity));
-        when(activityMetricRepository.findNumericValues(List.of(activityId), "tss"))
+        when(activityMetricRepository.findNumericValues(List.of(activityId), "training_stress_score"))
                 .thenReturn(Map.of(activityId, BigDecimal.TEN));
 
         CalendarDayDto result = service.getCalendarView(day, day).getFirst();
@@ -654,81 +684,16 @@ class TrainingPlanServiceTest {
     }
 
     @Test
-    void getCalendarView_autoSwapsOutdoorSessionWhenWeatherAndRoutesBlockIt() {
+    void getCalendarView_preservesScheduledWorkoutInsteadOfSilentlySwappingIt() {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
-        UUID programId = UUID.randomUUID();
-        UUID originalTemplateId = UUID.randomUUID();
-        TrainingPlan plan = TrainingPlan.builder()
-                .id(UUID.randomUUID())
-                .date(tomorrow)
-                .plannedType("ENDURANCE")
-                .plannedTss(BigDecimal.valueOf(140))
-                .plannedDurationMin(180)
-                .plannedDescription("Long Ride Outdoor")
-                .workoutTemplateId(originalTemplateId)
-                .programId(programId)
-                .status(TrainingPlanStatus.PLANNED)
-                .createdAt(OffsetDateTime.now())
-                .build();
+        TrainingPlan plan = buildPlan(tomorrow, BigDecimal.valueOf(140)).toBuilder()
+                .plannedType("ENDURANCE").plannedDescription("Long Ride Outdoor").build();
         when(trainingPlanRepository.findByDateRange(tomorrow, tomorrow)).thenReturn(List.of(plan));
-        when(activityRepository.findByStartedAtBetween(any(), any())).thenReturn(List.of());
-        when(programRepository.findById(programId)).thenReturn(Optional.of(TrainingPlanProgram.builder()
-                .id(programId)
-                .name("BUILD_BASE")
-                .goal(ProgramGoal.BUILD_BASE)
-                .goalPriority(GoalPriority.B)
-                .startDate(tomorrow.minusDays(7))
-                .endDate(tomorrow.plusDays(21))
-                .environmentPreference("OUTDOOR_FOCUSED")
-                .weekdayAvailabilityMinutes(90)
-                .weekendAvailabilityMinutes(180)
-                .preferredLongRideDay("SATURDAY")
-                .generatedBy("auto")
-                .build()));
-        when(trainingDayEnvironmentPort.getEnvironmentFor(tomorrow)).thenReturn(Optional.of(TrainingDayEnvironment.builder()
-                .date(tomorrow)
-                .locationName("Krakow")
-                .outdoorScore(28)
-                .bestWindowScore(35)
-                .weatherDescription("Silny wiatr i opady")
-                .build()));
-        when(plannedRouteRepository.findAll()).thenReturn(List.of(PlannedRoute.builder()
-                .id(UUID.randomUUID())
-                .name("Short Route")
-                .estimatedTimeSec(50 * 60)
-                .estimatedTss(45)
-                .build()));
-        when(workoutTemplateRepository.findAll()).thenReturn(List.of(
-                WorkoutTemplate.builder()
-                        .id(originalTemplateId)
-                        .name("Long Ride Outdoor")
-                        .category(WorkoutCategory.ENDURANCE)
-                        .targetTss(BigDecimal.valueOf(140))
-                        .targetDurationMin(180)
-                        .relativeEffort(5)
-                        .steps(List.of())
-                        .createdBy("system")
-                        .build(),
-                WorkoutTemplate.builder()
-                        .id(UUID.randomUUID())
-                        .name("Indoor Sweet Spot")
-                        .category(WorkoutCategory.SWEET_SPOT)
-                        .targetTss(BigDecimal.valueOf(130))
-                        .targetDurationMin(90)
-                        .relativeEffort(7)
-                        .steps(List.of())
-                        .createdBy("system")
-                        .build()
-        ));
-
         CalendarDayDto result = service.getCalendarView(tomorrow, tomorrow).getFirst();
-
-        assertThat(result.getPlanned()).isNotNull();
-        assertThat(result.getPlanned().getPlannedType()).isEqualTo("SWEET_SPOT");
-        assertThat(result.getPlanned().getPlannedDescription()).isEqualTo("Indoor Sweet Spot");
-        assertThat(result.getAdjustment()).isNotNull();
-        assertThat(result.getAdjustment().getType()).isEqualTo("AUTO_SWAP");
-        assertThat(result.getAdjustment().getTitle()).contains("Auto-swap");
+        assertThat(result.getPlanned().getId()).isEqualTo(plan.getId());
+        assertThat(result.getPlanned().getPlannedType()).isEqualTo("ENDURANCE");
+        assertThat(result.getPlanned().getPlannedDescription()).isEqualTo("Long Ride Outdoor");
+        org.mockito.Mockito.verify(trainingPlanRepository, org.mockito.Mockito.never()).save(any());
     }
 
     @Test

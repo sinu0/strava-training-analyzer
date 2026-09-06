@@ -1,7 +1,10 @@
+
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Box, IconButton, Typography, Grid } from '@mui/material';
 import { useState, useMemo } from 'react';
+
+import { localDate } from '@/utils/localDate';
 
 import CalendarDayCell from './CalendarDayCell';
 import CalendarDayDialog from './CalendarDayDialog';
@@ -24,7 +27,7 @@ function monthRange(year: number, month: number) {
 }
 
 function fmt(d: Date): string {
-  return d.toISOString().slice(0, 10);
+  return localDate(d);
 }
 
 export default function TrainingCalendar() {
@@ -93,7 +96,7 @@ export default function TrainingCalendar() {
         </Grid>
       ))}
 
-      <CalendarDayDialog day={selected} open={selected !== null} onClose={() => setSelected(null)} />
+      <CalendarDayDialog key={selected?.date ?? 'closed'} day={selected} open={selected !== null} onClose={() => setSelected(null)} />
     </Box>
   );
 }

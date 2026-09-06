@@ -1,3 +1,4 @@
+
 import BatteryChargingFullIcon from '@mui/icons-material/BatteryChargingFull';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import HotelIcon from '@mui/icons-material/Hotel';
@@ -50,6 +51,7 @@ import {
   STATUS_COLORS,
   alphaColor,
 } from '@/utils/colors';
+import { localDate } from '@/utils/localDate';
 
 function TrendIcon({ direction }: { direction: string }) {
   if (direction === 'rosnący') {
@@ -165,8 +167,8 @@ export default function HealthPage() {
   const today = new Date();
   const from30 = new Date(today);
   from30.setDate(from30.getDate() - 30);
-  const fromStr = from30.toISOString().slice(0, 10);
-  const toStr = today.toISOString().slice(0, 10);
+  const fromStr = localDate(from30);
+  const toStr = localDate(today);
 
   const { data: overview, isLoading: loadingOverview } = useHealthOverview(30);
   const { data: timeline, isLoading: loadingTimeline } = useHealthTimeline(fromStr, toStr);

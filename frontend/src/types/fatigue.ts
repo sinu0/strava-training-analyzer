@@ -30,11 +30,11 @@ export interface SessionSuggestion {
   type: string;
   label: string;
   durationMin: number;
-  estimatedTss: number;
-  estimatedIf: number;
+  estimatedTss: number | null;
+  estimatedIf: number | null;
   structure: string;
   rationale: string;
-  roiScore: number;
+  roiScore: number | null;
   impact: string;
 }
 

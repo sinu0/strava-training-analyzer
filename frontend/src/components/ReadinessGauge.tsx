@@ -122,6 +122,17 @@ export default function ReadinessGauge({
     );
   }
 
+  if (data.score == null || data.tsb == null || data.ctl == null || data.atl == null) {
+    return (
+      <Box sx={{ py: 2 }}>
+        <Typography variant="subtitle2">Gotowość niedostępna</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {data.description}
+        </Typography>
+      </Box>
+    );
+  }
+
   const color = getReadinessColor(data.score);
   const tsbColor = data.tsb >= 0 ? PMC_COLORS.TSB : STATUS_COLORS.error;
   const updatedAtLabel = formatUpdatedAt(data.checkIn?.updatedAt);
@@ -185,7 +196,7 @@ export default function ReadinessGauge({
             </Typography>
           </Box>
           <Typography variant="subtitle2" sx={{ fontWeight: 700, color, lineHeight: 1.2 }}>
-            {getReadinessLevelLabel(data.level)}
+            {getReadinessLevelLabel(data.level ?? 'unknown')}
           </Typography>
         </Box>
       </Box>

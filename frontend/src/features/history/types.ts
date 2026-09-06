@@ -36,6 +36,7 @@ export interface ActivityV2Detail {
   maxSpeedMs?: number | null;
   avgHeartrate?: number | null;
   maxHeartrate?: number | null;
+  deviceWatts?: boolean | null;
   avgPowerW?: number | null;
   maxPowerW?: number | null;
   avgCadence?: number | null;

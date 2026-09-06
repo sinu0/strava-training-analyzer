@@ -38,15 +38,32 @@ class WorkoutExecutionServiceTest {
     @Mock WorkoutExecutionRepository executionRepository;
     @Mock WorkoutExecutionEventRepository eventRepository;
     @Mock TrainingPlanRepository planRepository;
+    @Mock pl.strava.analizator.domain.port.CoachingFeedbackRepository coachingFeedbackRepository;
     private WorkoutExecutionService service;
 
     @BeforeEach
     void setUp() {
         service = new WorkoutExecutionService(executionRepository, eventRepository, planRepository,
-                Clock.fixed(NOW, ZoneOffset.UTC));
+                Clock.fixed(NOW, ZoneOffset.UTC), coachingFeedbackRepository);
         org.mockito.Mockito.lenient().when(executionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         org.mockito.Mockito.lenient().when(eventRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         org.mockito.Mockito.lenient().when(eventRepository.nextSequence(any())).thenReturn(1);
+    }
+
+    @Test
+    void feedbackUsesStableSourceAndHistoricalCompletionDate() {
+        WorkoutExecution completed = execution(UUID.randomUUID(), WorkoutExecutionStatus.COMPLETED)
+                .toBuilder().finishedAt(NOW.minusSeconds(3600)).build();
+        when(executionRepository.findById(completed.getId())).thenReturn(Optional.of(completed));
+
+        service.feedback(completed.getId(), 8, "HARD", "");
+
+        var captor = org.mockito.ArgumentCaptor.forClass(pl.strava.analizator.domain.model.CoachingFeedback.class);
+        verify(coachingFeedbackRepository).save(captor.capture());
+        assertThat(captor.getValue().getSourceKey()).isEqualTo("execution:" + completed.getId());
+        assertThat(captor.getValue().getOccurredAt()).isEqualTo(completed.getFinishedAt());
+        assertThat(captor.getValue().getRpe()).isEqualTo(8);
+        assertThat(captor.getValue().isCompleted()).isTrue();
     }
 
     @Test

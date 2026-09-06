@@ -46,6 +46,9 @@ const trendColors = PERFORMANCE_TREND_COLORS;
 /* ── Popover sections ── */
 
 function ReadinessPopover({ data }: { data: ReadinessData }) {
+  if (data.score == null || data.tsb == null || data.ctl == null || data.atl == null) {
+    return <Box sx={{ p: 2, width: 304 }}><Typography variant="body2">{data.description}</Typography></Box>;
+  }
   const color = getReadinessColor(data.score);
   const tsbColor = data.tsb >= 0 ? PMC_COLORS.TSB : STATUS_COLORS.error;
   return (
@@ -78,7 +81,7 @@ function ReadinessPopover({ data }: { data: ReadinessData }) {
         <Box
           component="img"
           src={getReadinessIllustrationPath(getReadinessImage(data.score))}
-          alt={data.level}
+          alt={data.level ?? 'Gotowość'}
           sx={{ width: 56, height: 48, objectFit: 'contain', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.3))' }}
         />
         <Box>
@@ -289,7 +292,7 @@ export default function StatusPill({ readiness, ftpProgress, weatherGradient }: 
         }}
       >
         {/* Readiness segment */}
-        {!!readiness && (
+        {readiness?.score != null && (
           <Box
             onClick={(e) => handleOpen(e, 'readiness')}
             sx={{
@@ -405,7 +408,7 @@ export default function StatusPill({ readiness, ftpProgress, weatherGradient }: 
           },
         }}
       >
-        {anchor?.type === 'readiness' && !!readiness && <ReadinessPopover data={readiness} />}
+        {anchor?.type === 'readiness' && readiness?.score != null && <ReadinessPopover data={readiness} />}
         {anchor?.type === 'ftp' && !!ftpProgress && <FtpPopover data={ftpProgress} />}
         {anchor?.type === 'weather' && !!weatherGradient && <WeatherPopover data={weatherGradient} />}
       </Popover>

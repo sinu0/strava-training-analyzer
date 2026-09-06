@@ -25,12 +25,13 @@ import pl.strava.analizator.domain.workout.WorkoutStepExpander;
 @Service
 @RequiredArgsConstructor
 public class WorkoutExecutionService {
-    private static final String COMPLIANCE_VERSION = "workout-compliance-v1";
+    private static final String COMPLIANCE_VERSION = pl.strava.analizator.domain.workout.WorkoutComplianceEvaluator.VERSION;
 
     private final WorkoutExecutionRepository executionRepository;
     private final WorkoutExecutionEventRepository eventRepository;
     private final TrainingPlanRepository trainingPlanRepository;
     private final Clock clock;
+    private final pl.strava.analizator.domain.port.CoachingFeedbackRepository coachingFeedbackRepository;
 
     @Transactional
     public WorkoutExecution start(UUID scheduledWorkoutId, String idempotencyKey, Instant requestedAt,
@@ -134,6 +135,7 @@ public class WorkoutExecutionService {
         appendEvent(finished, abort ? "ABORT" : "COMPLETE", idempotencyKey, at, "{}");
         trainingPlanRepository.updateStatus(finished.getScheduledWorkoutId(),
                 abort ? TrainingPlanStatus.SKIPPED : TrainingPlanStatus.COMPLETED);
+        saveCoachingFeedback(finished);
         return finished;
     }
 
@@ -144,17 +146,21 @@ public class WorkoutExecutionService {
         }
         WorkoutExecution execution = find(id);
         Instant at = clock.instant();
-        return executionRepository.save(execution.toBuilder()
+        WorkoutExecution saved = executionRepository.save(execution.toBuilder()
                 .rpe(rpe).feeling(feeling).notes(notes)
                 .stateVersion(execution.getStateVersion() + 1).updatedAt(at).build());
+        saveCoachingFeedback(saved);
+        return saved;
     }
 
-    @Transactional
-    public WorkoutExecution linkActivity(UUID id, UUID activityId) {
-        WorkoutExecution execution = find(id);
-        return executionRepository.save(execution.toBuilder().activityId(activityId)
-                .activityMatchStatus(activityId == null ? "UNMATCHED" : "MANUAL")
-                .stateVersion(execution.getStateVersion() + 1).updatedAt(clock.instant()).build());
+    private void saveCoachingFeedback(WorkoutExecution execution) {
+        if (execution.getFinishedAt() == null) return;
+        String type = trainingPlanRepository.findById(execution.getScheduledWorkoutId())
+                .map(TrainingPlan::getPlannedType).orElse("UNKNOWN");
+        coachingFeedbackRepository.save(pl.strava.analizator.domain.model.CoachingFeedback.builder()
+                .id(UUID.randomUUID()).sourceKey("execution:" + execution.getId())
+                .occurredAt(execution.getFinishedAt()).sessionType(type).rpe(execution.getRpe())
+                .completed(execution.getStatus() == WorkoutExecutionStatus.COMPLETED).build());
     }
 
     private WorkoutExecution reconcileAndSave(WorkoutExecution execution, Instant at) {

@@ -23,10 +23,12 @@ public interface ActivityJpaRepository extends JpaRepository<ActivityEntity, UUI
 
     boolean existsByExternalIdAndSource(String externalId, String source);
 
-    List<ActivityEntity> findByStartedAtBetweenOrderByStartedAtDesc(OffsetDateTime from, OffsetDateTime to);
+    @Query("SELECT a FROM ActivityEntity a WHERE a.startedAt >= :from AND a.startedAt < :to ORDER BY a.startedAt DESC")
+    List<ActivityEntity> findByStartedAtBetweenOrderByStartedAtDesc(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to);
 
+    @Query("SELECT a FROM ActivityEntity a WHERE a.sportType = :sportType AND a.startedAt >= :from AND a.startedAt < :to ORDER BY a.startedAt DESC")
     List<ActivityEntity> findBySportTypeAndStartedAtBetweenOrderByStartedAtDesc(
-            String sportType, OffsetDateTime from, OffsetDateTime to);
+            @Param("sportType") String sportType, @Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to);
 
     Page<ActivityEntity> findAllByOrderByStartedAtDesc(Pageable pageable);
 
@@ -55,7 +57,7 @@ public interface ActivityJpaRepository extends JpaRepository<ActivityEntity, UUI
                    a.elevationGainM AS elevationGainM, a.elevationLossM AS elevationLossM,
                    a.avgSpeedMs AS avgSpeedMs, a.maxSpeedMs AS maxSpeedMs,
                    a.avgHeartrate AS avgHeartrate, a.maxHeartrate AS maxHeartrate,
-                   a.avgPowerW AS avgPowerW, a.maxPowerW AS maxPowerW,
+                   a.avgPowerW AS avgPowerW, a.deviceWatts AS deviceWatts, a.maxPowerW AS maxPowerW,
                    a.avgCadence AS avgCadence, a.maxCadence AS maxCadence,
                    a.calories AS calories, a.avgTempC AS avgTempC,
                    a.summaryPolyline AS summaryPolyline, a.createdAt AS createdAt,
@@ -95,7 +97,7 @@ public interface ActivityJpaRepository extends JpaRepository<ActivityEntity, UUI
                    a.elevationGainM AS elevationGainM, a.elevationLossM AS elevationLossM,
                    a.avgSpeedMs AS avgSpeedMs, a.maxSpeedMs AS maxSpeedMs,
                    a.avgHeartrate AS avgHeartrate, a.maxHeartrate AS maxHeartrate,
-                   a.avgPowerW AS avgPowerW, a.maxPowerW AS maxPowerW,
+                   a.avgPowerW AS avgPowerW, a.deviceWatts AS deviceWatts, a.maxPowerW AS maxPowerW,
                    a.avgCadence AS avgCadence, a.maxCadence AS maxCadence,
                    a.calories AS calories, a.avgTempC AS avgTempC,
                    a.summaryPolyline AS summaryPolyline, a.createdAt AS createdAt,

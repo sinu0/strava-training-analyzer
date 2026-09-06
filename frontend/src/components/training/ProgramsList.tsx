@@ -114,7 +114,7 @@ export default function ProgramsList({ onSelect }: ProgramsListProps) {
                       <Chip
                         label={`${firstScorecard.completedGoalSessions ?? 0}/${firstScorecard.plannedGoalSessions} bodźców celu`}
                         size="small"
-                        color={firstScorecard.goalExecutionStatus === 'MISSED' ? 'warning' : 'success'}
+                        color={firstScorecard.goalExecutionStatus === 'UNKNOWN' ? 'default' : firstScorecard.goalExecutionStatus === 'MISSED' ? 'warning' : 'success'}
                         component="span"
                       />
                     )}

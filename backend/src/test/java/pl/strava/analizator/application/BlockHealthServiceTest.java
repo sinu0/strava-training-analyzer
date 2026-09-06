@@ -35,7 +35,7 @@ class BlockHealthServiceTest {
     void setUp() {
         trainingPlanService = mock(TrainingPlanService.class);
         analyticsService = mock(AnalyticsService.class);
-        blockHealthService = new BlockHealthService(trainingPlanService, analyticsService);
+        blockHealthService = new BlockHealthService(java.time.Clock.systemDefaultZone(), trainingPlanService, analyticsService);
     }
 
     @Test

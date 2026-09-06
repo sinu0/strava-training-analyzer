@@ -24,6 +24,10 @@ export async function getActiveExecution(): Promise<WorkoutExecution | null> {
   return response.status === 204 || !response.data ? null : response.data;
 }
 
+export async function getExecution(id: string): Promise<WorkoutExecution> {
+  return (await apiClient.get<WorkoutExecution>(`/v2/workouts/executions/${id}`)).data;
+}
+
 export async function startExecution(planId: string, idempotencyKey: string): Promise<WorkoutExecution> {
   const { data } = await apiClient.post<WorkoutExecution>(`/v2/workouts/scheduled/${planId}/executions/start`, {
     idempotencyKey,

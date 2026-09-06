@@ -1,3 +1,4 @@
+
 import {
   Alert,
   Button,
@@ -14,6 +15,8 @@ import {
   Typography,
 } from '@mui/material';
 import { useMemo, useState } from 'react';
+
+import { localDate } from '@/utils/localDate';
 
 import { useGenerateProgram } from '../../hooks/useTrainingPlan';
 
@@ -52,7 +55,7 @@ export default function PlanGenerator({ onGenerated }: PlanGeneratorProps) {
   const [activeStep, setActiveStep] = useState(0);
   const [goal, setGoal] = useState('BUILD_BASE');
   const [goalPriority, setGoalPriority] = useState('B');
-  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
+  const [startDate, setStartDate] = useState(localDate());
   const [eventDate, setEventDate] = useState('');
   const [weeks, setWeeks] = useState(8);
   const [daysPerWeek, setDaysPerWeek] = useState(4);

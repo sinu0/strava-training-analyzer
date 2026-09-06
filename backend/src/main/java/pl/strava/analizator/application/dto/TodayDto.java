@@ -19,6 +19,7 @@ import pl.strava.analizator.application.SyncService;
 public class TodayDto {
 
     private LocalDate asOf;
+    private String timezone;
     private String dataStatus;
     private RecommendationDto recommendation;
     private List<EvidenceDto> evidence;
@@ -35,6 +36,8 @@ public class TodayDto {
     @AllArgsConstructor
     public static class RecommendationDto {
         private String decision;
+        private String confidence;
+        private String algorithmVersion;
         private String sessionType;
         private Integer durationMinutes;
         private BigDecimal targetTss;
@@ -69,6 +72,9 @@ public class TodayDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class LoadSnapshotDto {
+        private String availability;
+        private BigDecimal coverage;
+        private BigDecimal temporalCoverage;
         private BigDecimal ctl42;
         private BigDecimal atl7;
         private BigDecimal form;

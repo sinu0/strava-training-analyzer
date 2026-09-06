@@ -1,3 +1,4 @@
+
 import AutoGraphOutlinedIcon from '@mui/icons-material/AutoGraphOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import FitnessCenterOutlinedIcon from '@mui/icons-material/FitnessCenterOutlined';
@@ -13,24 +14,27 @@ import LoadingState from '@/components/common/LoadingState';
 import PageContainer from '@/components/common/PageContainer';
 import PolishDateField from '@/components/common/PolishDateField';
 import TrainingCalendar from '@/components/training/TrainingCalendar';
+import TrainingContextPanel from '@/components/training/TrainingContextPanel';
+import WeeklyReviewPanel from '@/components/training/WeeklyReviewPanel';
 import WorkoutLibrary from '@/components/training/WorkoutLibrary';
 import MetricReadout from '@/components/v2/MetricReadout';
 import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import { getChartVisuals } from '@/utils/chartStyles';
 import { PMC_COLORS } from '@/utils/colors';
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
+import { localDate } from '@/utils/localDate';
 
 import { useLoadScenario } from './useLoadScenario';
 
-type PlanTab = 'calendar' | 'library' | 'scenario';
+type PlanTab = 'calendar' | 'library' | 'scenario' | 'context' | 'review';
 
 export default function PlanPage() {
   const theme = useTheme();
   const chart = getChartVisuals(theme);
   const [params, setParams] = useSearchParams();
   const requestedTab = params.get('tab');
-  const tab: PlanTab = requestedTab === 'library' || requestedTab === 'scenario' ? requestedTab : 'calendar';
-  const from = params.get('from') ?? new Date().toISOString().slice(0, 10);
+  const tab: PlanTab = requestedTab === 'library' || requestedTab === 'scenario' || requestedTab === 'context' || requestedTab === 'review' ? requestedTab : 'calendar';
+  const from = params.get('from') ?? localDate();
   const scenarioTo = new Date(`${from}T12:00:00Z`);
   scenarioTo.setUTCDate(scenarioTo.getUTCDate() + 41);
   const to = params.get('to') ?? scenarioTo.toISOString().slice(0, 10);
@@ -63,13 +67,17 @@ export default function PlanPage() {
         highlights={['Kalendarz', 'Biblioteka sesji', 'Scenariusz CTL / ATL']}
       />
       <PerformanceSurface sx={{ mb: 2.5 }}>
-        <Tabs value={tab} onChange={(_, value: PlanTab) => changeTab(value)} variant="fullWidth">
+        <Tabs value={tab} onChange={(_, value: PlanTab) => changeTab(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile>
           <Tab value="calendar" icon={<CalendarMonthOutlinedIcon />} iconPosition="start" label="Kalendarz" />
           <Tab value="library" icon={<FitnessCenterOutlinedIcon />} iconPosition="start" label="Biblioteka" />
           <Tab value="scenario" icon={<AutoGraphOutlinedIcon />} iconPosition="start" label="Scenariusz obciążenia" />
+          <Tab value="context" label="Cel i dostępność" />
+          <Tab value="review" label="Przegląd tygodnia" />
         </Tabs>
       </PerformanceSurface>
       {tab === 'calendar' && <TrainingCalendar />}
+      {tab === 'context' && <TrainingContextPanel />}
+      {tab === 'review' && <WeeklyReviewPanel />}
       {tab === 'library' && <WorkoutLibrary />}
       {tab === 'scenario' && (
         <PerformanceSurface accent sx={{ p: { xs: 1.5, md: 2.75 } }}>

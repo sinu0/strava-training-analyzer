@@ -29,6 +29,7 @@ public class WorkoutActivityMatchingService {
     private final TrainingPlanRepository trainingPlanRepository;
     private final ActivityRepository activityRepository;
     private final Clock clock;
+    private final pl.strava.analizator.domain.port.WorkoutExecutionEventRepository events;
 
     @Transactional
     public void matchImported(Activity imported) {
@@ -56,6 +57,10 @@ public class WorkoutActivityMatchingService {
     public WorkoutExecution linkManually(UUID executionId, UUID activityId) {
         WorkoutExecution execution = find(executionId);
         if (activityId == null) {
+            trainingPlanRepository.findById(execution.getScheduledWorkoutId())
+                    .filter(plan -> java.util.Objects.equals(plan.getActualActivityId(), execution.getActivityId()))
+                    .ifPresent(plan -> trainingPlanRepository.save(plan.toBuilder().actualActivityId(null)
+                            .activityMatchStatus("UNMATCHED").compliancePct(null).build()));
             return executionRepository.save(execution.toBuilder().activityId(null)
                     .activityMatchStatus("UNMATCHED").complianceStatus("UNKNOWN").complianceScore(null)
                     .stateVersion(execution.getStateVersion() + 1).updatedAt(clock.instant()).build());
@@ -100,6 +105,7 @@ public class WorkoutActivityMatchingService {
         WorkoutExecution linked = executionRepository.save(execution.toBuilder()
                 .activityId(activity.getId()).activityMatchStatus(matchStatus)
                 .complianceStatus(compliance.status()).complianceScore(compliance.score())
+                .complianceAlgorithmVersion(pl.strava.analizator.domain.workout.WorkoutComplianceEvaluator.VERSION)
                 .stateVersion(execution.getStateVersion() + 1).updatedAt(clock.instant()).build());
         trainingPlanRepository.findById(execution.getScheduledWorkoutId()).ifPresent(plan ->
                 trainingPlanRepository.save(plan.toBuilder().actualActivityId(activity.getId())
@@ -117,48 +123,18 @@ public class WorkoutActivityMatchingService {
     }
 
     private Compliance evaluate(WorkoutExecution execution, Activity activity) {
-        int[] power = activity.getPowerStream();
-        int[] times = activity.getTimeStream();
-        if (power == null || power.length == 0 || times == null || times.length == 0 || execution.getFtpWatts() == null) {
-            return new Compliance("UNKNOWN", null);
-        }
-        int samples = Math.min(power.length, times.length);
-        int comparable = 0;
-        int inTarget = 0;
-        for (int i = 0; i < samples; i++) {
-            WorkoutStep step = stepAt(execution.getStepsSnapshot(), times[i]);
-            if (step == null || step.getPowerPctFtpLow() == null || step.getPowerPctFtpHigh() == null) {
-                continue;
-            }
-            comparable++;
-            double adjustment = 1 + execution.getIntensityAdjustmentPct() / 100.0;
-            double low = execution.getFtpWatts() * step.getPowerPctFtpLow() / 100.0 * adjustment;
-            double high = execution.getFtpWatts() * step.getPowerPctFtpHigh() / 100.0 * adjustment;
-            if (power[i] >= low && power[i] <= high) {
-                inTarget++;
-            }
-        }
-        if (comparable == 0) {
-            return new Compliance("PARTIAL", null);
-        }
-        return new Compliance("COMPLETE", (int) Math.round(inTarget * 100.0 / comparable));
-    }
-
-    private WorkoutStep stepAt(List<WorkoutStep> steps, int second) {
-        if (steps == null) {
-            return null;
-        }
-        int cursor = 0;
-        for (WorkoutStep step : steps) {
-            if (step.getDurationSec() == null) {
-                return step;
-            }
-            cursor += step.getDurationSec();
-            if (second < cursor) {
-                return step;
-            }
-        }
-        return null;
+        var evaluator = new pl.strava.analizator.domain.workout.WorkoutComplianceEvaluator();
+        boolean changed = events.hasTimelineChanges(execution.getId()) || execution.getIntensityAdjustmentPct() != 0
+                || (execution.getSkippedStepIndexes() != null && !execution.getSkippedStepIndexes().isEmpty())
+                || (execution.getRepeatedStepIndexes() != null && !execution.getRepeatedStepIndexes().isEmpty());
+        boolean aligned = activity.getStartedAt() != null && execution.getStartedAt() != null
+                && Math.abs(Duration.between(execution.getStartedAt(), activity.getStartedAt().toInstant()).toSeconds()) <= 10;
+        boolean paused = execution.getFinishedAt() == null || execution.getStartedAt() == null
+                || Math.abs(Duration.between(execution.getStartedAt(), execution.getFinishedAt()).toMillis()
+                        - execution.getWorkoutElapsedMs()) > 10_000;
+        var result = changed || !aligned || paused ? evaluator.unknown("Zmieniona lub niezgodna oś czasu wykonania.")
+                : evaluator.evaluate(execution.getStepsSnapshot(), execution.getFtpWatts(), activity);
+        return new Compliance("AVAILABLE".equals(result.getAvailability()) ? "COMPLETE" : result.getAvailability(), result.getScore());
     }
 
     private boolean containsExecutionId(Activity activity, UUID executionId) {

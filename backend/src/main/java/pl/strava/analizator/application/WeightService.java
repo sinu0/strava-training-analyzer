@@ -30,6 +30,8 @@ import pl.strava.analizator.domain.port.WeightRepository;
 @RequiredArgsConstructor
 public class WeightService {
 
+    private final java.time.Clock clock;
+
     private static final BigDecimal KCAL_PER_KG_FAT = new BigDecimal("7700");
     private static final BigDecimal SEVEN = new BigDecimal("7");
 
@@ -73,7 +75,7 @@ public class WeightService {
             adjustedDailyTdee = dailyCaloricNeed;
 
             if (goal != null) {
-                long daysToGoal = ChronoUnit.DAYS.between(LocalDate.now(), goal.getTargetDate());
+                long daysToGoal = ChronoUnit.DAYS.between(LocalDate.now(clock), goal.getTargetDate());
                 if (daysToGoal > 0) {
                     weeksRemaining = BigDecimal.valueOf(daysToGoal).divide(SEVEN, 1, RoundingMode.HALF_UP);
                     BigDecimal weightDiff = currentWeight.subtract(goal.getTargetWeightKg());
@@ -178,7 +180,7 @@ public class WeightService {
         AthleteProfile profile = profileRepository.findFirst().orElse(null);
         int age = 30;
         if (profile != null && profile.getDateOfBirth() != null) {
-            age = (int) ChronoUnit.YEARS.between(profile.getDateOfBirth(), LocalDate.now());
+            age = (int) ChronoUnit.YEARS.between(profile.getDateOfBirth(), LocalDate.now(clock));
         }
         int heightCm = 178;
         return 10.0 * weightKg.doubleValue() + 6.25 * heightCm - 5.0 * age + 5;

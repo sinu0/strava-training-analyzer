@@ -19,7 +19,8 @@ interface TooltipEntry {
   payload?: PmcData;
 }
 
-function formatDelta(value: number): string {
+function formatDelta(value: number | null): string {
+  if (value == null) return '—';
   const rounded = Math.round(value * 10) / 10;
   return rounded >= 0 ? `+${rounded}` : `${rounded}`;
 }
@@ -48,12 +49,12 @@ function PmcTooltipContent({ active, payload, label }: { active?: boolean; paylo
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body2" sx={{ color: 'text.primary' }}>
-              {Math.round(m.value * 10) / 10}
+              {m.value == null ? '—' : Math.round(m.value * 10) / 10}
             </Typography>
             <Typography
               variant="caption"
               sx={{
-                color: m.delta > 0 ? STATUS_COLORS.success : m.delta < 0 ? STATUS_COLORS.error : 'text.secondary',
+                color: m.delta != null && m.delta > 0 ? STATUS_COLORS.success : m.delta != null && m.delta < 0 ? STATUS_COLORS.error : 'text.secondary',
                 fontWeight: 600,
                 minWidth: 40,
                 textAlign: 'right',

@@ -72,7 +72,7 @@ export default function ActivityDetailV2Page() {
             {[
               { label: 'Dystans', value: data.distanceM != null ? `${(data.distanceM / 1000).toFixed(1)} km` : '—' },
               { label: 'Czas', value: data.movingTimeSec != null ? `${Math.round(data.movingTimeSec / 60)} min` : '—' },
-              { label: 'Moc', value: metric(data.avgPowerW, ' W') },
+              { label: data.deviceWatts === true ? 'Moc · pomiar' : data.deviceWatts === false ? 'Moc · estymacja' : 'Moc · nieznane źródło', value: metric(data.avgPowerW, ' W') },
               { label: 'Tętno', value: metric(data.avgHeartrate, ' bpm') },
               { label: 'Przewyższenie', value: metric(data.elevationGainM, ' m') },
               { label: 'Kadencja', value: metric(data.avgCadence, ' rpm') },

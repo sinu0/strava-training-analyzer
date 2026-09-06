@@ -29,9 +29,10 @@ class V2AnalyticsControllerTest {
     void loadIsPartialWhenPmcExistsButLoadCoverageIsLow() {
         LocalDate from = LocalDate.of(2026, 8, 1);
         LocalDate to = LocalDate.of(2026, 8, 21);
-        when(analyticsService.getPmc(from, to)).thenReturn(List.of(PmcDataDto.builder()
-                .date(to).ctl(BigDecimal.valueOf(42)).atl(BigDecimal.valueOf(51))
-                .tsb(BigDecimal.valueOf(-9)).build()));
+        for (String metric : new String[]{"ctl", "atl", "tsb"}) {
+            when(dailyMetricRepository.findNumericSeries(eq(metric), org.mockito.ArgumentMatchers.any()))
+                    .thenReturn(Map.of(to, BigDecimal.valueOf(42)));
+        }
         when(dailyMetricRepository.findNumericSeries(eq("training_load_coverage"),
                 org.mockito.ArgumentMatchers.any(DateRange.class)))
                 .thenReturn(Map.of(to, BigDecimal.valueOf(0.4)));
