@@ -40,6 +40,18 @@ public interface ActivityJpaRepository extends JpaRepository<ActivityEntity, UUI
 
     long countBySummaryPolylineIsNotNull();
 
+    @Query("SELECT COUNT(a) FROM ActivityEntity a WHERE a.deviceWatts = true")
+    long countMeasuredPowerActivities();
+
+    @Query("SELECT COUNT(a) FROM ActivityEntity a WHERE a.deviceWatts = false")
+    long countEstimatedPowerActivities();
+
+    @Query("""
+            SELECT COUNT(a) FROM ActivityEntity a
+            WHERE a.deviceWatts IS NULL AND (a.avgPowerW IS NOT NULL OR a.maxPowerW IS NOT NULL)
+            """)
+    long countUnknownPowerProvenanceActivities();
+
     @Query("SELECT COALESCE(SUM(a.distanceM), 0.0) FROM ActivityEntity a WHERE a.summaryPolyline IS NOT NULL")
     java.util.Optional<Double> sumDistanceMForActivitiesWithPolylines();
 

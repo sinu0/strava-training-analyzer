@@ -24,8 +24,26 @@ export interface AiModuleStatus {
   activeProvider: string;
   activeModel: string;
   modelAvailable: boolean;
+  providerStatus: 'DISABLED' | 'NOT_CONFIGURED' | 'UNAVAILABLE' | 'AVAILABLE';
+  knowledgeStatus: 'DISABLED' | 'UNAVAILABLE' | 'EMPTY' | 'AVAILABLE';
+  knowledgeDocuments: number;
+  noteQueueStatus: 'DISABLED' | 'UNAVAILABLE' | 'PAUSED_PROVIDER_UNAVAILABLE' | 'READY';
+  noteQueueSuspendedUntil?: string | null;
   availableProviders: string[];
   availablePredictionTypes: string[];
+}
+
+export interface AiValidationReport {
+  status: 'UNAVAILABLE' | 'INSUFFICIENT_DATA' | 'AVAILABLE';
+  validSamples: number;
+  rejectedSamples: number;
+  minimumSamples: number;
+  meanAccuracy: number | null;
+  meanConfidence: number | null;
+  calibrationGap: number | null;
+  samplesByType: Record<string, number>;
+  provenance: 'POST_PREDICTION_VERIFICATION';
+  generatedAt: string;
 }
 
 export type PredictionType =

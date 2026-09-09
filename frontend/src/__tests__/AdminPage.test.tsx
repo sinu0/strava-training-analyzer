@@ -13,6 +13,21 @@ const mutateSyncRecent = vi.fn();
 const mutateSyncPhotos = vi.fn();
 let syncRecentState: { isPending: boolean; isError: boolean; error: unknown };
 let mockProfileConnected = true;
+let mockAiStatus = {
+  enabled: false,
+  batchEnabled: true,
+  batchCron: '0 0 3 * * *',
+  activeProvider: 'ollama',
+  activeModel: 'qwen3.6:27b',
+  modelAvailable: false,
+  providerStatus: 'DISABLED',
+  knowledgeStatus: 'DISABLED',
+  knowledgeDocuments: 0,
+  noteQueueStatus: 'DISABLED',
+  noteQueueSuspendedUntil: null,
+  availableProviders: [],
+  availablePredictionTypes: [],
+};
 let mockStravaConfig = {
   clientId: '12345',
   clientIdSource: 'env',
@@ -36,6 +51,21 @@ beforeEach(() => {
   mutateSyncPhotos.mockReset();
   syncRecentState = { isPending: false, isError: false, error: null };
   mockProfileConnected = true;
+  mockAiStatus = {
+    enabled: false,
+    batchEnabled: true,
+    batchCron: '0 0 3 * * *',
+    activeProvider: 'ollama',
+    activeModel: 'qwen3.6:27b',
+    modelAvailable: false,
+    providerStatus: 'DISABLED',
+    knowledgeStatus: 'DISABLED',
+    knowledgeDocuments: 0,
+    noteQueueStatus: 'DISABLED',
+    noteQueueSuspendedUntil: null,
+    availableProviders: [],
+    availablePredictionTypes: [],
+  };
   mockStravaConfig = {
     clientId: '12345',
     clientIdSource: 'env',
@@ -54,15 +84,22 @@ beforeEach(() => {
 
 vi.mock('@/hooks/useAi', () => ({
   useAiStatus: () => ({
-    data: {
-      enabled: false,
-      activeProvider: null,
-      activeModel: null,
-      modelAvailable: false,
-      availableProviders: [],
-      availablePredictionTypes: [],
-    },
+    data: mockAiStatus,
     isLoading: false,
+  }),
+  useAiValidationReport: () => ({
+    data: {
+      status: 'UNAVAILABLE',
+      validSamples: 0,
+      rejectedSamples: 0,
+      minimumSamples: 20,
+      meanAccuracy: null,
+      meanConfidence: null,
+      calibrationGap: null,
+      samplesByType: {},
+      provenance: 'POST_PREDICTION_VERIFICATION',
+      generatedAt: '2026-09-09T10:00:00Z',
+    },
   }),
   useRunAiBatch: () => ({ mutate: vi.fn(), isPending: false }),
 }));
@@ -215,5 +252,17 @@ describe('AdminPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /Pobierz zdjęcia/i }));
 
     expect(mutateSyncPhotos).toHaveBeenCalled();
+  });
+
+  it('explains unavailable AI capabilities and blocks batch actions', () => {
+    renderWithProviders(<AdminPage />);
+
+    expect(screen.getByText('AI wyłączone')).toBeDefined();
+    expect(screen.getByText('Baza wiedzy: wyłączona')).toBeDefined();
+    expect(screen.getByText('Walidacja zaleceń: brak danych')).toBeDefined();
+    expect((screen.getByRole('button', { name: 'Generuj wszystkie predykcje' }) as HTMLButtonElement).disabled)
+      .toBe(true);
+    expect((screen.getByRole('button', { name: 'Generuj brakujące (pomiń dzisiejsze)' }) as HTMLButtonElement).disabled)
+      .toBe(true);
   });
 });

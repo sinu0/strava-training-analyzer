@@ -9,6 +9,9 @@ export interface DataQualitySummary {
   partial: number;
   unknown: number;
   unassessed: number;
+  measuredPowerActivities: number;
+  estimatedPowerActivities: number;
+  unknownPowerProvenanceActivities: number;
 }
 
 export interface ProcessingJob {
@@ -46,7 +49,7 @@ export function useProcessingJob(id?: string) {
 
 export function useCreateImportJob() {
   return useMutation({
-    mutationFn: async (mode: 'RECENT' | 'FULL') =>
+    mutationFn: async (mode: 'RECENT' | 'FULL' | 'POWER_PROVENANCE') =>
       (await apiClient.post<ProcessingJob>('/v2/import-jobs', { mode })).data,
   });
 }

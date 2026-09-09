@@ -28,7 +28,8 @@ import pl.strava.analizator.domain.ai.ModelTier;
 import pl.strava.analizator.domain.ai.ToolCall;
 
 @Component("ollamaAdapterV2")
-@ConditionalOnProperty(name = "ai.ollama.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = {"ai.enabled", "ai.ollama.enabled"}, havingValue = "true",
+        matchIfMissing = false)
 public class OllamaAdapterV2 implements LlmPort {
 
     private static final Logger log = LoggerFactory.getLogger(OllamaAdapterV2.class);

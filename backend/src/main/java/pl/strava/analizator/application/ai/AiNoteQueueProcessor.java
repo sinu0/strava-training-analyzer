@@ -66,4 +66,18 @@ public class AiNoteQueueProcessor {
                     suspendedUntil, e.getMessage());
         }
     }
+
+    public RuntimeStatus getRuntimeStatus() {
+        if (!enabled) {
+            return new RuntimeStatus("DISABLED", null);
+        }
+        Instant currentSuspension = suspendedUntil;
+        if (currentSuspension != null && Instant.now().isBefore(currentSuspension)) {
+            return new RuntimeStatus("PAUSED_PROVIDER_UNAVAILABLE", currentSuspension);
+        }
+        return new RuntimeStatus("READY", null);
+    }
+
+    public record RuntimeStatus(String status, Instant suspendedUntil) {
+    }
 }

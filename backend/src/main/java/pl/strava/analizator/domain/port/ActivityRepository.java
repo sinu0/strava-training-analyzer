@@ -35,6 +35,12 @@ public interface ActivityRepository {
 
     long count();
 
+    long countMeasuredPowerActivities();
+
+    long countEstimatedPowerActivities();
+
+    long countUnknownPowerProvenanceActivities();
+
     void deleteById(UUID id);
 
     void deleteAll();

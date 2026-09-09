@@ -35,6 +35,9 @@ describe('TopBarSyncButton', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockedGet.mockImplementation(async (url) => {
+      if (url === '/admin/strava-config') {
+        return { data: { clientId: '123', hasClientSecret: true } };
+      }
       if (url === '/sync/strava/check') {
         return { data: { hasNew: true, count: 1 } };
       }
@@ -51,11 +54,59 @@ describe('TopBarSyncButton', () => {
   it('starts an observable background import and completes after polling the job', async () => {
     const { onSyncComplete } = renderButton();
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Synchronizuj ostatnie treningi' }));
+    const button = await screen.findByRole('button', { name: 'Synchronizuj ostatnie treningi' });
+    await waitFor(() => expect(button.hasAttribute('disabled')).toBe(false));
+    fireEvent.click(button);
 
     await waitFor(() => expect(mockedPost).toHaveBeenCalledWith('/v2/import-jobs', { mode: 'RECENT' }));
     await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/v2/jobs/job-1'));
     await waitFor(() => expect(onSyncComplete).toHaveBeenCalledTimes(1));
     expect(mockedPost).not.toHaveBeenCalledWith('/sync/strava/recent');
+  });
+
+  it('does not poll or start an import when Strava is not configured', async () => {
+    mockedGet.mockImplementation(async (url) => {
+      if (url === '/admin/strava-config') {
+        return { data: { clientId: '', hasClientSecret: false } };
+      }
+      if (url === '/sync/status') {
+        return { data: { status: 'idle', imported: 0, skipped: 0, timestamp: null } };
+      }
+      throw new Error(`Unexpected GET ${url}`);
+    });
+
+    renderButton();
+
+    const button = await screen.findByRole('button', { name: 'Połącz Stravę, aby synchronizować treningi' });
+    await waitFor(() => expect(button.hasAttribute('disabled')).toBe(true));
+    expect(mockedGet).not.toHaveBeenCalledWith('/sync/strava/check');
+    expect(mockedPost).not.toHaveBeenCalled();
+  });
+
+  it('allows a fresh attempt after a retryable job when the rate-limit status has expired', async () => {
+    mockedGet.mockImplementation(async (url) => {
+      if (url === '/admin/strava-config') {
+        return { data: { clientId: '123', hasClientSecret: true } };
+      }
+      if (url === '/sync/strava/check') {
+        return { data: { hasNew: true, count: 1 } };
+      }
+      if (url === '/sync/status') {
+        return { data: { status: 'failed', imported: 48, skipped: 545, rateLimitResetsAt: null } };
+      }
+      if (url === '/v2/jobs/job-1') {
+        return { data: { id: 'job-1', status: 'RETRYABLE', stage: 'FETCH_DETAIL' } };
+      }
+      throw new Error(`Unexpected GET ${url}`);
+    });
+
+    renderButton();
+    const button = await screen.findByRole('button', { name: 'Synchronizuj ostatnie treningi' });
+    await waitFor(() => expect(button.hasAttribute('disabled')).toBe(false));
+    fireEvent.click(button);
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/v2/jobs/job-1'));
+
+    await waitFor(() => expect(button.hasAttribute('disabled')).toBe(false));
+    expect(screen.getByLabelText('Synchronizacja nie powiodła się — sprawdź Dane i zadania')).toBeDefined();
   });
 });

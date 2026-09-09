@@ -22,7 +22,8 @@ import pl.strava.analizator.domain.ai.LlmPort;
  * Activated when ai.gemini.enabled=true.
  */
 @Component
-@ConditionalOnProperty(name = "ai.gemini.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = {"ai.enabled", "ai.gemini.enabled"}, havingValue = "true",
+        matchIfMissing = false)
 public class GeminiAdapter implements LlmPort {
 
     private static final Logger log = LoggerFactory.getLogger(GeminiAdapter.class);

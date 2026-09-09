@@ -64,6 +64,12 @@ public class AiPredictionRepositoryAdapter implements AiPredictionRepository {
     }
 
     @Override
+    public List<AiPrediction> findVerified() {
+        return jpaRepository.findByVerifiedAtIsNotNullOrderByVerifiedAtDesc()
+                .stream().map(this::toDomain).toList();
+    }
+
+    @Override
     public boolean existsTodayForType(String type) {
         Instant startOfDay = java.time.LocalDate.now().atStartOfDay(java.time.ZoneOffset.UTC).toInstant();
         Instant endOfDay = startOfDay.plus(1, java.time.temporal.ChronoUnit.DAYS);

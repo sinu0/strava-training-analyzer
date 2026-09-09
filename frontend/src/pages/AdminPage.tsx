@@ -23,7 +23,7 @@ import WeatherJobSection from '@/components/admin/WeatherJobSection';
 import PageContainer from '@/components/common/PageContainer';
 import Section from '@/components/common/Section';
 import ThemeModeSettings from '@/components/settings/ThemeModeSettings';
-import { useAiStatus, useRunAiBatch } from '@/hooks/useAi';
+import { useAiStatus, useAiValidationReport, useRunAiBatch } from '@/hooks/useAi';
 import {
   useAutoSyncConfig,
   useClearSyncData,
@@ -175,6 +175,7 @@ export default function AdminPage() {
   const resetConfig = useResetStravaConfig();
   const { data: weatherJobStatus } = useWeatherJobStatus();
   const { data: aiStatus } = useAiStatus();
+  const { data: aiValidation } = useAiValidationReport();
   const runAiBatch = useRunAiBatch();
   const stravaConfigForm = useStravaConfigForm(updateConfig, connectStrava);
   const { data: autoSyncConfig } = useAutoSyncConfig();
@@ -269,7 +270,7 @@ export default function AdminPage() {
             />
           </Grid>
           <AdminDashboard
-            aiStatus={aiStatus} runAiBatchPending={runAiBatch.isPending}
+            aiStatus={aiStatus} aiValidation={aiValidation} runAiBatchPending={runAiBatch.isPending}
             runAiBatchData={runAiBatch.data} runAiBatchError={runAiBatch.error}
             onRunAiBatch={(skipToday) => runAiBatch.mutate(skipToday)}
             recalculateAllTePending={recalculateAllTe.isPending} recalculateAllTeData={recalculateAllTe.data}

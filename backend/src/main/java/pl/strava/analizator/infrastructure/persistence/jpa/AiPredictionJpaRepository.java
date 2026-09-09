@@ -22,5 +22,7 @@ public interface AiPredictionJpaRepository extends JpaRepository<AiPredictionEnt
     List<AiPredictionEntity> findByPredictionTypeAndCreatedAtBetweenOrderByCreatedAtDesc(
             String predictionType, Instant from, Instant to);
 
+    List<AiPredictionEntity> findByVerifiedAtIsNotNullOrderByVerifiedAtDesc();
+
     boolean existsByPredictionTypeAndCreatedAtBetween(String predictionType, Instant from, Instant to);
 }

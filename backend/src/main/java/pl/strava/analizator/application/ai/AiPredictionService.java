@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import pl.strava.analizator.application.ai.knowledge.RagServiceV2;
 import pl.strava.analizator.application.dto.AiModuleStatusDto;
 import pl.strava.analizator.application.dto.BatchRunResultDto;
 import pl.strava.analizator.application.dto.CustomPromptDto;
@@ -48,26 +49,32 @@ public class AiPredictionService {
     private final AiPredictionRepository predictionRepository;
     private final CustomPromptService customPromptService;
     private final RagService ragService;
+    private final RagServiceV2 ragServiceV2;
+    private final AiNoteQueueProcessor noteQueueProcessor;
     private final ToolCallingLoop toolCallingLoop;
     private final String defaultProvider;
     private final String defaultModel;
     private final boolean enabled;
     private final boolean batchEnabled;
     private final String batchCron;
+    private final boolean knowledgeEnabled;
 
     public AiPredictionService(TrainingDataPort trainingDataPort,
                                 PromptRegistry promptRegistry,
                                 LlmProviderRegistry providerRegistry,
-                                 ObjectMapper objectMapper,
-                                 AiPredictionRepository predictionRepository,
-                                  CustomPromptService customPromptService,
-                                  @org.springframework.lang.Nullable RagService ragService,
-                                  ToolCallingLoop toolCallingLoop,
-                                  @Value("${ai.provider:ollama}") String defaultProvider,
-                                  @Value("${ai.model:llama3}") String defaultModel,
-                                  @Value("${ai.enabled:false}") boolean enabled,
-                                 @Value("${ai.batch.enabled:true}") boolean batchEnabled,
-                                 @Value("${ai.batch.cron:0 0 3 * * *}") String batchCron) {
+                                ObjectMapper objectMapper,
+                                AiPredictionRepository predictionRepository,
+                                CustomPromptService customPromptService,
+                                @org.springframework.lang.Nullable RagService ragService,
+                                @org.springframework.lang.Nullable RagServiceV2 ragServiceV2,
+                                @org.springframework.lang.Nullable AiNoteQueueProcessor noteQueueProcessor,
+                                ToolCallingLoop toolCallingLoop,
+                                @Value("${ai.provider:ollama}") String defaultProvider,
+                                @Value("${ai.model:llama3}") String defaultModel,
+                                @Value("${ai.enabled:false}") boolean enabled,
+                                @Value("${ai.batch.enabled:true}") boolean batchEnabled,
+                                @Value("${ai.batch.cron:0 0 3 * * *}") String batchCron,
+                                @Value("${ai.knowledge.enabled:false}") boolean knowledgeEnabled) {
         this.trainingDataPort = trainingDataPort;
         this.promptRegistry = promptRegistry;
         this.providerRegistry = providerRegistry;
@@ -75,12 +82,15 @@ public class AiPredictionService {
         this.predictionRepository = predictionRepository;
         this.customPromptService = customPromptService;
         this.ragService = ragService;
+        this.ragServiceV2 = ragServiceV2;
+        this.noteQueueProcessor = noteQueueProcessor;
         this.toolCallingLoop = toolCallingLoop;
         this.defaultProvider = defaultProvider;
         this.defaultModel = defaultModel;
         this.enabled = enabled;
         this.batchEnabled = batchEnabled;
         this.batchCron = batchCron;
+        this.knowledgeEnabled = knowledgeEnabled;
     }
 
     public PredictionResponseDto predict(PredictionRequestDto request) {
@@ -157,17 +167,25 @@ public class AiPredictionService {
     public AiModuleStatusDto getStatus() {
         List<String> providers = providerRegistry.getAvailableProviders();
         boolean modelAvailable = false;
+        String providerStatus = enabled ? "NOT_CONFIGURED" : "DISABLED";
         boolean todayTipsReady = !predictionRepository.findByCreatedAtBetween(
                 java.time.LocalDate.now().atStartOfDay(java.time.ZoneOffset.UTC).toInstant(),
                 Instant.now()).isEmpty();
 
         if (enabled && providerRegistry.hasProvider(defaultProvider)) {
+            providerStatus = "UNAVAILABLE";
             try {
                 modelAvailable = providerRegistry.getProvider(defaultProvider).isAvailable(defaultModel);
+                if (modelAvailable) {
+                    providerStatus = "AVAILABLE";
+                }
             } catch (Exception e) {
                 log.warn("Failed to check model availability: {}", e.getMessage());
             }
         }
+
+        RagServiceV2.RuntimeStatus knowledgeRuntime = knowledgeStatus();
+        AiNoteQueueProcessor.RuntimeStatus queueRuntime = noteQueueStatus();
 
         return AiModuleStatusDto.builder()
                 .enabled(enabled)
@@ -177,12 +195,35 @@ public class AiPredictionService {
                 .activeProvider(defaultProvider)
                 .activeModel(defaultModel)
                 .modelAvailable(modelAvailable)
+                .providerStatus(providerStatus)
+                .knowledgeStatus(knowledgeRuntime.status())
+                .knowledgeDocuments(knowledgeRuntime.documents())
+                .noteQueueStatus(queueRuntime.status())
+                .noteQueueSuspendedUntil(queueRuntime.suspendedUntil())
                 .availableProviders(providers)
                 .availablePredictionTypes(
                     promptRegistry.getAvailableTypes().stream()
                         .map(Enum::name)
                         .collect(Collectors.toList()))
                 .build();
+    }
+
+    private RagServiceV2.RuntimeStatus knowledgeStatus() {
+        if (!enabled || !knowledgeEnabled) {
+            return new RagServiceV2.RuntimeStatus("DISABLED", 0);
+        }
+        return ragServiceV2 != null
+                ? ragServiceV2.getRuntimeStatus()
+                : new RagServiceV2.RuntimeStatus("UNAVAILABLE", 0);
+    }
+
+    private AiNoteQueueProcessor.RuntimeStatus noteQueueStatus() {
+        if (!enabled) {
+            return new AiNoteQueueProcessor.RuntimeStatus("DISABLED", null);
+        }
+        return noteQueueProcessor != null
+                ? noteQueueProcessor.getRuntimeStatus()
+                : new AiNoteQueueProcessor.RuntimeStatus("UNAVAILABLE", null);
     }
 
     private Map<String, String> contextToVariables(TrainingContext context) {

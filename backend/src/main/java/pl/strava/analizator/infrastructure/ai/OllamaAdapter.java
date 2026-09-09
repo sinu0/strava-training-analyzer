@@ -33,7 +33,8 @@ import pl.strava.analizator.domain.ai.ToolCall;
  * @deprecated Use {@link pl.strava.analizator.infrastructure.ai.v2.OllamaAdapterV2} instead.
  */
 @Component
-@ConditionalOnProperty(name = "ai.ollama.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = {"ai.enabled", "ai.ollama.enabled"}, havingValue = "true",
+        matchIfMissing = false)
 @Deprecated
 public class OllamaAdapter implements LlmPort {
 

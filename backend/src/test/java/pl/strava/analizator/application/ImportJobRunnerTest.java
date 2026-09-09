@@ -66,4 +66,15 @@ class ImportJobRunnerTest {
         assertThat(current.getStatus()).isEqualTo("COMPLETED");
         assertThat(current.getAttempt()).isEqualTo(1);
     }
+
+    @Test
+    void runnerDispatchesPowerProvenanceBackfill() {
+        current = current.toBuilder().mode("POWER_PROVENANCE").stage("REFRESH_PROVENANCE").build();
+        when(syncService.resyncPowerProvenance(any())).thenReturn(
+                new SyncService.SyncStatus("completed", Instant.now(), 7, 3, null));
+
+        runner.start(current.getId());
+
+        assertThat(current.getStatus()).isEqualTo("COMPLETED");
+    }
 }

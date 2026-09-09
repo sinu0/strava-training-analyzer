@@ -1,5 +1,6 @@
 package pl.strava.analizator.infrastructure.persistence.jpa;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import pl.strava.analizator.infrastructure.persistence.entity.WorkoutExecutionEv
 
 public interface WorkoutExecutionEventJpaRepository extends JpaRepository<WorkoutExecutionEventEntity, UUID> {
     boolean existsByExecutionIdAndEventTypeIn(UUID executionId, java.util.List<String> eventTypes);
+    List<WorkoutExecutionEventEntity> findByExecutionIdOrderBySequenceNo(UUID executionId);
     Optional<WorkoutExecutionEventEntity> findByExecutionIdAndIdempotencyKey(UUID executionId, String key);
 
     @Query("select coalesce(max(e.sequenceNo), 0) + 1 from WorkoutExecutionEventEntity e where e.executionId = :executionId")

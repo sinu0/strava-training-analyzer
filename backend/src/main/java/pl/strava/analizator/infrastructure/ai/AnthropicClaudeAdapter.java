@@ -22,7 +22,8 @@ import pl.strava.analizator.domain.ai.LlmPort;
  * API: POST /v1/messages (Anthropic Messages API)
  */
 @Component
-@ConditionalOnProperty(name = "ai.anthropic.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = {"ai.enabled", "ai.anthropic.enabled"}, havingValue = "true",
+        matchIfMissing = false)
 public class AnthropicClaudeAdapter implements LlmPort {
 
     private static final Logger log = LoggerFactory.getLogger(AnthropicClaudeAdapter.class);

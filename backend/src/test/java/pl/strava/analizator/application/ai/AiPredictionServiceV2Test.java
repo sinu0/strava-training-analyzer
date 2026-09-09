@@ -60,6 +60,8 @@ class AiPredictionServiceV2Test {
                 responseValidator, knowledgeBaseBuilder, predictionRepository,
                 objectMapper);
         ReflectionTestUtils.setField(service, "enabled", true);
+        ReflectionTestUtils.setField(service, "knowledgeEnabled", true);
+        ReflectionTestUtils.setField(service, "knowledgeCron", "0 15 2 * * 0");
         ReflectionTestUtils.setField(service, "defaultProvider", "ollama-v2");
         ReflectionTestUtils.setField(service, "defaultModel", "qwen3.6:27b");
 
@@ -160,9 +162,13 @@ class AiPredictionServiceV2Test {
 
     @Test
     void getKnowledgeStatus_returnsInfo() {
-        when(ragServiceV2.isAvailable()).thenReturn(false);
+        when(ragServiceV2.getRuntimeStatus())
+                .thenReturn(new RagServiceV2.RuntimeStatus("EMPTY", 0));
         Map<String, Object> result = service.getKnowledgeStatus();
         assertThat(result.get("ragAvailable")).isEqualTo(false);
+        assertThat(result.get("status")).isEqualTo("EMPTY");
+        assertThat(result.get("documents")).isEqualTo(0L);
+        assertThat(result.get("refreshScheduled")).isEqualTo("0 15 2 * * 0");
     }
 
     @Test

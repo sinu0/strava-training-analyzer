@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import pl.strava.analizator.domain.model.Activity;
 import pl.strava.analizator.domain.model.WorkoutExecution;
+import pl.strava.analizator.domain.model.WorkoutExecutionEvent;
 import pl.strava.analizator.domain.model.WorkoutExecutionStatus;
 import pl.strava.analizator.domain.model.WorkoutStep;
 import pl.strava.analizator.domain.port.ActivityRepository;
@@ -56,6 +57,36 @@ class WorkoutActivityMatchingServiceTest {
     }
 
     @Test
+    void reconstructsPausedTimelineBeforeEvaluatingPower() {
+        WorkoutExecution execution = execution().toBuilder()
+                .stepsSnapshot(List.of(
+                        WorkoutStep.builder().type("steady").durationSec(30)
+                                .powerPctFtpLow(50).powerPctFtpHigh(60).build(),
+                        WorkoutStep.builder().type("steady").durationSec(30)
+                                .powerPctFtpLow(80).powerPctFtpHigh(90).build()))
+                .ftpWatts(200).finishedAt(START.plusSeconds(70)).workoutElapsedMs(60_000).build();
+        int[] watts = new int[71];
+        java.util.Arrays.fill(watts, 0);
+        java.util.Arrays.fill(watts, 0, 30, 110);
+        java.util.Arrays.fill(watts, 40, 70, 170);
+        Activity activity = activity("Ride", 0, 70, watts,
+                java.util.stream.IntStream.rangeClosed(0, 70).toArray()).toBuilder().deviceWatts(true).build();
+        when(executionRepository.findById(execution.getId())).thenReturn(Optional.of(execution));
+        when(activityRepository.findById(activity.getId())).thenReturn(Optional.of(activity));
+        when(events.findByExecutionIdOrderBySequenceNo(execution.getId())).thenReturn(List.of(
+                event(execution.getId(), 1, "START", 0, 0, 0),
+                event(execution.getId(), 2, "PAUSE", 30, 30_000, 1),
+                event(execution.getId(), 3, "RESUME", 40, 30_000, 1),
+                event(execution.getId(), 4, "COMPLETE", 70, 60_000, 1)));
+
+        WorkoutExecution linked = service.linkManually(execution.getId(), activity.getId());
+
+        assertThat(linked.getComplianceStatus()).isEqualTo("COMPLETE");
+        assertThat(linked.getComplianceScore()).isEqualTo(100);
+        assertThat(linked.getComplianceAlgorithmVersion()).isEqualTo("workout-compliance-v3");
+    }
+
+    @Test
     void linksOnlyCredibleCyclingActivityAndEvaluatesSnapshot() {
         WorkoutExecution execution = execution();
         int[] power = new int[61];
@@ -76,7 +107,7 @@ class WorkoutActivityMatchingServiceTest {
         assertThat(captor.getValue().getActivityMatchStatus()).isEqualTo("AUTO");
         assertThat(captor.getValue().getComplianceStatus()).isEqualTo("COMPLETE");
         assertThat(captor.getValue().getComplianceScore()).isEqualTo(100);
-        assertThat(captor.getValue().getComplianceAlgorithmVersion()).isEqualTo("workout-compliance-v2");
+        assertThat(captor.getValue().getComplianceAlgorithmVersion()).isEqualTo("workout-compliance-v3");
     }
 
     @Test
@@ -131,5 +162,13 @@ class WorkoutActivityMatchingServiceTest {
         return Activity.builder().id(UUID.randomUUID()).sportType(sport).name(sport)
                 .startedAt(OffsetDateTime.ofInstant(START.plusSeconds(startOffsetSec), ZoneOffset.UTC))
                 .elapsedTimeSec(durationSec).powerStream(power).timeStream(time).build();
+    }
+
+    private WorkoutExecutionEvent event(UUID executionId, int sequence, String type, long wallSeconds,
+                                        long workoutElapsedMs, int stepIndex) {
+        return WorkoutExecutionEvent.builder().id(UUID.randomUUID()).executionId(executionId)
+                .sequenceNo(sequence).eventType(type).occurredAt(START.plusSeconds(wallSeconds))
+                .workoutElapsedMs(workoutElapsedMs).stepIndex(stepIndex).payload("{}")
+                .idempotencyKey("event-" + sequence).createdAt(START.plusSeconds(wallSeconds)).build();
     }
 }

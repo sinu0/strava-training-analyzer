@@ -28,7 +28,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import pl.strava.analizator.application.ai.AiModuleDisabledException;
 import pl.strava.analizator.application.ai.AiPredictionService;
+import pl.strava.analizator.application.ai.AiValidationReportService;
 import pl.strava.analizator.application.dto.AiModuleStatusDto;
+import pl.strava.analizator.application.dto.AiValidationReportDto;
 import pl.strava.analizator.application.dto.PredictionRequestDto;
 import pl.strava.analizator.application.dto.PredictionResponseDto;
 
@@ -44,6 +46,9 @@ class AiPredictionControllerTest {
 
     @MockitoBean
     private AiPredictionService aiPredictionService;
+
+    @MockitoBean
+    private AiValidationReportService aiValidationReportService;
 
     @TestConfiguration
     static class TestSecurityConfig {
@@ -132,6 +137,10 @@ class AiPredictionControllerTest {
                 .activeProvider("ollama")
                 .activeModel("llama3")
                 .modelAvailable(true)
+                .providerStatus("AVAILABLE")
+                .knowledgeStatus("AVAILABLE")
+                .knowledgeDocuments(12)
+                .noteQueueStatus("READY")
                 .availableProviders(List.of("ollama"))
                 .availablePredictionTypes(List.of("FTP_PREDICTION", "FATIGUE_PREDICTION"))
                 .build();
@@ -147,6 +156,10 @@ class AiPredictionControllerTest {
                 .andExpect(jsonPath("$.activeProvider").value("ollama"))
                 .andExpect(jsonPath("$.activeModel").value("llama3"))
                 .andExpect(jsonPath("$.modelAvailable").value(true))
+                .andExpect(jsonPath("$.providerStatus").value("AVAILABLE"))
+                .andExpect(jsonPath("$.knowledgeStatus").value("AVAILABLE"))
+                .andExpect(jsonPath("$.knowledgeDocuments").value(12))
+                .andExpect(jsonPath("$.noteQueueStatus").value("READY"))
                 .andExpect(jsonPath("$.availableProviders[0]").value("ollama"))
                 .andExpect(jsonPath("$.availablePredictionTypes").isArray());
     }
@@ -161,6 +174,10 @@ class AiPredictionControllerTest {
                 .activeProvider("ollama")
                 .activeModel("llama3")
                 .modelAvailable(false)
+                .providerStatus("DISABLED")
+                .knowledgeStatus("DISABLED")
+                .knowledgeDocuments(0)
+                .noteQueueStatus("DISABLED")
                 .availableProviders(List.of())
                 .availablePredictionTypes(List.of())
                 .build();
@@ -171,7 +188,33 @@ class AiPredictionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.enabled").value(false))
                 .andExpect(jsonPath("$.batchEnabled").value(false))
-                .andExpect(jsonPath("$.modelAvailable").value(false));
+                .andExpect(jsonPath("$.modelAvailable").value(false))
+                .andExpect(jsonPath("$.providerStatus").value("DISABLED"))
+                .andExpect(jsonPath("$.knowledgeStatus").value("DISABLED"))
+                .andExpect(jsonPath("$.noteQueueStatus").value("DISABLED"));
+    }
+
+    @Test
+    void getValidationReport_returnsTemporalValidationEvidence() throws Exception {
+        when(aiValidationReportService.getReport()).thenReturn(AiValidationReportDto.builder()
+                .status("INSUFFICIENT_DATA")
+                .validSamples(4)
+                .rejectedSamples(1)
+                .minimumSamples(20)
+                .meanAccuracy(0.75)
+                .meanConfidence(0.8)
+                .calibrationGap(0.05)
+                .samplesByType(Map.of("FTP_PREDICTION", 4))
+                .provenance("POST_PREDICTION_VERIFICATION")
+                .generatedAt(Instant.parse("2026-09-09T10:00:00Z"))
+                .build());
+
+        mockMvc.perform(get("/api/ai/validation-report"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("INSUFFICIENT_DATA"))
+                .andExpect(jsonPath("$.validSamples").value(4))
+                .andExpect(jsonPath("$.rejectedSamples").value(1))
+                .andExpect(jsonPath("$.provenance").value("POST_PREDICTION_VERIFICATION"));
     }
 
 }

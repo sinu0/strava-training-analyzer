@@ -92,6 +92,8 @@ ai:
     max-documents: ${AI_KNOWLEDGE_MAX_DOCS:1000}
     chunk-size: ${AI_KNOWLEDGE_CHUNK_SIZE:800}
     rag-top-k: ${AI_KNOWLEDGE_RAG_TOP_K:5}
+  validation:
+    minimum-samples: ${AI_VALIDATION_MINIMUM_SAMPLES:20}
 
 logging:
   level:

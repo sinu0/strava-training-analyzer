@@ -64,6 +64,9 @@ class ActivityDataQualityServiceTest {
     @Test
     void unassessedActivitiesAreReportedSeparatelyFromExplicitlyUnknown() {
         when(activityRepository.count()).thenReturn(10L);
+        when(activityRepository.countMeasuredPowerActivities()).thenReturn(3L);
+        when(activityRepository.countEstimatedPowerActivities()).thenReturn(2L);
+        when(activityRepository.countUnknownPowerProvenanceActivities()).thenReturn(5L);
         when(qualityRepository.findAll()).thenReturn(List.of(
                 ActivityDataQuality.builder().activityId(UUID.randomUUID()).status("AVAILABLE")
                         .issues(List.of()).assessedAt(Instant.now()).build(),
@@ -76,6 +79,9 @@ class ActivityDataQualityServiceTest {
         assertThat(result.getAssessedActivities()).isEqualTo(2);
         assertThat(result.getUnknown()).isEqualTo(1);
         assertThat(result.getUnassessed()).isEqualTo(8);
+        assertThat(result.getMeasuredPowerActivities()).isEqualTo(3);
+        assertThat(result.getEstimatedPowerActivities()).isEqualTo(2);
+        assertThat(result.getUnknownPowerProvenanceActivities()).isEqualTo(5);
     }
 
     @Test

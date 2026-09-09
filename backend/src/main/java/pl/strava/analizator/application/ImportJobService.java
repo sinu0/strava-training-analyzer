@@ -31,7 +31,7 @@ public class ImportJobService {
             job = jobRepository.save(ProcessingJob.builder()
                     .jobType("IMPORT")
                     .mode(mode)
-                    .stage(SyncService.SyncStage.FETCH_SUMMARY.name())
+                    .stage(initialStage(mode).name())
                     .status("QUEUED")
                     .attempt(0)
                     .createdAt(now)
@@ -72,9 +72,15 @@ public class ImportJobService {
         String mode = requestedMode == null || requestedMode.isBlank()
                 ? "RECENT"
                 : requestedMode.trim().toUpperCase(Locale.ROOT);
-        if (!"RECENT".equals(mode) && !"FULL".equals(mode)) {
-            throw new IllegalArgumentException("Import mode must be RECENT or FULL");
+        if (!"RECENT".equals(mode) && !"FULL".equals(mode) && !"POWER_PROVENANCE".equals(mode)) {
+            throw new IllegalArgumentException("Import mode must be RECENT, FULL or POWER_PROVENANCE");
         }
         return mode;
+    }
+
+    private SyncService.SyncStage initialStage(String mode) {
+        return "POWER_PROVENANCE".equals(mode)
+                ? SyncService.SyncStage.REFRESH_PROVENANCE
+                : SyncService.SyncStage.FETCH_SUMMARY;
     }
 }

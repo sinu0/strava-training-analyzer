@@ -125,6 +125,21 @@ public class ActivityRepositoryAdapter implements ActivityRepository {
     }
 
     @Override
+    public long countMeasuredPowerActivities() {
+        return jpaRepository.countMeasuredPowerActivities();
+    }
+
+    @Override
+    public long countEstimatedPowerActivities() {
+        return jpaRepository.countEstimatedPowerActivities();
+    }
+
+    @Override
+    public long countUnknownPowerProvenanceActivities() {
+        return jpaRepository.countUnknownPowerProvenanceActivities();
+    }
+
+    @Override
     public void deleteById(UUID id) {
         jpaRepository.deleteById(id);
     }

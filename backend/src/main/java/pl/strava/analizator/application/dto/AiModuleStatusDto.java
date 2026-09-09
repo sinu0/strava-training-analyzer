@@ -1,5 +1,6 @@
 package pl.strava.analizator.application.dto;
 
+import java.time.Instant;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -20,6 +21,11 @@ public class AiModuleStatusDto {
     private String activeProvider;
     private String activeModel;
     private boolean modelAvailable;
+    private String providerStatus;
+    private String knowledgeStatus;
+    private long knowledgeDocuments;
+    private String noteQueueStatus;
+    private Instant noteQueueSuspendedUntil;
     private List<String> availableProviders;
     private List<String> availablePredictionTypes;
 }

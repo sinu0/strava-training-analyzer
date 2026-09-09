@@ -495,6 +495,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ai/validation-report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getValidationReport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/analytics/block-health": {
         parameters: {
             query?: never;
@@ -3397,7 +3413,14 @@ export interface components {
             batchCron?: string;
             batchEnabled?: boolean;
             enabled?: boolean;
+            /** Format: int64 */
+            knowledgeDocuments?: number;
+            knowledgeStatus?: string;
             modelAvailable?: boolean;
+            noteQueueStatus?: string;
+            /** Format: date-time */
+            noteQueueSuspendedUntil?: string;
+            providerStatus?: string;
             todayTipsReady?: boolean;
         };
         AiNoteAskRequest: {
@@ -3407,6 +3430,27 @@ export interface components {
             answer?: string;
             modelId?: string;
             providerName?: string;
+        };
+        AiValidationReportDto: {
+            /** Format: double */
+            calibrationGap?: number;
+            /** Format: date-time */
+            generatedAt?: string;
+            /** Format: double */
+            meanAccuracy?: number;
+            /** Format: double */
+            meanConfidence?: number;
+            /** Format: int32 */
+            minimumSamples?: number;
+            provenance?: string;
+            /** Format: int32 */
+            rejectedSamples?: number;
+            samplesByType?: {
+                [key: string]: number;
+            };
+            status?: string;
+            /** Format: int32 */
+            validSamples?: number;
         };
         AlternativeOptionDto: {
             label?: string;
@@ -3766,6 +3810,10 @@ export interface components {
             /** Format: int64 */
             available?: number;
             /** Format: int64 */
+            estimatedPowerActivities?: number;
+            /** Format: int64 */
+            measuredPowerActivities?: number;
+            /** Format: int64 */
             partial?: number;
             /** Format: int64 */
             totalActivities?: number;
@@ -3773,6 +3821,8 @@ export interface components {
             unassessed?: number;
             /** Format: int64 */
             unknown?: number;
+            /** Format: int64 */
+            unknownPowerProvenanceActivities?: number;
         };
         DecisionReasonDto: {
             evidence?: string;
@@ -6689,6 +6739,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PredictionResponseDto"][];
+                };
+            };
+        };
+    };
+    getValidationReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AiValidationReportDto"];
                 };
             };
         };

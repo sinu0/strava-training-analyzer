@@ -22,7 +22,8 @@ import pl.strava.analizator.domain.ai.LlmPort;
  * Activated when ai.azure-openai.enabled=true.
  */
 @Component
-@ConditionalOnProperty(name = "ai.azure-openai.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = {"ai.enabled", "ai.azure-openai.enabled"}, havingValue = "true",
+        matchIfMissing = false)
 public class AzureOpenAiAdapter implements LlmPort {
 
     private static final Logger log = LoggerFactory.getLogger(AzureOpenAiAdapter.class);

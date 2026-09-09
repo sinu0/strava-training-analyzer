@@ -10,6 +10,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -38,6 +40,9 @@ import pl.strava.analizator.domain.port.DailyMetricRepository;
 @ExtendWith(MockitoExtension.class)
 class DailyMetricsServiceTest {
 
+    private static final Clock CLOCK = Clock.fixed(
+            Instant.parse("2026-09-09T10:00:00Z"), ZoneOffset.UTC);
+
     @Mock private ActivityRepository activityRepository;
     @Mock private ActivityMetricRepository activityMetricRepository;
     @Mock private AthleteProfileRepository athleteProfileRepository;
@@ -47,7 +52,7 @@ class DailyMetricsServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new DailyMetricsService(java.time.Clock.systemDefaultZone(),
+        service = new DailyMetricsService(CLOCK,
                 activityRepository,
                 activityMetricRepository,
                 athleteProfileRepository,
@@ -282,7 +287,7 @@ class DailyMetricsServiceTest {
         verify(dailyMetricRepository).save(eq(historicalDate), argThat(metric ->
                 "ftp".equals(metric.getMetricName())
                         && metric.getNumericValue().doubleValue() < 300.0));
-        verify(dailyMetricRepository).save(eq(LocalDate.now(ZoneOffset.UTC)), argThat(metric ->
+        verify(dailyMetricRepository).save(eq(LocalDate.now(CLOCK)), argThat(metric ->
                 "ftp".equals(metric.getMetricName())
                         && metric.getNumericValue().doubleValue() == 320.0));
     }

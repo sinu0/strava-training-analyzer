@@ -15,10 +15,16 @@ import {
 import { getApiErrorMessage } from '@/utils/errorHandling';
 
 export interface AiStatus {
+    enabled?: boolean;
     batchEnabled?: boolean;
     batchCron?: string;
     activeProvider?: string | null;
     modelAvailable?: boolean;
+    providerStatus?: 'DISABLED' | 'NOT_CONFIGURED' | 'UNAVAILABLE' | 'AVAILABLE';
+    knowledgeStatus?: 'DISABLED' | 'UNAVAILABLE' | 'EMPTY' | 'AVAILABLE';
+    knowledgeDocuments?: number;
+    noteQueueStatus?: 'DISABLED' | 'UNAVAILABLE' | 'PAUSED_PROVIDER_UNAVAILABLE' | 'READY';
+    noteQueueSuspendedUntil?: string | null;
 }
 
 export interface AiBatchResult {
@@ -28,8 +34,16 @@ export interface AiBatchResult {
   failed: number;
 }
 
+export interface AiValidation {
+  status: 'UNAVAILABLE' | 'INSUFFICIENT_DATA' | 'AVAILABLE';
+  validSamples: number;
+  minimumSamples: number;
+  meanAccuracy: number | null;
+}
+
 export interface AdminDashboardProps {
   aiStatus: AiStatus | undefined;
+  aiValidation: AiValidation | undefined;
   runAiBatchPending: boolean;
   runAiBatchData: AiBatchResult | undefined;
   runAiBatchError: Error | null;
@@ -42,6 +56,7 @@ export interface AdminDashboardProps {
 
 export default function AdminDashboard({
   aiStatus,
+  aiValidation,
   runAiBatchPending,
   runAiBatchData,
   runAiBatchError,
@@ -58,6 +73,35 @@ export default function AdminDashboard({
   const teErrorMessage = recalculateAllTeError
     ? getApiErrorMessage(recalculateAllTeError, recalculateAllTeError.message)
     : null;
+  const providerStatus = aiStatus?.providerStatus
+    ?? (aiStatus?.modelAvailable ? 'AVAILABLE' : 'UNAVAILABLE');
+  const canRunAi = aiStatus?.enabled === true && providerStatus === 'AVAILABLE';
+  const providerLabel = providerStatus === 'AVAILABLE'
+    ? 'Provider gotowy'
+    : providerStatus === 'DISABLED'
+      ? 'AI wyłączone'
+      : providerStatus === 'NOT_CONFIGURED'
+        ? 'Provider nieskonfigurowany'
+        : 'Provider niedostępny';
+  const knowledgeLabel = aiStatus?.knowledgeStatus === 'AVAILABLE'
+    ? `Baza wiedzy: gotowa (${aiStatus.knowledgeDocuments ?? 0})`
+    : aiStatus?.knowledgeStatus === 'EMPTY'
+      ? 'Baza wiedzy: pusta'
+      : aiStatus?.knowledgeStatus === 'DISABLED'
+        ? 'Baza wiedzy: wyłączona'
+        : 'Baza wiedzy: niedostępna';
+  const queueLabel = aiStatus?.noteQueueStatus === 'READY'
+    ? 'Kolejka notatek: gotowa'
+    : aiStatus?.noteQueueStatus === 'PAUSED_PROVIDER_UNAVAILABLE'
+      ? 'Kolejka notatek: wstrzymana'
+      : aiStatus?.noteQueueStatus === 'DISABLED'
+        ? 'Kolejka notatek: wyłączona'
+        : 'Kolejka notatek: niedostępna';
+  const validationLabel = aiValidation?.status === 'AVAILABLE'
+    ? `Walidacja zaleceń: ${Math.round((aiValidation.meanAccuracy ?? 0) * 100)}% (n=${aiValidation.validSamples})`
+    : aiValidation?.status === 'INSUFFICIENT_DATA'
+      ? `Walidacja zaleceń: ${aiValidation.validSamples}/${aiValidation.minimumSamples} próbek`
+      : 'Walidacja zaleceń: brak danych';
 
   return (
     <>
@@ -86,12 +130,32 @@ export default function AdminDashboard({
                       } · ${aiStatus?.activeProvider ?? '—'}`}
                 </Typography>
               </Box>
-              <Chip
-                size="small"
-                variant="outlined"
-                color={aiStatus?.modelAvailable ? 'success' : 'warning'}
-                label={aiStatus?.modelAvailable ? 'Provider gotowy' : 'Provider niedostępny'}
-              />
+              <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  color={providerStatus === 'AVAILABLE' ? 'success' : 'warning'}
+                  label={providerLabel}
+                />
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  color={aiStatus?.knowledgeStatus === 'AVAILABLE' ? 'success' : 'default'}
+                  label={knowledgeLabel}
+                />
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  color={aiStatus?.noteQueueStatus === 'READY' ? 'success' : 'default'}
+                  label={queueLabel}
+                />
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  color={aiValidation?.status === 'AVAILABLE' ? 'success' : 'default'}
+                  label={validationLabel}
+                />
+              </Stack>
             </Box>
 
             {!!runAiBatchData && (
@@ -142,7 +206,7 @@ export default function AdminDashboard({
                 variant="contained"
                 startIcon={runAiBatchPending ? <CircularProgress size={16} color="inherit" /> : <AutoAwesomeIcon />}
                 onClick={() => onRunAiBatch(false)}
-                disabled={runAiBatchPending}
+                disabled={runAiBatchPending || !canRunAi}
                 fullWidth
                 sx={{
                   textTransform: 'none',
@@ -162,7 +226,7 @@ export default function AdminDashboard({
                 variant="outlined"
                 startIcon={runAiBatchPending ? <CircularProgress size={16} color="inherit" /> : <AutoAwesomeIcon />}
                 onClick={() => onRunAiBatch(true)}
-                disabled={runAiBatchPending}
+                disabled={runAiBatchPending || !canRunAi}
                 fullWidth
                 sx={{
                   textTransform: 'none',

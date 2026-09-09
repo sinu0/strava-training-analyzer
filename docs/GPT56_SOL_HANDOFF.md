@@ -1,66 +1,50 @@
-# Przekazanie końcowego przeglądu do GPT-5.6 Sol
+# Przekazanie przeglądu do GPT-5.6 Sol
 
-Skopiuj poniższy prompt do kolejnej sesji:
+Skopiuj poniższy prompt do kolejnej sesji, jeśli potrzebny będzie niezależny przegląd brancha:
 
 ```text
 Pracujesz w /home/mariuszp/Dokumenty/stravaAnalizator na branchu
-feat/application-coherence. To jest końcowy przegląd już wdrożonego uspójnienia,
-nie nowy audyt i nie zgoda na push, merge ani rozszerzanie zakresu.
+fix/follow-up-hardening. To jest niezależny przegląd już wdrożonego utwardzenia,
+nie zgoda na push, merge ani masowe uruchamianie zadań na danych użytkownika.
 
 Najpierw przeczytaj instrukcje AGENTS.md podane w sesji oraz:
-- docs/APPLICATION_COHERENCE_IMPLEMENTATION.md
+- docs/FOLLOW_UP_HARDENING.md
 - docs/FOLLOW_UP_BACKLOG.md
+- docs/APPLICATION_COHERENCE_IMPLEMENTATION.md
 - docs/BACKUP_AND_RECOVERY.md
 - docs/LAN_ACCESS.md
 
-Zweryfikowane fakty z 2026-09-06:
-- pełny backend: 868 testów jednostkowych + 5 integracyjnych;
-- frontend: lint, TypeScript, 405 testów/94 pliki, build i budżety są zielone;
-- npm run api:check jest zielone;
-- E2E na izolowanym Compose przeszło z prawdziwym API: kontekst, dwie sesje
-  jednego dnia, start/pauza/odświeżenie/zakończenie, RPE 8 i weekly review;
-- test LAN potwierdził 401 bez hasła, 200 z hasłem i 403 dla zapisu cross-site;
-- właściwy stack został przebudowany przez docker compose up -d --build;
-- runtime: kontenery healthy, /api/sync/status=completed, Flyway V55,
-  1143 aktywności, 3 plany, brak aktywnego wykonania;
-- migracja V55 unieważniła stare pochodne o niepewnej proweniencji, a ścisłe
-  przeliczenie nie utworzyło żadnego POWER_TSS bez deviceWatts=true.
-- końcowy przegląd usunął ostatnie sztuczne zera z legacy readiness i kontekstu
-  AI; przy braku CTL/ATL/TSB API zwraca UNKNOWN bez pól liczbowych, a UI pokazuje
-  brak oceny (wartości domenowe pozostają `null`).
+Zweryfikowane lokalnie 2026-09-09:
+- backend: 894 testy jednostkowe i 5 integracyjnych;
+- frontend: 409 testów/95 plików, lint, TypeScript, OpenAPI, build i budżety;
+- npm audit: 0 podatności;
+- E2E z prawdziwym API i PostgreSQL oraz kontrola LAN są zielone;
+- pełna oś zdarzeń może zasilać workout-compliance-v3;
+- AI ujawnia osobne stany providera, RAG i kolejki;
+- lokalny Ollama ma gotowe `qwen2.5:7b` i `all-minilm`, a indeks RAG jest celowo pusty;
+- zadanie POWER_PROVENANCE zachowuje wyłącznie jawną flagę Stravy i nie zgaduje;
+- polling Stravy nie działa bez kompletnej konfiguracji.
 
 Twoje zadanie:
-1. Sprawdź bieżący branch, status i git diff --check. Brudny worktree jest
-   oczekiwany i zawiera pracę użytkownika/poprzedniej sesji — niczego nie cofaj.
-2. Przejrzyj diff pod kątem oczywistych przypadkowych artefaktów, niespójności
-   kontraktu albo brakującego importu. Nie przebudowuj architektury ponownie.
-3. Jeśli niczego nie zmieniasz, nie powtarzaj kosztownych testów bez powodu;
-   potwierdź aktualny runtime poleceniami docker compose ps oraz
-   curl -fsS http://127.0.0.1:8080/api/sync/status.
-4. Jeśli znajdziesz i poprawisz realną regresję, zastosuj TDD, a potem uruchom
-   proporcjonalne testy oraz pełne bramki końcowe:
-   cd backend && ./gradlew test integrationTest
-   cd frontend && npm run api:check && npm run quality
-   cd .. && docker compose up -d --build
-   docker compose ps
-   curl -fsS http://127.0.0.1:8080/api/sync/status
-   git diff --check
-5. Zakończ raportem: co potwierdzono, co zmieniono i jakie ograniczenia pozostają.
-   Nie twórz commita, nie pushuj i nie scalaj bez osobnego polecenia użytkownika.
+1. Sprawdź branch, status i `git diff --check`; nie cofaj cudzych zmian.
+2. Przejrzyj ostatni commit pod kątem regresji kontraktu, przypadkowych artefaktów
+   i naruszenia zasady null/UNKNOWN/PARTIAL.
+3. Jeżeli nie zmieniasz kodu, nie powtarzaj kosztownych testów bez nowego powodu;
+   sprawdź bieżący runtime przez `docker compose ps` i endpointy statusowe.
+4. Realną regresję napraw przez TDD, a następnie uruchom proporcjonalne testy.
+5. Nie uruchamiaj zadania POWER_PROVENANCE, AI batch, synchronizacji ani innych
+   operacji na danych użytkownika wyłącznie w celu przeglądu.
+6. Nie twórz commita, nie pushuj i nie scalaj bez osobnego polecenia użytkownika.
 
 Niezmienne zasady:
-- brak danych to null/UNKNOWN/PARTIAL, nigdy sztuczne zero;
-- deviceWatts=null nie jest pomiarem, a wartości historycznych nie wolno
-  klasyfikować na podstawie samych watów;
-- brak pełnej osi czasu wykonania oznacza compliance UNKNOWN;
-- nie włączaj LAN bez certyfikatu, hasła i dokładnego APP_FRONTEND_URL;
-- nie uruchamiaj npm audit fix --force;
-- nie deklaruj zdalnego CI ani testu fizycznego urządzenia Garmin;
-- dodatkowe tematy zapisane w FOLLOW_UP_BACKLOG.md wymagają nowego brancha i
-  decyzji użytkownika, zamiast cichego dokładania ich do tego diffu.
+- brak danych to null/UNKNOWN/PARTIAL/UNAVAILABLE, nigdy sztuczne zero;
+- deviceWatts=null nie jest pomiarem i nie wolno klasyfikować go po samych watach;
+- niepełny lub sprzeczny log wykonania oznacza compliance UNKNOWN;
+- raport wyników AI nie jest naukową walidacją ani zbiorem etykiet eksperckich;
+- brak buildx, zdalnego runu CI lub fizycznego testu Garmin należy raportować,
+  a nie przedstawiać jako potwierdzone.
 
-Kryterium odbioru: aktualny zakres pozostaje zielony, runtime jest zdrowy,
-proweniencja jest uczciwa, dokumentacja zgadza się ze stanem, a raport nie
-ukrywa ograniczeń. Jeśli wszystko się zgadza, powiedz wprost, że branch jest
-gotowy do decyzji użytkownika o commit/push/merge.
+Kryterium odbioru: runtime jest zdrowy, proweniencja pozostaje uczciwa,
+dokumentacja zgadza się ze stanem, a raport wyraźnie oddziela wykonane zmiany
+od zadań zależnych od środowiska lub człowieka.
 ```

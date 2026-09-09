@@ -85,8 +85,7 @@ public class KnowledgeIndexAdapter implements KnowledgeIndexPort {
     @Override
     public boolean isAvailable() {
         try {
-            jdbc.queryForObject("SELECT 1 FROM ai_knowledge_documents LIMIT 0", Integer.class);
-            return true;
+            return jdbc.queryForObject("SELECT count(*) FROM ai_knowledge_documents", Long.class) != null;
         } catch (Exception e) {
             log.debug("Knowledge index not available: {}", e.getMessage());
             return false;

@@ -58,6 +58,10 @@ public class ActivityDataQualityService {
                 .partial(all.stream().filter(item -> "PARTIAL".equals(item.getStatus())).count())
                 .unknown(explicitlyUnknown)
                 .unassessed(unassessed)
+                .measuredPowerActivities(activityRepository.countMeasuredPowerActivities())
+                .estimatedPowerActivities(activityRepository.countEstimatedPowerActivities())
+                .unknownPowerProvenanceActivities(
+                        activityRepository.countUnknownPowerProvenanceActivities())
                 .build();
     }
 

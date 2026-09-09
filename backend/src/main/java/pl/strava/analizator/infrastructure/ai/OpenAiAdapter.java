@@ -21,7 +21,8 @@ import pl.strava.analizator.domain.ai.LlmPort;
  * Activated when ai.openai.enabled=true.
  */
 @Component
-@ConditionalOnProperty(name = "ai.openai.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = {"ai.enabled", "ai.openai.enabled"}, havingValue = "true",
+        matchIfMissing = false)
 public class OpenAiAdapter implements LlmPort {
 
     private static final Logger log = LoggerFactory.getLogger(OpenAiAdapter.class);

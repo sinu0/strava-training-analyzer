@@ -531,7 +531,7 @@ export function useClearSyncData() {
   });
 }
 
-export function useCheckNewActivities() {
+export function useCheckNewActivities(enabled = true) {
   return useQuery<NewActivitiesCheck>({
     queryKey: ['newActivitiesCheck'],
     queryFn: async () => {
@@ -539,7 +539,7 @@ export function useCheckNewActivities() {
       return data;
     },
     refetchInterval: 300000,
-    enabled: true,
+    enabled,
   });
 }
 

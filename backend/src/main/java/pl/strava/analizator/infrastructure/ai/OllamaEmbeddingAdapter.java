@@ -27,7 +27,8 @@ import pl.strava.analizator.domain.ai.EmbeddingPort;
  * Uses 384-dimensional embeddings (all-minilm model).
  */
 @Component
-@ConditionalOnProperty(name = "ai.ollama.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = {"ai.enabled", "ai.ollama.enabled"}, havingValue = "true",
+        matchIfMissing = false)
 public class OllamaEmbeddingAdapter implements EmbeddingPort {
 
     private static final Logger log = LoggerFactory.getLogger(OllamaEmbeddingAdapter.class);

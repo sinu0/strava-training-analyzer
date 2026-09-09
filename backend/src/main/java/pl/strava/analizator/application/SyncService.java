@@ -15,8 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import pl.strava.analizator.application.ai.AiActivityNoteService;
 import pl.strava.analizator.domain.metrics.LapMetricsService;
 import pl.strava.analizator.domain.model.Activity;
@@ -109,7 +107,6 @@ public class SyncService {
         this.workoutActivityMatchingService = workoutActivityMatchingService;
     }
 
-    @Getter
     private volatile SyncStatus lastSyncStatus = new SyncStatus("idle", null, 0, 0, null);
     private volatile Instant lastAutoSyncCheckAt;
 
@@ -138,7 +135,25 @@ public class SyncService {
             }
 
             lastSyncStatus = persistedStatus;
+            recoverExpiredRateLimit();
         });
+    }
+
+    public synchronized SyncStatus getLastSyncStatus() {
+        recoverExpiredRateLimit();
+        return lastSyncStatus;
+    }
+
+    private void recoverExpiredRateLimit() {
+        SyncStatus current = lastSyncStatus;
+        if (!"rate_limited".equals(current.status())) return;
+        Instant resetAt = current.rateLimitResetsAt();
+        if (resetAt != null && Instant.now().isBefore(resetAt)) return;
+
+        log.info("Strava rate-limit window expired; marking incomplete sync as failed and retryable");
+        lastSyncStatus = new SyncStatus(
+                "failed", current.lastSyncAt(), current.imported(), current.skipped(), null);
+        persistSyncStatus(lastSyncStatus);
     }
 
     public SyncStatus syncFull() {
@@ -591,6 +606,75 @@ public class SyncService {
         return lastSyncStatus;
     }
 
+    /**
+     * Refreshes only the explicit Strava power provenance flag for historic activities.
+     * Unknown values stay unknown when Strava does not return the flag; no inference is used.
+     */
+    public synchronized SyncStatus resyncPowerProvenance(SyncProgressListener progress) {
+        AthleteProfile profile = getProfile();
+        log.info("Starting power provenance refresh for athlete {}", profile.getStravaAthleteId());
+        progress.onStage(SyncStage.REFRESH_PROVENANCE);
+
+        lastSyncStatus = new SyncStatus("in_progress", Instant.now(), 0, 0, null);
+        persistSyncStatus(lastSyncStatus);
+        int totalUpdated = 0;
+        int totalSkipped = 0;
+
+        try {
+            for (Activity activity : activityRepository.findBySource("strava")) {
+                if (activity.getDeviceWatts() != null
+                        || !hasPowerData(activity)
+                        || activity.getExternalId() == null
+                        || activity.getExternalId().isBlank()) {
+                    totalSkipped++;
+                    continue;
+                }
+                try {
+                    Activity metadata = syncDataSource.fetchActivityMetadata(profile, activity.getExternalId());
+                    if (metadata == null || metadata.getDeviceWatts() == null) {
+                        totalSkipped++;
+                        continue;
+                    }
+                    Activity updated = activity.toBuilder()
+                            .deviceWatts(metadata.getDeviceWatts())
+                            .updatedAt(Instant.now())
+                            .build();
+                    Activity saved = activityRepository.save(updated);
+                    calculateActivityMetrics(saved, profile);
+                    calculateTrainingEffect(saved, profile);
+                    totalUpdated++;
+                } catch (RateLimitException e) {
+                    throw e;
+                } catch (Exception e) {
+                    log.warn("Failed to refresh power provenance for activity {}: {}",
+                            activity.getExternalId(), e.getMessage());
+                    totalSkipped++;
+                }
+            }
+        } catch (RateLimitException e) {
+            recalculateDailyMetricsIfChanged(totalUpdated);
+            lastSyncStatus = new SyncStatus(
+                    "rate_limited", Instant.now(), totalUpdated, totalSkipped, e.getResetsAt());
+            persistSyncStatus(lastSyncStatus);
+            return lastSyncStatus;
+        } catch (Exception e) {
+            lastSyncStatus = new SyncStatus("failed", Instant.now(), totalUpdated, totalSkipped, null);
+            persistSyncStatus(lastSyncStatus);
+            throw e;
+        }
+
+        if (totalUpdated > 0) {
+            progress.onStage(SyncStage.UPDATE_DAILY);
+            recalculateDailyMetrics();
+        }
+        progress.onStage(SyncStage.COMPLETE);
+        lastSyncStatus = new SyncStatus("completed", Instant.now(), totalUpdated, totalSkipped, null);
+        persistSyncStatus(lastSyncStatus);
+        log.info("Power provenance refresh completed: {} updated, {} skipped",
+                totalUpdated, totalSkipped);
+        return lastSyncStatus;
+    }
+
     private boolean hasFullData(Activity activity) {
         boolean hasTime = activity.getTimeStream() != null && activity.getTimeStream().length > 0;
         boolean hasTrainingStream = hasValues(activity.getPowerStream())
@@ -613,6 +697,12 @@ public class SyncService {
 
     private boolean hasValues(double[] values) {
         return values != null && values.length > 0;
+    }
+
+    private boolean hasPowerData(Activity activity) {
+        return activity.getAvgPowerW() != null
+                || activity.getMaxPowerW() != null
+                || hasValues(activity.getPowerStream());
     }
 
     private void persistSyncStatus(SyncStatus status) {
@@ -649,7 +739,7 @@ public class SyncService {
 
     @Scheduled(fixedDelayString = "${strava.auto-sync.poll-ms:60000}")
     public synchronized void autoSyncRecent() {
-        SyncStatus current = lastSyncStatus;
+        SyncStatus current = getLastSyncStatus();
         Instant now = Instant.now();
         if ("in_progress".equals(current.status())) {
             log.debug("Skipping auto-sync: current status is in_progress");
@@ -728,6 +818,7 @@ public class SyncService {
     public enum SyncStage {
         FETCH_SUMMARY,
         FETCH_DETAIL,
+        REFRESH_PROVENANCE,
         STORE_ACTIVITY,
         CALCULATE_METRICS,
         UPDATE_DAILY,

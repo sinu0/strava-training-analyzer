@@ -15,6 +15,10 @@ public interface SyncDataSource {
 
     Activity fetchActivityWithStreams(AthleteProfile profile, String externalId);
 
+    default Activity fetchActivityMetadata(AthleteProfile profile, String externalId) {
+        return fetchActivityWithStreams(profile, externalId);
+    }
+
     default Activity fetchActivityForSegmentBackfill(AthleteProfile profile, String externalId) {
         return fetchActivityWithStreams(profile, externalId);
     }

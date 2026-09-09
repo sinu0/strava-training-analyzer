@@ -5,7 +5,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.TemporalAdjusters;
@@ -27,6 +29,9 @@ import pl.strava.analizator.application.dto.TrainingWeekObjectiveDto;
 
 class BlockHealthServiceTest {
 
+    private static final Clock CLOCK = Clock.fixed(
+            Instant.parse("2026-09-09T10:00:00Z"), ZoneOffset.UTC);
+
     private TrainingPlanService trainingPlanService;
     private AnalyticsService analyticsService;
     private BlockHealthService blockHealthService;
@@ -35,12 +40,12 @@ class BlockHealthServiceTest {
     void setUp() {
         trainingPlanService = mock(TrainingPlanService.class);
         analyticsService = mock(AnalyticsService.class);
-        blockHealthService = new BlockHealthService(java.time.Clock.systemDefaultZone(), trainingPlanService, analyticsService);
+        blockHealthService = new BlockHealthService(CLOCK, trainingPlanService, analyticsService);
     }
 
     @Test
     void getCurrentBlockHealth_returnsChaoticBlockWhenGoalIsMissedAndAdjustmentsStackUp() {
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        LocalDate today = LocalDate.now(CLOCK);
         when(trainingPlanService.getPrograms()).thenReturn(List.of(currentProgram(today, "MISSED", 0, 2)));
         when(trainingPlanService.getCalendarView(today.minusDays(13), today)).thenReturn(List.of(
                 adjustedDay(today.minusDays(4), "MISSED_STIMULUS"),
@@ -73,7 +78,7 @@ class BlockHealthServiceTest {
 
     @Test
     void getCurrentBlockHealth_returnsStableProductiveWhenBlockIsOnTrack() {
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        LocalDate today = LocalDate.now(CLOCK);
         when(trainingPlanService.getPrograms()).thenReturn(List.of(currentProgram(today, "ON_TARGET", 1, 1)));
         when(trainingPlanService.getCalendarView(today.minusDays(13), today)).thenReturn(List.of(
                 regularDay(today.minusDays(3), "WELL_EXECUTED", null),

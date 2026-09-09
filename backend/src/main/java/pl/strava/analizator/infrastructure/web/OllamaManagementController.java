@@ -25,7 +25,8 @@ import org.springframework.web.client.RestTemplate;
  */
 @RestController
 @RequestMapping("/api/ai/ollama")
-@ConditionalOnProperty(name = "ai.ollama.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = {"ai.enabled", "ai.ollama.enabled"}, havingValue = "true",
+        matchIfMissing = false)
 public class OllamaManagementController {
 
     private static final Logger log = LoggerFactory.getLogger(OllamaManagementController.class);

@@ -57,6 +57,12 @@ public class AiPredictionServiceV2 {
     @Value("${ai.enabled:false}")
     private boolean enabled;
 
+    @Value("${ai.knowledge.enabled:false}")
+    private boolean knowledgeEnabled;
+
+    @Value("${ai.knowledge.cron:0 0 2 * * 0}")
+    private String knowledgeCron;
+
     public PredictionResponseV2Dto predict(PredictionRequestV2Dto request) {
         if (!enabled) throw new AiModuleDisabledException("AI module is disabled");
 
@@ -144,8 +150,18 @@ public class AiPredictionServiceV2 {
 
     public Map<String, Object> getKnowledgeStatus() {
         Map<String, Object> result = new HashMap<>();
-        result.put("ragAvailable", ragServiceV2.map(RagServiceV2::isAvailable).orElse(false));
-        result.put("refreshScheduled", "0 0 2 * * 0");
+        RagServiceV2.RuntimeStatus runtimeStatus;
+        if (!enabled || !knowledgeEnabled) {
+            runtimeStatus = new RagServiceV2.RuntimeStatus("DISABLED", 0);
+        } else {
+            runtimeStatus = ragServiceV2
+                    .map(RagServiceV2::getRuntimeStatus)
+                    .orElseGet(() -> new RagServiceV2.RuntimeStatus("UNAVAILABLE", 0));
+        }
+        result.put("status", runtimeStatus.status());
+        result.put("documents", runtimeStatus.documents());
+        result.put("ragAvailable", "AVAILABLE".equals(runtimeStatus.status()));
+        result.put("refreshScheduled", knowledgeCron);
         return result;
     }
 

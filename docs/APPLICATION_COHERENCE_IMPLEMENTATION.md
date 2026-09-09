@@ -27,12 +27,12 @@ Branch: `feat/application-coherence`. Zakres zatwierdzony po audycie aplikacji.
 - Readiness: brak bieżących CTL/ATL/TSB zwraca `availability=UNKNOWN` bez pól liczbowych zamiast pozornego wyniku z zer; domena zachowuje `null`, UI pokazuje brak oceny, a kontekst AI nie dostaje precyzyjnej wskazówki.
 - Ścisłe przeliczenie: 0 dni oznaczonych jako `POWER_TSS` bez potwierdzonej mocy; zachowano 597 dni z `HR_TSS`, a 312 dni jawnie opisano jako `UNKNOWN`.
 
-## Uczciwe ograniczenia
+## Uczciwe ograniczenia i dalsze utwardzenie
 
-- Historyczne aktywności nie zawierają flagi źródła mocy, więc nie da się ich automatycznie uznać za pomiar. Krzywa mocy pozostaje dostępna wyłącznie po świadomym włączeniu źródeł niepotwierdzonych, a bieżące obciążenie ma stan `UNKNOWN`, dopóki nie powstanie wiarygodny ciąg wejściowy.
-- Wykonanie ze zmianą intensywności, pauzą, pominięciem lub powtórzeniem kroku ma ocenę `UNKNOWN`, dopóki nie powstanie pełne odtworzenie osi czasu.
+- Historyczne aktywności bez flagi źródła mocy nadal pozostają nieznane. Dodane 2026-09-09 zadanie `POWER_PROVENANCE` potrafi uzupełnić wyłącznie jawne metadane zwrócone przez Stravę; nie zostało uruchomione masowo i nigdy nie klasyfikuje aktywności na podstawie samej wartości watów.
+- Od 2026-09-09 wykonania z pełnym, spójnym logiem zdarzeń mogą być oceniane także po pauzie, zmianie intensywności, pominięciu lub powtórzeniu kroku. Niepełny, niespójny albo niewyrównany log nadal celowo daje `UNKNOWN`.
 - Testy regresyjne sprawdzają poprawność i konserwatywność polityki, nie stanowią klinicznej ani naukowej walidacji zaleceń treningowych.
 - Wariant LAN jest przygotowany, ale celowo nie został włączony. Wymaga certyfikatu, hasła i dokładnego `APP_FRONTEND_URL`.
-- Pipeline GitHub Actions jest zapisany, lecz nie był uruchamiany zdalnie, ponieważ nie było zgody na push.
+- Pipeline baseline `c4e35cc` przeszedł zdalnie w GitHub Actions jako run `34049307509`. Zmiany z 2026-09-09 wymagają nowego przebiegu po osobnej zgodzie na push.
 
 Dodatkowe znaleziska spoza audytu są zapisane w `FOLLOW_UP_BACKLOG.md`.

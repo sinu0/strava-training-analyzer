@@ -97,6 +97,23 @@ class RagServiceV2Test {
     }
 
     @Test
+    void runtimeStatus_distinguishesUnavailableEmptyAndReadyIndexes() {
+        when(knowledgeIndexPort.isAvailable()).thenReturn(false);
+        assertThat(ragService.getRuntimeStatus())
+                .extracting(RagServiceV2.RuntimeStatus::status, RagServiceV2.RuntimeStatus::documents)
+                .containsExactly("UNAVAILABLE", 0L);
+
+        when(knowledgeIndexPort.isAvailable()).thenReturn(true);
+        when(knowledgeIndexPort.count()).thenReturn(0L, 12L);
+        assertThat(ragService.getRuntimeStatus())
+                .extracting(RagServiceV2.RuntimeStatus::status, RagServiceV2.RuntimeStatus::documents)
+                .containsExactly("EMPTY", 0L);
+        assertThat(ragService.getRuntimeStatus())
+                .extracting(RagServiceV2.RuntimeStatus::status, RagServiceV2.RuntimeStatus::documents)
+                .containsExactly("AVAILABLE", 12L);
+    }
+
+    @Test
     void retrieveAndFormat_noResults_returnsEmpty() {
         when(knowledgeIndexPort.isAvailable()).thenReturn(true);
         when(knowledgeIndexPort.count()).thenReturn(10L);

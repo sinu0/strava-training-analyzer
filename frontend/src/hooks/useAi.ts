@@ -12,6 +12,7 @@ import type {
   AiActivityNote,
   AiModuleStatus,
   AiNoteAskResponse,
+  AiValidationReport,
   PredictionRequest,
   PredictionResponse,
 } from '@/types/ai';
@@ -93,6 +94,17 @@ export function useAiStatus() {
       return data;
     },
     staleTime: STALE_REALTIME,
+  });
+}
+
+export function useAiValidationReport() {
+  return useQuery<AiValidationReport>({
+    queryKey: ['aiValidationReport'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<AiValidationReport>('/ai/validation-report');
+      return data;
+    },
+    staleTime: STALE_STANDARD,
   });
 }
 

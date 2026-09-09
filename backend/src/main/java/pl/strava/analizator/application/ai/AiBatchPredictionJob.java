@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
  * Activated when ai.batch.enabled=true.
  */
 @Component
-@ConditionalOnProperty(name = "ai.batch.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = {"ai.enabled", "ai.batch.enabled"}, havingValue = "true",
+        matchIfMissing = false)
 public class AiBatchPredictionJob {
 
     private final AiPredictionService aiPredictionService;

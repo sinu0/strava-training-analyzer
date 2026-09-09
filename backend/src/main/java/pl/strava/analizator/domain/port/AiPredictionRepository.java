@@ -19,6 +19,8 @@ public interface AiPredictionRepository {
 
     List<AiPrediction> findByTypeAndCreatedAtBetween(String type, Instant from, Instant to);
 
+    List<AiPrediction> findVerified();
+
     boolean existsTodayForType(String type);
 
     AiPrediction findById(UUID id);

@@ -1,5 +1,6 @@
 package pl.strava.analizator.application.ai;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +28,8 @@ class AiNoteQueueProcessorTest {
 
         verify(noteService).isDefaultProviderAvailable();
         verify(noteService, never()).processNextJob();
+        assertThat(processor.getRuntimeStatus().status()).isEqualTo("PAUSED_PROVIDER_UNAVAILABLE");
+        assertThat(processor.getRuntimeStatus().suspendedUntil()).isNotNull();
     }
 
     @Test
@@ -39,5 +42,17 @@ class AiNoteQueueProcessorTest {
 
         verify(noteService).recoverStaleJobs(Duration.ofMinutes(15));
         verify(noteService).processNextJob();
+        assertThat(processor.getRuntimeStatus().status()).isEqualTo("READY");
+        assertThat(processor.getRuntimeStatus().suspendedUntil()).isNull();
+    }
+
+    @Test
+    void reportsDisabledWithoutCheckingTheProvider() {
+        AiNoteQueueProcessor processor = new AiNoteQueueProcessor(
+                noteService, false, Duration.ofMinutes(5), Duration.ofMinutes(15));
+
+        assertThat(processor.getRuntimeStatus().status()).isEqualTo("DISABLED");
+        assertThat(processor.getRuntimeStatus().suspendedUntil()).isNull();
+        verify(noteService, never()).isDefaultProviderAvailable();
     }
 }

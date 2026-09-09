@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useCreateImportJob, useProcessingJob } from '@/features/data/useDataJobs';
 import { invalidateAfterTrainingSync } from '@/hooks/queryInvalidation';
-import { useCheckNewActivities, useSyncStatus } from '@/hooks/useAnalytics';
+import { useCheckNewActivities, useStravaConfig, useSyncStatus } from '@/hooks/useAnalytics';
 
 import type { Theme } from '@mui/material/styles';
 
@@ -43,7 +43,10 @@ interface TopBarSyncButtonProps {
  */
 export default function TopBarSyncButton({ onSyncComplete }: TopBarSyncButtonProps) {
   const queryClient = useQueryClient();
-  const { data: checkData } = useCheckNewActivities();
+  const { data: stravaConfig, isLoading: isStravaConfigLoading, isError: isStravaConfigError } = useStravaConfig();
+  const isStravaConfigured = Boolean(stravaConfig?.clientId && stravaConfig.hasClientSecret);
+  const isStravaUnavailable = !isStravaConfigLoading && (isStravaConfigError || !isStravaConfigured);
+  const { data: checkData } = useCheckNewActivities(isStravaConfigured);
   const { data: syncStatus } = useSyncStatus();
   const createImportJob = useCreateImportJob();
   const [jobId, setJobId] = useState<string>();
@@ -52,19 +55,21 @@ export default function TopBarSyncButton({ onSyncComplete }: TopBarSyncButtonPro
 
   const isJobActive = job.data?.status === 'QUEUED' || job.data?.status === 'RUNNING';
   const isSyncing = syncStatus?.status === 'in_progress' || createImportJob.isPending || isJobActive;
-  const isRateLimited = syncStatus?.status === 'rate_limited' || job.data?.status === 'RETRYABLE';
-  const hasFailed = job.data?.status === 'FAILED' || createImportJob.isError || job.isError;
+  const isRateLimited = syncStatus?.status === 'rate_limited';
+  const hasFailed = job.data?.status === 'FAILED' || job.data?.status === 'RETRYABLE'
+    || createImportJob.isError || job.isError;
   const hasNew = checkData?.hasNew ?? false;
   const newCount = checkData?.count ?? 0;
 
   const handleSync = useCallback(() => {
+    if (!isStravaConfigured) return;
     createImportJob.mutate('RECENT', {
       onSuccess: created => {
         handledTerminalJob.current = undefined;
         setJobId(created.id);
       },
     });
-  }, [createImportJob]);
+  }, [createImportJob, isStravaConfigured]);
 
   useEffect(() => {
     if (!job.data || handledTerminalJob.current === job.data.id) return;
@@ -79,6 +84,8 @@ export default function TopBarSyncButton({ onSyncComplete }: TopBarSyncButtonPro
 
   const tooltip = isSyncing
     ? 'Synchronizacja w toku...'
+    : isStravaUnavailable
+      ? 'Połącz Stravę w ustawieniach, aby synchronizować treningi'
     : isRateLimited
       ? 'API Strava zablokowane'
       : hasFailed
@@ -104,8 +111,10 @@ export default function TopBarSyncButton({ onSyncComplete }: TopBarSyncButtonPro
       >
         <IconButton
           onClick={handleSync}
-          disabled={isSyncing || isRateLimited}
-          aria-label="Synchronizuj ostatnie treningi"
+          disabled={isStravaConfigLoading || isSyncing || isRateLimited || isStravaUnavailable}
+          aria-label={isStravaUnavailable
+            ? 'Połącz Stravę, aby synchronizować treningi'
+            : 'Synchronizuj ostatnie treningi'}
           sx={[
             roundButtonSx,
             {

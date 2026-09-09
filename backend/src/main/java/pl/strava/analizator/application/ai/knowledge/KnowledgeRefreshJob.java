@@ -7,7 +7,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnProperty(name = "ai.knowledge.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = {"ai.enabled", "ai.knowledge.enabled"}, havingValue = "true",
+        matchIfMissing = false)
 public class KnowledgeRefreshJob {
 
     private static final Logger log = LoggerFactory.getLogger(KnowledgeRefreshJob.class);

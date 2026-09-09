@@ -124,16 +124,26 @@ public class WorkoutActivityMatchingService {
 
     private Compliance evaluate(WorkoutExecution execution, Activity activity) {
         var evaluator = new pl.strava.analizator.domain.workout.WorkoutComplianceEvaluator();
-        boolean changed = events.hasTimelineChanges(execution.getId()) || execution.getIntensityAdjustmentPct() != 0
-                || (execution.getSkippedStepIndexes() != null && !execution.getSkippedStepIndexes().isEmpty())
-                || (execution.getRepeatedStepIndexes() != null && !execution.getRepeatedStepIndexes().isEmpty());
-        boolean aligned = activity.getStartedAt() != null && execution.getStartedAt() != null
-                && Math.abs(Duration.between(execution.getStartedAt(), activity.getStartedAt().toInstant()).toSeconds()) <= 10;
-        boolean paused = execution.getFinishedAt() == null || execution.getStartedAt() == null
-                || Math.abs(Duration.between(execution.getStartedAt(), execution.getFinishedAt()).toMillis()
-                        - execution.getWorkoutElapsedMs()) > 10_000;
-        var result = changed || !aligned || paused ? evaluator.unknown("Zmieniona lub niezgodna oś czasu wykonania.")
-                : evaluator.evaluate(execution.getStepsSnapshot(), execution.getFtpWatts(), activity);
+        List<pl.strava.analizator.domain.model.WorkoutExecutionEvent> timelineEvents =
+                events.findByExecutionIdOrderBySequenceNo(execution.getId());
+        pl.strava.analizator.domain.workout.WorkoutCompliance result;
+        if (!timelineEvents.isEmpty()) {
+            var timeline = new pl.strava.analizator.domain.workout.WorkoutTimelineReconstructor()
+                    .reconstruct(execution, timelineEvents);
+            result = evaluator.evaluate(timeline, execution.getFtpWatts(), activity);
+        } else {
+            boolean changed = events.hasTimelineChanges(execution.getId()) || execution.getIntensityAdjustmentPct() != 0
+                    || (execution.getSkippedStepIndexes() != null && !execution.getSkippedStepIndexes().isEmpty())
+                    || (execution.getRepeatedStepIndexes() != null && !execution.getRepeatedStepIndexes().isEmpty());
+            boolean aligned = activity.getStartedAt() != null && execution.getStartedAt() != null
+                    && Math.abs(Duration.between(execution.getStartedAt(), activity.getStartedAt().toInstant()).toSeconds()) <= 10;
+            boolean paused = execution.getFinishedAt() == null || execution.getStartedAt() == null
+                    || Math.abs(Duration.between(execution.getStartedAt(), execution.getFinishedAt()).toMillis()
+                            - execution.getWorkoutElapsedMs()) > 10_000;
+            result = changed || !aligned || paused
+                    ? evaluator.unknown("Brak dziennika dla zmienionej lub niezgodnej osi czasu wykonania.")
+                    : evaluator.evaluate(execution.getStepsSnapshot(), execution.getFtpWatts(), activity);
+        }
         return new Compliance("AVAILABLE".equals(result.getAvailability()) ? "COMPLETE" : result.getAvailability(), result.getScore());
     }
 

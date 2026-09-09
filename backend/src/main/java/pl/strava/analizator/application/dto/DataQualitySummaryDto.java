@@ -18,4 +18,7 @@ public class DataQualitySummaryDto {
     private long partial;
     private long unknown;
     private long unassessed;
+    private long measuredPowerActivities;
+    private long estimatedPowerActivities;
+    private long unknownPowerProvenanceActivities;
 }

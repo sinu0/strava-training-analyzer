@@ -32,9 +32,12 @@ public class ImportJobRunner {
                 .build());
 
         try {
-            SyncService.SyncStatus result = "FULL".equals(job.getMode())
-                    ? syncService.syncFull(stage -> updateStage(jobId, stage))
-                    : syncService.syncRecent(stage -> updateStage(jobId, stage));
+            SyncService.SyncProgressListener progress = stage -> updateStage(jobId, stage);
+            SyncService.SyncStatus result = switch (job.getMode()) {
+                case "FULL" -> syncService.syncFull(progress);
+                case "POWER_PROVENANCE" -> syncService.resyncPowerProvenance(progress);
+                default -> syncService.syncRecent(progress);
+            };
             boolean retryable = "rate_limited".equals(result.status());
             updateTerminal(jobId, retryable ? "RETRYABLE" : "COMPLETED", null);
         } catch (Exception exception) {

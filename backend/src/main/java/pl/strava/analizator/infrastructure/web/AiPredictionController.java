@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import pl.strava.analizator.application.ai.AiPredictionService;
+import pl.strava.analizator.application.ai.AiValidationReportService;
 import pl.strava.analizator.application.dto.AiModuleStatusDto;
+import pl.strava.analizator.application.dto.AiValidationReportDto;
 import pl.strava.analizator.application.dto.BatchRunResultDto;
 import pl.strava.analizator.application.dto.PredictionRequestDto;
 import pl.strava.analizator.application.dto.PredictionResponseDto;
@@ -26,6 +28,7 @@ import pl.strava.analizator.application.dto.PredictionResponseDto;
 public class AiPredictionController {
 
     private final AiPredictionService aiPredictionService;
+    private final AiValidationReportService aiValidationReportService;
 
     @PostMapping("/predict")
     public ResponseEntity<PredictionResponseDto> predict(@RequestBody PredictionRequestDto request) {
@@ -35,6 +38,11 @@ public class AiPredictionController {
     @GetMapping("/status")
     public ResponseEntity<AiModuleStatusDto> getStatus() {
         return ResponseEntity.ok(aiPredictionService.getStatus());
+    }
+
+    @GetMapping("/validation-report")
+    public ResponseEntity<AiValidationReportDto> getValidationReport() {
+        return ResponseEntity.ok(aiValidationReportService.getReport());
     }
 
     @GetMapping("/predictions")

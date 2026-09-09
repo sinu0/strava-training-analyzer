@@ -1,5 +1,6 @@
 package pl.strava.analizator.infrastructure.persistence.adapter;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,6 +20,10 @@ public class WorkoutExecutionEventRepositoryAdapter implements WorkoutExecutionE
     public boolean hasTimelineChanges(UUID executionId) {
         return repository.existsByExecutionIdAndEventTypeIn(executionId,
                 java.util.List.of("PAUSE", "INTENSITY", "SKIP_STEP", "PREVIOUS_STEP", "REPEAT_STEP", "LAP"));
+    }
+
+    public List<WorkoutExecutionEvent> findByExecutionIdOrderBySequenceNo(UUID executionId) {
+        return repository.findByExecutionIdOrderBySequenceNo(executionId).stream().map(this::toDomain).toList();
     }
 
     public Optional<WorkoutExecutionEvent> findByExecutionIdAndIdempotencyKey(UUID executionId, String key) {

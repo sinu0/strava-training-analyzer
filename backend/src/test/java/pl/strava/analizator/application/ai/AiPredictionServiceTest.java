@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import pl.strava.analizator.application.dto.PredictionRequestDto;
 import pl.strava.analizator.application.dto.PredictionResponseDto;
+import pl.strava.analizator.application.ai.knowledge.RagServiceV2;
 import pl.strava.analizator.domain.ai.AiPrediction;
 import pl.strava.analizator.domain.ai.LlmPort;
 import pl.strava.analizator.domain.ai.PredictionType;
@@ -42,6 +43,8 @@ class AiPredictionServiceTest {
     @Mock private AiPredictionRepository predictionRepository;
     @Mock private CustomPromptService customPromptService;
     @Mock private ToolCallingLoop toolCallingLoop;
+    @Mock private RagServiceV2 ragServiceV2;
+    @Mock private AiNoteQueueProcessor noteQueueProcessor;
 
     private PromptRegistry promptRegistry;
     private LlmProviderRegistry providerRegistry;
@@ -58,16 +61,22 @@ class AiPredictionServiceTest {
         when(llmPort.getProviderName()).thenReturn("ollama");
         providerRegistry = new LlmProviderRegistry(List.of(llmPort));
         lenient().when(customPromptService.getActiveForType(anyString())).thenReturn(Optional.empty());
+        lenient().when(ragServiceV2.getRuntimeStatus())
+                .thenReturn(new RagServiceV2.RuntimeStatus("AVAILABLE", 12));
+        lenient().when(noteQueueProcessor.getRuntimeStatus())
+                .thenReturn(new AiNoteQueueProcessor.RuntimeStatus("READY", null));
 
         enabledService = new AiPredictionService(
                 trainingDataPort, promptRegistry, providerRegistry,
-                objectMapper, predictionRepository, customPromptService, null, toolCallingLoop,
-                "ollama", "llama3", true, true, "0 0 3 * * *");
+                objectMapper, predictionRepository, customPromptService, null, ragServiceV2,
+                noteQueueProcessor, toolCallingLoop,
+                "ollama", "llama3", true, true, "0 0 3 * * *", true);
 
         disabledService = new AiPredictionService(
                 trainingDataPort, promptRegistry, providerRegistry,
-                objectMapper, predictionRepository, customPromptService, null, toolCallingLoop,
-                "ollama", "llama3", false, true, "0 0 3 * * *");
+                objectMapper, predictionRepository, customPromptService, null, ragServiceV2,
+                noteQueueProcessor, toolCallingLoop,
+                "ollama", "llama3", false, true, "0 0 3 * * *", true);
     }
 
     @Test
@@ -243,6 +252,11 @@ class AiPredictionServiceTest {
         assertThat(status.getActiveProvider()).isEqualTo("ollama");
         assertThat(status.getActiveModel()).isEqualTo("llama3");
         assertThat(status.isModelAvailable()).isTrue();
+        assertThat(status.getProviderStatus()).isEqualTo("AVAILABLE");
+        assertThat(status.getKnowledgeStatus()).isEqualTo("AVAILABLE");
+        assertThat(status.getKnowledgeDocuments()).isEqualTo(12);
+        assertThat(status.getNoteQueueStatus()).isEqualTo("READY");
+        assertThat(status.getNoteQueueSuspendedUntil()).isNull();
         assertThat(status.getAvailableProviders()).contains("ollama");
         assertThat(status.getAvailablePredictionTypes()).contains("FTP_PREDICTION", "FATIGUE_PREDICTION");
     }
@@ -254,6 +268,9 @@ class AiPredictionServiceTest {
 
         assertThat(status.isEnabled()).isFalse();
         assertThat(status.isModelAvailable()).isFalse();
+        assertThat(status.getProviderStatus()).isEqualTo("DISABLED");
+        assertThat(status.getKnowledgeStatus()).isEqualTo("DISABLED");
+        assertThat(status.getNoteQueueStatus()).isEqualTo("DISABLED");
         verify(llmPort, never()).isAvailable(anyString());
     }
 
@@ -266,6 +283,7 @@ class AiPredictionServiceTest {
 
         assertThat(status.isEnabled()).isTrue();
         assertThat(status.isModelAvailable()).isFalse();
+        assertThat(status.getProviderStatus()).isEqualTo("UNAVAILABLE");
     }
 
     @Test

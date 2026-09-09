@@ -356,6 +356,38 @@ class SyncServiceTest {
     }
 
     @Test
+    void resyncPowerProvenanceFetchesOnlyUnknownValuesWithoutGuessing() {
+        AthleteProfile profile = AthleteProfile.builder()
+                .id(UUID.randomUUID()).stravaAthleteId(123L).ftpWatts((short) 280).build();
+        UUID unknownId = UUID.randomUUID();
+        Activity unknown = Activity.builder()
+                .id(unknownId).externalId("401").source("strava").deviceWatts(null)
+                .avgPowerW((short) 210)
+                .startedAt(OffsetDateTime.parse("2026-09-01T08:00:00Z")).build();
+        Activity alreadyKnown = Activity.builder()
+                .id(UUID.randomUUID()).externalId("402").source("strava").deviceWatts(false)
+                .startedAt(OffsetDateTime.parse("2026-09-02T08:00:00Z")).build();
+        Activity freshMetadata = Activity.builder().externalId("401").deviceWatts(true).build();
+
+        when(profileRepository.findFirst()).thenReturn(Optional.of(profile));
+        when(activityRepository.findBySource("strava")).thenReturn(List.of(unknown, alreadyKnown));
+        when(syncDataSource.fetchActivityMetadata(profile, "401")).thenReturn(freshMetadata);
+        when(activityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(metricRegistry.calculateAllActivityMetrics(any(), any())).thenReturn(Map.of());
+
+        SyncService.SyncStatus status = syncService.resyncPowerProvenance(stage -> { });
+
+        assertThat(status.status()).isEqualTo("completed");
+        assertThat(status.imported()).isEqualTo(1);
+        assertThat(status.skipped()).isEqualTo(1);
+        verify(syncDataSource).fetchActivityMetadata(profile, "401");
+        verify(syncDataSource, never()).fetchActivityMetadata(profile, "402");
+        verify(activityRepository).save(argThat(saved -> unknownId.equals(saved.getId())
+                && Boolean.TRUE.equals(saved.getDeviceWatts())));
+        verify(dailyMetricsService).recalculateAll();
+    }
+
+    @Test
     void recalculateActivityMetrics_recalculatesAndSavesMetricsForActivity() {
         UUID activityId = UUID.randomUUID();
         AthleteProfile profile = AthleteProfile.builder()
@@ -455,6 +487,31 @@ class SyncServiceTest {
         syncService.autoSyncRecent();
 
         verify(syncDataSource).countNewActivities(profile, latest.toEpochSecond());
+    }
+
+    @Test
+    void expiredRateLimitIsRecoveredAsRetryableFailure() {
+        Instant limitedAt = Instant.now().minusSeconds(120);
+        SyncState expiredRateLimit = SyncState.builder()
+                .id(1L)
+                .status("rate_limited")
+                .lastSyncAt(limitedAt)
+                .importedTotal(48)
+                .skippedTotal(545)
+                .rateLimitResetsAt(Instant.now().minusSeconds(60))
+                .updatedAt(limitedAt)
+                .build();
+        when(syncStateRepository.findFirst()).thenReturn(Optional.of(expiredRateLimit));
+
+        syncService.loadSyncStateFromDb();
+
+        assertThat(syncService.getLastSyncStatus().status()).isEqualTo("failed");
+        assertThat(syncService.getLastSyncStatus().rateLimitResetsAt()).isNull();
+        verify(syncStateRepository).save(argThat(state ->
+                state.getStatus().equals("failed")
+                        && state.getImportedTotal() == 48
+                        && state.getSkippedTotal() == 545
+                        && state.getRateLimitResetsAt() == null));
     }
 
     @Test

@@ -28,7 +28,7 @@ import {
   useRetryJob,
 } from './useDataJobs';
 
-const stages = ['FETCH_SUMMARY', 'FETCH_DETAIL', 'STORE_ACTIVITY', 'CALCULATE_METRICS', 'UPDATE_DAILY', 'DERIVE_INSIGHTS', 'COMPLETE'];
+const stages = ['FETCH_SUMMARY', 'FETCH_DETAIL', 'REFRESH_PROVENANCE', 'STORE_ACTIVITY', 'CALCULATE_METRICS', 'UPDATE_DAILY', 'DERIVE_INSIGHTS', 'COMPLETE'];
 
 export default function DataJobsPage() {
   const quality = useDataQualitySummary();
@@ -38,7 +38,7 @@ export default function DataJobsPage() {
   const recalculation = useCreateRecalculationJob();
   const retry = useRetryJob();
 
-  const startImport = (mode: 'RECENT' | 'FULL') => {
+  const startImport = (mode: 'RECENT' | 'FULL' | 'POWER_PROVENANCE') => {
     importJob.mutate(mode, { onSuccess: created => setJobId(created.id) });
   };
   const startRecalculation = () => {
@@ -67,6 +67,9 @@ export default function DataJobsPage() {
                 <Grid size={6}><MetricReadout label="Dostępnych" value={quality.data.available} tone="success" /></Grid>
                 <Grid size={6}><MetricReadout label="Częściowych" value={quality.data.partial} tone="warning" /></Grid>
                 <Grid size={6}><MetricReadout label="Nieznanych" value={quality.data.unknown} /></Grid>
+                <Grid size={4}><MetricReadout label="Moc zmierzona" value={quality.data.measuredPowerActivities} tone="success" /></Grid>
+                <Grid size={4}><MetricReadout label="Moc szacowana" value={quality.data.estimatedPowerActivities} tone="warning" /></Grid>
+                <Grid size={4}><MetricReadout label="Nieznane źródło mocy" value={quality.data.unknownPowerProvenanceActivities} /></Grid>
                 {quality.data.unassessed > 0 ? (
                   <Grid size={12}>
                     <Alert severity="info">Nieocenionych: {quality.data.unassessed}. Uruchom „Przelicz metryki”, aby wykonać backfill ocen.</Alert>
@@ -88,8 +91,12 @@ export default function DataJobsPage() {
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} sx={{ mt: 2.5 }}>
               <Button variant="contained" disabled={busy} onClick={() => startImport('RECENT')}>Import ostatnich</Button>
               <Button variant="outlined" disabled={busy} onClick={() => startImport('FULL')}>Pełny import</Button>
+              <Button variant="outlined" disabled={busy} onClick={() => startImport('POWER_PROVENANCE')}>Uzupełnij źródło mocy</Button>
               <Button variant="outlined" startIcon={<RefreshOutlinedIcon />} disabled={busy} onClick={startRecalculation}>Przelicz metryki</Button>
             </Stack>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.5 }}>
+              Uzupełnienie źródła mocy pobiera ze Stravy wyłącznie jawne metadane pomiaru. Brakująca flaga pozostaje nieznana — aplikacja nie zgaduje jej na podstawie watów.
+            </Typography>
           </PerformanceSurface>
         </Grid>
 

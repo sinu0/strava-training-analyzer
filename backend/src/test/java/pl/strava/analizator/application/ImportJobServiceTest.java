@@ -68,4 +68,18 @@ class ImportJobServiceTest {
         verify(jobRepository, never()).save(any());
         verify(jobRunner, never()).start(any());
     }
+
+    @Test
+    void createsPowerProvenanceBackfillAsAnObservableImportJob() {
+        UUID id = UUID.randomUUID();
+        when(jobRepository.findActive("IMPORT")).thenReturn(Optional.empty());
+        when(jobRepository.save(any())).thenAnswer(invocation ->
+                ((ProcessingJob) invocation.getArgument(0)).toBuilder().id(id).build());
+
+        ProcessingJob job = service.create("power_provenance");
+
+        assertThat(job.getMode()).isEqualTo("POWER_PROVENANCE");
+        assertThat(job.getStage()).isEqualTo("REFRESH_PROVENANCE");
+        verify(jobRunner).start(id);
+    }
 }
