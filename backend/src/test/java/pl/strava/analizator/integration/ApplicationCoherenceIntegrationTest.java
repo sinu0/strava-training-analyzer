@@ -10,6 +10,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.UUID;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+import pl.strava.analizator.domain.ai.KnowledgeDocument;
+import pl.strava.analizator.domain.ai.KnowledgeIndexEntry;
+import pl.strava.analizator.domain.ai.KnowledgeIndexPort;
+import pl.strava.analizator.domain.ai.KnowledgeSource;
+import pl.strava.analizator.domain.ai.KnowledgeType;
 import pl.strava.analizator.domain.model.Activity;
 import pl.strava.analizator.domain.model.CoachingFeedback;
 import pl.strava.analizator.domain.port.ActivityRepository;
@@ -62,9 +68,10 @@ class ApplicationCoherenceIntegrationTest {
     private final JdbcTemplate jdbc;
     private final ActivityRepository activities;
     private final CoachingFeedbackRepository feedback;
+    private final KnowledgeIndexPort knowledgeIndex;
 
     @Test void migratesAndExportsRealOpenApi() throws Exception {
-        assertThat(jdbc.queryForObject("SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1", String.class)).isEqualTo("55");
+        assertThat(jdbc.queryForObject("SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1", String.class)).isEqualTo("60");
         String schema = mvc.perform(get("/api-docs")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(json.readTree(schema).at("/paths/~1api~1v2~1training~1context").isMissingNode()).isFalse();
         Files.createDirectories(Path.of("build"));
@@ -108,5 +115,48 @@ class ApplicationCoherenceIntegrationTest {
         feedback.save(CoachingFeedback.builder().id(UUID.randomUUID()).sourceKey(key).occurredAt(at).sessionType("ENDURANCE").rpe(5).completed(true).build());
         feedback.save(CoachingFeedback.builder().id(UUID.randomUUID()).sourceKey(key).occurredAt(at).sessionType("ENDURANCE").rpe(8).completed(true).build());
         assertThat(feedback.findBetween(at, at.plusSeconds(1))).hasSize(1).allSatisfy(f -> assertThat(f.getRpe()).isEqualTo(8));
+    }
+
+    @Test void knowledgeCorpusReplacementIsAtomicAndVersioned() {
+        jdbc.update("DELETE FROM ai_knowledge_documents");
+        knowledgeIndex.replaceAll(List.of(knowledgeEntry("old-version", "old-content", 384)));
+
+        assertThat(knowledgeIndex.currentCorpusVersion()).contains("old-version");
+        assertThat(knowledgeIndex.count()).isEqualTo(1);
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> knowledgeIndex.replaceAll(List.of(
+                knowledgeEntry("new-version", "new-content", 2))))
+                .isInstanceOf(RuntimeException.class);
+
+        assertThat(knowledgeIndex.currentCorpusVersion()).contains("old-version");
+        assertThat(knowledgeIndex.count()).isEqualTo(1);
+    }
+
+    @Test void databasePreventsParallelUnfinishedJobsOfTheSameType() {
+        String jobType = "INTEGRATION_LOCK";
+        jdbc.update("INSERT INTO processing_jobs (job_type, mode, stage, status) VALUES (?, 'ALL', 'FETCH_SUMMARY', 'RETRYABLE')", jobType);
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> jdbc.update(
+                        "INSERT INTO processing_jobs (job_type, mode, stage, status) VALUES (?, 'ALL', 'FETCH_DETAIL', 'QUEUED')",
+                        jobType))
+                .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+
+        jdbc.update("DELETE FROM processing_jobs WHERE job_type = ?", jobType);
+    }
+
+    private KnowledgeIndexEntry knowledgeEntry(String version, String content, int dimensions) {
+        return new KnowledgeIndexEntry(
+                KnowledgeDocument.builder()
+                        .source(KnowledgeSource.CUSTOM)
+                        .url("https://example.test/" + version)
+                        .title(version)
+                        .type(KnowledgeType.SCIENTIFIC)
+                        .topics(List.of("training"))
+                        .content(content)
+                        .chunkIndex(0)
+                        .contentHash("a".repeat(64))
+                        .corpusVersion(version)
+                        .build(),
+                new float[dimensions]);
     }
 }

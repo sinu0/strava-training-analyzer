@@ -25,6 +25,7 @@ export interface ProcessingJob {
   createdAt: string;
   startedAt?: string | null;
   completedAt?: string | null;
+  retryAt?: string | null;
   updatedAt: string;
 }
 
@@ -40,11 +41,28 @@ export function useProcessingJob(id?: string) {
     queryKey: ['v2', 'jobs', id],
     enabled: Boolean(id),
     queryFn: async () => (await apiClient.get<ProcessingJob>(`/v2/jobs/${id}`)).data,
-    refetchInterval: query => {
-      const status = query.state.data?.status;
-      return status === 'QUEUED' || status === 'RUNNING' ? 1500 : false;
-    },
+    refetchInterval: query => jobRefetchInterval(query.state.data),
   });
+}
+
+export function useLatestProcessingJob() {
+  return useQuery({
+    queryKey: ['v2', 'jobs', 'latest'],
+    queryFn: async () => {
+      const response = await apiClient.get<ProcessingJob>('/v2/jobs/latest');
+      return response.status === 204 ? null : response.data;
+    },
+    refetchInterval: query => jobRefetchInterval(query.state.data),
+  });
+}
+
+function jobRefetchInterval(job?: ProcessingJob | null) {
+  if (job?.status === 'QUEUED' || job?.status === 'RUNNING') return 1500;
+  if (job?.status === 'RETRYABLE' && job.retryAt) {
+    const untilRetry = Date.parse(job.retryAt) - Date.now();
+    return Math.max(1500, Math.min(untilRetry + 1000, 60_000));
+  }
+  return false;
 }
 
 export function useCreateImportJob() {

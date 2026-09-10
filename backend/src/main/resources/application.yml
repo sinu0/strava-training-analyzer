@@ -1,6 +1,9 @@
 spring:
   application:
     name: strava-analizator
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
 
   datasource:
     url: jdbc:postgresql://localhost:5432/strava_analizator
@@ -14,7 +17,6 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        dialect: org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect
         format_sql: false
 
   flyway:

@@ -55,6 +55,9 @@ public class ProcessingJobEntity {
     @Column(name = "completed_at")
     private Instant completedAt;
 
+    @Column(name = "retry_at")
+    private Instant retryAt;
+
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 }

@@ -1,15 +1,17 @@
 package pl.strava.analizator.application.ai.knowledge;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
+
+import pl.strava.analizator.domain.ai.KnowledgeSource;
+import pl.strava.analizator.domain.ai.KnowledgeType;
 
 public record KnowledgeSourceConfig(
         String name,
+        KnowledgeSource source,
         String baseUrl,
         List<String> seedUrls,
-        String defaultType,
+        KnowledgeType defaultType,
         Set<String> topics,
         boolean enabled
 ) {
@@ -17,12 +19,13 @@ public record KnowledgeSourceConfig(
     public static KnowledgeSourceConfig forTrainingPeaks() {
         return new KnowledgeSourceConfig(
                 "trainingpeaks",
+                KnowledgeSource.TRAININGPEAKS,
                 "https://www.trainingpeaks.com",
                 List.of(
-                        "https://www.trainingpeaks.com/blog/",
-                        "https://www.trainingpeaks.com/blog/training-articles/cycling/"
+                        "https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/",
+                        "https://www.trainingpeaks.com/blog/managing-your-training-stress-balance/"
                 ),
-                "METHODOLOGY",
+                KnowledgeType.METHODOLOGY,
                 Set.of("cycling", "power", "tsb", "ctl", "atl", "ftp", "training", "periodization"),
                 true
         );
@@ -31,25 +34,24 @@ public record KnowledgeSourceConfig(
     public static KnowledgeSourceConfig forFriel() {
         return new KnowledgeSourceConfig(
                 "friel",
+                KnowledgeSource.FRIEL,
                 "https://www.trainingpeaks.com",
-                List.of(
-                        "https://www.trainingpeaks.com/blog/what-is-tsb/",
-                        "https://www.trainingpeaks.com/blog/understanding-your-trainingpeaks-chart/"
-                ),
-                "FRAMEWORK",
+                List.of(),
+                KnowledgeType.FRAMEWORK,
                 Set.of("tsb", "ctl", "atl", "pmc", "performance-management", "friel"),
-                true
+                false
         );
     }
 
     public static KnowledgeSourceConfig forCoggan() {
         return new KnowledgeSourceConfig(
                 "coggan",
+                KnowledgeSource.COGGAN,
                 "https://www.trainingpeaks.com",
                 List.of(
                         "https://www.trainingpeaks.com/blog/power-training-levels/"
                 ),
-                "FRAMEWORK",
+                KnowledgeType.FRAMEWORK,
                 Set.of("power", "zones", "coggan", "threshold", "ftp", "training-levels"),
                 true
         );
@@ -58,9 +60,10 @@ public record KnowledgeSourceConfig(
     public static KnowledgeSourceConfig forSeiler() {
         return new KnowledgeSourceConfig(
                 "seiler",
+                KnowledgeSource.SEILER,
                 "https://pubmed.ncbi.nlm.nih.gov",
                 List.of(),
-                "SCIENTIFIC",
+                KnowledgeType.SCIENTIFIC,
                 Set.of("polarized", "seiler", "intensity-distribution", "endurance"),
                 true
         );
@@ -69,11 +72,12 @@ public record KnowledgeSourceConfig(
     public static KnowledgeSourceConfig forIntervalsIcu() {
         return new KnowledgeSourceConfig(
                 "intervals_icu",
+                KnowledgeSource.INTERVALS_ICU,
                 "https://intervals.icu",
                 List.of(
                         "https://intervals.icu/docs/"
                 ),
-                "ANALYTICS",
+                KnowledgeType.ANALYTICS,
                 Set.of("analytics", "power", "hr", "pmc", "fitness"),
                 true
         );

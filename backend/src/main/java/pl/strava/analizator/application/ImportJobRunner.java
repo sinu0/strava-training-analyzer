@@ -27,6 +27,7 @@ public class ImportJobRunner {
                 .attempt(job.getAttempt() + 1)
                 .startedAt(now)
                 .completedAt(null)
+                .retryAt(null)
                 .errorMessage(null)
                 .updatedAt(now)
                 .build());
@@ -39,9 +40,16 @@ public class ImportJobRunner {
                 default -> syncService.syncRecent(progress);
             };
             boolean retryable = "rate_limited".equals(result.status());
-            updateTerminal(jobId, retryable ? "RETRYABLE" : "COMPLETED", null);
+            Instant retryAt = retryable && result.rateLimitResetsAt() != null
+                    ? result.rateLimitResetsAt()
+                    : retryable ? Instant.now().plusSeconds(900) : null;
+            updateTerminal(
+                    jobId,
+                    retryable ? "RETRYABLE" : "COMPLETED",
+                    null,
+                    retryAt);
         } catch (Exception exception) {
-            updateTerminal(jobId, "FAILED", abbreviate(exception.getMessage()));
+            updateTerminal(jobId, "FAILED", abbreviate(exception.getMessage()), null);
         }
     }
 
@@ -52,10 +60,11 @@ public class ImportJobRunner {
                 .build()));
     }
 
-    private void updateTerminal(UUID jobId, String status, String errorMessage) {
+    private void updateTerminal(UUID jobId, String status, String errorMessage, Instant retryAt) {
         jobRepository.findById(jobId).ifPresent(current -> jobRepository.save(current.toBuilder()
                 .status(status)
                 .errorMessage(errorMessage)
+                .retryAt(retryAt)
                 .completedAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build()));

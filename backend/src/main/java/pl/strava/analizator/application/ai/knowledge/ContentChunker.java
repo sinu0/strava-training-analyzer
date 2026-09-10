@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ContentChunker {
 
+    private static final Pattern MAIN_TAG = Pattern.compile("<main\\b[^>]*>([\\s\\S]*?)</main>",
+            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     private static final Pattern SCRIPT_TAG = Pattern.compile("<script[^>]*>[\\s\\S]*?</script>",
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     private static final Pattern STYLE_TAG = Pattern.compile("<style[^>]*>[\\s\\S]*?</style>",
@@ -33,7 +35,9 @@ public class ContentChunker {
 
     public String extractMainContent(String html) {
         if (html == null) return "";
-        String text = SCRIPT_TAG.matcher(html).replaceAll(" ");
+        var main = MAIN_TAG.matcher(html);
+        String relevantHtml = main.find() ? main.group(1) : html;
+        String text = SCRIPT_TAG.matcher(relevantHtml).replaceAll(" ");
         text = STYLE_TAG.matcher(text).replaceAll(" ");
         text = HTML_TAG.matcher(text).replaceAll(" ");
         text = text.replace("&nbsp;", " ").replace("&amp;", "&")

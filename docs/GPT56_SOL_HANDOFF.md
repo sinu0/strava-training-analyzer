@@ -14,15 +14,17 @@ Najpierw przeczytaj instrukcje AGENTS.md podane w sesji oraz:
 - docs/BACKUP_AND_RECOVERY.md
 - docs/LAN_ACCESS.md
 
-Zweryfikowane lokalnie 2026-09-09:
-- backend: 894 testy jednostkowe i 5 integracyjnych;
-- frontend: 409 testów/95 plików, lint, TypeScript, OpenAPI, build i budżety;
+Zweryfikowane lokalnie 2026-09-10:
+- backend: 913 testów jednostkowych i 7 integracyjnych;
+- frontend: 412 testów/95 plików, lint, TypeScript, OpenAPI, build i budżety;
 - npm audit: 0 podatności;
 - E2E z prawdziwym API i PostgreSQL oraz kontrola LAN są zielone;
 - pełna oś zdarzeń może zasilać workout-compliance-v3;
 - AI ujawnia osobne stany providera, RAG i kolejki;
-- lokalny Ollama ma gotowe `qwen2.5:7b` i `all-minilm`, a indeks RAG jest celowo pusty;
-- zadanie POWER_PROVENANCE zachowuje wyłącznie jawną flagę Stravy i nie zgaduje;
+- lokalny Ollama ma gotowe `qwen2.5:7b` i `all-minilm`; atomowy indeks RAG ma 36 dokumentów i wersję `d58b84c5…`;
+- zadanie POWER_PROVENANCE zachowuje wyłącznie jawną flagę Stravy, ukończyło 4 próby i dało 301 `measured`, 145 `estimated`, 0 `unknown`;
+- job po limicie ma trwałe `retryAt`, wznawia się automatycznie i jest odnajdywany po przeładowaniu panelu;
+- baza działa po migracji V60 na PostgreSQL 16/Bookworm, PostGIS 3.6.4 i pgvector 0.8.6, z odświeżoną collation;
 - polling Stravy nie działa bez kompletnej konfiguracji.
 
 Twoje zadanie:
@@ -41,7 +43,7 @@ Niezmienne zasady:
 - deviceWatts=null nie jest pomiarem i nie wolno klasyfikować go po samych watach;
 - niepełny lub sprzeczny log wykonania oznacza compliance UNKNOWN;
 - raport wyników AI nie jest naukową walidacją ani zbiorem etykiet eksperckich;
-- brak buildx, zdalnego runu CI lub fizycznego testu Garmin należy raportować,
+- brak zdalnego runu CI lub fizycznego testu Garmin należy raportować,
   a nie przedstawiać jako potwierdzone.
 
 Kryterium odbioru: runtime jest zdrowy, proweniencja pozostaje uczciwa,

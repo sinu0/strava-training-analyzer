@@ -7,13 +7,14 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import AdminPage from '@/pages/AdminPage';
 import theme from '@/theme/theme';
+import type { AiModuleStatus } from '@/types/ai';
 
 const mutateConnect = vi.fn();
 const mutateSyncRecent = vi.fn();
 const mutateSyncPhotos = vi.fn();
 let syncRecentState: { isPending: boolean; isError: boolean; error: unknown };
 let mockProfileConnected = true;
-let mockAiStatus = {
+let mockAiStatus: AiModuleStatus = {
   enabled: false,
   batchEnabled: true,
   batchCron: '0 0 3 * * *',
@@ -23,6 +24,7 @@ let mockAiStatus = {
   providerStatus: 'DISABLED',
   knowledgeStatus: 'DISABLED',
   knowledgeDocuments: 0,
+  knowledgeCorpusVersion: null,
   noteQueueStatus: 'DISABLED',
   noteQueueSuspendedUntil: null,
   availableProviders: [],
@@ -61,6 +63,7 @@ beforeEach(() => {
     providerStatus: 'DISABLED',
     knowledgeStatus: 'DISABLED',
     knowledgeDocuments: 0,
+    knowledgeCorpusVersion: null,
     noteQueueStatus: 'DISABLED',
     noteQueueSuspendedUntil: null,
     availableProviders: [],
@@ -264,5 +267,19 @@ describe('AdminPage', () => {
       .toBe(true);
     expect((screen.getByRole('button', { name: 'Generuj brakujące (pomiń dzisiejsze)' }) as HTMLButtonElement).disabled)
       .toBe(true);
+  });
+
+  it('shows the active knowledge corpus version when RAG is ready', () => {
+    mockAiStatus = {
+      ...mockAiStatus,
+      enabled: true,
+      knowledgeStatus: 'AVAILABLE',
+      knowledgeDocuments: 27,
+      knowledgeCorpusVersion: '0123456789abcdef',
+    };
+
+    renderWithProviders(<AdminPage />);
+
+    expect(screen.getByText('Baza wiedzy: gotowa (27, v 01234567)')).toBeDefined();
   });
 });

@@ -5,16 +5,21 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import pl.strava.analizator.domain.ai.KnowledgeDocument;
+import pl.strava.analizator.domain.ai.KnowledgeIndexEntry;
 import pl.strava.analizator.domain.ai.KnowledgeIndexPort;
 import pl.strava.analizator.domain.ai.KnowledgeSource;
 import pl.strava.analizator.domain.ai.KnowledgeType;
@@ -31,19 +36,40 @@ public class KnowledgeIndexAdapter implements KnowledgeIndexPort {
     }
 
     @Override
-    public void store(KnowledgeDocument doc, float[] embedding) {
-        String embeddingStr = Arrays.toString(embedding)
-                .replace("[", "[").replace("]", "]");
+    @Transactional
+    public void replaceAll(List<KnowledgeIndexEntry> entries) {
+        if (entries == null || entries.isEmpty()) {
+            throw new IllegalArgumentException("Nowy korpus wiedzy nie może być pusty");
+        }
+        Set<String> versions = entries.stream()
+                .map(entry -> entry.document().getCorpusVersion())
+                .collect(Collectors.toSet());
+        if (versions.size() != 1 || versions.contains(null) || versions.contains("")) {
+            throw new IllegalArgumentException("Wszystkie dokumenty muszą należeć do jednej wersji korpusu");
+        }
+
+        jdbc.update("DELETE FROM ai_knowledge_documents");
+        entries.forEach(this::insert);
+    }
+
+    private void insert(KnowledgeIndexEntry entry) {
+        KnowledgeDocument doc = entry.document();
+        float[] embedding = entry.embedding();
+        String embeddingStr = Arrays.toString(embedding);
         jdbc.update(
-                "INSERT INTO ai_knowledge_documents (source, url, title, doc_type, topics, content, chunk_index, embedding, embedded_at, refreshed_at) "
-                        + "VALUES (?::varchar, ?::text, ?::varchar, ?::varchar, ?::text[], ?::text, ?::int, ?::vector, ?::timestamptz, ?::timestamptz)",
+                "INSERT INTO ai_knowledge_documents (source, url, title, doc_type, topics, content, chunk_index, "
+                        + "content_hash, corpus_version, embedding, embedded_at, refreshed_at) "
+                        + "VALUES (?::varchar, ?::text, ?::varchar, ?::varchar, ?::text[], ?::text, ?::int, "
+                        + "?::varchar, ?::varchar, ?::vector, ?::timestamptz, ?::timestamptz)",
                 doc.getSource().name(),
                 doc.getUrl(),
                 doc.getTitle(),
                 doc.getType().name(),
-                doc.getTopics().toArray(new String[0]),
+                doc.getTopics() != null ? doc.getTopics().toArray(new String[0]) : new String[0],
                 doc.getContent(),
                 doc.getChunkIndex(),
+                doc.getContentHash(),
+                doc.getCorpusVersion(),
                 embeddingStr,
                 Timestamp.from(doc.getEmbeddedAt() != null ? doc.getEmbeddedAt().toInstant() : OffsetDateTime.now(ZoneOffset.UTC).toInstant()),
                 Timestamp.from(doc.getRefreshedAt() != null ? doc.getRefreshedAt().toInstant() : OffsetDateTime.now(ZoneOffset.UTC).toInstant())
@@ -53,7 +79,8 @@ public class KnowledgeIndexAdapter implements KnowledgeIndexPort {
     @Override
     public List<KnowledgeDocument> findSimilar(float[] queryEmbedding, int topK, KnowledgeType typeFilter) {
         String embeddingStr = Arrays.toString(queryEmbedding);
-        String sql = "SELECT id, source, url, title, doc_type, topics, content, chunk_index, embedded_at, refreshed_at "
+        String sql = "SELECT id, source, url, title, doc_type, topics, content, chunk_index, content_hash, "
+                + "corpus_version, embedded_at, refreshed_at "
                 + "FROM ai_knowledge_documents "
                 + "WHERE embedding IS NOT NULL ";
         if (typeFilter != null) {
@@ -78,8 +105,16 @@ public class KnowledgeIndexAdapter implements KnowledgeIndexPort {
     }
 
     @Override
-    public void clear() {
-        jdbc.update("DELETE FROM ai_knowledge_documents");
+    public Optional<String> currentCorpusVersion() {
+        try {
+            return Optional.ofNullable(jdbc.queryForObject(
+                    "SELECT min(corpus_version) FROM ai_knowledge_documents "
+                            + "HAVING count(*) > 0 AND count(DISTINCT corpus_version) = 1 "
+                            + "AND count(corpus_version) = count(*)",
+                    String.class));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -108,6 +143,8 @@ public class KnowledgeIndexAdapter implements KnowledgeIndexPort {
                 .topics(topics)
                 .content(rs.getString("content"))
                 .chunkIndex(rs.getInt("chunk_index"))
+                .contentHash(rs.getString("content_hash"))
+                .corpusVersion(rs.getString("corpus_version"))
                 .embeddedAt(embeddedTs != null ? embeddedTs.toInstant().atOffset(ZoneOffset.UTC) : null)
                 .refreshedAt(refreshedTs != null ? refreshedTs.toInstant().atOffset(ZoneOffset.UTC) : null)
                 .build();

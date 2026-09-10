@@ -1,5 +1,6 @@
 package pl.strava.analizator.infrastructure.persistence.adapter;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,6 +36,25 @@ public class ProcessingJobRepositoryAdapter implements ProcessingJobRepository {
     }
 
     @Override
+    public Optional<ProcessingJob> findUnfinished(String jobType) {
+        return jpaRepository.findFirstByJobTypeAndStatusInOrderByCreatedAtDesc(
+                jobType, List.of("QUEUED", "RUNNING", "RETRYABLE")).map(this::toDomain);
+    }
+
+    @Override
+    public Optional<ProcessingJob> findLatest() {
+        return jpaRepository.findFirstByOrderByCreatedAtDesc().map(this::toDomain);
+    }
+
+    @Override
+    public Optional<ProcessingJob> findFirstRetryableDue(String jobType, Instant now) {
+        return jpaRepository
+                .findFirstByJobTypeAndStatusAndRetryAtLessThanEqualOrderByRetryAtAsc(
+                        jobType, "RETRYABLE", now)
+                .map(this::toDomain);
+    }
+
+    @Override
     public boolean existsActive(String jobType) {
         return jpaRepository.existsByJobTypeAndStatusIn(jobType, List.of("QUEUED", "RUNNING"));
     }
@@ -51,6 +71,7 @@ public class ProcessingJobRepositoryAdapter implements ProcessingJobRepository {
                 .createdAt(entity.getCreatedAt())
                 .startedAt(entity.getStartedAt())
                 .completedAt(entity.getCompletedAt())
+                .retryAt(entity.getRetryAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
     }
@@ -67,6 +88,7 @@ public class ProcessingJobRepositoryAdapter implements ProcessingJobRepository {
                 .createdAt(job.getCreatedAt())
                 .startedAt(job.getStartedAt())
                 .completedAt(job.getCompletedAt())
+                .retryAt(job.getRetryAt())
                 .updatedAt(job.getUpdatedAt())
                 .build();
     }

@@ -27,6 +27,7 @@ public class ProcessingJobDto {
     private Instant createdAt;
     private Instant startedAt;
     private Instant completedAt;
+    private Instant retryAt;
     private Instant updatedAt;
 
     public static ProcessingJobDto from(ProcessingJob job) {
@@ -41,6 +42,7 @@ public class ProcessingJobDto {
                 .createdAt(job.getCreatedAt())
                 .startedAt(job.getStartedAt())
                 .completedAt(job.getCompletedAt())
+                .retryAt(job.getRetryAt())
                 .updatedAt(job.getUpdatedAt())
                 .build();
     }

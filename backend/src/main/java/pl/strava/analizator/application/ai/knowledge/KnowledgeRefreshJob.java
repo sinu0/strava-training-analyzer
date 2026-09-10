@@ -23,8 +23,9 @@ public class KnowledgeRefreshJob {
     public void refresh() {
         log.info("Scheduled knowledge base refresh starting...");
         try {
-            int count = knowledgeBaseBuilder.rebuild();
-            log.info("Scheduled knowledge base refresh complete: {} documents", count);
+            KnowledgeBuildResult result = knowledgeBaseBuilder.rebuild();
+            log.info("Scheduled knowledge base refresh complete: corpus={}, documents={}, changed={}",
+                    result.corpusVersion(), result.documents(), result.changed());
         } catch (Exception e) {
             log.error("Knowledge base refresh failed", e);
         }

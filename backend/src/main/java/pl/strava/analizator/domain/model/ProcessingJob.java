@@ -20,5 +20,6 @@ public class ProcessingJob {
     private Instant createdAt;
     private Instant startedAt;
     private Instant completedAt;
+    private Instant retryAt;
     private Instant updatedAt;
 }

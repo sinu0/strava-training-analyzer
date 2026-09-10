@@ -78,16 +78,19 @@ public class RagServiceV2 {
     public RuntimeStatus getRuntimeStatus() {
         try {
             if (!knowledgeIndexPort.isAvailable()) {
-                return new RuntimeStatus("UNAVAILABLE", 0);
+                return new RuntimeStatus("UNAVAILABLE", 0, null);
             }
             long documents = knowledgeIndexPort.count();
-            return new RuntimeStatus(documents > 0 ? "AVAILABLE" : "EMPTY", documents);
+            String corpusVersion = documents > 0
+                    ? knowledgeIndexPort.currentCorpusVersion().orElse(null)
+                    : null;
+            return new RuntimeStatus(documents > 0 ? "AVAILABLE" : "EMPTY", documents, corpusVersion);
         } catch (Exception e) {
             log.warn("Knowledge index status check failed: {}", e.getMessage());
-            return new RuntimeStatus("UNAVAILABLE", 0);
+            return new RuntimeStatus("UNAVAILABLE", 0, null);
         }
     }
 
-    public record RuntimeStatus(String status, long documents) {
+    public record RuntimeStatus(String status, long documents, String corpusVersion) {
     }
 }

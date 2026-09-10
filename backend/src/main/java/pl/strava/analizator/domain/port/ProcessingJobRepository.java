@@ -1,5 +1,6 @@
 package pl.strava.analizator.domain.port;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,6 +13,12 @@ public interface ProcessingJobRepository {
     Optional<ProcessingJob> findById(UUID id);
 
     Optional<ProcessingJob> findActive(String jobType);
+
+    Optional<ProcessingJob> findUnfinished(String jobType);
+
+    Optional<ProcessingJob> findLatest();
+
+    Optional<ProcessingJob> findFirstRetryableDue(String jobType, Instant now);
 
     boolean existsActive(String jobType);
 }

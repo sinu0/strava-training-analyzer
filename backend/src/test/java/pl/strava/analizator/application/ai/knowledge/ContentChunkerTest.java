@@ -30,6 +30,16 @@ class ContentChunkerTest {
     }
 
     @Test
+    void extractMainContentPrefersArticleMainOverNavigationAndFooter() {
+        String html = "<html><body><nav>Account navigation noise</nav>"
+                + "<main role='main'><article>Verified cycling training guidance.</article></main>"
+                + "<footer>Marketing footer noise</footer></body></html>";
+
+        assertThat(chunker.extractMainContent(html))
+                .isEqualTo("Verified cycling training guidance.");
+    }
+
+    @Test
     void chunk_shortText_returnsSingleChunk() {
         String text = "This is a slightly longer text that exceeds fifty characters. With two sentences here.";
         List<String> chunks = chunker.chunk(text, 500, 50);

@@ -140,6 +140,7 @@ class AiPredictionControllerTest {
                 .providerStatus("AVAILABLE")
                 .knowledgeStatus("AVAILABLE")
                 .knowledgeDocuments(12)
+                .knowledgeCorpusVersion("0123456789abcdef")
                 .noteQueueStatus("READY")
                 .availableProviders(List.of("ollama"))
                 .availablePredictionTypes(List.of("FTP_PREDICTION", "FATIGUE_PREDICTION"))
@@ -159,6 +160,7 @@ class AiPredictionControllerTest {
                 .andExpect(jsonPath("$.providerStatus").value("AVAILABLE"))
                 .andExpect(jsonPath("$.knowledgeStatus").value("AVAILABLE"))
                 .andExpect(jsonPath("$.knowledgeDocuments").value(12))
+                .andExpect(jsonPath("$.knowledgeCorpusVersion").value("0123456789abcdef"))
                 .andExpect(jsonPath("$.noteQueueStatus").value("READY"))
                 .andExpect(jsonPath("$.availableProviders[0]").value("ollama"))
                 .andExpect(jsonPath("$.availablePredictionTypes").isArray());

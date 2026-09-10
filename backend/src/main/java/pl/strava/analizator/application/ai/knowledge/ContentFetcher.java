@@ -19,10 +19,14 @@ public class ContentFetcher {
     private final HttpClient httpClient;
 
     public ContentFetcher() {
-        this.httpClient = HttpClient.newBuilder()
+        this(HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .followRedirects(HttpClient.Redirect.NORMAL)
-                .build();
+                .build());
+    }
+
+    ContentFetcher(HttpClient httpClient) {
+        this.httpClient = httpClient;
     }
 
     public String fetch(String url) {
@@ -40,9 +44,12 @@ public class ContentFetcher {
             }
             log.warn("Failed to fetch {}: HTTP {}", url, response.statusCode());
             return null;
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
             log.warn("Failed to fetch {}: {}", url, e.getMessage());
             Thread.currentThread().interrupt();
+            return null;
+        } catch (IOException e) {
+            log.warn("Failed to fetch {}: {}", url, e.getMessage());
             return null;
         }
     }

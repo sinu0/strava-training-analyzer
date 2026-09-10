@@ -2367,6 +2367,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/jobs/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getLatestJob"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/matched-rides/{groupId}": {
         parameters: {
             query?: never;
@@ -3413,6 +3429,7 @@ export interface components {
             batchCron?: string;
             batchEnabled?: boolean;
             enabled?: boolean;
+            knowledgeCorpusVersion?: string;
             /** Format: int64 */
             knowledgeDocuments?: number;
             knowledgeStatus?: string;
@@ -4736,6 +4753,8 @@ export interface components {
             id?: string;
             jobType?: string;
             mode?: string;
+            /** Format: date-time */
+            retryAt?: string;
             stage?: string;
             /** Format: date-time */
             startedAt?: string;
@@ -9690,6 +9709,26 @@ export interface operations {
             path: {
                 id: string;
             };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProcessingJobDto"];
+                };
+            };
+        };
+    };
+    getLatestJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;

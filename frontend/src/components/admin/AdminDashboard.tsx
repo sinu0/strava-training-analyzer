@@ -23,6 +23,7 @@ export interface AiStatus {
     providerStatus?: 'DISABLED' | 'NOT_CONFIGURED' | 'UNAVAILABLE' | 'AVAILABLE';
     knowledgeStatus?: 'DISABLED' | 'UNAVAILABLE' | 'EMPTY' | 'AVAILABLE';
     knowledgeDocuments?: number;
+    knowledgeCorpusVersion?: string | null;
     noteQueueStatus?: 'DISABLED' | 'UNAVAILABLE' | 'PAUSED_PROVIDER_UNAVAILABLE' | 'READY';
     noteQueueSuspendedUntil?: string | null;
 }
@@ -84,7 +85,9 @@ export default function AdminDashboard({
         ? 'Provider nieskonfigurowany'
         : 'Provider niedostępny';
   const knowledgeLabel = aiStatus?.knowledgeStatus === 'AVAILABLE'
-    ? `Baza wiedzy: gotowa (${aiStatus.knowledgeDocuments ?? 0})`
+    ? `Baza wiedzy: gotowa (${aiStatus.knowledgeDocuments ?? 0}${
+        aiStatus.knowledgeCorpusVersion ? `, v ${aiStatus.knowledgeCorpusVersion.slice(0, 8)}` : ''
+      })`
     : aiStatus?.knowledgeStatus === 'EMPTY'
       ? 'Baza wiedzy: pusta'
       : aiStatus?.knowledgeStatus === 'DISABLED'

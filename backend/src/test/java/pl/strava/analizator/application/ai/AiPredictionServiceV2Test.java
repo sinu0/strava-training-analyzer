@@ -163,7 +163,7 @@ class AiPredictionServiceV2Test {
     @Test
     void getKnowledgeStatus_returnsInfo() {
         when(ragServiceV2.getRuntimeStatus())
-                .thenReturn(new RagServiceV2.RuntimeStatus("EMPTY", 0));
+                .thenReturn(new RagServiceV2.RuntimeStatus("EMPTY", 0, null));
         Map<String, Object> result = service.getKnowledgeStatus();
         assertThat(result.get("ragAvailable")).isEqualTo(false);
         assertThat(result.get("status")).isEqualTo("EMPTY");
@@ -173,10 +173,14 @@ class AiPredictionServiceV2Test {
 
     @Test
     void refreshKnowledge_success_returnsCount() {
-        when(knowledgeBaseBuilder.rebuild()).thenReturn(42);
+        when(knowledgeBaseBuilder.rebuild())
+                .thenReturn(new pl.strava.analizator.application.ai.knowledge.KnowledgeBuildResult(
+                        true, "corpus-v1", 42, 3));
         Map<String, Object> result = service.refreshKnowledge();
         assertThat(result.get("status")).isEqualTo("completed");
+        assertThat(result.get("action")).isEqualTo("updated");
         assertThat(result.get("documentsIndexed")).isEqualTo(42);
+        assertThat(result.get("corpusVersion")).isEqualTo("corpus-v1");
     }
 
     @Test

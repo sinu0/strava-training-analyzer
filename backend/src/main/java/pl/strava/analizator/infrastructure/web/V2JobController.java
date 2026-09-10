@@ -43,6 +43,14 @@ public class V2JobController {
         return ProcessingJobDto.from(importJobService.get(id));
     }
 
+    @GetMapping("/jobs/latest")
+    public ResponseEntity<ProcessingJobDto> getLatestJob() {
+        return importJobService.latest()
+                .map(ProcessingJobDto::from)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
     @PostMapping("/jobs/{id}/retry")
     public ResponseEntity<ProcessingJobDto> retryJob(@PathVariable UUID id) {
         return ResponseEntity.accepted().body(ProcessingJobDto.from(importJobService.retry(id)));

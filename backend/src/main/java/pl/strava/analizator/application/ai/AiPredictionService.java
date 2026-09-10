@@ -198,6 +198,7 @@ public class AiPredictionService {
                 .providerStatus(providerStatus)
                 .knowledgeStatus(knowledgeRuntime.status())
                 .knowledgeDocuments(knowledgeRuntime.documents())
+                .knowledgeCorpusVersion(knowledgeRuntime.corpusVersion())
                 .noteQueueStatus(queueRuntime.status())
                 .noteQueueSuspendedUntil(queueRuntime.suspendedUntil())
                 .availableProviders(providers)
@@ -210,11 +211,11 @@ public class AiPredictionService {
 
     private RagServiceV2.RuntimeStatus knowledgeStatus() {
         if (!enabled || !knowledgeEnabled) {
-            return new RagServiceV2.RuntimeStatus("DISABLED", 0);
+            return new RagServiceV2.RuntimeStatus("DISABLED", 0, null);
         }
         return ragServiceV2 != null
                 ? ragServiceV2.getRuntimeStatus()
-                : new RagServiceV2.RuntimeStatus("UNAVAILABLE", 0);
+                : new RagServiceV2.RuntimeStatus("UNAVAILABLE", 0, null);
     }
 
     private AiNoteQueueProcessor.RuntimeStatus noteQueueStatus() {

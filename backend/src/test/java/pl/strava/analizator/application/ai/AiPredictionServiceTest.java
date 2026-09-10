@@ -62,7 +62,7 @@ class AiPredictionServiceTest {
         providerRegistry = new LlmProviderRegistry(List.of(llmPort));
         lenient().when(customPromptService.getActiveForType(anyString())).thenReturn(Optional.empty());
         lenient().when(ragServiceV2.getRuntimeStatus())
-                .thenReturn(new RagServiceV2.RuntimeStatus("AVAILABLE", 12));
+                .thenReturn(new RagServiceV2.RuntimeStatus("AVAILABLE", 12, "corpus-v1"));
         lenient().when(noteQueueProcessor.getRuntimeStatus())
                 .thenReturn(new AiNoteQueueProcessor.RuntimeStatus("READY", null));
 

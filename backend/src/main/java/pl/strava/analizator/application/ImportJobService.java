@@ -2,6 +2,7 @@ package pl.strava.analizator.application;
 
 import java.time.Instant;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -19,9 +20,9 @@ public class ImportJobService {
     private final ImportJobRunner jobRunner;
 
     public synchronized ProcessingJob create(String requestedMode) {
-        ProcessingJob active = jobRepository.findActive("IMPORT").orElse(null);
-        if (active != null) {
-            return active;
+        ProcessingJob unfinished = jobRepository.findUnfinished("IMPORT").orElse(null);
+        if (unfinished != null) {
+            return unfinished;
         }
 
         String mode = normalizeMode(requestedMode);
@@ -38,7 +39,7 @@ public class ImportJobService {
                     .updatedAt(now)
                     .build());
         } catch (DataIntegrityViolationException race) {
-            return jobRepository.findActive("IMPORT").orElseThrow(() -> race);
+            return jobRepository.findUnfinished("IMPORT").orElseThrow(() -> race);
         }
         jobRunner.start(job.getId());
         return job;
@@ -47,6 +48,10 @@ public class ImportJobService {
     public ProcessingJob get(UUID id) {
         return jobRepository.findById(id)
                 .orElseThrow(() -> new ProcessingJobNotFoundException("Processing job not found: " + id));
+    }
+
+    public Optional<ProcessingJob> latest() {
+        return jobRepository.findLatest();
     }
 
     public synchronized ProcessingJob retry(UUID id) {
@@ -62,10 +67,30 @@ public class ImportJobService {
                 .status("QUEUED")
                 .errorMessage(null)
                 .completedAt(null)
+                .retryAt(null)
                 .updatedAt(Instant.now())
                 .build());
         jobRunner.start(queued.getId());
         return queued;
+    }
+
+    public synchronized int retryDueJobs() {
+        if (jobRepository.existsActive("IMPORT")) {
+            return 0;
+        }
+        ProcessingJob due = jobRepository.findFirstRetryableDue("IMPORT", Instant.now()).orElse(null);
+        if (due == null) {
+            return 0;
+        }
+        ProcessingJob queued = jobRepository.save(due.toBuilder()
+                .status("QUEUED")
+                .errorMessage(null)
+                .completedAt(null)
+                .retryAt(null)
+                .updatedAt(Instant.now())
+                .build());
+        jobRunner.start(queued.getId());
+        return 1;
     }
 
     private String normalizeMode(String requestedMode) {

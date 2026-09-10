@@ -77,4 +77,16 @@ class ImportJobRunnerTest {
 
         assertThat(current.getStatus()).isEqualTo("COMPLETED");
     }
+
+    @Test
+    void runnerPersistsProviderResetAsAutomaticRetryTime() {
+        Instant retryAt = Instant.now().plusSeconds(900);
+        when(syncService.syncRecent(any())).thenReturn(
+                new SyncService.SyncStatus("rate_limited", Instant.now(), 99, 1, retryAt));
+
+        runner.start(current.getId());
+
+        assertThat(current.getStatus()).isEqualTo("RETRYABLE");
+        assertThat(current.getRetryAt()).isEqualTo(retryAt);
+    }
 }

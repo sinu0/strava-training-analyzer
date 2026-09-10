@@ -11,7 +11,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
@@ -24,6 +24,7 @@ import {
   useCreateImportJob,
   useCreateRecalculationJob,
   useDataQualitySummary,
+  useLatestProcessingJob,
   useProcessingJob,
   useRetryJob,
 } from './useDataJobs';
@@ -32,8 +33,10 @@ const stages = ['FETCH_SUMMARY', 'FETCH_DETAIL', 'REFRESH_PROVENANCE', 'STORE_AC
 
 export default function DataJobsPage() {
   const quality = useDataQualitySummary();
+  const refetchQuality = quality.refetch;
   const [jobId, setJobId] = useState<string>();
   const job = useProcessingJob(jobId);
+  const latestJob = useLatestProcessingJob();
   const importJob = useCreateImportJob();
   const recalculation = useCreateRecalculationJob();
   const retry = useRetryJob();
@@ -44,10 +47,20 @@ export default function DataJobsPage() {
   const startRecalculation = () => {
     recalculation.mutate(undefined, { onSuccess: created => setJobId(created.id) });
   };
-  const activeJob = job.data;
+  const activeJob = jobId ? job.data : latestJob.data ?? undefined;
   const progress = activeJob ? Math.max(4, ((stages.indexOf(activeJob.stage) + 1) / stages.length) * 100) : 0;
+  const waitingForAutomaticRetry = activeJob?.status === 'RETRYABLE'
+    && Boolean(activeJob.retryAt)
+    && Date.parse(activeJob.retryAt ?? '') > Date.now();
+  const automaticRetryScheduled = activeJob?.status === 'RETRYABLE' && Boolean(activeJob.retryAt);
   const busy = activeJob?.status === 'QUEUED' || activeJob?.status === 'RUNNING'
-    || importJob.isPending || recalculation.isPending || retry.isPending;
+    || automaticRetryScheduled || importJob.isPending || recalculation.isPending || retry.isPending;
+
+  useEffect(() => {
+    if (activeJob?.status === 'RETRYABLE' || activeJob?.status === 'COMPLETED') {
+      void refetchQuality();
+    }
+  }, [activeJob?.status, activeJob?.updatedAt, refetchQuality]);
 
   return (
     <PageContainer title="Dane i zadania" subtitle="Kontroluj kompletność danych, import oraz bezpieczne przeliczanie metryk." maxWidth={1180}>
@@ -108,9 +121,14 @@ export default function DataJobsPage() {
                 <Chip label={activeJob.status} color={activeJob.status === 'COMPLETED' ? 'success' : activeJob.status === 'FAILED' ? 'error' : 'primary'} variant="outlined" />
               </Stack>
               <LinearProgress variant="determinate" value={progress} sx={{ mt: 2, height: 8, borderRadius: 4 }} />
+              {activeJob.status === 'RETRYABLE' && activeJob.retryAt ? (
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  Limit API. Zadanie wznowi się automatycznie {new Date(activeJob.retryAt).toLocaleString('pl-PL')}.
+                </Alert>
+              ) : null}
               {activeJob.errorMessage ? <Alert severity="error" sx={{ mt: 2 }}>{activeJob.errorMessage}</Alert> : null}
               {activeJob.status === 'FAILED' || activeJob.status === 'RETRYABLE' ? (
-                <Button sx={{ mt: 2 }} disabled={retry.isPending} onClick={() => retry.mutate(activeJob.id, { onSuccess: updated => setJobId(updated.id) })}>Wznów od niezakończonego etapu</Button>
+                <Button sx={{ mt: 2 }} disabled={retry.isPending || waitingForAutomaticRetry} onClick={() => retry.mutate(activeJob.id, { onSuccess: updated => setJobId(updated.id) })}>Wznów od niezakończonego etapu</Button>
               ) : null}
             </PerformanceSurface>
           </Grid>

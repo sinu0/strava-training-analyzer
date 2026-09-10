@@ -20,6 +20,8 @@ public class KnowledgeDocument {
     private final List<String> topics;
     private final String content;
     private final int chunkIndex;
+    private final String contentHash;
+    private final String corpusVersion;
     private final OffsetDateTime embeddedAt;
     private final OffsetDateTime refreshedAt;
 }

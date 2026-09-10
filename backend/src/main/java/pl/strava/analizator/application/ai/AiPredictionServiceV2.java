@@ -152,14 +152,15 @@ public class AiPredictionServiceV2 {
         Map<String, Object> result = new HashMap<>();
         RagServiceV2.RuntimeStatus runtimeStatus;
         if (!enabled || !knowledgeEnabled) {
-            runtimeStatus = new RagServiceV2.RuntimeStatus("DISABLED", 0);
+            runtimeStatus = new RagServiceV2.RuntimeStatus("DISABLED", 0, null);
         } else {
             runtimeStatus = ragServiceV2
                     .map(RagServiceV2::getRuntimeStatus)
-                    .orElseGet(() -> new RagServiceV2.RuntimeStatus("UNAVAILABLE", 0));
+                    .orElseGet(() -> new RagServiceV2.RuntimeStatus("UNAVAILABLE", 0, null));
         }
         result.put("status", runtimeStatus.status());
         result.put("documents", runtimeStatus.documents());
+        result.put("corpusVersion", runtimeStatus.corpusVersion());
         result.put("ragAvailable", "AVAILABLE".equals(runtimeStatus.status()));
         result.put("refreshScheduled", knowledgeCron);
         return result;
@@ -169,9 +170,12 @@ public class AiPredictionServiceV2 {
         if (!enabled) throw new AiModuleDisabledException("AI module is disabled");
         Map<String, Object> result = new HashMap<>();
         try {
-            int count = knowledgeBaseBuilder.rebuild();
+            var build = knowledgeBaseBuilder.rebuild();
             result.put("status", "completed");
-            result.put("documentsIndexed", count);
+            result.put("action", build.changed() ? "updated" : "unchanged");
+            result.put("documentsIndexed", build.documents());
+            result.put("sources", build.sources());
+            result.put("corpusVersion", build.corpusVersion());
         } catch (Exception e) {
             result.put("status", "failed");
             result.put("error", e.getMessage());
