@@ -33,4 +33,4 @@ Podgląd wszystkich części w obu motywach: trasa `/design-system` (ukryta w na
 - Pliki ładowane na starcie (`App.tsx`, `components/layout/*`) importują konkretne moduły (`@/ui/feedback/LoadingState`, `@/ui/BrandMark`), nie barrel `@/ui`. Inaczej cały zestaw trafia do początkowego bundla i łamie budżet `npm run budget`.
 - Brakuje części? Dodaj ją do `src/ui`, eksportuj w `src/ui/index.ts`, pokaż w katalogu i napisz test w `src/ui/__tests__`. Nie buduj lokalnego odpowiednika w feature.
 
-Strażnik w ESLint (`eslint.config.mjs`) odrzuca literały kolorów i importy starych powierzchni. `DS_GUARD=error npx eslint "src/**/*.{ts,tsx}"` pokazuje miejsca do poprawy.
+Strażnik w ESLint (`eslint.config.mjs`) jest częścią `npm run lint` i odrzuca literały kolorów oraz importy starych powierzchni.

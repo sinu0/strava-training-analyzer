@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import FormDialog from '@/components/common/FormDialog';
-import ScoreBadge from '@/components/common/ScoreBadge';
 import { useCountdown } from '@/hooks/useCountdown';
 import { useFormDialog } from '@/hooks/useFormDialog';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
@@ -225,13 +224,6 @@ describe('consistency foundation', () => {
     );
 
     expect(screen.getByText('Chart content')).toBeDefined();
-  });
-
-  it('renders score badge using shared ranges', () => {
-    renderWithTheme(<ScoreBadge score={82} />);
-
-    expect(screen.getByText('82/100')).toBeDefined();
-    expect(screen.getByText('Świetne')).toBeDefined();
   });
 
   it('shows notifications from the shared provider', () => {

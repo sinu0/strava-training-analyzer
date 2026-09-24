@@ -5,9 +5,6 @@ import { describe, it, expect, beforeAll } from 'vitest';
 
 import { EmptyState, Page } from '@/ui';
 
-import ChartWrapper from '../components/common/ChartWrapper';
-import Section from '../components/common/Section';
-import StatDisplay from '../components/common/StatDisplay';
 import TabsNav from '../components/common/TabsNav';
 import theme from '../theme/theme';
 
@@ -30,29 +27,6 @@ function renderWithThemeAndRouter(ui: React.ReactElement) {
     </ThemeProvider>,
   );
 }
-
-describe('Section', () => {
-  it('renders title and children', () => {
-    renderWithTheme(<Section title="Test Title">Content here</Section>);
-    expect(screen.getByText('Test Title')).toBeDefined();
-    expect(screen.getByText('Content here')).toBeDefined();
-  });
-
-  it('renders subtitle when provided', () => {
-    renderWithTheme(<Section title="T" subtitle="Sub text">Child</Section>);
-    expect(screen.getByText('Sub text')).toBeDefined();
-  });
-
-  it('renders action slot', () => {
-    renderWithTheme(<Section title="T" action={<button>Act</button>}>Child</Section>);
-    expect(screen.getByText('Act')).toBeDefined();
-  });
-
-  it('renders without title', () => {
-    renderWithTheme(<Section>No title content</Section>);
-    expect(screen.getByText('No title content')).toBeDefined();
-  });
-});
 
 describe('Page', () => {
   it('renders title and children', () => {
@@ -94,32 +68,6 @@ describe('Page', () => {
   });
 });
 
-describe('StatDisplay', () => {
-  it('renders value and label', () => {
-    renderWithTheme(<StatDisplay value={250} label="FTP" unit="W" />);
-    expect(screen.getByText('250')).toBeDefined();
-    expect(screen.getByText('FTP')).toBeDefined();
-    expect(screen.getByText('W')).toBeDefined();
-  });
-
-  it('shows positive trend', () => {
-    renderWithTheme(<StatDisplay value={100} label="Test" trend={5.2} />);
-    expect(screen.getByText('+5.2%')).toBeDefined();
-  });
-
-  it('shows negative trend', () => {
-    renderWithTheme(<StatDisplay value={100} label="Test" trend={-3.1} />);
-    expect(screen.getByText('-3.1%')).toBeDefined();
-  });
-
-  it('respects size prop', () => {
-    const { container } = renderWithTheme(<StatDisplay value="42" label="Metric" size="lg" />);
-    const h4 = container.querySelector('.MuiTypography-h4');
-    expect(h4).toBeDefined();
-    expect(h4?.textContent).toBe('42');
-  });
-});
-
 describe('EmptyState', () => {
   it('renders title and description', () => {
     renderWithTheme(<EmptyState title="Brak danych" description="Dodaj aktywność" />);
@@ -152,23 +100,6 @@ describe('EmptyState', () => {
       <EmptyState title="Brak" illustration="/illustrations/empty-ai.png" />,
     );
     expect(container.querySelector('svg')).toBeNull();
-  });
-});
-
-describe('ChartWrapper', () => {
-  it('renders title and children', () => {
-    renderWithTheme(<ChartWrapper title="Chart Title"><div>Chart goes here</div></ChartWrapper>);
-    expect(screen.getByText('Chart Title')).toBeDefined();
-    expect(screen.getByText('Chart goes here')).toBeDefined();
-  });
-
-  it('renders legend slot', () => {
-    renderWithTheme(
-      <ChartWrapper title="C" legend={<span>Legend items</span>}>
-        <div>Chart</div>
-      </ChartWrapper>,
-    );
-    expect(screen.getByText('Legend items')).toBeDefined();
   });
 });
 

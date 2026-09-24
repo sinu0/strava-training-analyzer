@@ -15,6 +15,7 @@ import {
   Tooltip,
 } from '@mui/material';
 
+import { Widget } from '@/ui';
 import {
   CHART_COLORS,
   GRADIENTS,
@@ -23,7 +24,6 @@ import {
   alphaColor,
 } from '@/utils/colors';
 
-import DataCard from '../common/DataCard';
 
 function SourceChip({ source }: { source: string }) {
   return (
@@ -89,7 +89,7 @@ export default function StravaConfigSection({
   onResetConfig,
 }: StravaConfigSectionProps) {
   return (
-    <DataCard title="Konfiguracja Strava">
+    <Widget title="Konfiguracja Strava">
       <Box sx={{ py: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
         <VpnKeyIcon sx={{ color: CHART_COLORS.primary, fontSize: 28 }} />
@@ -302,6 +302,6 @@ export default function StravaConfigSection({
         </>
       )}
     </Box>
-    </DataCard>
+    </Widget>
   );
 }

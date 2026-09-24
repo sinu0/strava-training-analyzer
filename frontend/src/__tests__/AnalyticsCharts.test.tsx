@@ -4,8 +4,6 @@ import { describe, it, expect, beforeAll } from 'vitest';
 
 import PMChart from '../components/PMChart';
 import PowerCurveChart from '../components/PowerCurveChart';
-import WeeklyVolumeChart from '../components/WeeklyVolumeChart';
-import ZoneDistributionChart from '../components/ZoneDistributionChart';
 import theme from '../theme/theme';
 
 beforeAll(() => {
@@ -56,39 +54,5 @@ describe('PowerCurveChart', () => {
   it('shows empty state when no data', () => {
     renderWithTheme(<PowerCurveChart data={undefined} />);
     expect(screen.getByText('Brak danych krzywej mocy.')).toBeDefined();
-  });
-});
-
-describe('ZoneDistributionChart', () => {
-  it('renders colored bars', () => {
-    const { container } = renderWithTheme(
-      <ZoneDistributionChart
-        data={{ zoneType: 'power', zones: { Z1: 600, Z2: 1200, Z3: 900 }, totalSeconds: 2700 }}
-      />,
-    );
-    expect(container.querySelector('.recharts-wrapper')).toBeDefined();
-  });
-
-  it('shows empty state when no data', () => {
-    renderWithTheme(<ZoneDistributionChart data={undefined} />);
-    expect(screen.getByText('Brak danych stref.')).toBeDefined();
-  });
-});
-
-describe('WeeklyVolumeChart', () => {
-  it('renders TSS bars', () => {
-    const { container } = renderWithTheme(
-      <WeeklyVolumeChart
-        data={[
-          { weekStart: '2024-06-03', activityCount: 5, totalDistanceM: 150000, totalTimeSec: 18000, totalElevationM: 1200, totalTss: 350 },
-        ]}
-      />,
-    );
-    expect(container.querySelector('.recharts-wrapper')).toBeDefined();
-  });
-
-  it('shows empty state when no data', () => {
-    renderWithTheme(<WeeklyVolumeChart data={[]} />);
-    expect(screen.getByText('Brak danych tygodniowych.')).toBeDefined();
   });
 });

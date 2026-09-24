@@ -6,9 +6,9 @@ import tsParser from '@typescript-eslint/parser';
 
 const leakedRenderRule = ['error', { validStrategies: ['coerce', 'ternary'] }];
 
-// Design-system guard: colours come from theme tokens and surfaces from `@/ui`.
-// Temporarily opt-in (DS_GUARD=error) while screens migrate; becomes 'error' afterwards.
-const designSystemGuard = process.env.DS_GUARD ?? 'off';
+// Design-system guard: colours come from theme tokens and surfaces from `@/ui`
+// (docs/DESIGN_SYSTEM.md). DS_GUARD=off disables it for an emergency local run only.
+const designSystemGuard = process.env.DS_GUARD ?? 'error';
 const colorLiteral = String.raw`/(#[0-9A-Fa-f]{3,8}\b|rgba?\()/`;
 
 export default [

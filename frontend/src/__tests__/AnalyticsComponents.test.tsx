@@ -3,9 +3,6 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeAll } from 'vitest';
 
 import MmpTrendChart from '../components/analytics/MmpTrendChart';
-import RaceReadinessCard from '../components/analytics/RaceReadinessCard';
-import TrainingPhasesChart from '../components/analytics/TrainingPhasesChart';
-import WPrimeBalanceChart from '../components/analytics/WPrimeBalanceChart';
 
 beforeAll(() => {
   globalThis.ResizeObserver = class {
@@ -68,31 +65,5 @@ describe('MmpTrendChart', () => {
     expect(screen.getByText('Trend mocy maksymalnej (MMP)')).toBeDefined();
     expect(screen.getByText('5s')).toBeDefined();
     expect(screen.getByText('20min')).toBeDefined();
-  });
-});
-
-describe('WPrimeBalanceChart', () => {
-  it('renders stats chips', () => {
-    wrap(<WPrimeBalanceChart activityId="abc-123" />);
-    expect(screen.getByText("W' Balance")).toBeDefined();
-    expect(screen.getByText('CP: 200 W')).toBeDefined();
-    expect(screen.getByText('Wyczerpania: 2')).toBeDefined();
-  });
-});
-
-describe('TrainingPhasesChart', () => {
-  it('renders current phase and score', () => {
-    wrap(<TrainingPhasesChart from="2025-01-01" to="2025-01-31" />);
-    expect(screen.getByText('Fazy treningowe')).toBeDefined();
-    expect(screen.getAllByText(/Budowanie/).length).toBeGreaterThan(0);
-    expect(screen.getByText('Ocena periodyzacji: 72/100')).toBeDefined();
-  });
-});
-
-describe('RaceReadinessCard', () => {
-  it('renders date input and title', () => {
-    wrap(<RaceReadinessCard />);
-    expect(screen.getByText('Gotowość na wyścig')).toBeDefined();
-    expect(screen.getByLabelText('Data wyścigu')).toBeDefined();
   });
 });

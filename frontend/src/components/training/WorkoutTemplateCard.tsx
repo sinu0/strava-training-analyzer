@@ -1,8 +1,9 @@
 import { Chip, Typography, Box, CardActions, Button } from '@mui/material';
 
+import { Widget } from '@/ui';
+
 import WorkoutPowerChart from './WorkoutPowerChart';
 import { CATEGORY_LABELS } from '../../types/training';
-import DataCard from '../common/DataCard';
 
 import type { WorkoutTemplate } from '../../types/training';
 
@@ -13,7 +14,7 @@ interface WorkoutTemplateCardProps {
 
 export default function WorkoutTemplateCard({ template, onDetails }: WorkoutTemplateCardProps) {
   return (
-    <DataCard
+    <Widget
       title={template.name}
       subtitle={`${template.targetDurationMin} min · TSS ${template.targetTss}`}
       action={
@@ -36,7 +37,7 @@ export default function WorkoutTemplateCard({ template, onDetails }: WorkoutTemp
           Szczegóły
         </Button>
       </CardActions>
-    </DataCard>
+    </Widget>
   );
 }
 
