@@ -21,12 +21,9 @@ import { lazy, Suspense } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import ActivityListCardV2 from '@/components/activity/ActivityListCardV2';
-import EmptyState from '@/components/common/EmptyState';
-import ErrorState from '@/components/common/ErrorState';
-import LoadingState from '@/components/common/LoadingState';
-import PageContainer from '@/components/common/PageContainer';
 import PolishDateField from '@/components/common/PolishDateField';
 import { getAppThemeTokens } from '@/theme/theme';
+import { EmptyState, ErrorState, LoadingState, Page } from '@/ui';
 import { getPolishPaginationAriaLabel } from '@/utils/accessibility';
 
 import { useHistoryActivities } from './useHistory';
@@ -153,7 +150,7 @@ export default function HistoryPage() {
   };
 
   return (
-    <PageContainer
+    <Page
       title="Historia treningów"
       subtitle="Trasy, liczby i kontekst każdej sesji. Mapa jest widoczna od razu, strumienie dopiero w szczególe."
       maxWidth={1320}
@@ -219,6 +216,6 @@ export default function HistoryPage() {
         </Stack>
       </Paper>
       {content()}
-    </PageContainer>
+    </Page>
   );
 }

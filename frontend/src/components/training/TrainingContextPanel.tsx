@@ -1,11 +1,9 @@
 import { Alert, Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 
-import ErrorState from '@/components/common/ErrorState';
-import LoadingState from '@/components/common/LoadingState';
-import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import { useSaveTrainingContext, useTrainingContext } from '@/hooks/useTrainingContext';
 import type { TrainingConstraint, TrainingContext } from '@/types/trainingContext';
+import { ErrorState, LoadingState, Surface } from '@/ui';
 import { localDate } from '@/utils/localDate';
 
 const days = [['MONDAY', 'Poniedziałek'], ['TUESDAY', 'Wtorek'], ['WEDNESDAY', 'Środa'], ['THURSDAY', 'Czwartek'], ['FRIDAY', 'Piątek'], ['SATURDAY', 'Sobota'], ['SUNDAY', 'Niedziela']] as const;
@@ -70,5 +68,5 @@ export default function TrainingContextPanel() {
   const context = useTrainingContext();
   if (context.isLoading) return <LoadingState message="Wczytywanie kontekstu treningowego…" />;
   if (context.isError || !context.data) return <ErrorState message="Nie udało się pobrać kontekstu treningowego." onRetry={() => void context.refetch()} />;
-  return <PerformanceSurface sx={{ p: { xs: 2, md: 3 } }}><ContextForm initial={context.data} /></PerformanceSurface>;
+  return <Surface><ContextForm initial={context.data} /></Surface>;
 }

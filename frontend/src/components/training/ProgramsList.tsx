@@ -3,10 +3,10 @@ import {
   Card, CardContent, Chip, IconButton, List, ListItem, ListItemText, Stack,
 } from '@mui/material';
 
-import EmptyState from '@/components/common/EmptyState';
+
+import { EmptyState, LoadingState } from '@/ui';
 
 import { usePrograms, useDeleteProgram } from '../../hooks/useTrainingPlan';
-import LoadingState from '../common/LoadingState';
 
 import type { TrainingPlanProgram } from '../../types/training';
 

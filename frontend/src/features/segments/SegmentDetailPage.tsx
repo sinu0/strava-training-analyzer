@@ -4,17 +4,12 @@ import { Alert, Box, Button, Checkbox, Chip, FormControlLabel, Grid, Radio, Stac
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
-import EmptyState from '@/components/common/EmptyState';
-import ErrorState from '@/components/common/ErrorState';
-import LoadingState from '@/components/common/LoadingState';
-import PageContainer from '@/components/common/PageContainer';
 import SegmentComparisonVisual from '@/components/segments/SegmentComparisonVisual';
 import SegmentProgressChart from '@/components/segments/SegmentProgressChart';
 import SegmentRankTrophy from '@/components/segments/SegmentRankTrophy';
 import SegmentRouteMap from '@/components/segments/SegmentRouteMap';
-import MetricReadout from '@/components/v2/MetricReadout';
-import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import { useSegment, useSegmentComparison } from '@/hooks/useSegments';
+import { EmptyState, ErrorState, LoadingState, Metric, Page, Surface } from '@/ui';
 
 function duration(seconds?: number | null) { return seconds == null ? '—' : `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`; }
 
@@ -50,23 +45,23 @@ export default function SegmentDetailPage() {
   if (detail.isError || !detail.data) return <ErrorState title="Nie znaleziono segmentu" message="Nie udało się wczytać danych segmentu." />;
   const { segment, efforts } = detail.data;
   return (
-    <PageContainer title={segment.name} subtitle={[segment.city, segment.country].filter(Boolean).join(' · ') || 'Własne próby segmentowe'} maxWidth={1200}
+    <Page title={segment.name} subtitle={[segment.city, segment.country].filter(Boolean).join(' · ') || 'Własne próby segmentowe'} maxWidth={1200}
       breadcrumbs={[{ label: 'Segmenty', href: '/segments' }, { label: segment.name }]}
       actions={<Button startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate(backPath)}>{fromActivity ? 'Wróć do aktywności' : 'Katalog'}</Button>}>
       {!detail.data.personalBestConfirmed && <Alert severity="warning" sx={{ mb: 2 }}>Historyczny backfill nie jest ukończony. Rekordy oznaczamy jako „najlepsze w dostępnych danych”.</Alert>}
-      <PerformanceSurface accent sx={{ p: { xs: 2, md: 2.5 }, mb: 2 }}>
-        <Grid container spacing={2}><Grid size={{ xs: 6, md: 2.4 }}><MetricReadout label="Dystans" value={segment.distanceM != null ? `${(segment.distanceM / 1000).toFixed(2)} km` : '—'} /></Grid>
-          <Grid size={{ xs: 6, md: 2.4 }}><MetricReadout label="Najlepszy czas" value={duration(segment.bestElapsedTimeSec)} tone="primary" /></Grid>
-          <Grid size={{ xs: 6, md: 2.4 }}><MetricReadout label="Własne próby" value={String(segment.effortCount)} /></Grid>
-          <Grid size={{ xs: 6, md: 2.4 }}><MetricReadout label="Śr. nachylenie" value={segment.averageGrade != null ? `${segment.averageGrade.toFixed(1)}%` : '—'} /></Grid>
-          <Grid size={{ xs: 6, md: 2.4 }}><MetricReadout label="Różnica wysokości" value={segment.elevationHighM != null && segment.elevationLowM != null ? `${Math.round(segment.elevationHighM - segment.elevationLowM)} m` : '—'} /></Grid>
+      <Surface variant="accent" sx={{ mb: 2 }}>
+        <Grid container spacing={2}><Grid size={{ xs: 6, md: 2.4 }}><Metric label="Dystans" value={segment.distanceM != null ? `${(segment.distanceM / 1000).toFixed(2)} km` : '—'} /></Grid>
+          <Grid size={{ xs: 6, md: 2.4 }}><Metric label="Najlepszy czas" value={duration(segment.bestElapsedTimeSec)} tone="primary" /></Grid>
+          <Grid size={{ xs: 6, md: 2.4 }}><Metric label="Własne próby" value={String(segment.effortCount)} /></Grid>
+          <Grid size={{ xs: 6, md: 2.4 }}><Metric label="Śr. nachylenie" value={segment.averageGrade != null ? `${segment.averageGrade.toFixed(1)}%` : '—'} /></Grid>
+          <Grid size={{ xs: 6, md: 2.4 }}><Metric label="Różnica wysokości" value={segment.elevationHighM != null && segment.elevationLowM != null ? `${Math.round(segment.elevationHighM - segment.elevationLowM)} m` : '—'} /></Grid>
         </Grid>
-      </PerformanceSurface>
-      {!!segment.routePolyline && <PerformanceSurface sx={{ mb: 2 }}><SegmentRouteMap routes={[{ id: segment.id, label: segment.name, polyline: segment.routePolyline }]} ariaLabel={`Mapa segmentu ${segment.name}`} /></PerformanceSurface>}
-      {efforts.length > 0 && <PerformanceSurface sx={{ p: { xs: 1.5, md: 2.5 }, mb: 2 }}>
+      </Surface>
+      {!!segment.routePolyline && <Surface padding="none" sx={{ mb: 2 }}><SegmentRouteMap routes={[{ id: segment.id, label: segment.name, polyline: segment.routePolyline }]} ariaLabel={`Mapa segmentu ${segment.name}`} /></Surface>}
+      {efforts.length > 0 && <Surface sx={{ mb: 2 }}>
         <SegmentProgressChart efforts={efforts} />
-      </PerformanceSurface>}
-      <PerformanceSurface sx={{ p: { xs: 1.5, md: 2.5 }, mb: 2 }}>
+      </Surface>}
+      <Surface sx={{ mb: 2 }}>
         <Stack
           direction="row"
           spacing={1}
@@ -77,10 +72,10 @@ export default function SegmentDetailPage() {
         {!!comparison.isLoading && <LoadingState message="Wyrównywanie prób po dystansie…" />}
         {!!comparison.isError && <ErrorState message="Nie udało się porównać prób." onRetry={() => void comparison.refetch()} />}
         {!!comparison.data && <SegmentComparisonVisual comparison={comparison.data} />}
-      </PerformanceSurface>
+      </Surface>
       <Typography variant="h5" component="h2" sx={{ mb: 1.5 }}>Historia własnych prób</Typography>
       {efforts.length === 0 ? <EmptyState title="Brak prób" /> : <Stack spacing={1}>
-        {efforts.map(effort => <PerformanceSurface key={effort.id} sx={{ p: 1.5 }}>
+        {efforts.map(effort => <Surface padding="sm" key={effort.id}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{
             alignItems: { sm: 'center' }
           }}>
@@ -94,8 +89,8 @@ export default function SegmentDetailPage() {
             <Typography variant="body2">{effort.averagePowerW ?? '—'} W · {effort.averageHeartrate ?? '—'} bpm · {effort.averageCadence ?? '—'} rpm</Typography>
             <Button onClick={() => navigate(`/activities/${effort.activityId}?tab=segments`)}>Aktywność</Button>
           </Stack>
-        </PerformanceSurface>)}
+        </Surface>)}
       </Stack>}
-    </PageContainer>
+    </Page>
   );
 }

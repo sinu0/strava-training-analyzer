@@ -36,15 +36,13 @@ import {
 } from 'recharts';
 
 import apiClient from '@/api/client';
-import EmptyState from '@/components/common/EmptyState';
-import PageContainer from '@/components/common/PageContainer';
 import PullToRefreshPanel from '@/components/common/PullToRefreshPanel';
 import Section from '@/components/common/Section';
-import SkeletonCard from '@/components/common/SkeletonCard';
 import SwipeableContent from '@/components/common/SwipeableContent';
 import TabsNav from '@/components/common/TabsNav';
 import { useHealthOverview, useHealthTimeline, useRecoveryStatus } from '@/hooks/useHealth';
 import { getAppThemeTokens } from '@/theme/theme';
+import { EmptyState, Page, SkeletonCard } from '@/ui';
 import { CHART_ACTIVE_DOT, getChartVisuals } from '@/utils/chartStyles';
 import {
   HEALTH_COLORS,
@@ -341,7 +339,7 @@ export default function HealthPage() {
 
   if (isLoading) {
     return (
-      <PageContainer title="Zdrowie">
+      <Page title="Zdrowie">
         <Stack spacing={2.5}>
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
             <CircularProgress />
@@ -376,12 +374,12 @@ export default function HealthPage() {
             </Grid>
           </Grid>
         </Stack>
-      </PageContainer>
+      </Page>
     );
   }
 
   return (
-    <PageContainer
+    <Page
       title="Zdrowie"
       subtitle="Regeneracja, sen i energia są rozdzielone na krótsze sekcje z szybszym odczytem trendów."
     >
@@ -715,6 +713,6 @@ export default function HealthPage() {
           )}
         </Stack>
       </PullToRefreshPanel>
-    </PageContainer>
+    </Page>
   );
 }

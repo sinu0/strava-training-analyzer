@@ -8,17 +8,12 @@ import { useSearchParams } from 'react-router-dom';
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 import EditorialHero from '@/components/common/EditorialHero';
-import EmptyState from '@/components/common/EmptyState';
-import ErrorState from '@/components/common/ErrorState';
-import LoadingState from '@/components/common/LoadingState';
-import PageContainer from '@/components/common/PageContainer';
 import PolishDateField from '@/components/common/PolishDateField';
 import TrainingCalendar from '@/components/training/TrainingCalendar';
 import TrainingContextPanel from '@/components/training/TrainingContextPanel';
 import WeeklyReviewPanel from '@/components/training/WeeklyReviewPanel';
 import WorkoutLibrary from '@/components/training/WorkoutLibrary';
-import MetricReadout from '@/components/v2/MetricReadout';
-import PerformanceSurface from '@/components/v2/PerformanceSurface';
+import { EmptyState, ErrorState, LoadingState, Metric, Page, Surface } from '@/ui';
 import { getChartVisuals } from '@/utils/chartStyles';
 import { PMC_COLORS } from '@/utils/colors';
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
@@ -55,7 +50,7 @@ export default function PlanPage() {
   };
 
   return (
-    <PageContainer title="Plan treningowy" subtitle="Zbuduj tydzień, wybierz jednostkę i zobacz matematyczny scenariusz obciążenia." maxWidth={1320}>
+    <Page title="Plan treningowy" subtitle="Zbuduj tydzień, wybierz jednostkę i zobacz matematyczny scenariusz obciążenia." maxWidth={1320}>
       <EditorialHero
         compact
         eyebrow="Kierunek sezonu"
@@ -66,7 +61,7 @@ export default function PlanPage() {
         imageAlt="Przygotowane akcesoria kolarskie i mapa trasy"
         highlights={['Kalendarz', 'Biblioteka sesji', 'Scenariusz CTL / ATL']}
       />
-      <PerformanceSurface sx={{ mb: 2.5 }}>
+      <Surface padding="none" sx={{ mb: 2.5 }}>
         <Tabs value={tab} onChange={(_, value: PlanTab) => changeTab(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile>
           <Tab value="calendar" icon={<CalendarMonthOutlinedIcon />} iconPosition="start" label="Kalendarz" />
           <Tab value="library" icon={<FitnessCenterOutlinedIcon />} iconPosition="start" label="Biblioteka" />
@@ -74,13 +69,13 @@ export default function PlanPage() {
           <Tab value="context" label="Cel i dostępność" />
           <Tab value="review" label="Przegląd tygodnia" />
         </Tabs>
-      </PerformanceSurface>
+      </Surface>
       {tab === 'calendar' && <TrainingCalendar />}
       {tab === 'context' && <TrainingContextPanel />}
       {tab === 'review' && <WeeklyReviewPanel />}
       {tab === 'library' && <WorkoutLibrary />}
       {tab === 'scenario' && (
-        <PerformanceSurface accent sx={{ p: { xs: 1.5, md: 2.75 } }}>
+        <Surface variant="accent">
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={1.25}
@@ -115,9 +110,9 @@ export default function PlanPage() {
               </Typography>
               {lastPoint ? (
                 <Grid container spacing={2} sx={{ mt: 1 }}>
-                  <Grid size={4}><MetricReadout label="CTL na końcu" value={lastPoint.ctl.toFixed(1)} tone="primary" /></Grid>
-                  <Grid size={4}><MetricReadout label="ATL na końcu" value={lastPoint.atl.toFixed(1)} tone="warning" /></Grid>
-                  <Grid size={4}><MetricReadout label="Forma" value={lastPoint.form.toFixed(1)} tone={lastPoint.form < -10 ? 'warning' : 'success'} /></Grid>
+                  <Grid size={4}><Metric label="CTL na końcu" value={lastPoint.ctl.toFixed(1)} tone="primary" /></Grid>
+                  <Grid size={4}><Metric label="ATL na końcu" value={lastPoint.atl.toFixed(1)} tone="warning" /></Grid>
+                  <Grid size={4}><Metric label="Forma" value={lastPoint.form.toFixed(1)} tone={lastPoint.form < -10 ? 'warning' : 'success'} /></Grid>
                 </Grid>
               ) : null}
               <Box
@@ -143,8 +138,8 @@ export default function PlanPage() {
               </List>
             </>
           ) : null}
-        </PerformanceSurface>
+        </Surface>
       )}
-    </PageContainer>
+    </Page>
   );
 }

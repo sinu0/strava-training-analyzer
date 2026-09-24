@@ -6,6 +6,11 @@ import tsParser from '@typescript-eslint/parser';
 
 const leakedRenderRule = ['error', { validStrategies: ['coerce', 'ternary'] }];
 
+// Design-system guard: colours come from theme tokens and surfaces from `@/ui`.
+// Temporarily opt-in (DS_GUARD=error) while screens migrate; becomes 'error' afterwards.
+const designSystemGuard = process.env.DS_GUARD ?? 'off';
+const colorLiteral = String.raw`/(#[0-9A-Fa-f]{3,8}\b|rgba?\()/`;
+
 export default [
   {
     ignores: ['dist', 'coverage', 'node_modules'],
@@ -70,5 +75,30 @@ export default [
       'react/jsx-no-leaked-render': ['error', { validStrategies: ['coerce', 'ternary'] }],
       'react/no-array-index-key': 'error',
     },
+  },
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/theme/**', 'src/**/__tests__/**', 'src/**/*.test.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [designSystemGuard,
+        { selector: `Literal[value=${colorLiteral}]`, message: 'Kolory tylko z tokenów motywu (theme.tokens / useTokens) — nie wpisuj hex ani rgba.' },
+        { selector: `TemplateElement[value.raw=${colorLiteral}]`, message: 'Kolory tylko z tokenów motywu (theme.tokens / useTokens) — nie wpisuj hex ani rgba.' },
+      ],
+      'no-restricted-imports': [designSystemGuard, {
+        paths: [
+          { name: '@mui/material', importNames: ['Card', 'CardContent', 'CardHeader', 'Paper'], message: 'Użyj Surface / Widget z @/ui.' },
+          { name: '@mui/material/Card', message: 'Użyj Surface / Widget z @/ui.' },
+          { name: '@mui/material/Paper', message: 'Użyj Surface / Widget z @/ui.' },
+        ],
+        patterns: [
+          { group: ['@/components/v2/*', '@/components/common/DataCard', '@/components/common/MetricTile', '@/components/common/Section', '@/components/common/StatDisplay', '@/components/common/ScoreBadge', '@/components/common/EditorialHero', '@/components/common/ChartWrapper'], message: 'Komponent zastąpiony przez @/ui.' },
+        ],
+      }],
+    },
+  },
+  {
+    // The component library itself is the one place allowed to build on MUI surfaces.
+    files: ['src/ui/**/*.{ts,tsx}'],
+    rules: { 'no-restricted-imports': 'off' },
   },
 ];

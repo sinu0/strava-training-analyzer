@@ -4,7 +4,7 @@ import { Box, Chip, Grid, Stack, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import DataCard from '@/components/common/DataCard';
+import { Widget } from '@/ui';
 import {
   BRAND_COLORS,
   COMMON_COLORS,
@@ -113,7 +113,7 @@ export default function AdminDashboard({
           xs: 12,
           md: 6
         }}>
-        <DataCard title="Predykcje AI">
+        <Widget title="Predykcje AI">
             <Box sx={{ py: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
                 <AutoAwesomeIcon sx={{ color: BRAND_COLORS.ai, fontSize: 28 }} />
@@ -247,14 +247,14 @@ export default function AdminDashboard({
               </Button>
             </Stack>
           </Box>
-        </DataCard>
+        </Widget>
       </Grid>
       <Grid
         size={{
           xs: 12,
           md: 6
         }}>
-        <DataCard title="Training Effects">
+        <Widget title="Training Effects">
             <Box sx={{ py: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
                 <StarOutlineIcon sx={{ color: STATUS_COLORS.warning, fontSize: 28 }} />
@@ -332,10 +332,10 @@ export default function AdminDashboard({
                 {recalculateAllTePending ? 'Przeliczanie...' : 'Przelicz wszystkie Training Effects'}
               </Button>
             </Box>
-          </DataCard>
+          </Widget>
         </Grid>
       <Grid size={12}>
-        <DataCard title="Informacje">
+        <Widget title="Informacje">
           <Stack spacing={1} sx={{ py: 1 }}>
             <Typography variant="body2" sx={{
               color: "text.secondary"
@@ -356,7 +356,7 @@ export default function AdminDashboard({
               Dane logowania są szyfrowane. Synchronizacja pobiera dane za wybrany okres.
             </Typography>
           </Stack>
-        </DataCard>
+        </Widget>
       </Grid>
     </>
   );

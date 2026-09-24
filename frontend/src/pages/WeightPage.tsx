@@ -4,11 +4,8 @@ import FlagIcon from '@mui/icons-material/Flag';
 import { Box, Button, Grid, Stack, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 
-import ErrorState from '@/components/common/ErrorState';
-import PageContainer from '@/components/common/PageContainer';
 import PullToRefreshPanel from '@/components/common/PullToRefreshPanel';
 import Section from '@/components/common/Section';
-import SkeletonCard from '@/components/common/SkeletonCard';
 import AddWeightDialog from '@/components/weight/AddWeightDialog';
 import WeightChart from '@/components/weight/WeightChart';
 import WeightGoalDialog from '@/components/weight/WeightGoalDialog';
@@ -22,6 +19,7 @@ import {
   useWeightOverview,
 } from '@/hooks/useWeight';
 import { getAppThemeTokens } from '@/theme/theme';
+import { ErrorState, Page, SkeletonCard } from '@/ui';
 import { getApiErrorMessage } from '@/utils/errorHandling';
 import { localDate } from '@/utils/localDate';
 
@@ -123,7 +121,7 @@ export default function WeightPage() {
 
   if (overviewQuery.isLoading) {
     return (
-      <PageContainer
+      <Page
         title="Waga"
         breadcrumbs={[
           { label: 'Dashboard', href: '/' },
@@ -156,13 +154,13 @@ export default function WeightPage() {
             <SkeletonCard height={260} />
           </Grid>
         </Grid>
-      </PageContainer>
+      </Page>
     );
   }
 
   if (overviewQuery.isError) {
     return (
-      <PageContainer title="Waga">
+      <Page title="Waga">
         <ErrorState
           message={getApiErrorMessage(
             overviewQuery.error,
@@ -172,12 +170,12 @@ export default function WeightPage() {
             void overviewQuery.refetch();
           }}
         />
-      </PageContainer>
+      </Page>
     );
   }
 
   return (
-    <PageContainer
+    <Page
       title="Waga"
       subtitle="Stan dziś, cel i historia są rozdzielone na krótsze sekcje z czytelniejszym trendem."
       breadcrumbs={[
@@ -269,6 +267,6 @@ export default function WeightPage() {
         pending={setGoal.isPending}
         onSubmit={handleGoalSubmit}
       />
-    </PageContainer>
+    </Page>
   );
 }

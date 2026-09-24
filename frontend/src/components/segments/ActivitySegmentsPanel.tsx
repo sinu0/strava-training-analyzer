@@ -4,11 +4,8 @@ import { Box, Button, Chip, Collapse, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import EmptyState from '@/components/common/EmptyState';
-import ErrorState from '@/components/common/ErrorState';
-import LoadingState from '@/components/common/LoadingState';
-import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import { useActivitySegments } from '@/hooks/useSegments';
+import { EmptyState, ErrorState, LoadingState, Surface } from '@/ui';
 
 import SegmentRankTrophy from './SegmentRankTrophy';
 import SegmentRouteMap from './SegmentRouteMap';
@@ -41,7 +38,7 @@ export default function ActivitySegmentsPanel({ activityId }: ActivitySegmentsPa
   return (
     <Stack spacing={2}>
       {!data.personalBestConfirmed && <Chip color="warning" variant="outlined" label="Rekordy: najlepsze w dostępnych danych — backfill trwa" sx={{ alignSelf: 'flex-start' }} />}
-      <PerformanceSurface sx={{ overflow: 'hidden' }}>
+      <Surface padding="none" sx={{ overflow: 'hidden' }}>
         <SegmentRouteMap
           routes={[
             ...(data.routePolyline ? [{ id: 'activity-route', label: 'Pełna trasa aktywności', polyline: data.routePolyline, color: '#64748b', weight: 4, interactive: false }] : []),
@@ -51,16 +48,15 @@ export default function ActivitySegmentsPanel({ activityId }: ActivitySegmentsPa
           onOpen={id => openEffort(String(id))}
           ariaLabel="Segmenty na trasie aktywności"
         />
-      </PerformanceSurface>
+      </Surface>
       <Stack spacing={1} component="ol" sx={{ listStyle: 'none', m: 0, p: 0 }}>
         {data.efforts.map((effort, index) => (
-          <PerformanceSurface
+          <Surface padding="sm"
             key={effort.id}
             component="li"
             onMouseEnter={() => setHighlighted(effort.id)}
             onMouseLeave={() => setHighlighted(null)}
-            sx={{ p: 2, borderColor: highlighted === effort.id ? 'primary.main' : undefined }}
-          >
+            sx={{ borderColor: highlighted === effort.id ? 'primary.main' : undefined }}>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{
               alignItems: { sm: 'center' }
             }}>
@@ -116,7 +112,7 @@ export default function ActivitySegmentsPanel({ activityId }: ActivitySegmentsPa
                 />
               </Box>
             </Collapse>
-          </PerformanceSurface>
+          </Surface>
         ))}
       </Stack>
     </Stack>

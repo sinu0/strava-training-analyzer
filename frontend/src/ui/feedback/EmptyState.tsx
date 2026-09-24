@@ -1,6 +1,8 @@
 import InboxIcon from '@mui/icons-material/Inbox';
 import { Box, Typography, Button } from '@mui/material';
 
+import IconBubble from '../IconBubble';
+
 import type { ReactNode } from 'react';
 
 interface EmptyStateProps {
@@ -43,21 +45,9 @@ export default function EmptyState({
           sx={{ width: 140, height: 140, objectFit: 'contain', opacity: 0.85, mb: 1 }}
         />
       ) : (
-        <Box
-          sx={{
-            width: 72,
-            height: 72,
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            bgcolor: (theme) => theme.tokens?.iconBubble ?? 'action.hover',
-            color: 'text.secondary',
-            mb: 1,
-          }}
-        >
-          {icon ?? <InboxIcon sx={{ fontSize: 32 }} />}
-        </Box>
+        <IconBubble size="lg" sx={{ mb: 1, color: 'text.secondary' }}>
+          {icon ?? <InboxIcon />}
+        </IconBubble>
       )}
       <Typography variant="subtitle1" sx={{ color: 'text.primary' }}>
         {title}

@@ -15,10 +15,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import WorkoutPowerChart from '@/components/training/WorkoutPowerChart';
-import MetricReadout from '@/components/v2/MetricReadout';
-import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import { getAppThemeTokens } from '@/theme/theme';
 import type { WorkoutExecution, WorkoutStep } from '@/types/training';
+import { Metric, Surface } from '@/ui';
 
 import {
   acquireExecutionLock, clearActiveExecution, loadActiveExecution, saveActiveExecution,
@@ -273,15 +272,15 @@ export default function WorkoutPlayerPage() {
     };
     return (
       <Container maxWidth="sm" sx={{ py: { xs: 3, sm: 6 } }}>
-        <PerformanceSurface accent sx={{ p: { xs: 2.5, sm: 4 } }}>
+        <Surface variant="accent">
           <Typography variant="overline" sx={{
             color: "text.secondary"
           }}>{execution.status === 'COMPLETED' ? 'Trening ukończony' : 'Trening przerwany'}</Typography>
           <Typography variant="h3" sx={{ mt: 0.5 }}>{execution.workoutNameSnapshot}</Typography>
           <Stack direction="row" spacing={3} sx={{ my: 3 }}>
-            <MetricReadout label="Zrealizowany czas" value={formatTime(execution.workoutElapsedMs)} />
-            <MetricReadout label="Pominięte kroki" value={execution.skippedStepIndexes.length} />
-            <MetricReadout label="Zgodność" value={execution.complianceScore ?? '—'} unit={execution.complianceScore != null ? '%' : undefined} hint={execution.complianceStatus} />
+            <Metric label="Zrealizowany czas" value={formatTime(execution.workoutElapsedMs)} />
+            <Metric label="Pominięte kroki" value={execution.skippedStepIndexes.length} />
+            <Metric label="Zgodność" value={execution.complianceScore ?? '—'} unit={execution.complianceScore != null ? '%' : undefined} hint={execution.complianceStatus} />
           </Stack>
           <Alert severity="info" sx={{ mb: 3 }}>Dokładna ocena zostanie uzupełniona po synchronizacji aktywności i strumieni ze Stravy.</Alert>
           <Typography id="rpe-label" gutterBottom>{rpe == null ? 'RPE: nie podano' : `RPE: ${rpe}/10`}</Typography>
@@ -294,7 +293,7 @@ export default function WorkoutPlayerPage() {
           <TextField label="Notatka" multiline minRows={3} fullWidth value={notes} onChange={event => setNotes(event.target.value)} />
           {!!feedbackError && <Alert severity="error" sx={{ mt: 2 }}>Nie udało się zapisać podsumowania. Twoje odczucia pozostały w formularzu; spróbuj ponownie.</Alert>}
           <Button variant="contained" fullWidth disabled={saving} onClick={() => void saveFeedback()} sx={{ mt: 2, minHeight: 48 }}>Zapisz podsumowanie</Button>
-        </PerformanceSurface>
+        </Surface>
       </Container>
     );
   }
@@ -316,7 +315,7 @@ export default function WorkoutPlayerPage() {
             <Chip label={wakeMode === 'ACTIVE' ? 'Ekran aktywny' : wakeMode === 'FALLBACK' ? 'Wake Lock niedostępny — ustaw blokadę ekranu ręcznie' : 'Wake Lock wyłączony'} variant="outlined" />
           </Stack>
         </Stack>
-        <PerformanceSurface accent sx={{ p: { xs: 2, sm: 3 } }}>
+        <Surface variant="accent">
           <Typography variant="overline" sx={{
             color: "text.secondary"
           }}>{execution.workoutNameSnapshot}</Typography>
@@ -335,9 +334,9 @@ export default function WorkoutPlayerPage() {
             <Stack direction="row" spacing={{ xs: 3, sm: 5 }} sx={{
               alignItems: "center"
             }}>
-              <MetricReadout label="Cel mocy" value={goal.watts} unit={goal.watts !== '—' ? 'W' : undefined} tone="primary" hint={goal.pct} />
-              <MetricReadout label="Tętno" value={step?.heartRateBpmLow == null ? '—' : `${step.heartRateBpmLow}–${step.heartRateBpmHigh ?? step.heartRateBpmLow}`} unit={step?.heartRateBpmLow == null ? undefined : 'bpm'} />
-              <MetricReadout label="Kadencja" value={step?.cadenceRpmLow == null ? '—' : `${step.cadenceRpmLow}–${step.cadenceRpmHigh ?? step.cadenceRpmLow}`} unit={step?.cadenceRpmLow == null ? undefined : 'rpm'} />
+              <Metric label="Cel mocy" value={goal.watts} unit={goal.watts !== '—' ? 'W' : undefined} tone="primary" hint={goal.pct} />
+              <Metric label="Tętno" value={step?.heartRateBpmLow == null ? '—' : `${step.heartRateBpmLow}–${step.heartRateBpmHigh ?? step.heartRateBpmLow}`} unit={step?.heartRateBpmLow == null ? undefined : 'bpm'} />
+              <Metric label="Kadencja" value={step?.cadenceRpmLow == null ? '—' : `${step.cadenceRpmLow}–${step.cadenceRpmHigh ?? step.cadenceRpmLow}`} unit={step?.cadenceRpmLow == null ? undefined : 'rpm'} />
             </Stack>
           </Stack>
           <LinearProgress variant="determinate" value={progress} aria-label="Postęp całego treningu" sx={{ height: 10, borderRadius: 8, mt: 3 }} />
@@ -348,7 +347,7 @@ export default function WorkoutPlayerPage() {
               mt: 1
             }}>Następny: {stepLabel(nextStep, execution.currentStepIndex + 1)}</Typography>
           {!!step?.instructions && <Alert severity="info" sx={{ mt: 2 }}>{step.instructions}</Alert>}
-        </PerformanceSurface>
+        </Surface>
 
         <Box sx={{ mt: 2 }}><WorkoutPowerChart steps={execution.stepsSnapshot} /></Box>
 

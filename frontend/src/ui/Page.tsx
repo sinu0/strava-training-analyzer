@@ -2,7 +2,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Breadcrumbs, Box, Link, Typography, type Breakpoint } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
-import { getAppThemeTokens } from '@/theme/theme';
+import PageHeader from './PageHeader';
 
 import type { ReactNode } from 'react';
 
@@ -11,9 +11,11 @@ interface PageBreadcrumb {
   href?: string;
 }
 
-interface PageContainerProps {
+export interface PageProps {
   title?: string;
   subtitle?: string;
+  eyebrow?: string;
+  meta?: ReactNode;
   actions?: ReactNode;
   maxWidth?: Breakpoint | number;
   breadcrumbs?: PageBreadcrumb[];
@@ -21,16 +23,18 @@ interface PageContainerProps {
 }
 
 /**
- * Constrains page content width and renders an optional page header row.
+ * Page shell: width constraint, breadcrumbs and the standard PageHeader.
  */
-export default function PageContainer({
+export default function Page({
   title,
   subtitle,
+  eyebrow,
+  meta,
   actions,
   maxWidth,
   breadcrumbs,
   children,
-}: PageContainerProps) {
+}: PageProps) {
   const mw =
     typeof maxWidth === 'number'
       ? maxWidth
@@ -86,36 +90,7 @@ export default function PageContainer({
         </Breadcrumbs>
       )}
       {!!(title || actions) && (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: (theme) => getAppThemeTokens(theme).space.cluster,
-            mb: { xs: 3, md: 4 },
-          }}
-        >
-          <Box sx={{ minWidth: 0 }}>
-            {!!title && (
-              <Typography component="h1" variant="h4">
-                {title}
-              </Typography>
-            )}
-            {!!subtitle && (
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                  mt: 0.75,
-                  maxWidth: 760
-                }}>
-                {subtitle}
-              </Typography>
-            )}
-          </Box>
-          {actions}
-        </Box>
+        <PageHeader title={title} description={subtitle} eyebrow={eyebrow} meta={meta} actions={actions} />
       )}
       {children}
     </Box>

@@ -14,10 +14,10 @@ import {
 import { useMemo, lazy, Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { Page } from '@/ui';
 import { localDate } from '@/utils/localDate';
 
 import ErrorBoundary from '../components/common/ErrorBoundary';
-import PageContainer from '../components/common/PageContainer';
 import Section from '../components/common/Section';
 import AchievementsSection from '../components/profile/AchievementsSection';
 import FourWeekCyclingSummary from '../components/profile/FourWeekCyclingSummary';
@@ -128,7 +128,7 @@ export default function ProfilePage() {
     : 'KP';
 
   return (
-    <PageContainer
+    <Page
       title="Profil"
       subtitle="Kluczowe statystyki są uproszczone, a podsumowanie treningowe wychodzi nad galerię i dodatki."
       breadcrumbs={[
@@ -514,6 +514,6 @@ export default function ProfilePage() {
         </DialogActions>
       </Dialog>
       </Box>
-    </PageContainer>
+    </Page>
   );
 }

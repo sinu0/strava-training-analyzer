@@ -1,8 +1,8 @@
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { Grid, Stack, Tooltip, Typography } from '@mui/material';
 
-import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import type { ActivityMetricValue } from '@/features/history/types';
+import { Surface } from '@/ui';
 import { formatActivityMetric, getActivityMetricMetadata } from '@/utils/activityMetricMetadata';
 
 export default function ActivityMetricGrid({ metrics }: { metrics: ActivityMetricValue[] }) {
@@ -22,7 +22,7 @@ export default function ActivityMetricGrid({ metrics }: { metrics: ActivityMetri
         const metadata = getActivityMetricMetadata(item.name);
         return (
           <Grid key={item.name} size={{ xs: 12, sm: 6 }}>
-            <PerformanceSurface sx={{ p: 1.5, height: '100%' }}>
+            <Surface padding="sm" sx={{ height: '100%' }}>
               <Stack direction="row" spacing={0.75} sx={{
                 alignItems: "center"
               }}>
@@ -41,7 +41,7 @@ export default function ActivityMetricGrid({ metrics }: { metrics: ActivityMetri
               <Typography variant="h6" sx={{ mt: 0.5, fontVariantNumeric: 'tabular-nums' }}>
                 {formatActivityMetric(item.name, item.numericValue!)}
               </Typography>
-            </PerformanceSurface>
+            </Surface>
           </Grid>
         );
       })}

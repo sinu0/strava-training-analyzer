@@ -3,9 +3,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, beforeAll } from 'vitest';
 
+import { EmptyState, Page } from '@/ui';
+
 import ChartWrapper from '../components/common/ChartWrapper';
-import EmptyState from '../components/common/EmptyState';
-import PageContainer from '../components/common/PageContainer';
 import Section from '../components/common/Section';
 import StatDisplay from '../components/common/StatDisplay';
 import TabsNav from '../components/common/TabsNav';
@@ -54,26 +54,26 @@ describe('Section', () => {
   });
 });
 
-describe('PageContainer', () => {
+describe('Page', () => {
   it('renders title and children', () => {
-    renderWithTheme(<PageContainer title="Page">Page content</PageContainer>);
+    renderWithTheme(<Page title="Page">Page content</Page>);
     expect(screen.getByText('Page')).toBeDefined();
     expect(screen.getByText('Page content')).toBeDefined();
   });
 
   it('renders subtitle', () => {
-    renderWithTheme(<PageContainer title="P" subtitle="Description">C</PageContainer>);
+    renderWithTheme(<Page title="P" subtitle="Description">C</Page>);
     expect(screen.getByText('Description')).toBeDefined();
   });
 
   it('renders actions', () => {
-    renderWithTheme(<PageContainer title="P" actions={<button>Action</button>}>C</PageContainer>);
+    renderWithTheme(<Page title="P" actions={<button>Action</button>}>C</Page>);
     expect(screen.getByText('Action')).toBeDefined();
   });
 
   it('renders breadcrumbs when provided', () => {
     renderWithThemeAndRouter(
-      <PageContainer
+      <Page
         title="Aktywności"
         breadcrumbs={[
           { label: 'Dashboard', href: '/' },
@@ -81,7 +81,7 @@ describe('PageContainer', () => {
         ]}
       >
         C
-      </PageContainer>,
+      </Page>,
     );
 
     expect(screen.getByText('Dashboard')).toBeDefined();
@@ -89,7 +89,7 @@ describe('PageContainer', () => {
   });
 
   it('renders without title', () => {
-    renderWithTheme(<PageContainer>Just content</PageContainer>);
+    renderWithTheme(<Page>Just content</Page>);
     expect(screen.getByText('Just content')).toBeDefined();
   });
 });

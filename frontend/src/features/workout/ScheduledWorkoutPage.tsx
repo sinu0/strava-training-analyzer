@@ -6,13 +6,9 @@ import { Alert, Box, Button, Chip, Stack, Typography } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import ErrorState from '@/components/common/ErrorState';
-import LoadingState from '@/components/common/LoadingState';
-import PageContainer from '@/components/common/PageContainer';
 import PwaCapabilityBanner from '@/components/PwaCapabilityBanner';
 import WorkoutPowerChart from '@/components/training/WorkoutPowerChart';
-import MetricReadout from '@/components/v2/MetricReadout';
-import PerformanceSurface from '@/components/v2/PerformanceSurface';
+import { ErrorState, LoadingState, Metric, Page, Surface } from '@/ui';
 
 import { deliveryCapabilities, getActiveExecution, getScheduledWorkout, scheduledExportUrl, startExecution } from './workoutApi';
 
@@ -45,7 +41,7 @@ export default function ScheduledWorkoutPage() {
   const garmin = capabilities.data?.find(capability => capability.method === 'GARMIN');
 
   return (
-    <PageContainer
+    <Page
       title={plan.workoutTemplateName ?? plan.plannedDescription ?? 'Zaplanowany trening'}
       subtitle={`${plan.date} · wersja ${plan.workoutTemplateRevision ?? 'legacy'}`}
       maxWidth={1100}
@@ -54,7 +50,7 @@ export default function ScheduledWorkoutPage() {
       {!!start.isError && <Alert severity="error" sx={{ mb: 2 }}>Nie udało się rozpocząć treningu. Sprawdź, czy inne wykonanie nie jest aktywne.</Alert>}
       {!!anotherActive && <Alert severity="warning" sx={{ mb: 2 }}>Inny trening jest aktywny. Najpierw go wznów lub zakończ.</Alert>}
       <Stack spacing={2.5}>
-        <PerformanceSurface accent sx={{ p: { xs: 2, sm: 3 } }}>
+        <Surface variant="accent">
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{
             justifyContent: "space-between"
           }}>
@@ -72,15 +68,15 @@ export default function ScheduledWorkoutPage() {
             <Stack direction="row" spacing={{ xs: 2, sm: 4 }} sx={{
               flexWrap: "wrap"
             }}>
-              <MetricReadout label="Czas" value={plan.plannedDurationMin ?? '—'} unit="min" />
-              <MetricReadout label="FTP wykonania" value={plan.ftpWatts ?? '—'} unit={plan.ftpWatts ? 'W' : undefined} hint="zapisane przy planowaniu" />
-              <MetricReadout label="TSS" value={plan.plannedTss ?? '—'} />
+              <Metric label="Czas" value={plan.plannedDurationMin ?? '—'} unit="min" />
+              <Metric label="FTP wykonania" value={plan.ftpWatts ?? '—'} unit={plan.ftpWatts ? 'W' : undefined} hint="zapisane przy planowaniu" />
+              <Metric label="TSS" value={plan.plannedTss ?? '—'} />
             </Stack>
           </Stack>
           <Box sx={{ mt: 3 }}>
             <WorkoutPowerChart steps={plan.workoutStepsSnapshot ?? []} />
           </Box>
-        </PerformanceSurface>
+        </Surface>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
           <Button
@@ -103,7 +99,7 @@ export default function ScheduledWorkoutPage() {
           </Stack>
         </Stack>
 
-        <PerformanceSurface sx={{ p: 2.5 }}>
+        <Surface>
           <Stack direction="row" spacing={1.5} sx={{
             alignItems: "center"
           }}>
@@ -116,8 +112,8 @@ export default function ScheduledWorkoutPage() {
             </Box>
             <Chip label={garmin?.status ?? '…'} size="small" color={garmin?.status === 'AVAILABLE' ? 'success' : 'default'} />
           </Stack>
-        </PerformanceSurface>
+        </Surface>
       </Stack>
-    </PageContainer>
+    </Page>
   );
 }

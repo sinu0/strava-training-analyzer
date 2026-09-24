@@ -18,7 +18,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import PageContainer from '@/components/common/PageContainer';
 import Section from '@/components/common/Section';
 import WeatherAlgorithmPanel from '@/components/weather/WeatherAlgorithmPanel';
 import WeatherForecastViews from '@/components/weather/WeatherForecastViews';
@@ -37,6 +36,7 @@ import {
 } from '@/hooks/useAnalytics';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { getAppThemeTokens } from '@/theme/theme';
+import { Page } from '@/ui';
 import { alphaColor, CHART_COLORS, STATUS_COLORS } from '@/utils/colors';
 import { getWeatherIllustrationPath } from '@/utils/illustrationAssets';
 import {
@@ -127,7 +127,7 @@ export default function WeatherPage() {
   };
 
   return (
-    <PageContainer
+    <Page
       title="Studio pogody"
       subtitle="Pełny widok pogody dla decyzji treningowej i eksploracji punktów na mapie."
       breadcrumbs={[{ label: 'Home' }, { label: 'Studio pogody' }]}
@@ -431,6 +431,6 @@ export default function WeatherPage() {
           </Grid>
         </Grid>
       </Stack>
-    </PageContainer>
+    </Page>
   );
 }

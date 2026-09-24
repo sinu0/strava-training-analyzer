@@ -12,9 +12,9 @@ import {
 import { forwardRef, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import EmptyState from '@/components/common/EmptyState';
 import { useRecentActivities } from '@/hooks/useAnalytics';
 import type { ActivitySummary } from '@/types/activity';
+import { EmptyState } from '@/ui';
 import { formatDistance, formatDuration } from '@/utils/formatters';
 
 import type { TransitionProps } from '@mui/material/transitions';

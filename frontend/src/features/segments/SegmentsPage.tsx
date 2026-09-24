@@ -4,13 +4,8 @@ import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import { Box, Button, Chip, FormControl, FormControlLabel, Grid, IconButton, InputAdornment, InputLabel, MenuItem, Pagination, Select, Stack, Switch, TextField, Typography } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
 
-import EmptyState from '@/components/common/EmptyState';
-import ErrorState from '@/components/common/ErrorState';
-import LoadingState from '@/components/common/LoadingState';
-import PageContainer from '@/components/common/PageContainer';
-import MetricReadout from '@/components/v2/MetricReadout';
-import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import { useBackfillStatus, useSegments, useSetSegmentFavorite, useStartBackfill } from '@/hooks/useSegments';
+import { EmptyState, ErrorState, LoadingState, Metric, Page, Surface } from '@/ui';
 import { describeBackfillStatus, isBackfillBusy } from '@/utils/backfillStatus';
 
 function duration(seconds?: number | null) {
@@ -48,8 +43,8 @@ export default function SegmentsPage() {
   };
 
   return (
-    <PageContainer title="Segmenty" subtitle="Katalog wszystkich segmentów napotkanych w Twoich aktywnościach" maxWidth={1200}>
-      <PerformanceSurface sx={{ p: 2, mb: 2.5 }}>
+    <Page title="Segmenty" subtitle="Katalog wszystkich segmentów napotkanych w Twoich aktywnościach" maxWidth={1200}>
+      <Surface padding="sm" sx={{ mb: 2.5 }}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{
           alignItems: { md: 'center' }
         }}>
@@ -70,10 +65,10 @@ export default function SegmentsPage() {
           <FormControlLabel control={<Switch checked={favorite} onChange={event => update('favorite', event.target.checked ? 'true' : undefined)} />} label="Tylko ulubione" />
           <FormControlLabel control={<Switch checked={climbs} onChange={event => update('climbs', event.target.checked ? 'true' : undefined)} />} label="Podjazdy ≥ 3%" />
         </Stack>
-      </PerformanceSurface>
+      </Surface>
 
       {!!backfill.data && backfill.data.status !== 'COMPLETED' && (
-        <PerformanceSurface sx={{ p: 2, mb: 2.5 }}>
+        <Surface padding="sm" sx={{ mb: 2.5 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{
             alignItems: { sm: 'center' }
           }}>
@@ -83,11 +78,11 @@ export default function SegmentsPage() {
               }}>{backfill.data.processed}/{backfill.data.total} aktywności · capability: {backfill.data.capability}</Typography></Box>
             <Button variant="contained" disabled={isBackfillBusy(backfill.data.status) || startBackfill.isPending} onClick={() => startBackfill.mutate('segments')}>Uruchom / wznów</Button>
           </Stack>
-        </PerformanceSurface>
+        </Surface>
       )}
 
       {!!routeBackfill.data && routeBackfill.data.status !== 'COMPLETED' && (
-        <PerformanceSurface sx={{ p: 2, mb: 2.5 }}>
+        <Surface padding="sm" sx={{ mb: 2.5 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{
             alignItems: { sm: 'center' }
           }}>
@@ -97,7 +92,7 @@ export default function SegmentsPage() {
               }}>{routeBackfill.data.processed}/{routeBackfill.data.total} aktywności · bez wywołań Stravy</Typography></Box>
             <Button variant="outlined" disabled={isBackfillBusy(routeBackfill.data.status) || startBackfill.isPending} onClick={() => startBackfill.mutate('routes')}>Uruchom / wznów</Button>
           </Stack>
-        </PerformanceSurface>
+        </Surface>
       )}
 
       {!!segments.isLoading && <LoadingState message="Ładowanie katalogu segmentów…" />}
@@ -106,7 +101,7 @@ export default function SegmentsPage() {
       <Grid container spacing={1.5}>
         {segments.data?.items.map(segment => (
           <Grid key={segment.id} size={{ xs: 12, md: 6 }}>
-            <PerformanceSurface interactive sx={{ p: 2, height: '100%' }}>
+            <Surface padding="sm" interactive sx={{ height: '100%' }}>
               <Stack direction="row" spacing={1} sx={{
                 alignItems: "flex-start"
               }}>
@@ -129,15 +124,15 @@ export default function SegmentsPage() {
                 </IconButton>
               </Stack>
               <Grid container spacing={1.5} sx={{ mt: 1.5 }}>
-                <Grid size={4}><MetricReadout label="Dystans" value={segment.distanceM != null ? `${(segment.distanceM / 1000).toFixed(2)} km` : '—'} /></Grid>
-                <Grid size={4}><MetricReadout label="Nachylenie" value={segment.averageGrade != null ? `${segment.averageGrade.toFixed(1)}%` : '—'} /></Grid>
-                <Grid size={4}><MetricReadout label="Najlepszy" value={duration(segment.bestElapsedTimeSec)} tone="primary" /></Grid>
+                <Grid size={4}><Metric label="Dystans" value={segment.distanceM != null ? `${(segment.distanceM / 1000).toFixed(2)} km` : '—'} /></Grid>
+                <Grid size={4}><Metric label="Nachylenie" value={segment.averageGrade != null ? `${segment.averageGrade.toFixed(1)}%` : '—'} /></Grid>
+                <Grid size={4}><Metric label="Najlepszy" value={duration(segment.bestElapsedTimeSec)} tone="primary" /></Grid>
               </Grid>
-            </PerformanceSurface>
+            </Surface>
           </Grid>
         ))}
       </Grid>
       {(segments.data?.totalPages ?? 0) > 1 && <Pagination sx={{ mt: 3, display: 'flex', justifyContent: 'center' }} page={page + 1} count={segments.data?.totalPages ?? 1} onChange={(_, value) => update('page', String(value - 1))} />}
-    </PageContainer>
+    </Page>
   );
 }

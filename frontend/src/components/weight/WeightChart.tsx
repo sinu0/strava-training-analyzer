@@ -11,8 +11,8 @@ import {
   YAxis,
 } from 'recharts';
 
-import ChartContainer from '@/components/common/ChartContainer';
 import type { WeightGoal, WeightRecord } from '@/types/weight';
+import { ChartFrame } from '@/ui';
 import { CHART_ACTIVE_DOT, getChartVisuals } from '@/utils/chartStyles';
 
 const WEIGHT_GRADIENT_ID = 'weight-history-gradient';
@@ -35,7 +35,7 @@ export default function WeightChart({
 
   return (
     <Grid size={12}>
-      <ChartContainer
+      <ChartFrame
         title="Historia wagi"
         empty={chartData.length === 0}
         emptyTitle="Brak danych o wadze"
@@ -95,7 +95,7 @@ export default function WeightChart({
             </AreaChart>
           </ResponsiveContainer>
         </Box>
-      </ChartContainer>
+      </ChartFrame>
     </Grid>
   );
 }

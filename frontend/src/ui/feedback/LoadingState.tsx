@@ -1,5 +1,7 @@
 import { Box, CircularProgress, Typography } from '@mui/material';
 
+import IconBubble from '../IconBubble';
+
 interface LoadingStateProps {
   message?: string;
 }
@@ -20,19 +22,9 @@ export default function LoadingState({ message = 'Ładowanie...' }: LoadingState
         gap: 2,
       }}
     >
-      <Box
-        sx={{
-          width: 64,
-          height: 64,
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          bgcolor: (theme) => theme.tokens?.iconBubble ?? 'action.hover',
-        }}
-      >
-        <CircularProgress color="primary" size={28} thickness={4} />
-      </Box>
+      <IconBubble size="lg" decorative={false}>
+        <CircularProgress color="primary" size={28} thickness={4} aria-label={message} />
+      </IconBubble>
       <Typography variant="body2" sx={{
         color: "text.secondary"
       }}>

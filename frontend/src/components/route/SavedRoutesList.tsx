@@ -2,7 +2,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 import { List, ListItemButton, ListItemText, IconButton, Chip, Stack } from '@mui/material';
 
-import EmptyState from '@/components/common/EmptyState';
+
+import { EmptyState } from '@/ui';
 
 import { STATUS_COLORS, alphaColor } from '../../utils/colors';
 

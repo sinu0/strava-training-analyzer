@@ -12,10 +12,9 @@ import { alpha, useTheme } from '@mui/material/styles';
 
 import LightweightRoutePreview from '@/components/activity/LightweightRoutePreview';
 import { LoadDotMatrix, RecoveryFormGauge } from '@/components/today/TrainingVisualizations';
-import MetricReadout from '@/components/v2/MetricReadout';
-import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import { getAppThemeTokens } from '@/theme/theme';
 import type { DashboardWidget } from '@/types/uiPreferences';
+import { Metric, Surface } from '@/ui';
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
 
 import type { TodayResponse } from './types';
@@ -136,7 +135,7 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
     });
 
     return (
-      <PerformanceSurface accent sx={{ p: 0, minHeight: { xs: 380, md: 440 }, height: '100%' }}>
+      <Surface padding="none" variant="accent" sx={{ minHeight: { xs: 380, md: 440 }, height: '100%' }}>
         <Box sx={{ position: 'relative', minHeight: 'inherit', height: '100%', overflow: 'hidden' }}>
           <Box
             component="img"
@@ -268,7 +267,7 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
             </IconButton>
           </Stack>
         </Box>
-      </PerformanceSurface>
+      </Surface>
     );
   }
 
@@ -276,10 +275,10 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
     const form = data.load?.form;
     const readiness = form == null ? 'Brak oceny' : form >= 5 ? 'Świeżość' : form >= -10 ? 'Równowaga' : 'Regeneracja';
     return (
-      <PerformanceSurface interactive sx={{ p: { xs: 2.5, md: 3 }, height: '100%' }}>
+      <Surface interactive sx={{ height: '100%' }}>
         <WidgetHeader icon={<HotelOutlinedIcon />} title={title} />
         <Box sx={{ mt: 2 }}>
-          <MetricReadout label="Ocena gotowości" value={readiness} />
+          <Metric label="Ocena gotowości" value={readiness} />
         </Box>
         <Typography
           variant="body2"
@@ -290,20 +289,20 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
           {form == null ? 'Brakuje historii do oceny gotowości.' : `Forma ${form.toFixed(1)} · ocena na podstawie obciążenia treningowego.`}
         </Typography>
         {form != null && <RecoveryFormGauge form={form} />}
-      </PerformanceSurface>
+      </Surface>
     );
   }
 
   if (widget.type === 'load') {
     return (
-      <PerformanceSurface interactive sx={{ p: { xs: 2.5, md: 3 }, height: '100%' }}>
+      <Surface interactive sx={{ height: '100%' }}>
         <WidgetHeader icon={<DataUsageOutlinedIcon />} title={title} />
         {data.load ? (
           <>
             <Stack direction="row" spacing={2.5} sx={{ mt: 2 }}>
-              <MetricReadout label="CTL" value={data.load.ctl42.toFixed(1)} tone="primary" />
-              <MetricReadout label="ATL" value={data.load.atl7.toFixed(1)} tone="warning" />
-              <MetricReadout label="Forma" value={data.load.form.toFixed(1)} tone={data.load.form < -10 ? 'warning' : 'success'} />
+              <Metric label="CTL" value={data.load.ctl42.toFixed(1)} tone="primary" />
+              <Metric label="ATL" value={data.load.atl7.toFixed(1)} tone="warning" />
+              <Metric label="Forma" value={data.load.form.toFixed(1)} tone={data.load.form < -10 ? 'warning' : 'success'} />
             </Stack>
             <LoadDotMatrix ctl={data.load.ctl42} atl={data.load.atl7} form={data.load.form} />
           </>
@@ -313,13 +312,13 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
             color: "text.secondary",
             mt: 2
           }}>Brak historii wymaganej do obliczenia obciążenia.</Typography>}
-      </PerformanceSurface>
+      </Surface>
     );
   }
 
   if (widget.type === 'lastActivity') {
     return (
-      <PerformanceSurface sx={{ p: 0, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <Surface padding="none" sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ p: { xs: 2.5, md: 3 }, pb: 1.5 }}>
           <WidgetHeader icon={<DirectionsBikeOutlinedIcon />} title={title} />
           {data.lastActivity ? (
@@ -376,13 +375,13 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
             </Button>
           </Box>
         )}
-      </PerformanceSurface>
+      </Surface>
     );
   }
 
   if (widget.type === 'nextWorkout') {
     return (
-      <PerformanceSurface interactive sx={{ p: { xs: 2.5, md: 3 }, height: '100%' }}>
+      <Surface interactive sx={{ height: '100%' }}>
         <WidgetHeader icon={<EventOutlinedIcon />} title={title} />
         {data.nextTraining ? (
           <>
@@ -407,13 +406,13 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
             color: "text.secondary",
             mt: 2
           }}>Brak zaplanowanej sesji.</Typography>}
-      </PerformanceSurface>
+      </Surface>
     );
   }
 
   if (widget.type === 'weather') {
     return (
-      <PerformanceSurface sx={{ p: { xs: 2.5, md: 3 }, height: '100%' }}>
+      <Surface sx={{ height: '100%' }}>
         <WidgetHeader icon={<CloudOutlinedIcon />} title={title} />
         <Typography
           variant="body2"
@@ -424,13 +423,13 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
           Sprawdź okno pogodowe, wiatr i opady przed wyborem godziny wyjazdu.
         </Typography>
         <Button variant="outlined" onClick={() => navigate('/weather')} sx={{ mt: 2 }}>Otwórz pogodę</Button>
-      </PerformanceSurface>
+      </Surface>
     );
   }
 
   if (widget.type === 'weeklyVolume') {
     return (
-      <PerformanceSurface sx={{ p: { xs: 2.5, md: 3 }, height: '100%' }}>
+      <Surface sx={{ height: '100%' }}>
         <WidgetHeader icon={<InsightsOutlinedIcon />} title={title} />
         <Typography
           variant="body2"
@@ -441,12 +440,12 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
           Szczegółowa objętość tygodnia jest dostępna w analizie obciążenia.
         </Typography>
         <Button onClick={() => navigate('/analytics')} sx={{ mt: 1 }}>Otwórz analizę</Button>
-      </PerformanceSurface>
+      </Surface>
     );
   }
 
   return (
-    <PerformanceSurface sx={{ p: { xs: 2.5, md: 3 }, height: '100%' }}>
+    <Surface sx={{ height: '100%' }}>
       <WidgetHeader icon={<FlagOutlinedIcon />} title={title} />
       <Typography
         variant="body2"
@@ -457,6 +456,6 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
         Ustaw priorytet sezonu i monitoruj drogę do celu w widoku planu.
       </Typography>
       <Button onClick={() => navigate('/training')} sx={{ mt: 1 }}>Otwórz plan</Button>
-    </PerformanceSurface>
+    </Surface>
   );
 }

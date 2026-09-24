@@ -8,11 +8,10 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import { Alert, Box, ButtonBase, Grid, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-import PageContainer from '@/components/common/PageContainer';
 import MobileNavigationSettings from '@/components/settings/MobileNavigationSettings';
-import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import { useSaveUiPreferences, useUiPreferences } from '@/hooks/useUiPreferences';
 import { getAppThemeTokens } from '@/theme/theme';
+import { Page, Surface } from '@/ui';
 
 const items = [
   { label: 'Pogoda', description: 'Prognoza, lokalizacje i ustawienia', path: '/weather', icon: <CloudOutlinedIcon /> },
@@ -28,7 +27,7 @@ export default function MorePage() {
   const preferences = useUiPreferences();
   const savePreferences = useSaveUiPreferences();
   return (
-    <PageContainer title="Więcej" subtitle="Pełna pogoda, profil sportowy, zdrowie oraz kontrola danych w jednym miejscu." maxWidth={1100}>
+    <Page title="Więcej" subtitle="Pełna pogoda, profil sportowy, zdrowie oraz kontrola danych w jednym miejscu." maxWidth={1100}>
       <Grid container spacing={2}>
         {items.map((item, index) => (
           <Grid
@@ -37,7 +36,7 @@ export default function MorePage() {
               xs: 12,
               sm: 6
             }}>
-            <PerformanceSurface interactive accent={index === 0} sx={{ height: '100%' }}>
+            <Surface padding="none" interactive variant={index === 0 ? 'accent' : 'default'} sx={{ height: '100%' }}>
               <ButtonBase
                 onClick={() => navigate(item.path)}
                 sx={{
@@ -78,11 +77,11 @@ export default function MorePage() {
                   <ArrowForwardRoundedIcon sx={{ color: 'text.secondary', alignSelf: 'center' }} />
                 </Stack>
               </ButtonBase>
-            </PerformanceSurface>
+            </Surface>
           </Grid>
         ))}
         <Grid size={12}>
-          <PerformanceSurface sx={{ p: { xs: 2, md: 2.5 } }}>
+          <Surface>
             {preferences.data ? (
               <MobileNavigationSettings
                 preferences={preferences.data}
@@ -98,9 +97,9 @@ export default function MorePage() {
                 color: "text.secondary"
               }}>Wczytywanie skrótów mobilnych…</Typography>
             )}
-          </PerformanceSurface>
+          </Surface>
         </Grid>
       </Grid>
-    </PageContainer>
+    </Page>
   );
 }

@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 import { formatTimestamp, StatusChip } from '@/components/admin/adminUtils';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
-import DataCard from '@/components/common/DataCard';
+import { Widget } from '@/ui';
 import {
   BRAND_COLORS,
   CHART_COLORS,
@@ -86,7 +86,7 @@ export default function SyncStatusSection({
 
   return (
     <>
-      <DataCard title="Synchronizacja Strava">
+      <Widget title="Synchronizacja Strava">
         <Box sx={{ py: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
             <SyncIcon sx={{ color: STATUS_COLORS.info, fontSize: 28 }} />
@@ -374,7 +374,7 @@ export default function SyncStatusSection({
             </Stack>
           </Box>
         </Box>
-      </DataCard>
+      </Widget>
 
       <ConfirmDialog
         open={clearDialogOpen}

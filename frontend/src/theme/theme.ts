@@ -57,6 +57,22 @@ export const getThemeTokens = (mode: AppColorMode) => {
     canvas,
     topBar: isLight ? 'rgba(243,244,250,0.88)' : 'rgba(8,16,24,0.82)',
     iconBubble: isLight ? '#F2F4FA' : 'rgba(255,255,255,0.05)',
+    /** Frosted surfaces placed over photography (hero pills, floating stats). */
+    glass: {
+      bg: 'rgba(255,255,255,0.18)',
+      bgStrong: 'rgba(255,255,255,0.26)',
+      border: 'rgba(255,255,255,0.25)',
+      blur: 'blur(12px)',
+    },
+    /** Ink for content that sits on photography or a dark scrim, in both modes. */
+    media: {
+      ink: '#FFFFFF',
+      inkMuted: 'rgba(255,255,255,0.78)',
+      inkQuiet: 'rgba(255,255,255,0.66)',
+      actionBg: '#FFFFFF',
+      actionInk: '#111827',
+      actionShadow: '0 14px 30px rgba(5,10,16,0.35)',
+    },
     trackBg: isLight ? '#E9EDF5' : 'rgba(255,255,255,0.08)',
     searchPill: elevated,
     radius: {
@@ -92,6 +108,8 @@ export const getThemeTokens = (mode: AppColorMode) => {
         label: 650,
         heading: 650,
         display: 700,
+        /** Large numeric readouts stay lighter than headings, as in the reference dashboard. */
+        metric: 560,
       },
       tracking: {
         tight: '-0.03em',

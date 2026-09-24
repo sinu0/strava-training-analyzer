@@ -13,12 +13,7 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 
-import EmptyState from '@/components/common/EmptyState';
-import ErrorState from '@/components/common/ErrorState';
-import LoadingState from '@/components/common/LoadingState';
-import PageContainer from '@/components/common/PageContainer';
-import MetricReadout from '@/components/v2/MetricReadout';
-import PerformanceSurface from '@/components/v2/PerformanceSurface';
+import { EmptyState, ErrorState, LoadingState, Metric, Page, Surface } from '@/ui';
 
 import {
   useCreateImportJob,
@@ -63,14 +58,14 @@ export default function DataJobsPage() {
   }, [activeJob?.status, activeJob?.updatedAt, refetchQuality]);
 
   return (
-    <PageContainer title="Dane i zadania" subtitle="Kontroluj kompletność danych, import oraz bezpieczne przeliczanie metryk." maxWidth={1180}>
+    <Page title="Dane i zadania" subtitle="Kontroluj kompletność danych, import oraz bezpieczne przeliczanie metryk." maxWidth={1180}>
       <Grid container spacing={2.5}>
         <Grid
           size={{
             xs: 12,
             md: 5
           }}>
-          <PerformanceSurface accent sx={{ p: 2.5, height: '100%' }}>
+          <Surface variant="accent" sx={{ height: '100%' }}>
             <Stack direction="row" spacing={1} sx={{
               alignItems: "center"
             }}><DataObjectOutlinedIcon color="primary" /><Typography variant="h6">Jakość danych</Typography></Stack>
@@ -78,13 +73,13 @@ export default function DataJobsPage() {
             {quality.isError ? <ErrorState message="Nie udało się pobrać jakości danych." onRetry={() => void quality.refetch()} /> : null}
             {quality.data ? (
               <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                <Grid size={6}><MetricReadout label="Ocenionych" value={`${quality.data.assessedActivities}/${quality.data.totalActivities}`} tone="primary" /></Grid>
-                <Grid size={6}><MetricReadout label="Dostępnych" value={quality.data.available} tone="success" /></Grid>
-                <Grid size={6}><MetricReadout label="Częściowych" value={quality.data.partial} tone="warning" /></Grid>
-                <Grid size={6}><MetricReadout label="Nieznanych" value={quality.data.unknown} /></Grid>
-                <Grid size={4}><MetricReadout label="Moc zmierzona" value={quality.data.measuredPowerActivities} tone="success" /></Grid>
-                <Grid size={4}><MetricReadout label="Moc szacowana" value={quality.data.estimatedPowerActivities} tone="warning" /></Grid>
-                <Grid size={4}><MetricReadout label="Nieznane źródło mocy" value={quality.data.unknownPowerProvenanceActivities} /></Grid>
+                <Grid size={6}><Metric label="Ocenionych" value={`${quality.data.assessedActivities}/${quality.data.totalActivities}`} tone="primary" /></Grid>
+                <Grid size={6}><Metric label="Dostępnych" value={quality.data.available} tone="success" /></Grid>
+                <Grid size={6}><Metric label="Częściowych" value={quality.data.partial} tone="warning" /></Grid>
+                <Grid size={6}><Metric label="Nieznanych" value={quality.data.unknown} /></Grid>
+                <Grid size={4}><Metric label="Moc zmierzona" value={quality.data.measuredPowerActivities} tone="success" /></Grid>
+                <Grid size={4}><Metric label="Moc szacowana" value={quality.data.estimatedPowerActivities} tone="warning" /></Grid>
+                <Grid size={4}><Metric label="Nieznane źródło mocy" value={quality.data.unknownPowerProvenanceActivities} /></Grid>
                 {quality.data.unassessed > 0 ? (
                   <Grid size={12}>
                     <Alert severity="info">Nieocenionych: {quality.data.unassessed}. Uruchom „Przelicz metryki”, aby wykonać backfill ocen.</Alert>
@@ -92,7 +87,7 @@ export default function DataJobsPage() {
                 ) : null}
               </Grid>
             ) : null}
-          </PerformanceSurface>
+          </Surface>
         </Grid>
 
         <Grid
@@ -100,7 +95,7 @@ export default function DataJobsPage() {
             xs: 12,
             md: 7
           }}>
-          <PerformanceSurface sx={{ p: 2.5, height: '100%' }}>
+          <Surface sx={{ height: '100%' }}>
             <Stack direction="row" spacing={1} sx={{
               alignItems: "center"
             }}><SyncOutlinedIcon color="primary" /><Typography variant="h6">Uruchom zadanie</Typography></Stack>
@@ -125,12 +120,12 @@ export default function DataJobsPage() {
               }}>
               Uzupełnienie źródła mocy pobiera ze Stravy wyłącznie jawne metadane pomiaru. Brakująca flaga pozostaje nieznana — aplikacja nie zgaduje jej na podstawie watów.
             </Typography>
-          </PerformanceSurface>
+          </Surface>
         </Grid>
 
         {activeJob ? (
           <Grid size={12}>
-            <PerformanceSurface sx={{ p: 2.5 }}>
+            <Surface>
               <Stack
                 direction="row"
                 spacing={2}
@@ -153,20 +148,20 @@ export default function DataJobsPage() {
               {activeJob.status === 'FAILED' || activeJob.status === 'RETRYABLE' ? (
                 <Button sx={{ mt: 2 }} disabled={retry.isPending || waitingForAutomaticRetry} onClick={() => retry.mutate(activeJob.id, { onSuccess: updated => setJobId(updated.id) })}>Wznów od niezakończonego etapu</Button>
               ) : null}
-            </PerformanceSurface>
+            </Surface>
           </Grid>
         ) : (
           <Grid size={12}>
-            <PerformanceSurface>
+            <Surface padding="none">
               <EmptyState
                 icon={<DataObjectOutlinedIcon />}
                 title="Brak aktywnego zadania"
                 description="Uruchom import lub przeliczenie metryk. Postęp i ewentualne błędy pojawią się w tym miejscu."
               />
-            </PerformanceSurface>
+            </Surface>
           </Grid>
         )}
       </Grid>
-    </PageContainer>
+    </Page>
   );
 }

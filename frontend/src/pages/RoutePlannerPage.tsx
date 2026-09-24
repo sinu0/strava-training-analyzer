@@ -1,7 +1,6 @@
 import { Box, Chip, Paper, Stack, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 
-import PageContainer from '@/components/common/PageContainer';
 import RouteElevationChart from '@/components/route-planner/RouteElevationChart';
 import RouteMap from '@/components/route-planner/RouteMap';
 import MobileShortcutPinButton from '@/components/settings/MobileShortcutPinButton';
@@ -9,6 +8,7 @@ import { useSaveUiPreferences, useUiPreferences } from '@/hooks/useUiPreferences
 import RoutePlannerSidebar from '@/pages/route-planner/RoutePlannerSidebar';
 import { useRoutePlannerState } from '@/pages/route-planner/useRoutePlannerState';
 import { getAppThemeTokens } from '@/theme/theme';
+import { Page } from '@/ui';
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
 
 export default function RoutePlannerPage() {
@@ -17,7 +17,7 @@ export default function RoutePlannerPage() {
   const savePreferences = useSaveUiPreferences();
 
   return (
-    <PageContainer
+    <Page
       maxWidth={1440}
     >
       <Paper
@@ -84,6 +84,6 @@ export default function RoutePlannerPage() {
         elevationPoints={planner.elevationPoints}
         onHover={planner.setHighlightIdx}
       />
-    </PageContainer>
+    </Page>
   );
 }
