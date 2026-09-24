@@ -1,10 +1,10 @@
-import { Alert, Chip, Stack } from '@mui/material';
+import { Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 import EditableDashboard from '@/components/dashboard/EditableDashboard';
 import PwaCapabilityBanner from '@/components/PwaCapabilityBanner';
 import { useSaveUiPreferences, useUiPreferences } from '@/hooks/useUiPreferences';
-import { ErrorState, LoadingState, Page } from '@/ui';
+import { ErrorState, LoadingState, Page, StatusPill } from '@/ui';
 
 import TodayWidget from './TodayWidget';
 import { useToday } from './useToday';
@@ -56,18 +56,16 @@ export default function TodayPage() {
       title="Dzisiaj"
       subtitle="Rekomendacja dnia, forma i kluczowe moduły w Twoim układzie."
       maxWidth={1440}
-      actions={(
-        <Stack direction="row" spacing={1} sx={{
-          alignItems: "center"
-        }}>
-          <Chip
-            size="small"
+      meta={(
+        <>
+          <StatusPill
+            size="sm"
+            variant="outline"
             label={statusLabels[data.dataStatus]}
-            color={data.dataStatus === 'AVAILABLE' ? 'success' : data.dataStatus === 'PARTIAL' ? 'warning' : 'default'}
-            variant="outlined"
+            tone={data.dataStatus === 'AVAILABLE' ? 'success' : data.dataStatus === 'PARTIAL' ? 'warning' : 'neutral'}
           />
-          <Chip size="small" label={confidenceLabels[data.confidence.level]} variant="outlined" />
-        </Stack>
+          <StatusPill size="sm" variant="outline" label={confidenceLabels[data.confidence.level]} />
+        </>
       )}
     >
       <PwaCapabilityBanner />

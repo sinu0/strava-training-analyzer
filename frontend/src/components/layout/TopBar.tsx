@@ -27,6 +27,7 @@ import { useNavigate } from 'react-router-dom';
 import TopBarSyncButton from '@/components/layout/TopBarSyncButton';
 import { useColorMode } from '@/context/ThemeModeContext';
 import { getAppThemeTokens } from '@/theme/theme';
+import { BrandMark } from '@/ui';
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -100,21 +101,7 @@ export default function TopBar({
             </IconButton>
             {showBrand ? (
               <>
-                <Box
-                  sx={{
-                    width: 34,
-                    height: 34,
-                    display: 'grid',
-                    placeItems: 'center',
-                    flexShrink: 0,
-                    borderRadius: '12px',
-                    color: '#fff',
-                    background: (theme) => theme.tokens.gradients.strava,
-                    boxShadow: '0 8px 20px rgba(252,76,2,0.28)',
-                  }}
-                >
-                  <PedalBikeOutlinedIcon sx={{ fontSize: 20 }} />
-                </Box>
+                <BrandMark size={34} icon={<PedalBikeOutlinedIcon />} />
                 <Typography variant="subtitle1" sx={{ lineHeight: 1.2, whiteSpace: 'nowrap' }}>
                   Training Lab
                 </Typography>

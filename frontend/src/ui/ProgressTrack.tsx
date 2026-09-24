@@ -47,7 +47,14 @@ export default function ProgressTrack({
   }, []);
 
   return (
-    <Box sx={{ minWidth: 0 }}>
+    <Box
+      role={mode === 'bar' ? 'progressbar' : 'img'}
+      aria-label={ariaLabel}
+      aria-valuenow={mode === 'bar' ? Math.round(clamped) : undefined}
+      aria-valuemin={mode === 'bar' ? 0 : undefined}
+      aria-valuemax={mode === 'bar' ? 100 : undefined}
+      sx={{ minWidth: 0 }}
+    >
       {label || valueLabel ? (
         <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'baseline', mb: 0.75, gap: 1 }}>
           <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 650 }}>{label}</Typography>
@@ -55,11 +62,6 @@ export default function ProgressTrack({
         </Stack>
       ) : null}
       <Box
-        role={mode === 'bar' ? 'progressbar' : 'img'}
-        aria-label={ariaLabel}
-        aria-valuenow={mode === 'bar' ? Math.round(clamped) : undefined}
-        aria-valuemin={mode === 'bar' ? 0 : undefined}
-        aria-valuemax={mode === 'bar' ? 100 : undefined}
         sx={(theme) => {
           const tokens = getAppThemeTokens(theme);
           return { position: 'relative', height, borderRadius: `${tokens.radius.pill}px`, bgcolor: tokens.trackBg, overflow: mode === 'bar' ? 'hidden' : 'visible', display: 'flex' };

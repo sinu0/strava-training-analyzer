@@ -3,6 +3,7 @@
  * (colour, radius, spacing, type) live in `@/theme/theme` tokens.
  * See docs/DESIGN_SYSTEM.md.
  */
+export { default as BrandMark } from './BrandMark';
 export { default as ChartFrame, useChartVisuals } from './ChartFrame';
 export type { ChartFrameProps } from './ChartFrame';
 export { DotMatrixChart, DotMatrixRow } from './DotMatrix';

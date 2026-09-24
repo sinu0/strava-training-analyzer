@@ -64,6 +64,14 @@ export const getThemeTokens = (mode: AppColorMode) => {
       border: 'rgba(255,255,255,0.25)',
       blur: 'blur(12px)',
     },
+    /** Coloured light around accent elements (brand mark, active nav, live status). */
+    glow: {
+      accent: '0 10px 28px rgba(252,76,2,0.26)',
+      accentIcon: 'drop-shadow(0 0 8px rgba(255,107,53,0.32))',
+      success: '0 0 10px rgba(63,185,80,0.55)',
+    },
+    /** Ink placed on the solid accent (brand gradient, solid pills). */
+    onAccent: '#FFFFFF',
     /** Ink for content that sits on photography or a dark scrim, in both modes. */
     media: {
       ink: '#FFFFFF',
