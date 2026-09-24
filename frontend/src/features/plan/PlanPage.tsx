@@ -7,13 +7,12 @@ import { useTheme } from '@mui/material/styles';
 import { useSearchParams } from 'react-router-dom';
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-import EditorialHero from '@/components/common/EditorialHero';
 import PolishDateField from '@/components/common/PolishDateField';
 import TrainingCalendar from '@/components/training/TrainingCalendar';
 import TrainingContextPanel from '@/components/training/TrainingContextPanel';
 import WeeklyReviewPanel from '@/components/training/WeeklyReviewPanel';
 import WorkoutLibrary from '@/components/training/WorkoutLibrary';
-import { EmptyState, ErrorState, LoadingState, Metric, Page, Surface } from '@/ui';
+import { EmptyState, ErrorState, HeroCard, LoadingState, Metric, Page, Surface } from '@/ui';
 import { getChartVisuals } from '@/utils/chartStyles';
 import { PMC_COLORS } from '@/utils/colors';
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
@@ -51,15 +50,14 @@ export default function PlanPage() {
 
   return (
     <Page title="Plan treningowy" subtitle="Zbuduj tydzień, wybierz jednostkę i zobacz matematyczny scenariusz obciążenia." maxWidth={1320}>
-      <EditorialHero
-        compact
+      <HeroCard
+        layout="split"
         eyebrow="Kierunek sezonu"
         title="Trening, który ma swoje miejsce w planie"
         description="Zbuduj tydzień, wybierz sesję i sprawdź konsekwencje dla obciążenia, zanim wsiądziesz na rower."
-        accentColor="primary.main"
-        imageSrc={getCyclingHeroIllustrationPath('training')}
-        imageAlt="Przygotowane akcesoria kolarskie i mapa trasy"
-        highlights={['Kalendarz', 'Biblioteka sesji', 'Scenariusz CTL / ATL']}
+        image={{ src: getCyclingHeroIllustrationPath('training'), alt: 'Przygotowane akcesoria kolarskie i mapa trasy' }}
+        tags={['Kalendarz', 'Biblioteka sesji', 'Scenariusz CTL / ATL']}
+        headingComponent="h2"
       />
       <Surface padding="none" sx={{ mb: 2.5 }}>
         <Tabs value={tab} onChange={(_, value: PlanTab) => changeTab(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile>

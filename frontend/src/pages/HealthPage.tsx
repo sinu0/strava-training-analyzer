@@ -37,12 +37,11 @@ import {
 
 import apiClient from '@/api/client';
 import PullToRefreshPanel from '@/components/common/PullToRefreshPanel';
-import Section from '@/components/common/Section';
 import SwipeableContent from '@/components/common/SwipeableContent';
 import TabsNav from '@/components/common/TabsNav';
 import { useHealthOverview, useHealthTimeline, useRecoveryStatus } from '@/hooks/useHealth';
 import { getAppThemeTokens } from '@/theme/theme';
-import { EmptyState, Page, SkeletonCard } from '@/ui';
+import { EmptyState, Page, SkeletonCard, Widget } from '@/ui';
 import { CHART_ACTIVE_DOT, getChartVisuals } from '@/utils/chartStyles';
 import {
   HEALTH_COLORS,
@@ -389,14 +388,9 @@ export default function HealthPage() {
         }}
       >
         <Stack spacing={2.5}>
-          <Section
+          <Widget
             title="Regeneracja dziś"
             subtitle="Najważniejsza odpowiedź brzmi: czy dziś dowieźć jakość, czy chronić zasoby."
-            accentColor={
-              recovery?.score != null && recovery.score >= 70
-                ? STATUS_COLORS.success
-                : STATUS_COLORS.warning
-            }
           >
             <Box
               sx={{
@@ -435,7 +429,7 @@ export default function HealthPage() {
                 </Typography>
               </Stack>
             </Box>
-          </Section>
+          </Widget>
 
           {recovery?.alerts.length ? (
             <Stack spacing={1}>
@@ -448,7 +442,7 @@ export default function HealthPage() {
             </Stack>
           ) : null}
 
-          <Section title="Wprowadź metryki" subtitle="Ręczne uzupełnienie dzisiejszych danych zdrowotnych" accentColor={STATUS_COLORS.info}>
+          <Widget title="Wprowadź metryki" subtitle="Ręczne uzupełnienie dzisiejszych danych zdrowotnych">
             <Stack spacing={1.5}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                 <TextField label="HRV (ms)" size="small" type="number" value={hrvVal} onChange={e => setHrvVal(e.target.value)} sx={{ flex: 1 }} />
@@ -465,7 +459,7 @@ export default function HealthPage() {
                 </Box>
               </Stack>
             </Stack>
-          </Section>
+          </Widget>
 
           <Grid container spacing={2.5}>
             {groupCards.map((group) => (
@@ -475,9 +469,9 @@ export default function HealthPage() {
                   xs: 12,
                   md: 4
                 }}>
-                <Section title={group.title} accentColor={group.accentColor}>
+                <Widget title={group.title}>
                   {group.items}
-                </Section>
+                </Widget>
               </Grid>
             ))}
           </Grid>
@@ -485,12 +479,12 @@ export default function HealthPage() {
           <TabsNav tabs={tabs} value={tab} onChange={setTab} />
 
           {!selectedTabHasData ? (
-            <Section title="Brak danych trendu" subtitle="Wykres pojawi się, gdy dostępne będą pomiary z co najmniej jednego dnia." accentColor={STATUS_COLORS.info}>
+            <Widget title="Brak danych trendu" subtitle="Wykres pojawi się, gdy dostępne będą pomiary z co najmniej jednego dnia.">
               <EmptyState
                 title="Uzupełnij pierwsze pomiary"
                 description="Dodaj dane ręcznie powyżej albo podłącz źródło zdrowotne. Obsługiwane są HRV, tętno spoczynkowe, sen, Body Battery i stres."
               />
-            </Section>
+            </Widget>
           ) : (
           <SwipeableContent onSwipeLeft={nextTab} onSwipeRight={prevTab}>
             {tab === 0 && (
@@ -500,7 +494,7 @@ export default function HealthPage() {
                     xs: 12,
                     md: 6
                   }}>
-                  <Section title="HRV (RMSSD) — 30 dni" accentColor={STATUS_COLORS.successLight}>
+                  <Widget title="HRV (RMSSD) — 30 dni">
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
@@ -530,14 +524,14 @@ export default function HealthPage() {
                         </AreaChart>
                       </ResponsiveContainer>
                     </Box>
-                  </Section>
+                  </Widget>
                 </Grid>
                 <Grid
                   size={{
                     xs: 12,
                     md: 6
                   }}>
-                  <Section title="Tętno spoczynkowe — 30 dni" accentColor={STATUS_COLORS.error}>
+                  <Widget title="Tętno spoczynkowe — 30 dni">
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
@@ -567,7 +561,7 @@ export default function HealthPage() {
                         </AreaChart>
                       </ResponsiveContainer>
                     </Box>
-                  </Section>
+                  </Widget>
                 </Grid>
               </Grid>
             )}
@@ -579,7 +573,7 @@ export default function HealthPage() {
                     xs: 12,
                     md: 6
                   }}>
-                  <Section title="Wynik snu — 30 dni" accentColor={STATUS_COLORS.info}>
+                  <Widget title="Wynik snu — 30 dni">
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
@@ -607,14 +601,14 @@ export default function HealthPage() {
                         </AreaChart>
                       </ResponsiveContainer>
                     </Box>
-                  </Section>
+                  </Widget>
                 </Grid>
                 <Grid
                   size={{
                     xs: 12,
                     md: 6
                   }}>
-                  <Section title="Fazy snu — 30 dni" accentColor={STATUS_COLORS.highlight}>
+                  <Widget title="Fazy snu — 30 dni">
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={sleepStageData}>
@@ -630,7 +624,7 @@ export default function HealthPage() {
                         </BarChart>
                       </ResponsiveContainer>
                     </Box>
-                  </Section>
+                  </Widget>
                 </Grid>
               </Grid>
             )}
@@ -642,7 +636,7 @@ export default function HealthPage() {
                     xs: 12,
                     md: 6
                   }}>
-                  <Section title="Body Battery — 30 dni" accentColor={STATUS_COLORS.warningStrong}>
+                  <Widget title="Body Battery — 30 dni">
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
@@ -670,14 +664,14 @@ export default function HealthPage() {
                         </AreaChart>
                       </ResponsiveContainer>
                     </Box>
-                  </Section>
+                  </Widget>
                 </Grid>
                 <Grid
                   size={{
                     xs: 12,
                     md: 6
                   }}>
-                  <Section title="Stres — 30 dni" accentColor={STATUS_COLORS.warning}>
+                  <Widget title="Stres — 30 dni">
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
@@ -705,7 +699,7 @@ export default function HealthPage() {
                         </AreaChart>
                       </ResponsiveContainer>
                     </Box>
-                  </Section>
+                  </Widget>
                 </Grid>
               </Grid>
             )}

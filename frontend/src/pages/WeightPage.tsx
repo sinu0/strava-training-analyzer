@@ -5,7 +5,6 @@ import { Box, Button, Grid, Stack, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 
 import PullToRefreshPanel from '@/components/common/PullToRefreshPanel';
-import Section from '@/components/common/Section';
 import AddWeightDialog from '@/components/weight/AddWeightDialog';
 import WeightChart from '@/components/weight/WeightChart';
 import WeightGoalDialog from '@/components/weight/WeightGoalDialog';
@@ -19,7 +18,7 @@ import {
   useWeightOverview,
 } from '@/hooks/useWeight';
 import { getAppThemeTokens } from '@/theme/theme';
-import { ErrorState, Page, SkeletonCard } from '@/ui';
+import { ErrorState, Page, SkeletonCard, Widget } from '@/ui';
 import { getApiErrorMessage } from '@/utils/errorHandling';
 import { localDate } from '@/utils/localDate';
 
@@ -210,7 +209,7 @@ export default function WeightPage() {
       >
         <Grid container spacing={3}>
           <Grid size={12}>
-            <Section title="Stan dziś" subtitle="Najważniejszy status: aktualna waga, tempo zmian i cel." accentColor="primary.main">
+            <Widget title="Stan dziś" subtitle="Najważniejszy status: aktualna waga, tempo zmian i cel.">
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="h3">
@@ -245,7 +244,7 @@ export default function WeightPage() {
                   </Typography>
                 </Stack>
               </Box>
-            </Section>
+            </Widget>
           </Grid>
           <WeightOverviewCards
             overview={overview}

@@ -14,11 +14,10 @@ import {
 import { useMemo, lazy, Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Page } from '@/ui';
+import { Page, Widget } from '@/ui';
 import { localDate } from '@/utils/localDate';
 
 import ErrorBoundary from '../components/common/ErrorBoundary';
-import Section from '../components/common/Section';
 import AchievementsSection from '../components/profile/AchievementsSection';
 import FourWeekCyclingSummary from '../components/profile/FourWeekCyclingSummary';
 import PersonalRecordWall from '../components/profile/PersonalRecordWall';
@@ -364,42 +363,42 @@ export default function ProfilePage() {
       </Box>
 
       {/* ── 4-week cycling summary ────────────────────── */}
-      <Section title="Podsumowanie treningowe" subtitle="Najważniejsze liczby i kontekst z ostatnich czterech tygodni." accentColor={STATUS_COLORS.accent}>
+      <Widget title="Podsumowanie treningowe" subtitle="Najważniejsze liczby i kontekst z ostatnich czterech tygodni.">
         <FourWeekCyclingSummary />
-      </Section>
+      </Widget>
 
       {/* ── Streak heatmap ──────────────────────────────── */}
-      <Section title="Kalendarz aktywności" subtitle="Historia Twoich dni na rowerze" accentColor={STATUS_COLORS.success}>
+      <Widget title="Kalendarz aktywności" subtitle="Historia Twoich dni na rowerze">
         <StreakHeatmap />
-      </Section>
+      </Widget>
 
       {/* ── Gallery ──────────────────────────────────── */}
-      <Section title="Galeria zdjęć">
+      <Widget title="Galeria zdjęć">
         <ProfileGallery />
-      </Section>
+      </Widget>
 
       {/* ── Weekly km bar chart ──────────────────────── */}
-      <Section title="Tygodniowe wolumeny">
+      <Widget title="Tygodniowe wolumeny">
         <WeeklyKmBarChart />
-      </Section>
+      </Widget>
 
       {/* ── MMP Trend ─────────────────────────────────── */}
-      <Section title="Krzywa mocy – trend">
+      <Widget title="Krzywa mocy – trend">
         <ErrorBoundary>
           <Suspense fallback={<Box sx={{ color: 'text.secondary', py: 2, textAlign: 'center' }}>Ładowanie wykresu…</Box>}>
             <MmpTrendChart from={fromTo.from} to={fromTo.to} />
           </Suspense>
         </ErrorBoundary>
-      </Section>
+      </Widget>
 
       {/* ── Achievements ─────────────────────────── */}
-      <Section title="Odznaki i osiągnięcia">
+      <Widget title="Odznaki i osiągnięcia">
         <AchievementsSection />
-      </Section>
+      </Widget>
 
-      <Section title="Rekordy osobiste" subtitle="Twoje najlepsze wyniki" accentColor={STATUS_COLORS.warning}>
+      <Widget title="Rekordy osobiste" subtitle="Twoje najlepsze wyniki">
         <PersonalRecordWall />
-      </Section>
+      </Widget>
 
       <SummaryStoryModal
         open={storyOpen}

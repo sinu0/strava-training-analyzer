@@ -1,8 +1,8 @@
 import { Box, Grid, Pagination, Stack, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 
-import Section from '@/components/common/Section';
 import type { WeightRecord } from '@/types/weight';
+import { Widget } from '@/ui';
 import { getPolishPaginationAriaLabel } from '@/utils/accessibility';
 
 interface WeightHistoryTableProps {
@@ -26,7 +26,7 @@ export default function WeightHistoryTable({
 
   return (
     <Grid size={12}>
-      <Section title="Pomiary">
+      <Widget title="Pomiary">
         <Stack spacing={2}>
           <Box sx={{ maxHeight: 360, overflowY: 'auto' }}>
             {pageItems.map((record) => (
@@ -88,7 +88,7 @@ export default function WeightHistoryTable({
             </Box>
           )}
         </Stack>
-      </Section>
+      </Widget>
     </Grid>
   );
 }

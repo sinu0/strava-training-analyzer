@@ -20,7 +20,6 @@ import EquipmentSection from '@/components/admin/EquipmentSection';
 import StravaConfigSection from '@/components/admin/StravaConfigSection';
 import SyncStatusSection from '@/components/admin/SyncStatusSection';
 import WeatherJobSection from '@/components/admin/WeatherJobSection';
-import Section from '@/components/common/Section';
 import ThemeModeSettings from '@/components/settings/ThemeModeSettings';
 import { useAiStatus, useAiValidationReport, useRunAiBatch } from '@/hooks/useAi';
 import {
@@ -48,7 +47,7 @@ import {
   useWeatherLocations,
 } from '@/hooks/useAnalytics';
 import { useCountdown } from '@/hooks/useCountdown';
-import { Page } from '@/ui';
+import { Page, Widget } from '@/ui';
 import { STATUS_COLORS } from '@/utils/colors';
 import { getApiErrorMessage } from '@/utils/errorHandling';
 
@@ -84,7 +83,7 @@ function getMutationErrorMessage(mutation: MutationWithError, fallback: string):
 
 function AdminActionSection({ title, subtitle, pending, success, idleLabel, pendingLabel, successLabel, onClick }: AdminActionSectionProps) {
   return (
-    <Section title={title} subtitle={subtitle}>
+    <Widget title={title} subtitle={subtitle}>
       <Button
         variant="outlined"
         color="primary"
@@ -99,7 +98,7 @@ function AdminActionSection({ title, subtitle, pending, success, idleLabel, pend
           {successLabel}
         </span>
       )}
-    </Section>
+    </Widget>
   );
 }
 

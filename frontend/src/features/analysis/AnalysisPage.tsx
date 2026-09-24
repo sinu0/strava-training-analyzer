@@ -9,11 +9,10 @@ import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined';
 import { Alert, Box, Checkbox, FormControlLabel, Grid, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
 
-import EditorialHero from '@/components/common/EditorialHero';
 import PolishDateField from '@/components/common/PolishDateField';
 import PMChart from '@/components/PMChart';
 import PowerCurveChart from '@/components/PowerCurveChart';
-import { EmptyState, ErrorState, LoadingState, Metric, Page, Surface } from '@/ui';
+import { EmptyState, ErrorState, HeroCard, LoadingState, Metric, Page, Surface } from '@/ui';
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
 import { localDate } from '@/utils/localDate';
 
@@ -150,15 +149,14 @@ export default function AnalysisPage() {
 
   return (
     <Page title="Laboratorium wydolności" subtitle="Porównuj okresy, obserwuj obciążenie i analizuj moc bez ukrywania jakości danych." maxWidth={1320}>
-      <EditorialHero
-        compact
+      <HeroCard
+        layout="split"
         eyebrow="Dane, nie hałas"
         title="Zobacz, co zmienia Twój trening"
         description="Porównuj bloki, obciążenie i moc w jednym spokojnym widoku analitycznym."
-        accentColor="secondary.main"
-        imageSrc={getCyclingHeroIllustrationPath('analytics')}
-        imageAlt="Kokpit roweru na górskiej drodze o świcie"
-        highlights={[`${dayCount} dni`, 'Porównanie okresów', 'Moc i obciążenie']}
+        image={{ src: getCyclingHeroIllustrationPath('analytics'), alt: 'Kokpit roweru na górskiej drodze o świcie' }}
+        tags={[`${dayCount} dni`, 'Porównanie okresów', 'Moc i obciążenie']}
+        headingComponent="h2"
       />
       <Surface padding="none" sx={{ mb: 2.5 }}>
         <Tabs

@@ -1,3 +1,5 @@
+import { STATUS_COLORS } from '@/utils/colors';
+
 import { getZoneForPower, ZONE_COLORS_TRAINING } from '../../types/training';
 
 import type { WorkoutStep } from '../../types/training';
@@ -87,7 +89,7 @@ export function segmentsToDataPoints(segments: ChartSegment[]): ChartDataPoint[]
       points.push({
         timeSec: t,
         power: Math.round(power),
-        fill: ZONE_COLORS_TRAINING[zone] ?? '#8B949E',
+        fill: ZONE_COLORS_TRAINING[zone] ?? STATUS_COLORS.neutral,
         label: seg.type,
       });
     }

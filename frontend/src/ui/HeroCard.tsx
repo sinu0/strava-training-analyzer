@@ -28,6 +28,8 @@ export interface HeroCardProps {
   /** Smaller glass figures under the description. */
   metrics?: Array<GlassStatProps & { id: string }>;
   footnote?: ReactNode;
+  /** Short labels shown as pills (scope, filters, key facts). */
+  tags?: string[];
   action?: { label: string; onClick: () => void; icon?: ReactNode };
   /** overlay — text on the photo (dashboard hero); split — text left, photo right (page intro). */
   layout?: 'overlay' | 'split';
@@ -47,7 +49,7 @@ function HeroPhoto({ image }: { image: HeroImage }) {
 
 /** Photographic hero surface with glass pill, glass figures and a round call-to-action. */
 export default function HeroCard({
-  image, title, eyebrow, caption, description, stat, metrics, footnote, action, layout = 'overlay',
+  image, title, eyebrow, caption, description, stat, metrics, footnote, tags, action, layout = 'overlay',
   minHeight = { xs: 380, md: 440 }, headingComponent = 'h2', children,
 }: HeroCardProps) {
   if (layout === 'split') {
@@ -60,6 +62,11 @@ export default function HeroCard({
               <Typography variant="h4" component={headingComponent} sx={{ maxWidth: 620 }}>{title}</Typography>
               {description ? <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1, maxWidth: 720 }}>{description}</Typography> : null}
             </Box>
+            {tags?.length ? (
+              <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
+                {tags.map((tag) => <StatusPill key={tag} label={tag} size="sm" />)}
+              </Stack>
+            ) : null}
             {children}
           </Stack>
           <Box sx={(theme) => ({ position: 'relative', flexBasis: { xs: 'auto', md: '40%' }, minWidth: { md: 280 }, minHeight: { xs: 150, md: 210 }, borderRadius: `${getAppThemeTokens(theme).radius.panel}px`, overflow: 'hidden' })}>
@@ -102,6 +109,11 @@ export default function HeroCard({
             {metrics?.length ? (
               <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap', mt: 1.5 }}>
                 {metrics.map(({ id, ...metric }) => <GlassStat key={id} {...metric} />)}
+              </Stack>
+            ) : null}
+            {tags?.length ? (
+              <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap', mt: 1.5 }}>
+                {tags.map((tag) => <StatusPill key={tag} label={tag} size="sm" variant="glass" />)}
               </Stack>
             ) : null}
             {footnote ? <Typography variant="caption" sx={(theme) => ({ display: 'block', mt: 1.25, color: getAppThemeTokens(theme).media.inkQuiet, maxWidth: 460 })}>{footnote}</Typography> : null}

@@ -1,4 +1,5 @@
-import { Alert, Box, Card, CardContent, Stack, Typography } from '@mui/material';
+import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined';
+import { Alert, Box, Stack, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useMemo } from 'react';
 import {
@@ -11,6 +12,8 @@ import {
   YAxis,
   CartesianGrid,
 } from 'recharts';
+
+import { StatusPill, Widget } from '@/ui';
 
 import { getChartVisuals } from '../../utils/chartStyles';
 import { PMC_COLORS } from '../../utils/colors';
@@ -55,25 +58,15 @@ export default function TrainingProjectionChart({ days }: TrainingProjectionChar
     .slice(0, 3);
 
   return (
-    <Card sx={{ mb: 2 }}>
-      <CardContent>
-        <Typography variant="h6" sx={{ mb: 0.5 }}>Projekcja PMC planu</Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-            mb: 1.5
-          }}>
-          Szybki podgląd, jak obecny plan przesuwa CTL, ATL i świeżość w widocznym zakresie kalendarza.
-        </Typography>
-
-        <Stack direction="row" spacing={1} sx={{ mb: 1.5, flexWrap: 'wrap' }}>
-          <Typography variant="caption" sx={{ fontWeight: 700 }}>
-            Najniższy TSB: {minTsb > 0 ? '+' : ''}{minTsb.toFixed(1)}
-          </Typography>
-          <Typography variant="caption" sx={{ fontWeight: 700 }}>
-            Dni z taperem: {futureDays.filter((day) => day.projection?.taperDay).length}
-          </Typography>
+    <Widget
+      sx={{ mb: 2, height: 'auto' }}
+      title="Projekcja PMC planu"
+      subtitle="Jak obecny plan przesuwa CTL, ATL i świeżość w widocznym zakresie kalendarza."
+      icon={<TimelineOutlinedIcon />}
+    >
+        <Stack direction="row" spacing={1} useFlexGap sx={{ mb: 1.5, flexWrap: 'wrap' }}>
+          <StatusPill size="sm" tone={minTsb < -20 ? 'warning' : 'neutral'} label={`Najniższy TSB: ${minTsb > 0 ? '+' : ''}${minTsb.toFixed(1)}`} />
+          <StatusPill size="sm" label={`Dni z taperem: ${futureDays.filter((day) => day.projection?.taperDay).length}`} />
         </Stack>
 
         <Box sx={{ width: '100%', height: 240, mb: adjustments.length ? 1.5 : 0 }}>
@@ -97,7 +90,6 @@ export default function TrainingProjectionChart({ days }: TrainingProjectionChar
             <Typography variant="body2">{day.adjustment?.description}</Typography>
           </Alert>
         ))}
-      </CardContent>
-    </Card>
+    </Widget>
   );
 }
