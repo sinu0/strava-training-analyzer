@@ -43,6 +43,40 @@ UNAVAILABLE, dopóki aplikacja nie uzyska dostępu do Garmin Connect Developer P
 i nie wdroży oficjalnego OAuth 2.0. Pobranie FIT/ZWO oraz kopiowanie FIT przez USB do
 Garmin/NewFiles są obsługiwanym fallbackiem.
 
+## Tryb trenażera (Bluetooth)
+
+Odtwarzacz `/workout/:id` jest kokpitem trenażera: moc (3 s), kadencja i tętno na żywo,
+bieżący krok z odliczaniem i strefą, plan interwałów, profil z przejechaną mocą oraz
+sterowanie ERG / opór / wolna jazda. Skróty klawiszowe: spacja pauza, ↑/↓ intensywność ±1%,
+→ pomiń krok, ← powtórz krok.
+
+Urządzenia łączą się przez Web Bluetooth:
+
+- trenażer — Fitness Machine Service (FTMS 0x1826), np. Elite Suito: dane z Indoor Bike Data,
+  sterowanie przez Control Point (ERG, opór); fallback Cycling Power (0x1818) tylko do odczytu;
+- pasek tętna — Heart Rate Service (0x180D), np. Garmin HRM-Dual / HRM-Pro / HRM 600
+  (starsze paski tylko ANT+ nie są widoczne w przeglądarce).
+
+Po zerwaniu połączenia aplikacja łączy się ponownie z backoffem (1 → 30 s) i przywraca cel ERG.
+Pauza i koniec treningu zwalniają opór trenażera.
+
+Wymagania przeglądarki: Chrome/Edge na komputerze (Linux z BlueZ; jeśli wybór urządzenia się
+nie otwiera, włącz `chrome://flags/#enable-web-bluetooth`) albo Chrome na Androidzie przez HTTPS
+(patrz sekcja o LAN). Safari/iOS nie obsługuje Web Bluetooth.
+
+Tryb demo bez sprzętu: dodaj `?devices=sim` do adresu odtwarzacza — trenażer i pasek są
+symulowane deterministycznie (ten sam tryb wykorzystują testy e2e).
+
+### Nagrywanie w aplikacji (opcjonalne)
+
+Przełącznik „Nagrywaj przejazd w aplikacji” w panelu urządzeń zapisuje próbki 1 Hz (moc, tętno,
+kadencja, prędkość) w IndexedDB w paczkach po 60 s. Po treningu paczki są wysyłane idempotentnie
+(`POST /api/v2/workouts/executions/{id}/samples`), a podsumowanie oferuje plik FIT
+(`GET /api/v2/workouts/executions/{id}/export/activity.fit`, oficjalny Garmin FIT SDK: rekordy,
+okrążenie na każdy krok, sesja indoor cycling). Wyłączone: przejazd nagrywa Garmin, ocena
+przychodzi po synchronizacji ze Stravą. Jeśli Garmin nagrywa równolegle, pozwól mu tylko
+odczytywać dane z Suito — trenażer słucha jednej aplikacji sterującej.
+
 ## Test manualny na urządzeniu
 
 - zainstalować CA i sprawdzić HTTPS bez ostrzeżenia;
@@ -52,3 +86,12 @@ Garmin/NewFiles są obsługiwanym fallbackiem.
 - odłączyć sieć, wykonać pauzę, LAP i zmianę intensywności, przywrócić sieć i sprawdzić synchronizację;
 - potwierdzić dźwięk, wibrację i Wake Lock albo jawny fallback urządzenia;
 - pobrać FIT i skopiować go do Garmin/NewFiles, następnie otworzyć trening na fizycznym Garminie.
+
+### Trenażer i pasek (Elite Suito + Garmin HRM)
+
+- Chrome na Linuksie i Android: połączyć Suito i pasek z panelu „Urządzenia”, sprawdzić nazwę, baterię i możliwości (ERG, opór);
+- w ERG zmienić krok i intensywność ±5% — opór trenażera ma się zmienić w ciągu ~1 s;
+- przełączyć na „Opór” i przesunąć suwak, potem „Wolna” — trenażer ma przestać sterować;
+- pauza zwalnia opór, wznowienie przywraca cel;
+- zdjąć pasek / wyłączyć trenażer na ~10 s — status „utracono — ponawiam…”, potem samoczynny powrót;
+- włączyć nagrywanie, przejechać kilka minut, zakończyć, pobrać FIT i otworzyć go w Garmin Connect lub wgrać do Stravy.

@@ -7,7 +7,7 @@ import { toneColor, type Tone } from './tokens';
 import type { ReactNode } from 'react';
 
 export type MetricVariant = 'readout' | 'stat' | 'hero';
-export type MetricSize = 'sm' | 'md' | 'lg' | 'xl';
+export type MetricSize = 'sm' | 'md' | 'lg' | 'xl' | 'display';
 
 export interface MetricProps {
   label: ReactNode;
@@ -34,6 +34,8 @@ const VALUE_SIZE: Record<MetricSize, string> = {
   md: 'clamp(1.2rem, 1.1rem + 0.4vw, 1.45rem)',
   lg: 'clamp(1.7rem, 1.45rem + 0.9vw, 2.2rem)',
   xl: 'clamp(2.4rem, 1.9rem + 2vw, 3.6rem)',
+  /** Glanceable figure read from a distance (trainer power). */
+  display: 'clamp(4rem, 2.6rem + 6vw, 7rem)',
 };
 
 /** One numeric figure with its unit and label, in the three layouts used across the app. */
@@ -85,7 +87,7 @@ export default function Metric({
             sx={(theme) => ({
               color: 'text.secondary',
               fontWeight: getAppThemeTokens(theme).type.weight.regular,
-              fontSize: variant === 'hero' ? '1.1rem' : '0.8rem',
+              fontSize: resolvedSize === 'display' ? '1.6rem' : variant === 'hero' ? '1.1rem' : '0.8rem',
             })}
           >
             {unit}

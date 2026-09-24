@@ -67,15 +67,8 @@ export const HEALTH_COLORS = {
   bodyBattery: tokens.health.bodyBattery,
 } as const;
 
-export const TRAINING_ZONE_COLORS = {
-  Z1: STATUS_COLORS.neutral,
-  Z2: STATUS_COLORS.info,
-  Z3: STATUS_COLORS.success,
-  Z4: STATUS_COLORS.warning,
-  Z5: tokens.health.zoneFive,
-  Z6: STATUS_COLORS.error,
-  Z7: ZONE_COLORS.Z6,
-} as const;
+/** Workout profiles use the same zone palette as every other zone view (one source: theme tokens). */
+export const TRAINING_ZONE_COLORS = ZONE_COLORS;
 
 export const PROFILE_GRADIENTS = {
   hero: tokens.profileHero,

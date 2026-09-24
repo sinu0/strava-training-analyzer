@@ -13,6 +13,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import pl.strava.analizator.application.ActivityNotFoundException;
 import pl.strava.analizator.application.ProfileNotFoundException;
+import pl.strava.analizator.application.RideRecordingNotFoundException;
 import pl.strava.analizator.application.ProcessingJobNotFoundException;
 import pl.strava.analizator.application.SegmentNotFoundException;
 import pl.strava.analizator.application.UiPreferencesConflictException;
@@ -41,6 +42,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SegmentNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleSegmentNotFound(SegmentNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(errorBody(HttpStatus.NOT_FOUND, ex.getMessage()));
+    }
+
+    @ExceptionHandler(RideRecordingNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleRideRecordingNotFound(RideRecordingNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(errorBody(HttpStatus.NOT_FOUND, ex.getMessage()));
     }

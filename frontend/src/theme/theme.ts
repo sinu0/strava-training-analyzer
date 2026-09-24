@@ -237,7 +237,7 @@ export const getThemeTokens = (mode: AppColorMode) => {
       ],
     },
     /** Health signals. */
-    health: { hrv: '#39D353', bodyBattery: '#FFA657', zoneFive: '#F78166' },
+    health: { hrv: '#39D353', bodyBattery: '#FFA657' },
     profileHero: `linear-gradient(135deg, ${canvas} 0%, #152131 50%, #0B2036 100%)`,
     sport: { cycling: '#FC4C02', running: '#2E9E5B', swimming: '#2687D9', walking: '#C98516', strength: '#C98516', default: '#C98516' },
     weather: {

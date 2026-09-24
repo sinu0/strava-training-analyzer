@@ -77,11 +77,24 @@ describe('WorkoutPlayerPage', () => {
     renderPlayer();
     expect(await screen.findByRole('heading', { name: 'Próg' })).toBeInTheDocument();
     expect(screen.getByText('266–280')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Pauza' })).toHaveStyle({ minHeight: '48px' });
+    const pause = screen.getByRole('button', { name: 'Pauza' });
+    // Touch target of the main control stays well above the 48 px minimum.
+    expect(parseFloat(window.getComputedStyle(pause).height)).toBeGreaterThanOrEqual(48);
     expect(await screen.findByText(/Wake Lock niedostępny/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Pauza' }));
     await waitFor(() => expect(api.send).toHaveBeenCalledWith('execution-1', 'events', expect.objectContaining({ type: 'PAUSE' })));
     expect(screen.getByRole('button', { name: 'Wznów' })).toBeInTheDocument();
+  });
+
+  it('offers device pairing and explains an unsupported browser', async () => {
+    store.load.mockResolvedValue(execution());
+    renderPlayer();
+    await screen.findByRole('heading', { name: 'Próg' });
+    expect(screen.getByText(/Połącz Suito i pasek tętna/)).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Tryb sterowania trenażerem' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Urządzenia' }));
+    expect(await screen.findByText(/nie udostępnia Web Bluetooth/)).toBeInTheDocument();
+    expect(screen.getByLabelText('Nagrywaj przejazd w aplikacji')).not.toBeChecked();
   });
 
   it('shows loss and recovery of network without losing state', async () => {

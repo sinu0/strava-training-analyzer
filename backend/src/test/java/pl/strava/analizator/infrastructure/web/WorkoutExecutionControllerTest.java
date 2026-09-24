@@ -24,6 +24,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import pl.strava.analizator.application.WorkoutActivityMatchingService;
 import pl.strava.analizator.application.WorkoutExecutionService;
+import pl.strava.analizator.application.RideRecordingNotFoundException;
+import pl.strava.analizator.application.RideRecordingService;
 import pl.strava.analizator.application.WorkoutExportService;
 import pl.strava.analizator.domain.model.WorkoutDeliveryCapability;
 import pl.strava.analizator.domain.model.WorkoutExecution;
@@ -40,6 +42,7 @@ class WorkoutExecutionControllerTest {
     @MockitoBean WorkoutExecutionService executionService;
     @MockitoBean WorkoutActivityMatchingService matchingService;
     @MockitoBean WorkoutExportService exportService;
+    @MockitoBean RideRecordingService recordingService;
     @MockitoBean TrainingPlanRepository trainingPlanRepository;
     @MockitoBean WorkoutDeliveryPort deliveryPort;
     @MockitoBean Clock clock;
@@ -78,6 +81,34 @@ class WorkoutExecutionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Disposition", "attachment; filename=\"scheduled-workout.fit\""))
                 .andExpect(header().string("Content-Type", MediaType.APPLICATION_OCTET_STREAM_VALUE));
+    }
+
+    @Test
+    void recordedSamplesAreAcceptedAsIdempotentChunks() throws Exception {
+        UUID executionId = UUID.randomUUID();
+        mockMvc.perform(post("/api/v2/workouts/executions/{id}/samples", executionId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"chunkIndex":2,"samples":[{"atMs":1700000000000,"elapsedMs":120000,"stepIndex":1,"powerWatts":250,"heartRateBpm":150,"cadenceRpm":90,"speedKph":35.5}]}
+                                """))
+                .andExpect(status().isNoContent());
+        org.mockito.Mockito.verify(recordingService).saveChunk(eq(executionId), eq(2),
+                org.mockito.ArgumentMatchers.argThat(samples -> samples.size() == 1 && samples.get(0).getPowerWatts() == 250));
+    }
+
+    @Test
+    void recordedRideDownloadsAsFitOrIsNotFound() throws Exception {
+        UUID executionId = UUID.randomUUID();
+        when(recordingService.exportActivityFit(executionId)).thenReturn(new byte[] {1, 2, 3});
+        mockMvc.perform(get("/api/v2/workouts/executions/{id}/export/activity.fit", executionId))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", "attachment; filename=\"trainer-ride-" + executionId + ".fit\""))
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_OCTET_STREAM_VALUE));
+
+        UUID missing = UUID.randomUUID();
+        when(recordingService.exportActivityFit(missing)).thenThrow(new RideRecordingNotFoundException("Ten trening nie ma nagrania z aplikacji"));
+        mockMvc.perform(get("/api/v2/workouts/executions/{id}/export/activity.fit", missing))
+                .andExpect(status().isNotFound());
     }
 
     @Test
