@@ -136,7 +136,9 @@ export default function SyncedMap({ latStream, lngStream, powerStream, hoverInde
   if (lat.length < 2 || lng.length < 2) {
     return (
       <Box sx={{ height: 350, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Typography color="text.secondary">Brak danych GPS</Typography>
+        <Typography sx={{
+          color: "text.secondary"
+        }}>Brak danych GPS</Typography>
       </Box>
     );
   }

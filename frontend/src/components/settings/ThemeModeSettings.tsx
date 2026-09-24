@@ -33,8 +33,15 @@ export default function ThemeModeSettings() {
 
   return (
     <Box>
-      <Typography component="h2" variant="h6" fontWeight={780}>Motyw aplikacji</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+      <Typography component="h2" variant="h6" sx={{
+        fontWeight: 780
+      }}>Motyw aplikacji</Typography>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mt: 0.5
+        }}>
         Wybierz jasny lub ciemny wygląd. Zapisujemy tę preferencję lokalnie na tym urządzeniu.
       </Typography>
       <ToggleButtonGroup
@@ -77,9 +84,18 @@ export default function ThemeModeSettings() {
             }}
           >
             {option.icon}
-            <Stack spacing={0.15} alignItems="flex-start">
-              <Typography variant="body2" fontWeight={760}>{option.label}</Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'none' }}>
+            <Stack spacing={0.15} sx={{
+              alignItems: "flex-start"
+            }}>
+              <Typography variant="body2" sx={{
+                fontWeight: 760
+              }}>{option.label}</Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  textTransform: 'none'
+                }}>
                 {option.description}
               </Typography>
             </Stack>

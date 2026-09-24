@@ -67,7 +67,13 @@ export default function SegmentDetailPage() {
         <SegmentProgressChart efforts={efforts} />
       </PerformanceSurface>}
       <PerformanceSurface sx={{ p: { xs: 1.5, md: 2.5 }, mb: 2 }}>
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}><CompareArrowsRoundedIcon color="primary" /><Typography variant="h6">Porównanie prób</Typography><Chip size="small" label={`${selected.length}/3`} /></Stack>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: "center",
+            mb: 2
+          }}><CompareArrowsRoundedIcon color="primary" /><Typography variant="h6">Porównanie prób</Typography><Chip size="small" label={`${selected.length}/3`} /></Stack>
         {!!comparison.isLoading && <LoadingState message="Wyrównywanie prób po dystansie…" />}
         {!!comparison.isError && <ErrorState message="Nie udało się porównać prób." onRetry={() => void comparison.refetch()} />}
         {!!comparison.data && <SegmentComparisonVisual comparison={comparison.data} />}
@@ -75,10 +81,14 @@ export default function SegmentDetailPage() {
       <Typography variant="h5" component="h2" sx={{ mb: 1.5 }}>Historia własnych prób</Typography>
       {efforts.length === 0 ? <EmptyState title="Brak prób" /> : <Stack spacing={1}>
         {efforts.map(effort => <PerformanceSurface key={effort.id} sx={{ p: 1.5 }}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ sm: 'center' }} spacing={1.5}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{
+            alignItems: { sm: 'center' }
+          }}>
             <FormControlLabel control={<Checkbox checked={selectedSet.has(effort.id)} disabled={!selectedSet.has(effort.id) && selected.length >= 3} onChange={() => toggle(effort.id)} />} label="Porównaj" />
             <FormControlLabel control={<Radio checked={reference === effort.id} disabled={!selectedSet.has(effort.id)} onChange={() => setReference(effort.id)} />} label="Odniesienie" />
-            <Box sx={{ flex: 1 }}><Typography sx={{ fontWeight: 800 }}>{new Date(effort.startedAt).toLocaleString('pl-PL')}</Typography><Typography variant="body2" color="text.secondary">{effort.activityName}</Typography></Box>
+            <Box sx={{ flex: 1 }}><Typography sx={{ fontWeight: 800 }}>{new Date(effort.startedAt).toLocaleString('pl-PL')}</Typography><Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>{effort.activityName}</Typography></Box>
             <SegmentRankTrophy rank={effort.personalRank} />
             <Typography sx={{ minWidth: 72, fontWeight: 900 }}>{duration(effort.elapsedTimeSec)}</Typography>
             <Typography variant="body2">{effort.averagePowerW ?? '—'} W · {effort.averageHeartrate ?? '—'} bpm · {effort.averageCadence ?? '—'} rpm</Typography>

@@ -46,7 +46,11 @@ export default function MatchedRidesPage() {
       <PerformanceSurface accent sx={{ p: 2, mb: 2 }}>
         <Typography variant="h6">{current.activityName}</Typography>
         {isRecord && priorBest != null
-          ? <Typography color="success.main" sx={{ fontWeight: 800 }}>Nowy rekord — {signed(current.averageSpeedKmh! - priorBest)} względem poprzedniego najlepszego wyniku</Typography>
+          ? <Typography
+          sx={{
+            color: "success.main",
+            fontWeight: 800
+          }}>Nowy rekord — {signed(current.averageSpeedKmh! - priorBest)} względem poprzedniego najlepszego wyniku</Typography>
           : <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 0.5 }}>
             <Typography>{signed(versusPrevious)} względem poprzedniej jazdy</Typography>
             <Typography>{signed(versusAverage)} względem średniej</Typography>
@@ -66,7 +70,14 @@ export default function MatchedRidesPage() {
           <TableBody>{[...data.rides].reverse().map(ride => <TableRow hover key={ride.activityId} sx={{ cursor: 'pointer' }} onClick={() => navigate(`/activities/${ride.activityId}`)}><TableCell>{new Date(ride.startedAt).toLocaleDateString('pl-PL')}</TableCell><TableCell><Button onClick={() => navigate(`/activities/${ride.activityId}`)}>{ride.activityName}</Button></TableCell><TableCell align="right">{ride.averageSpeedKmh?.toFixed(1) ?? '—'} km/h</TableCell><TableCell align="right">{duration(ride.movingTimeSec)}</TableCell><TableCell align="right">{ride.averagePowerW ?? '—'} W</TableCell><TableCell align="right">{ride.averageHeartrate ?? '—'} bpm</TableCell><TableCell align="right">{ride.relativeEffort ?? '—'}</TableCell><TableCell align="right">{ride.similarityPercent.toFixed(0)}%</TableCell></TableRow>)}</TableBody>
         </Table></TableContainer>
       </PerformanceSurface>
-      <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1 }}><Typography variant="caption" color="text.secondary">Przeciwny kierunek jest przechowywany jako osobna grupa w tej samej rodzinie tras.</Typography></Stack>
+      <Stack
+        direction="row"
+        sx={{
+          justifyContent: "flex-end",
+          mt: 1
+        }}><Typography variant="caption" sx={{
+        color: "text.secondary"
+      }}>Przeciwny kierunek jest przechowywany jako osobna grupa w tej samej rodzinie tras.</Typography></Stack>
     </PageContainer>
   );
 }

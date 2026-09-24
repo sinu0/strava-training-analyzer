@@ -76,7 +76,14 @@ export default function ActivityRoutePreview({
           <Skeleton variant="rectangular" width="100%" height="100%" animation="wave" />
         )
       ) : (
-        <Stack alignItems="center" justifyContent="center" spacing={1} sx={{ height: '100%', color: 'text.secondary' }}>
+        <Stack
+          spacing={1}
+          sx={{
+            alignItems: "center",
+            justifyContent: "center",
+            height: '100%',
+            color: 'text.secondary'
+          }}>
           <RouteOutlinedIcon sx={{ fontSize: 34, opacity: 0.5 }} />
           <Typography variant="caption">Brak zapisu trasy</Typography>
         </Stack>
@@ -86,8 +93,8 @@ export default function ActivityRoutePreview({
         <Stack
           direction="row"
           spacing={0.65}
-          alignItems="center"
           sx={{
+            alignItems: "center",
             position: 'absolute',
             left: 12,
             bottom: 10,
@@ -97,9 +104,8 @@ export default function ActivityRoutePreview({
             borderRadius: 999,
             bgcolor: 'rgba(8, 12, 18, 0.76)',
             border: '1px solid rgba(255,255,255,0.12)',
-            backdropFilter: 'blur(10px)',
-          }}
-        >
+            backdropFilter: 'blur(10px)'
+          }}>
           <MapOutlinedIcon sx={{ fontSize: 15, color: 'primary.main' }} />
           <Typography variant="caption" sx={{ fontWeight: 750, color: 'text.primary' }}>
             Trasa GPS

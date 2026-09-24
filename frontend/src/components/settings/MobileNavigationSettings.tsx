@@ -40,8 +40,15 @@ export default function MobileNavigationSettings({
 
   return (
     <Box>
-      <Typography variant="h6" fontWeight={780}>Skróty mobilne</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+      <Typography variant="h6" sx={{
+        fontWeight: 780
+      }}>Skróty mobilne</Typography>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mt: 0.5
+        }}>
         Wybierz dokładnie cztery sekcje widoczne obok przycisku „Więcej”.
       </Typography>
       <ToggleButtonGroup
@@ -62,7 +69,13 @@ export default function MobileNavigationSettings({
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems={{ sm: 'center' }} sx={{ mt: 2 }}>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={1.5}
+        sx={{
+          alignItems: { sm: 'center' },
+          mt: 2
+        }}>
         <Typography variant="body2" color={missingCount === 0 ? 'success.main' : 'warning.main'} sx={{ flex: 1 }}>
           {missingCount === 0 ? 'Wybrano 4 skróty.' : `Wybierz jeszcze ${missingCount} skrót${missingCount === 1 ? '' : 'y'}.`}
         </Typography>

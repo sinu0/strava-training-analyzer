@@ -157,7 +157,9 @@ export default function WeatherLocationMenu({
           </ListItemIcon>
           <ListItemText
             primary={location.name}
-            primaryTypographyProps={{ variant: 'body2', fontWeight: location.active ? 700 : 400 }}
+            slotProps={{
+              primary: { variant: 'body2', sx: { fontWeight: location.active ? 700 : 400 } }
+            }}
           />
           <IconButton
             aria-label={`Usuń lokalizację ${location.name}`}
@@ -182,7 +184,9 @@ export default function WeatherLocationMenu({
           </ListItemIcon>
           <ListItemText
             primary="Dodaj lokalizację"
-            primaryTypographyProps={{ variant: 'body2' }}
+            slotProps={{
+              primary: { variant: 'body2' }
+            }}
           />
         </MenuItem>
       ) : (
@@ -193,10 +197,12 @@ export default function WeatherLocationMenu({
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             fullWidth
-            InputProps={{
-              endAdornment: searching ? <CircularProgress size={16} /> : null,
-            }}
             sx={{ mb: 0.5 }}
+            slotProps={{
+              input: {
+                endAdornment: searching ? <CircularProgress size={16} /> : null,
+              }
+            }}
           />
           {searchResults.length > 0 && (
             <List dense sx={{ py: 0, maxHeight: 200, overflow: 'auto' }}>
@@ -216,9 +222,10 @@ export default function WeatherLocationMenu({
                   <ListItemText
                     primary={result.name}
                     secondary={[result.admin1, result.country].filter(Boolean).join(', ')}
-                    primaryTypographyProps={{ variant: 'body2', fontWeight: 600 }}
-                    secondaryTypographyProps={{ variant: 'caption', sx: { fontSize: '0.65rem' } }}
-                  />
+                    slotProps={{
+                      primary: { variant: 'body2', sx: { fontWeight: 600 } },
+                      secondary: { variant: 'caption', sx: { fontSize: '0.65rem' } }
+                    }} />
                 </ListItemButton>
               ))}
             </List>
@@ -226,9 +233,12 @@ export default function WeatherLocationMenu({
           {searchQuery.trim().length >= 2 && !searching && searchResults.length === 0 && (
             <Typography
               variant="caption"
-              color="text.secondary"
-              sx={{ display: 'block', textAlign: 'center', py: 1 }}
-            >
+              sx={{
+                color: "text.secondary",
+                display: 'block',
+                textAlign: 'center',
+                py: 1
+              }}>
               Brak wyników
             </Typography>
           )}
@@ -258,7 +268,9 @@ export default function WeatherLocationMenu({
         <ListItemIcon>
           <RefreshIcon sx={{ color: STATUS_COLORS.info, fontSize: 18 }} />
         </ListItemIcon>
-        <ListItemText primary="Odśwież dane" primaryTypographyProps={{ variant: 'body2' }} />
+        <ListItemText primary="Odśwież dane" slotProps={{
+          primary: { variant: 'body2' }
+        }} />
       </MenuItem>
     </Menu>
   );

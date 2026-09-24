@@ -94,7 +94,12 @@ export default function Section({
               </Typography>
             )}
             {!!subtitle && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  mt: 0.25
+                }}>
                 {subtitle}
               </Typography>
             )}

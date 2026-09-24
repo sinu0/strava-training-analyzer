@@ -94,7 +94,9 @@ export default function ActivityMap({
           justifyContent: 'center',
         }}
       >
-        <Typography color="text.secondary">Brak danych mapy</Typography>
+        <Typography sx={{
+          color: "text.secondary"
+        }}>Brak danych mapy</Typography>
       </Box>
     );
   }

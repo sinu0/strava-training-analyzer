@@ -31,11 +31,22 @@ function durationLabel(seconds: number) {
 
 function Stat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
-    <Stack direction="row" spacing={0.8} alignItems="center" sx={{ minWidth: 96 }}>
+    <Stack
+      direction="row"
+      spacing={0.8}
+      sx={{
+        alignItems: "center",
+        minWidth: 96
+      }}>
       <Box sx={{ color: 'text.secondary', display: 'flex', '& svg': { fontSize: 18 } }}>{icon}</Box>
       <Box>
         <Typography variant="body2" sx={{ fontWeight: 760, lineHeight: 1.2 }}>{value}</Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.68rem' }}>{label}</Typography>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            fontSize: '0.68rem'
+          }}>{label}</Typography>
       </Box>
     </Stack>
   );
@@ -79,11 +90,30 @@ export default function ActivityListCardV2({ activity, onOpen, priority = false 
       />
 
       <Box sx={{ p: { xs: 2, sm: 2.5 }, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-        <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={2}>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: "flex-start",
+            justifyContent: "space-between"
+          }}>
           <Box sx={{ minWidth: 0 }}>
-            <Stack direction="row" spacing={0.8} alignItems="center" useFlexGap flexWrap="wrap">
+            <Stack
+              direction="row"
+              spacing={0.8}
+              useFlexGap
+              sx={{
+                alignItems: "center",
+                flexWrap: "wrap"
+              }}>
               <DirectionsBikeOutlinedIcon sx={{ color: 'primary.main', fontSize: 18 }} />
-              <Typography variant="overline" color="text.secondary" sx={{ lineHeight: 1.4, letterSpacing: '0.08em' }}>
+              <Typography
+                variant="overline"
+                sx={{
+                  color: "text.secondary",
+                  lineHeight: 1.4,
+                  letterSpacing: '0.08em'
+                }}>
                 {dateLabel} · {timeLabel}
               </Typography>
             </Stack>
@@ -101,7 +131,14 @@ export default function ActivityListCardV2({ activity, onOpen, priority = false 
           ) : null}
         </Stack>
 
-        <Stack direction="row" spacing={2.2} useFlexGap flexWrap="wrap" sx={{ mt: 2.2 }}>
+        <Stack
+          direction="row"
+          spacing={2.2}
+          useFlexGap
+          sx={{
+            flexWrap: "wrap",
+            mt: 2.2
+          }}>
           <Stat icon={<StraightenOutlinedIcon />} value={`${decimal.format(activity.distanceM / 1000)} km`} label="dystans" />
           <Stat icon={<TimerOutlinedIcon />} value={durationLabel(activity.movingTimeSec)} label="czas ruchu" />
           {activity.avgPowerW != null ? <Stat icon={<BoltOutlinedIcon />} value={`${activity.avgPowerW} W`} label="śr. moc" /> : null}
@@ -110,7 +147,14 @@ export default function ActivityListCardV2({ activity, onOpen, priority = false 
           {activity.elevationGainM != null ? <Stat icon={<LandscapeOutlinedIcon />} value={`${Math.round(activity.elevationGainM)} m`} label="przewyższenie" /> : null}
         </Stack>
 
-        <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 'auto', pt: 2.2 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: "center",
+            mt: 'auto',
+            pt: 2.2
+          }}>
           {activity.primaryBenefit ? <Chip size="small" variant="outlined" label={activity.primaryBenefit} /> : null}
           {(activity.segmentCount ?? 0) > 0 ? <Chip size="small" variant="outlined" label={`${activity.segmentCount} segmentów · ${activity.newRecordCount ?? 0} nowe rekordy`} /> : null}
           <Box sx={{ flex: 1 }} />

@@ -1,6 +1,6 @@
 import { ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -85,6 +85,8 @@ vi.mock('@/hooks/useAnalytics', () => ({
     },
   }),
   useAddWeatherLocation: () => ({ mutate: vi.fn(), isPending: false }),
+  useActivateWeatherLocation: () => ({ mutate: vi.fn(), isPending: false }),
+  useDeleteWeatherLocation: () => ({ mutate: vi.fn(), isPending: false }),
   useRefreshWeatherCache: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
@@ -113,5 +115,14 @@ describe('WeatherPage', () => {
     expect(screen.getAllByText('Decyzja treningowa').length).toBeGreaterThan(0);
     expect(screen.getByText('Weather map')).toBeDefined();
     expect(screen.getByRole('button', { name: 'Zapisz punkt jako lokalizację' })).toBeDefined();
+  });
+
+  it('opens saved-location management instead of refreshing weather', () => {
+    renderPage();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Zarządzaj lokalizacjami' }));
+
+    expect(screen.getByRole('menu')).toBeDefined();
+    expect(screen.getByRole('menuitem', { name: 'Dodaj lokalizację' })).toBeDefined();
   });
 });

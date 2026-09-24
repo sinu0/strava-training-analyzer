@@ -14,7 +14,9 @@ export default function AiStatusWidget({ status }: AiStatusWidgetProps) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1 }}>
         <SmartToyIcon sx={{ color: 'text.disabled' }} />
-        <Typography variant="body2" color="text.secondary">Ładowanie statusu AI...</Typography>
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>Ładowanie statusu AI...</Typography>
       </Box>
     );
   }
@@ -34,7 +36,9 @@ export default function AiStatusWidget({ status }: AiStatusWidgetProps) {
     <Stack spacing={1.5}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <SmartToyIcon sx={{ color: statusColor }} />
-        <Typography variant="body1" fontWeight={600}>Moduł AI</Typography>
+        <Typography variant="body1" sx={{
+          fontWeight: 600
+        }}>Moduł AI</Typography>
         <Chip
           label={statusLabel}
           size="small"
@@ -44,21 +48,37 @@ export default function AiStatusWidget({ status }: AiStatusWidgetProps) {
 
       {!!status.enabled && <>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="body2" color="text.secondary">Provider</Typography>
-            <Typography variant="body2" fontWeight={500}>{status.activeProvider}</Typography>
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>Provider</Typography>
+            <Typography variant="body2" sx={{
+              fontWeight: 500
+            }}>{status.activeProvider}</Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="body2" color="text.secondary">Model</Typography>
-            <Typography variant="body2" fontWeight={500}>{status.activeModel}</Typography>
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>Model</Typography>
+            <Typography variant="body2" sx={{
+              fontWeight: 500
+            }}>{status.activeModel}</Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="body2" color="text.secondary">Typy predykcji</Typography>
-            <Typography variant="body2" fontWeight={500}>{status.availablePredictionTypes.length}</Typography>
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>Typy predykcji</Typography>
+            <Typography variant="body2" sx={{
+              fontWeight: 500
+            }}>{status.availablePredictionTypes.length}</Typography>
           </Box>
           {typeof status.batchEnabled === 'boolean' && (
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body2" color="text.secondary">Nocny batch</Typography>
-              <Typography variant="body2" fontWeight={500}>
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>Nocny batch</Typography>
+              <Typography variant="body2" sx={{
+                fontWeight: 500
+              }}>
                 {status.batchEnabled
                   ? (status.batchCron === '0 0 3 * * *'
                     ? 'Aktywny (03:00)'

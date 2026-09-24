@@ -31,9 +31,13 @@ const ZoneDistributionChart = memo(function ZoneDistributionChart({
 
   if (!chartData.length) {
     return (
-      <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-        Brak danych stref.
-      </Typography>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          py: 4,
+          textAlign: 'center'
+        }}>Brak danych stref.
+              </Typography>
     );
   }
 
@@ -61,11 +65,20 @@ const ZoneDistributionChart = memo(function ZoneDistributionChart({
         </ResponsiveContainer>
       </Box>
 
-      <Stack direction="row" spacing={1.5} useFlexGap flexWrap="wrap" sx={{ mt: 1.5 }}>
+      <Stack
+        direction="row"
+        spacing={1.5}
+        useFlexGap
+        sx={{
+          flexWrap: "wrap",
+          mt: 1.5
+        }}>
         {chartData.map((entry) => (
           <Box key={entry.zone} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
             <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: entry.color, flexShrink: 0 }} />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               {entry.zone}
             </Typography>
           </Box>

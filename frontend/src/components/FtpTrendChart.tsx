@@ -27,9 +27,13 @@ const FtpTrendChart = memo(function FtpTrendChart({
 
   if (!data.length) {
     return (
-      <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-        Brak danych trendu FTP.
-      </Typography>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          py: 4,
+          textAlign: 'center'
+        }}>Brak danych trendu FTP.
+              </Typography>
     );
   }
 

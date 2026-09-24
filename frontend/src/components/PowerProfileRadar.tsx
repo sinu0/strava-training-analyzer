@@ -107,18 +107,17 @@ export default function PowerProfileRadar({ data, weightKg }: PowerProfileRadarP
         </ResponsiveContainer>
         {!hasData && (
           <Typography
-            color="text.secondary"
             variant="caption"
             sx={{
+              color: "text.secondary",
               position: 'absolute',
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
               textAlign: 'center',
               opacity: 0.7,
-              pointerEvents: 'none',
-            }}
-          >
+              pointerEvents: 'none'
+            }}>
             Brak danych —<br />zsynchronizuj Stravę
           </Typography>
         )}
@@ -182,7 +181,9 @@ export default function PowerProfileRadar({ data, weightKg }: PowerProfileRadarP
             <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
               {strongest.fullLabel}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               {strongest.watts}W ({strongest.value}%)
             </Typography>
           </Box>
@@ -197,7 +198,9 @@ export default function PowerProfileRadar({ data, weightKg }: PowerProfileRadarP
             <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
               {weakest.fullLabel}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               {weakest.watts}W ({weakest.value}%)
             </Typography>
           </Box>

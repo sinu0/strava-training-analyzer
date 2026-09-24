@@ -111,7 +111,9 @@ function AdminGroup({ title, subtitle, icon, defaultExpanded = false, children }
           <Box sx={{ display: 'flex', color: 'primary.main' }}>{icon}</Box>
           <Box>
             <Typography variant="h6">{title}</Typography>
-            <Typography variant="body2" color="text.secondary">{subtitle}</Typography>
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>{subtitle}</Typography>
           </Box>
         </Box>
       </AccordionSummary>

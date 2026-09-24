@@ -91,7 +91,9 @@ export default function AnalysisPage() {
                 md: 6
               }}>
               <PerformanceSurface accent={index === 0} sx={{ p: { xs: 2, md: 2.75 }, height: '100%' }}>
-                <Typography variant="overline" color="text.secondary">{index === 0 ? 'Wybrany okres' : 'Poprzedni okres'}</Typography>
+                <Typography variant="overline" sx={{
+                  color: "text.secondary"
+                }}>{index === 0 ? 'Wybrany okres' : 'Poprzedni okres'}</Typography>
                 <Typography variant="h6">{period.from} — {period.to}</Typography>
                 <Grid container spacing={2.25} sx={{ mt: 0.75 }}>
                   <Grid size={6}>
@@ -178,7 +180,7 @@ export default function AnalysisPage() {
               flexDirection: { xs: 'column', sm: 'row' },
               gap: { xs: 0.4, sm: 0.75 },
             },
-            '& .MuiTab-iconWrapper': { m: '0 !important' },
+            "& .MuiTab-icon": { m: '0 !important' },
           }}
         >
           <Tab value="compare" icon={<CompareArrowsOutlinedIcon />} iconPosition="start" label="Porównaj" />
@@ -186,11 +188,16 @@ export default function AnalysisPage() {
           <Tab value="power" icon={<ShowChartOutlinedIcon />} iconPosition="start" label="Moc" />
         </Tabs>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-          <PolishDateField size="small" label="Od" value={from} onChange={value => update('from', value)} InputLabelProps={{ shrink: true }} />
-          <PolishDateField size="small" label="Do" value={to} onChange={value => update('to', value)} InputLabelProps={{ shrink: true }} />
+          <PolishDateField size="small" label="Od" value={from} onChange={value => update('from', value)} slotProps={{ inputLabel: { shrink: true } }} />
+          <PolishDateField size="small" label="Do" value={to} onChange={value => update('to', value)} slotProps={{ inputLabel: { shrink: true } }} />
           {tab === 'power' && <FormControlLabel control={<Checkbox checked={includeUnverified} onChange={(_, checked) => update('powerSources', checked ? 'all' : 'measured')} />} label="Pokaż także źródła niepotwierdzone" />}
           <Box sx={{ flex: 1 }} />
-          <Typography variant="caption" color="text.secondary" alignSelf="center">Zakres jest zapisany w URL</Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              alignSelf: "center"
+            }}>Zakres jest zapisany w URL</Typography>
         </Stack>
       </PerformanceSurface>
       {renderContent()}

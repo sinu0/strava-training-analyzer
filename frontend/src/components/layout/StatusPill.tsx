@@ -86,12 +86,20 @@ function ReadinessPopover({ data }: { data: ReadinessData }) {
         />
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700, color, lineHeight: 1 }}>
-            {data.score}<Typography component="span" variant="body2" color="text.secondary">/100</Typography>
+            {data.score}<Typography component="span" variant="body2" sx={{
+            color: "text.secondary"
+          }}>/100</Typography>
           </Typography>
           <Typography variant="caption" sx={{ color, fontWeight: 600 }}>{getReadinessLabel(data.score)}</Typography>
         </Box>
       </Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, lineHeight: 1.4 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 1.5,
+          lineHeight: 1.4
+        }}>
         {data.description}
       </Typography>
       <Stack direction="row" spacing={1}>
@@ -148,9 +156,17 @@ function FtpPopover({ data }: { data: FtpProgress }) {
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1 }}>
-            {data.currentFtp ?? '—'}<Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>W</Typography>
+            {data.currentFtp ?? '—'}<Typography
+            component="span"
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              ml: 0.5
+            }}>W</Typography>
           </Typography>
-          <Typography variant="caption" color="text.secondary">Aktualne FTP</Typography>
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>Aktualne FTP</Typography>
         </Box>
         <Box sx={{ textAlign: 'right' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3, color: tc }}>
@@ -159,12 +175,20 @@ function FtpPopover({ data }: { data: FtpProgress }) {
               {data.changePercent > 0 ? '+' : ''}{data.changePercent.toFixed(1)}%
             </Typography>
           </Box>
-          <Typography variant="caption" color="text.secondary">90 dni</Typography>
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>90 dni</Typography>
         </Box>
       </Box>
       {data.history.length > 1 && (
         <Box sx={{ mt: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>Historia</Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              mb: 0.5,
+              display: 'block'
+            }}>Historia</Typography>
           <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: '2px', height: 40 }}>
             {data.history.slice(-20).map((p) => {
               const max = Math.max(...data.history.map(h => h.value));
@@ -218,7 +242,12 @@ function WeatherPopover({ data }: { data: WeatherGradient }) {
           {Math.round(c.temperature)}°
         </Typography>
         <WeatherConditionIcon code={c.weatherCode} size={18} alt={c.weatherDescription} />
-        <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            flex: 1
+          }}>
           {c.weatherDescription}
         </Typography>
       </Box>
@@ -238,7 +267,9 @@ function WeatherPopover({ data }: { data: WeatherGradient }) {
       </Stack>
       <Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
-          <Typography variant="caption" color="text.secondary">Ocena outdoor</Typography>
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>Ocena outdoor</Typography>
           <Typography variant="caption" sx={{ color: sc, fontWeight: 700 }}>
             {getScoreLabel(c.outdoorScore)}
           </Typography>
@@ -252,7 +283,13 @@ function WeatherPopover({ data }: { data: WeatherGradient }) {
           }}
         />
       </Box>
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          mt: 1,
+          display: 'block'
+        }}>
         📍 {data.locationName}
       </Typography>
     </Box>

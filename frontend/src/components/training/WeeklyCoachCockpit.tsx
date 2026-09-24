@@ -143,7 +143,9 @@ export default function WeeklyCoachCockpit() {
           <Alert severity="info">Wygeneruj program, żeby zobaczyć tygodniowy priorytet, ryzyka i najbliższe kluczowe sesje.</Alert>
         ) : (
           <Stack spacing={2}>
-            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+            <Stack direction="row" spacing={1} useFlexGap sx={{
+              flexWrap: "wrap"
+            }}>
               {!!currentObjective && <Chip label={currentObjective.label} color="primary" />}
               {readiness?.score != null && <Chip label={`Dziś: ${readiness.dayLabel} (${readiness.score}/100)`} color={readiness.score >= 65 ? 'success' : 'warning'} />}
               {!!durability && <Chip label={`Durability: ${durability.label}`} color={durability.avgDurabilityScore >= 65 ? 'success' : 'warning'} />}
@@ -166,9 +168,13 @@ export default function WeeklyCoachCockpit() {
                 <Stack spacing={0.5}>
                   <Typography variant="subtitle2">Priorytet tygodnia</Typography>
                   <Typography variant="body2">{currentObjective.focus}</Typography>
-                  <Typography variant="body2" color="text.secondary">{currentObjective.fuelingGuidance}</Typography>
+                  <Typography variant="body2" sx={{
+                    color: "text.secondary"
+                  }}>{currentObjective.fuelingGuidance}</Typography>
                 </Stack>
-                <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                <Stack direction="row" spacing={1} useFlexGap sx={{
+                  flexWrap: "wrap"
+                }}>
                   <Chip label={`Max ${currentObjective.maxQualityDays} akcenty`} size="small" variant="outlined" />
                   {!!currentScorecard?.goalFocusLabel && (
                     <Chip label={`Cel: ${currentScorecard.goalFocusLabel}`} size="small" variant="outlined" />
@@ -202,9 +208,19 @@ export default function WeeklyCoachCockpit() {
             <Stack spacing={1}>
               <Typography variant="subtitle2">Najbliższe sesje</Typography>
               {upcomingDays.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">Brak zaplanowanych sesji w tym tygodniu.</Typography>
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>Brak zaplanowanych sesji w tym tygodniu.</Typography>
                 ) : upcomingDays.map((day) => (
-                  <Stack key={day.date} direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+                  <Stack
+                    key={day.date}
+                    direction="row"
+                    spacing={1}
+                    useFlexGap
+                    sx={{
+                      alignItems: "center",
+                      flexWrap: "wrap"
+                    }}>
                     <Chip label={day.date} size="small" variant="outlined" />
                     <Chip label={day.planned?.plannedType ?? 'Sesja'} size="small" />
                     {day.planned?.sessionRole ? <Chip label={formatSessionRole(day.planned.sessionRole)} size="small" variant="outlined" /> : null}
@@ -238,7 +254,9 @@ export default function WeeklyCoachCockpit() {
 
             <Stack spacing={1}>
               <Typography variant="subtitle2">Ograniczenia planu</Typography>
-              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+              <Stack direction="row" spacing={1} useFlexGap sx={{
+                flexWrap: "wrap"
+              }}>
                 <Chip label={`${currentProgram.weekdayAvailabilityMinutes ?? 75} min w dzień roboczy`} size="small" variant="outlined" />
                 <Chip label={`${currentProgram.weekendAvailabilityMinutes ?? 180} min w weekend`} size="small" variant="outlined" />
                 <Chip label={`Długi trening: ${formatLongRideDay(currentProgram.preferredLongRideDay)}`} size="small" variant="outlined" />

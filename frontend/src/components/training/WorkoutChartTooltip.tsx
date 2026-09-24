@@ -26,10 +26,17 @@ function TooltipContent({ active, payload }: { active?: boolean; payload?: Chart
         boxShadow: theme.tokens?.cardShadow ?? '0 12px 28px rgba(15, 23, 42, 0.12)',
       }}
     >
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={{
+        color: "text.secondary"
+      }}>
         {formatTime(d.timeSec)} — {getTypeLabel(d.label)}
       </Typography>
-      <Typography variant="body2" color="text.primary" fontWeight={600}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.primary",
+          fontWeight: 600
+        }}>
         {d.power}% FTP
       </Typography>
     </Box>

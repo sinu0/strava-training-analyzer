@@ -1,4 +1,4 @@
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
 import { Alert, Button, Chip, Menu, MenuItem, Stack } from '@mui/material';
 import { useState } from 'react';
@@ -42,7 +42,9 @@ export default function MobileShortcutPinButton({
   }
 
   return (
-    <Stack spacing={1} alignItems="flex-end">
+    <Stack spacing={1} sx={{
+      alignItems: "flex-end"
+    }}>
       <Button
         variant="outlined"
         startIcon={<PushPinOutlinedIcon />}

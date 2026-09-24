@@ -59,7 +59,9 @@ export default function TrainingPhasesChart({ from, to }: TrainingPhasesChartPro
   if (isLoading) {
     return (
       <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
-        <Typography color="text.secondary">Ładowanie faz treningowych…</Typography>
+        <Typography sx={{
+          color: "text.secondary"
+        }}>Ładowanie faz treningowych…</Typography>
       </Paper>
     );
   }
@@ -69,8 +71,15 @@ export default function TrainingPhasesChart({ from, to }: TrainingPhasesChartPro
   return (
     <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
       <Stack spacing={1.5}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="subtitle1" fontWeight={600}>
+        <Stack
+          direction="row"
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}>
+          <Typography variant="subtitle1" sx={{
+            fontWeight: 600
+          }}>
             Fazy treningowe
           </Typography>
           <Stack direction="row" spacing={0.5}>
@@ -121,7 +130,12 @@ export default function TrainingPhasesChart({ from, to }: TrainingPhasesChartPro
           </ResponsiveContainer>
         </Box>
 
-        <Typography variant="caption" color="text.secondary" textAlign="center">
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            textAlign: "center"
+          }}>
           Ocena periodyzacji: {data.periodizationScore}/100
         </Typography>
       </Stack>

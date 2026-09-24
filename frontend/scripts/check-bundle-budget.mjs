@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
 
 const assetsDirectory = new URL('../dist/assets/', import.meta.url);
+const distDirectory = new URL('../dist/', import.meta.url);
 const files = readdirSync(assetsDirectory).filter((file) => file.endsWith('.js'));
 
 const budgets = [
@@ -25,6 +26,18 @@ for (const budget of budgets) {
   console.log(`${budget.label}: ${gzipKb.toFixed(2)} kB gzip / ${budget.maxGzipKb} kB — ${status}`);
   if (gzipKb > budget.maxGzipKb) failed = true;
 }
+
+const indexHtml = readFileSync(join(distDirectory.pathname, 'index.html'), 'utf8');
+const initialFiles = [...new Set(
+  [...indexHtml.matchAll(/(?:src|href)="\/(assets\/[^" ]+\.js)"/g)].map((match) => match[1]),
+)];
+const initialGzipKb = initialFiles.reduce((total, file) => (
+  total + gzipSync(readFileSync(join(distDirectory.pathname, file))).byteLength / 1024
+), 0);
+const initialBudgetKb = 210;
+const initialStatus = initialGzipKb <= initialBudgetKb ? 'OK' : 'PRZEKROCZONY';
+console.log(`początkowy JavaScript: ${initialGzipKb.toFixed(2)} kB gzip / ${initialBudgetKb} kB — ${initialStatus}`);
+if (initialGzipKb > initialBudgetKb) failed = true;
 
 const largest = files
   .map((file) => ({

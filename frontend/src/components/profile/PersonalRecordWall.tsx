@@ -62,15 +62,21 @@ export default function PersonalRecordWall() {
               variant="outlined"
             >
               <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   {info.icon} {info.label}
                 </Typography>
                 {items.slice(0, 3).map((r) => (
                   <Box key={r.id} sx={{ mt: 0.75 }}>
-                    <Typography variant="body2" fontWeight={700}>
+                    <Typography variant="body2" sx={{
+                      fontWeight: 700
+                    }}>
                       {r.recordValue} {r.unit}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{
+                      color: "text.secondary"
+                    }}>
                       {r.label}
                     </Typography>
                     {r.improvementPercent != null && r.improvementPercent > 0 && (

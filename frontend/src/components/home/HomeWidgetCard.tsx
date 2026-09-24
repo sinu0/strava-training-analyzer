@@ -81,10 +81,11 @@ export default function HomeWidgetCard({
       <Stack spacing={1.25} sx={{ height: '100%' }}>
         <Stack
           direction="row"
-          alignItems="center"
-          justifyContent="space-between"
           spacing={1}
-        >
+          sx={{
+            alignItems: "center",
+            justifyContent: "space-between"
+          }}>
           <Box sx={{ minWidth: 0 }}>
             <Typography
               variant="subtitle1"
@@ -102,17 +103,16 @@ export default function HomeWidgetCard({
             {subtitle ? (
               <Typography
                 variant="caption"
-                color="text.secondary"
                 sx={{
+                  color: "text.secondary",
                   display: '-webkit-box',
                   mt: 0.35,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   lineHeight: 1.28,
                   WebkitLineClamp: subtitleLines,
-                  WebkitBoxOrient: 'vertical',
-                }}
-              >
+                  WebkitBoxOrient: 'vertical'
+                }}>
                 {subtitle}
               </Typography>
             ) : null}

@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from '../fixtures';
 
 const activityId = '11111111-1111-1111-1111-111111111111';
 
@@ -47,6 +47,7 @@ async function mockApi(page: Page) {
       return route.fulfill({ json: { series: ['power'], originalPoints: 2, returnedPoints: 2, resolution: '1000', time: [0, 1], power: [200, 210] } });
     }
     if (path === `/api/v2/activities/${activityId}/laps`) return route.fulfill({ json: [] });
+    if (path === `/api/v2/matched-rides/activity/${activityId}`) return route.fulfill({ status: 204 });
     if (path === `/api/activities/${activityId}/map`) {
       return route.fulfill({ json: { type: 'FeatureCollection', features: [] } });
     }

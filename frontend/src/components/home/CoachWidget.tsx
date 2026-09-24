@@ -32,7 +32,12 @@ export default function CoachWidget() {
             Coach
           </Typography>
         </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.78rem' }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            fontSize: '0.78rem'
+          }}>
           Sprawdz pelna analize, decyzje na dziś, cel treningowy i AI insights.
         </Typography>
         <Button

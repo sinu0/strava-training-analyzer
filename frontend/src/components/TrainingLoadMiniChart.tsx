@@ -37,9 +37,12 @@ const TrainingLoadMiniChart = memo(function TrainingLoadMiniChart({
 
   if (chartData.length === 0) {
     return (
-      <Typography color="text.secondary" sx={{ py: 2 }}>
-        Brak danych PMC. Zsynchronizuj aktywności i oblicz metryki.
-      </Typography>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          py: 2
+        }}>Brak danych PMC. Zsynchronizuj aktywności i oblicz metryki.
+              </Typography>
     );
   }
 

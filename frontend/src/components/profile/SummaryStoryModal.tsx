@@ -85,15 +85,17 @@ export default function SummaryStoryModal({ open, onClose, weeklySummaries, read
       onClose={onClose}
       fullWidth
       maxWidth="sm"
-      PaperProps={{
-        sx: {
-          bgcolor: 'transparent',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
-          overflow: 'hidden',
-          borderRadius: 4,
-          height: { xs: '80vh', sm: '85vh' },
-          maxHeight: 700,
-        },
+      slotProps={{
+        paper: {
+          sx: {
+            bgcolor: 'transparent',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+            overflow: 'hidden',
+            borderRadius: 4,
+            height: { xs: '80vh', sm: '85vh' },
+            maxHeight: 700,
+          },
+        }
       }}
     >
       <Box

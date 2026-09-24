@@ -62,10 +62,14 @@ function NavButton({ item, selected, onClick }: { item: AppNavigationItem; selec
       </ListItemIcon>
       <ListItemText
         primary={item.label}
-        primaryTypographyProps={{
-          fontSize: '0.88rem',
-          fontWeight: selected ? 650 : 500,
-          color: selected ? 'text.primary' : 'text.secondary',
+        slotProps={{
+          primary: {
+            sx: {
+              fontSize: '0.88rem',
+              fontWeight: selected ? 650 : 500,
+              color: selected ? 'text.primary' : 'text.secondary',
+            },
+          }
         }}
       />
     </ListItemButton>
@@ -159,10 +163,23 @@ export default function Sidebar({
           <SpeedOutlinedIcon />
         </Box>
         <Box sx={{ minWidth: 0 }}>
-          <Typography color="text.primary" noWrap sx={{ fontWeight: 700, fontSize: '0.92rem', letterSpacing: '0.05em' }}>
+          <Typography
+            noWrap
+            sx={{
+              color: "text.primary",
+              fontWeight: 700,
+              fontSize: '0.92rem',
+              letterSpacing: '0.05em'
+            }}>
             TRAINING LAB
           </Typography>
-          <Typography variant="caption" color="text.secondary" noWrap sx={{ fontSize: '0.68rem' }}>
+          <Typography
+            variant="caption"
+            noWrap
+            sx={{
+              color: "text.secondary",
+              fontSize: '0.68rem'
+            }}>
             cycling performance
           </Typography>
         </Box>
@@ -205,9 +222,21 @@ export default function Sidebar({
           pt: 0.75,
         }}
       >
-        <Stack direction="row" spacing={0.8} alignItems="center" sx={{ px: 2.75, pt: 0.75 }}>
+        <Stack
+          direction="row"
+          spacing={0.8}
+          sx={{
+            alignItems: "center",
+            px: 2.75,
+            pt: 0.75
+          }}>
           <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: 'success.main', boxShadow: '0 0 10px rgba(63,185,80,0.55)' }} />
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.68rem' }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              fontSize: '0.68rem'
+            }}>
             Local-only · dane prywatne
           </Typography>
         </Stack>

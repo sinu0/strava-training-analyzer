@@ -27,9 +27,13 @@ export default function ZoneDonutChart({ data, title }: ZoneDonutChartProps) {
   const chart = getChartVisuals(theme);
   if (!data || Object.keys(data.zones).length === 0) {
     return (
-      <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
-        Brak danych strefowych.
-      </Typography>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          py: 2,
+          textAlign: 'center'
+        }}>Brak danych strefowych.
+              </Typography>
     );
   }
 
@@ -44,7 +48,13 @@ export default function ZoneDonutChart({ data, title }: ZoneDonutChartProps) {
   return (
     <Box>
       {!!title && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1, textAlign: 'center' }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 1,
+            textAlign: 'center'
+          }}>
           {title}
         </Typography>
       )}
@@ -87,7 +97,12 @@ export default function ZoneDonutChart({ data, title }: ZoneDonutChartProps) {
                   flexShrink: 0,
                 }}
               />
-              <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  flex: 1
+                }}>
                 {entry.name}
               </Typography>
               <Typography variant="caption" sx={{ fontWeight: 600 }}>

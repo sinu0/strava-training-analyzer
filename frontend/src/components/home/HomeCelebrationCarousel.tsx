@@ -1,4 +1,4 @@
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CloseIcon from '@mui/icons-material/Close';
@@ -147,8 +147,15 @@ export default function HomeCelebrationCarousel({
             py: { xs: 2.5, md: 4 },
           }}
         >
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Stack direction="row" spacing={1} alignItems="center">
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}>
+            <Stack direction="row" spacing={1} sx={{
+              alignItems: "center"
+            }}>
               <CheckCircleOutlineIcon sx={{ color: slide.accentColor }} />
               <Typography variant="body2" sx={{ fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                 Nowości po synchronizacji
@@ -188,7 +195,14 @@ export default function HomeCelebrationCarousel({
                 {slide.description}
               </Typography>
 
-              <Stack direction="row" spacing={1.25} useFlexGap flexWrap="wrap" alignItems="center">
+              <Stack
+                direction="row"
+                spacing={1.25}
+                useFlexGap
+                sx={{
+                  flexWrap: "wrap",
+                  alignItems: "center"
+                }}>
                 {slide.badge ? (
                   <Box
                     sx={{
@@ -288,7 +302,12 @@ export default function HomeCelebrationCarousel({
           </Box>
 
           {slides.length > 1 ? (
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Stack
+              direction="row"
+              sx={{
+                justifyContent: "space-between",
+                alignItems: "center"
+              }}>
               <Button
                 color="inherit"
                 startIcon={<ChevronLeftIcon />}

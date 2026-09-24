@@ -218,12 +218,19 @@ export default function WeightPage() {
                   <Typography variant="h3">
                     {overview?.currentWeightKg != null ? `${Number(overview.currentWeightKg).toFixed(1)} kg` : '—'}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      mt: 0.5
+                    }}>
                     Ostatni pomiar: {latestWeight ? new Date(latestWeight.recordedDate).toLocaleDateString('pl-PL') : 'brak danych'}
                   </Typography>
                 </Box>
                 <Stack spacing={0.5} sx={{ minWidth: { xs: '100%', sm: 280 } }}>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{
+                    color: "text.secondary"
+                  }}>
                     {goal
                       ? `Cel: ${Number(goal.targetWeightKg).toFixed(1)} kg do ${new Date(goal.targetDate).toLocaleDateString('pl-PL')}`
                       : 'Brak ustawionego celu wagowego'}
@@ -233,7 +240,9 @@ export default function WeightPage() {
                       ? `${weeklyChange > 0 ? '+' : ''}${weeklyChange.toFixed(1)} kg / tydzień`
                       : 'Brak trendu tygodniowego'}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     Odśwież, gdy chcesz szybko porównać dzisiejszy stan z ostatnim pomiarem.
                   </Typography>
                 </Stack>

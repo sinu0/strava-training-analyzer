@@ -28,17 +28,16 @@ export default function RecentActivityFeed({
           <ActivityFeedCard activity={activity} onClick={onSelect} summaryText={buildSummary(activity)} />
           <Typography
             variant="body2"
-            color="text.secondary"
             sx={{
+              color: "text.secondary",
               mt: 1,
               px: 0.5,
               display: '-webkit-box',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-            }}
-          >
+              WebkitBoxOrient: 'vertical'
+            }}>
             {buildSummary(activity)}
           </Typography>
         </Box>

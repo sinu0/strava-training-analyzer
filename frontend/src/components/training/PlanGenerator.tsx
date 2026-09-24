@@ -242,7 +242,9 @@ export default function PlanGenerator({ onGenerated }: PlanGeneratorProps) {
           {activeStep === 2 && (
             <Stack spacing={2}>
               <Typography variant="subtitle2">Sprawdź, czy plan ma sens zanim go wygenerujesz.</Typography>
-              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+              <Stack direction="row" spacing={1} useFlexGap sx={{
+                flexWrap: "wrap"
+              }}>
                 <Chip label={GOALS.find((item) => item.value === goal)?.label ?? goal} color="primary" />
                 <Chip label={`Priorytet ${goalPriority}`} variant="outlined" />
                 <Chip label={`${weeks} tyg.`} variant="outlined" />
@@ -257,14 +259,18 @@ export default function PlanGenerator({ onGenerated }: PlanGeneratorProps) {
                 Generator zbuduje tydzień wokół głównego celu, limitu jakości i dostępnych okien czasowych zamiast układać luźny zestaw sesji.
               </Alert>
               {!!eventDate && (
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   Start docelowy: {eventDate}. Planner uwzględni taper, jeśli blok dochodzi do tej daty.
                 </Typography>
               )}
             </Stack>
           )}
 
-          <Stack direction="row" spacing={1} justifyContent="space-between">
+          <Stack direction="row" spacing={1} sx={{
+            justifyContent: "space-between"
+          }}>
             <Button disabled={activeStep === 0 || generate.isPending} onClick={() => setActiveStep((step) => step - 1)}>
               Wstecz
             </Button>

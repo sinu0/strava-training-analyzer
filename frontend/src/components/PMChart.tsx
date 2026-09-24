@@ -74,9 +74,13 @@ const PMChart = memo(function PMChart({ data }: PMChartProps) {
   const chart = getChartVisuals(theme);
   if (!data.length) {
     return (
-      <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-        Brak danych PMC dla wybranego zakresu.
-      </Typography>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          py: 4,
+          textAlign: 'center'
+        }}>Brak danych PMC dla wybranego zakresu.
+              </Typography>
     );
   }
 
@@ -84,7 +88,12 @@ const PMChart = memo(function PMChart({ data }: PMChartProps) {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 1
+        }}>
         CTL pokazuje trend około 42 dni, ATL krótkie zmęczenie około 7 dni, a TSB różnicę między nimi.
       </Typography>
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 1.25 }}>
@@ -95,7 +104,9 @@ const PMChart = memo(function PMChart({ data }: PMChartProps) {
         ].map(([label, color, style]) => (
           <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
             <Box sx={{ width: 24, borderTop: `3px ${style} ${color}` }} />
-            <Typography variant="caption" color="text.secondary">{label}</Typography>
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>{label}</Typography>
           </Box>
         ))}
       </Box>

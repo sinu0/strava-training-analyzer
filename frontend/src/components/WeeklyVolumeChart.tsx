@@ -26,9 +26,13 @@ const WeeklyVolumeChart = memo(function WeeklyVolumeChart({
 
   if (!chartData.length) {
     return (
-      <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-        Brak danych tygodniowych.
-      </Typography>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          py: 4,
+          textAlign: 'center'
+        }}>Brak danych tygodniowych.
+              </Typography>
     );
   }
 

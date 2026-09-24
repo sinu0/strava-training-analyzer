@@ -30,7 +30,13 @@ export default function WeeklyStressBudget({ weeks = [], avgTss = 0 }: WeeklyStr
       <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 0.5 }}>
         Tygodniowy budżet stresu
       </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          mb: 2,
+          display: 'block'
+        }}>
         Porównanie tygodniowego TSS z bezpiecznym limitem (1.3× średnia z 4 tyg)
       </Typography>
 
@@ -43,7 +49,9 @@ export default function WeeklyStressBudget({ weeks = [], avgTss = 0 }: WeeklyStr
           const label = date.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' });
 
           return (
-            <Stack key={w.weekStart} direction="row" spacing={1.5} alignItems="center">
+            <Stack key={w.weekStart} direction="row" spacing={1.5} sx={{
+              alignItems: "center"
+            }}>
               <Typography variant="caption" sx={{ minWidth: 42, fontSize: '0.6rem', color: 'text.secondary' }}>
                 {label}
               </Typography>
@@ -92,7 +100,14 @@ export default function WeeklyStressBudget({ weeks = [], avgTss = 0 }: WeeklyStr
         })}
       </Stack>
 
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block', fontSize: '0.6rem' }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          mt: 1.5,
+          display: 'block',
+          fontSize: '0.6rem'
+        }}>
         Linia: bezpieczny limit = {Math.round(safeMax)} TSS · Średnia 4-tyg: {Math.round(avgTss)} TSS
       </Typography>
     </Paper>

@@ -274,7 +274,9 @@ export default function WorkoutPlayerPage() {
     return (
       <Container maxWidth="sm" sx={{ py: { xs: 3, sm: 6 } }}>
         <PerformanceSurface accent sx={{ p: { xs: 2.5, sm: 4 } }}>
-          <Typography variant="overline" color="text.secondary">{execution.status === 'COMPLETED' ? 'Trening ukończony' : 'Trening przerwany'}</Typography>
+          <Typography variant="overline" sx={{
+            color: "text.secondary"
+          }}>{execution.status === 'COMPLETED' ? 'Trening ukończony' : 'Trening przerwany'}</Typography>
           <Typography variant="h3" sx={{ mt: 0.5 }}>{execution.workoutNameSnapshot}</Typography>
           <Stack direction="row" spacing={3} sx={{ my: 3 }}>
             <MetricReadout label="Zrealizowany czas" value={formatTime(execution.workoutElapsedMs)} />
@@ -300,7 +302,13 @@ export default function WorkoutPlayerPage() {
   return (
     <Box sx={{ minHeight: '100dvh', bgcolor: 'background.default', py: { xs: 1, sm: 2 } }}>
       <Container maxWidth="lg">
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+        <Stack
+          direction="row"
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 1
+          }}>
           <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(`/training/workouts/${execution.scheduledWorkoutId}`)}>Trening</Button>
           <Stack direction="row" spacing={1}>
             {!online && <Chip icon={<WifiOffIcon />} label="Offline — zmiany w kolejce" color="warning" />}
@@ -309,29 +317,50 @@ export default function WorkoutPlayerPage() {
           </Stack>
         </Stack>
         <PerformanceSurface accent sx={{ p: { xs: 2, sm: 3 } }}>
-          <Typography variant="overline" color="text.secondary">{execution.workoutNameSnapshot}</Typography>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} justifyContent="space-between">
+          <Typography variant="overline" sx={{
+            color: "text.secondary"
+          }}>{execution.workoutNameSnapshot}</Typography>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{
+            justifyContent: "space-between"
+          }}>
             <Box sx={{ flex: 1 }}>
               <Typography variant="h2" component="h1" aria-live="polite">{stepLabel(step, execution.currentStepIndex)}</Typography>
               <Typography variant="h1" sx={{ fontVariantNumeric: 'tabular-nums', mt: 1 }}>
                 {stepDuration == null ? formatTime(execution.stepElapsedMs) : formatTime(stepDuration - execution.stepElapsedMs)}
               </Typography>
-              <Typography color="text.secondary">całość {formatTime(execution.workoutElapsedMs)} · krok {execution.currentStepIndex + 1}/{execution.stepsSnapshot.length}</Typography>
+              <Typography sx={{
+                color: "text.secondary"
+              }}>całość {formatTime(execution.workoutElapsedMs)} · krok {execution.currentStepIndex + 1}/{execution.stepsSnapshot.length}</Typography>
             </Box>
-            <Stack direction="row" spacing={{ xs: 3, sm: 5 }} alignItems="center">
+            <Stack direction="row" spacing={{ xs: 3, sm: 5 }} sx={{
+              alignItems: "center"
+            }}>
               <MetricReadout label="Cel mocy" value={goal.watts} unit={goal.watts !== '—' ? 'W' : undefined} tone="primary" hint={goal.pct} />
               <MetricReadout label="Tętno" value={step?.heartRateBpmLow == null ? '—' : `${step.heartRateBpmLow}–${step.heartRateBpmHigh ?? step.heartRateBpmLow}`} unit={step?.heartRateBpmLow == null ? undefined : 'bpm'} />
               <MetricReadout label="Kadencja" value={step?.cadenceRpmLow == null ? '—' : `${step.cadenceRpmLow}–${step.cadenceRpmHigh ?? step.cadenceRpmLow}`} unit={step?.cadenceRpmLow == null ? undefined : 'rpm'} />
             </Stack>
           </Stack>
           <LinearProgress variant="determinate" value={progress} aria-label="Postęp całego treningu" sx={{ height: 10, borderRadius: 8, mt: 3 }} />
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Następny: {stepLabel(nextStep, execution.currentStepIndex + 1)}</Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mt: 1
+            }}>Następny: {stepLabel(nextStep, execution.currentStepIndex + 1)}</Typography>
           {!!step?.instructions && <Alert severity="info" sx={{ mt: 2 }}>{step.instructions}</Alert>}
         </PerformanceSurface>
 
         <Box sx={{ mt: 2 }}><WorkoutPowerChart steps={execution.stepsSnapshot} /></Box>
 
-        <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap" sx={{ mt: 2, '& .MuiButton-root': { minHeight: 48, minWidth: 96 } }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            justifyContent: "center",
+            flexWrap: "wrap",
+            mt: 2,
+            '& .MuiButton-root': { minHeight: 48, minWidth: 96 }
+          }}>
           <Button variant="contained" startIcon={execution.status === 'PAUSED' ? <PlayArrowIcon /> : <PauseIcon />} onClick={() => sendAction(execution.status === 'PAUSED' ? 'RESUME' : 'PAUSE')}>
             {execution.status === 'PAUSED' ? 'Wznów' : 'Pauza'}
           </Button>

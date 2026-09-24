@@ -33,7 +33,9 @@ export default function LoadingState({ message = 'Ładowanie...' }: LoadingState
       >
         <CircularProgress color="primary" size={28} thickness={4} />
       </Box>
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="body2" sx={{
+        color: "text.secondary"
+      }}>
         {message}
       </Typography>
     </Box>

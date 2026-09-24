@@ -29,7 +29,12 @@ export default function NotFoundPage() {
       <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary' }}>
         Strona nie znaleziona
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 400 }}>
+      <Typography
+        variant="body1"
+        sx={{
+          color: "text.secondary",
+          maxWidth: 400
+        }}>
         Wygląda na to, że ta trasa prowadzi donikąd. Sprawdź adres URL lub wróć na dashboard.
       </Typography>
       <Button variant="contained" onClick={() => navigate('/')} sx={{ mt: 1 }}>

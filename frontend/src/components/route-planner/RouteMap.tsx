@@ -132,8 +132,21 @@ export default function RouteMap({
           }}
         >
           <Stack spacing={1}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-              <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                alignItems: "center",
+                justifyContent: "space-between"
+              }}>
+              <Stack
+                direction="row"
+                spacing={1}
+                useFlexGap
+                sx={{
+                  alignItems: "center",
+                  flexWrap: "wrap"
+                }}>
                 <Chip
                   size="small"
                   label={formatGeneratedStyle(generatedAlternatives[selectedAlternativeIndex]?.style ?? 'balanced')}
@@ -144,7 +157,9 @@ export default function RouteMap({
                   {generatedAlternatives[selectedAlternativeIndex]?.sourceName}
                 </Typography>
               </Stack>
-              <Stack direction="row" spacing={0.5} alignItems="center">
+              <Stack direction="row" spacing={0.5} sx={{
+                alignItems: "center"
+              }}>
                 <IconButton
                   size="small"
                   aria-label="Poprzednia propozycja"
@@ -163,10 +178,14 @@ export default function RouteMap({
                 </IconButton>
               </Stack>
             </Stack>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               {generatedAlternatives[selectedAlternativeIndex]?.strategy}
             </Typography>
-            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+            <Stack direction="row" spacing={1} useFlexGap sx={{
+              flexWrap: "wrap"
+            }}>
               <Chip
                 size="small"
                 label={`${((generatedAlternatives[selectedAlternativeIndex]?.preview.distanceM ?? 0) / 1000).toFixed(1)} km`}
@@ -183,7 +202,9 @@ export default function RouteMap({
                 variant="outlined"
               />
             </Stack>
-            <Stack direction="row" justifyContent="center" spacing={0.75}>
+            <Stack direction="row" spacing={0.75} sx={{
+              justifyContent: "center"
+            }}>
               {generatedAlternatives.map((suggestion, index) => (
                 <Box
                   key={`${suggestion.seed}-${suggestion.style}-dot`}
@@ -205,7 +226,13 @@ export default function RouteMap({
                  />
               ))}
             </Stack>
-            <Stack direction="row" justifyContent="center" spacing={1} sx={{ mt: 0.5 }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                justifyContent: "center",
+                mt: 0.5
+              }}>
               <Button
                 size="small"
                 variant="contained"

@@ -95,7 +95,12 @@ function RecoveryGauge({ score }: { score: number }) {
         <Typography variant="h3" sx={{ color, lineHeight: 1 }}>
           {score}
         </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            mt: 0.5
+          }}>
           Poziom regeneracji
         </Typography>
       </Box>
@@ -144,7 +149,13 @@ function MetricSummary({
         border: `1px solid ${alphaColor(color, 0.18)}`,
       }}
     >
-      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          alignItems: "center",
+          mb: 1
+        }}>
         <Box sx={{ color, display: 'flex' }}>{icon}</Box>
         <Typography sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label }}>{title}</Typography>
         {trend ? <TrendIcon direction={trend} /> : null}
@@ -152,7 +163,9 @@ function MetricSummary({
       <Typography variant="h5" sx={{ color }}>
         {primary}
       </Typography>
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="body2" sx={{
+        color: "text.secondary"
+      }}>
         {secondary}
       </Typography>
     </Box>
@@ -402,7 +415,9 @@ export default function HealthPage() {
                 ) : (
                   <Box sx={{ minWidth: 150, textAlign: 'center', p: 2 }}>
                     <Typography variant="h6">Brak danych do oceny</Typography>
-                    <Typography variant="body2" color="text.secondary">Dodaj check-in, aby obliczyć regenerację.</Typography>
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>Dodaj check-in, aby obliczyć regenerację.</Typography>
                   </Box>
                 )}
               </Box>
@@ -410,10 +425,14 @@ export default function HealthPage() {
                 <Typography variant="h5">
                   {recovery?.level ?? 'Brak danych'}
                 </Typography>
-                <Typography variant="body1" color="text.secondary">
+                <Typography variant="body1" sx={{
+                  color: "text.secondary"
+                }}>
                   {recovery?.description ?? 'Brak opisu regeneracji.'}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   Przeciągnij w dół na telefonie, aby szybko odświeżyć stan zdrowia z ostatniej synchronizacji.
                 </Typography>
               </Stack>

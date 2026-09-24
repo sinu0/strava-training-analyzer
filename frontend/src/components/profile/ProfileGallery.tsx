@@ -279,7 +279,9 @@ export default function ProfileGallery() {
 
       {photos.length > PAGE_SIZE && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} sx={{
+            alignItems: "center"
+          }}>
             <Button disabled={currentPage === 0} onClick={() => setPage((value) => Math.max(0, value - 1))} size="small">
               Poprzednia
             </Button>
@@ -298,12 +300,16 @@ export default function ProfileGallery() {
         onClose={closeLightbox}
         fullScreen
         keepMounted
-        TransitionComponent={NoTransition}
-        PaperProps={{
-          sx: {
-            bgcolor: 'rgba(4, 8, 12, 0.98)',
-            backgroundImage: 'none',
-          },
+        slots={{
+          transition: NoTransition
+        }}
+        slotProps={{
+          paper: {
+            sx: {
+              bgcolor: 'rgba(4, 8, 12, 0.98)',
+              backgroundImage: 'none',
+            },
+          }
         }}
       >
         {!!currentPhoto && (
@@ -374,9 +380,10 @@ export default function ProfileGallery() {
               <Stack
                 direction={{ xs: 'column', md: 'row' }}
                 spacing={2}
-                justifyContent="space-between"
-                alignItems={{ xs: 'flex-start', md: 'flex-end' }}
-              >
+                sx={{
+                  justifyContent: "space-between",
+                  alignItems: { xs: 'flex-start', md: 'flex-end' }
+                }}>
                 <Box>
                   <Typography variant="h6" sx={{ color: 'white', fontWeight: 700 }}>
                     {currentPhoto.title}
@@ -387,7 +394,13 @@ export default function ProfileGallery() {
                     </Typography>
                   )}
 
-                  <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1.5 }}>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{
+                      flexWrap: "wrap",
+                      mt: 1.5
+                    }}>
                     <Stat label="Dystans" value={currentPhoto.activity.distanceM ? formatDistance(currentPhoto.activity.distanceM) : null} />
                     <Stat label="Czas" value={currentPhoto.activity.movingTimeSec ? formatDuration(currentPhoto.activity.movingTimeSec) : null} />
                     <Stat label="Moc śr." value={currentPhoto.activity.avgPowerW ? `${Math.round(currentPhoto.activity.avgPowerW)} W` : null} />

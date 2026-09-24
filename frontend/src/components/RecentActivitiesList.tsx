@@ -39,7 +39,9 @@ const RecentActivityItem = memo(function RecentActivityItem({
           </Box>
         }
         secondary={
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             {new Date(activity.startedAt).toLocaleDateString('pl-PL')} · {formatDistance(activity.distanceM)} · {formatDuration(activity.movingTimeSec)}
           </Typography>
         }
@@ -66,9 +68,12 @@ const RecentActivitiesList = memo(function RecentActivitiesList({
 
   if (!activities?.length) {
     return (
-      <Typography color="text.secondary" sx={{ py: 2 }}>
-        Brak aktywności.
-      </Typography>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          py: 2
+        }}>Brak aktywności.
+              </Typography>
     );
   }
 

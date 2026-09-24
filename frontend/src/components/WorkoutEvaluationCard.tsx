@@ -69,10 +69,17 @@ export default function WorkoutEvaluationCard({ evaluation }: Props) {
             color={OUTCOME_COLORS[outcome] ?? 'default'}
             size="small"
           />
-          <Typography variant="h5" fontWeight={700} sx={{ color: outcomeColor }}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 700,
+              color: outcomeColor
+            }}>
             {score}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             /100
           </Typography>
           <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -83,14 +90,18 @@ export default function WorkoutEvaluationCard({ evaluation }: Props) {
               thickness={5}
               sx={{ color: 'text.secondary' }}
             />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               {Math.round(confidence * 100)}%
             </Typography>
           </Box>
         </Box>
 
         <Box sx={{ mb: 1.5 }}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {insight}
           </Typography>
         </Box>
@@ -114,7 +125,14 @@ export default function WorkoutEvaluationCard({ evaluation }: Props) {
         {reasons.length > 0 && (
           <Box sx={{ mb: 1.5 }}>
             {reasons.map((reason) => (
-              <Typography key={reason} variant="caption" display="block" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+              <Typography
+                key={reason}
+                variant="caption"
+                sx={{
+                  display: "block",
+                  color: "text.secondary",
+                  lineHeight: 1.6
+                }}>
                 • {reason}
               </Typography>
             ))}
@@ -153,7 +171,13 @@ function MetricBar({
 
   return (
     <Box sx={{ minWidth: 80 }}>
-      <Typography variant="caption" color="text.secondary" display="block" textAlign="center">
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          display: "block",
+          textAlign: "center"
+        }}>
         {label}
       </Typography>
       <LinearProgress
@@ -169,7 +193,14 @@ function MetricBar({
           },
         }}
       />
-      <Typography variant="caption" fontWeight={600} display="block" textAlign="center" mt={0.25}>
+      <Typography
+        variant="caption"
+        sx={{
+          fontWeight: 600,
+          display: "block",
+          textAlign: "center",
+          mt: 0.25
+        }}>
         {value}%
       </Typography>
     </Box>

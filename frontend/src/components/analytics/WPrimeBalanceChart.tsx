@@ -52,7 +52,9 @@ export default function WPrimeBalanceChart({ activityId }: WPrimeBalanceChartPro
   if (isLoading) {
     return (
       <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
-        <Typography color="text.secondary">Ładowanie W&apos; Balance…</Typography>
+        <Typography sx={{
+          color: "text.secondary"
+        }}>Ładowanie W&apos; Balance…</Typography>
       </Paper>
     );
   }
@@ -64,11 +66,15 @@ export default function WPrimeBalanceChart({ activityId }: WPrimeBalanceChartPro
   return (
     <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
       <Stack spacing={1}>
-        <Typography variant="subtitle1" fontWeight={600}>
+        <Typography variant="subtitle1" sx={{
+          fontWeight: 600
+        }}>
           W&apos; Balance
         </Typography>
 
-        <Stack direction="row" spacing={1} flexWrap="wrap">
+        <Stack direction="row" spacing={1} sx={{
+          flexWrap: "wrap"
+        }}>
           <Chip
             label={`CP: ${Math.round(data.criticalPower)} W`}
             size="small"

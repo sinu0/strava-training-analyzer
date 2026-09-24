@@ -45,7 +45,9 @@ export default function CoachSummaryPanel({
 
   return (
     <Stack spacing={1.25}>
-      <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+      <Stack direction="row" spacing={1} useFlexGap sx={{
+        flexWrap: "wrap"
+      }}>
         <Chip icon={<AutoAwesomeIcon />} label="Coach AI" size="small" color="secondary" />
         <Chip label={`${Math.round(prediction.confidence * 100)}% pewności`} size="small" variant="outlined" />
       </Stack>
@@ -53,13 +55,17 @@ export default function CoachSummaryPanel({
       {weekReview ? (
         <Box>
           <Typography variant="subtitle2">Tydzień</Typography>
-          <Typography variant="body2" color="text.secondary">{weekReview}</Typography>
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>{weekReview}</Typography>
         </Box>
       ) : null}
       {blockReview ? (
         <Box>
           <Typography variant="subtitle2">Blok</Typography>
-          <Typography variant="body2" color="text.secondary">{blockReview}</Typography>
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>{blockReview}</Typography>
         </Box>
       ) : null}
       {!!keyWins.length && (

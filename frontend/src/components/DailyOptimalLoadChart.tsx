@@ -99,9 +99,13 @@ const DailyOptimalLoadChart = memo(function DailyOptimalLoadChart({
 
   if (!chartData.length) {
     return (
-      <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-        Brak danych dziennego obciążenia.
-      </Typography>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          py: 4,
+          textAlign: 'center'
+        }}>Brak danych dziennego obciążenia.
+              </Typography>
     );
   }
 
@@ -114,7 +118,13 @@ const DailyOptimalLoadChart = memo(function DailyOptimalLoadChart({
     <Box>
       {/* Legend */}
       {!compact && (
-        <Stack direction="row" spacing={3} flexWrap="wrap" sx={{ mb: 1.5 }}>
+        <Stack
+          direction="row"
+          spacing={3}
+          sx={{
+            flexWrap: "wrap",
+            mb: 1.5
+          }}>
           {[
             { color: LOAD_COLORS.OPTIMAL, label: 'Optymalny' },
             { color: LOAD_COLORS.UNDER, label: 'Zbyt mało' },
@@ -122,14 +132,18 @@ const DailyOptimalLoadChart = memo(function DailyOptimalLoadChart({
             { color: LOAD_COLORS.DANGER, label: 'Ryzyko kontuzji' },
             { color: LOAD_COLORS.INSUFFICIENT, label: 'Brak danych' },
           ].map(({ color, label }) => (
-            <Stack key={label} direction="row" alignItems="center" spacing={0.5}>
+            <Stack key={label} direction="row" spacing={0.5} sx={{
+              alignItems: "center"
+            }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color }} />
               <Typography variant="caption" sx={{ color: CHART_COLORS.tickText, fontSize: 11 }}>
                 {label}
               </Typography>
             </Stack>
           ))}
-          <Stack direction="row" alignItems="center" spacing={0.5}>
+          <Stack direction="row" spacing={0.5} sx={{
+            alignItems: "center"
+          }}>
             <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: LOAD_COLORS.FUTURE, opacity: 0.6 }} />
             <Typography variant="caption" sx={{ color: CHART_COLORS.tickText, fontSize: 11 }}>
               Projekcja (21 dni)
@@ -140,19 +154,27 @@ const DailyOptimalLoadChart = memo(function DailyOptimalLoadChart({
 
       {!compact && (
         <Stack direction="row" spacing={3} sx={{ mb: 1, flexWrap: 'wrap' }}>
-          <Stack direction="row" alignItems="center" spacing={0.5}>
+          <Stack direction="row" spacing={0.5} sx={{
+            alignItems: "center"
+          }}>
             <Box sx={{ width: 20, height: 2, bgcolor: LOAD_COLORS.UNDER, borderRadius: 1 }} />
             <Typography variant="caption" sx={{ color: CHART_COLORS.tickText, fontSize: 11 }}>Min optymalny</Typography>
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5}>
+          <Stack direction="row" spacing={0.5} sx={{
+            alignItems: "center"
+          }}>
             <Box sx={{ width: 20, height: 2, bgcolor: LOAD_COLORS.OPTIMAL, borderRadius: 1 }} />
             <Typography variant="caption" sx={{ color: CHART_COLORS.tickText, fontSize: 11 }}>Max optymalny</Typography>
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5}>
+          <Stack direction="row" spacing={0.5} sx={{
+            alignItems: "center"
+          }}>
             <Box sx={{ width: 20, height: 2, bgcolor: LOAD_COLORS.CTL, borderRadius: 1 }} />
             <Typography variant="caption" sx={{ color: CHART_COLORS.tickText, fontSize: 11 }}>CTL (forma)</Typography>
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5}>
+          <Stack direction="row" spacing={0.5} sx={{
+            alignItems: "center"
+          }}>
             <Box sx={{ width: 20, height: 2, bgcolor: LOAD_COLORS.DANGER, style: { borderStyle: 'dashed' } } as never} />
             <Typography variant="caption" sx={{ color: CHART_COLORS.tickText, fontSize: 11 }}>Próg ryzyka</Typography>
           </Stack>
@@ -314,7 +336,14 @@ const DailyOptimalLoadChart = memo(function DailyOptimalLoadChart({
       </Box>
 
       {!compact && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block', lineHeight: 1.6 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            mt: 1.5,
+            display: 'block',
+            lineHeight: 1.6
+          }}>
           Zakres optymalny (0.8–1.3 × CTL) obliczany codziennie na podstawie bieżącej formy (CTL).
           Im dłuższa przerwa, tym niższe CTL i tym niższy bezpieczny poziom TSS po powrocie.
           Im wyższa forma, tym więcej możesz bezpiecznie trenować.

@@ -13,7 +13,13 @@ function FocusBar({ label, value, target, color }: { label: string; value: numbe
   const targetPct = Math.min(100, target);
   return (
     <Box sx={{ mb: 1.5 }}>
-      <Stack direction="row" spacing={1} justifyContent="space-between" sx={{ mb: 0.25 }}>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          justifyContent: "space-between",
+          mb: 0.25
+        }}>
         <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.65rem' }}>
           {label}
         </Typography>
@@ -72,7 +78,13 @@ export default function TrainingLoadFocus({ data, isLoading }: TrainingLoadFocus
       <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 0.25 }}>
         Balans obciążeń — ostatnie {data.totalSeconds / 3600 < 1 ? '4 tyg' : `${Math.round(data.totalSeconds / 3600)}h`}
       </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          mb: 2,
+          display: 'block'
+        }}>
         Porównanie czasu w strefach z optymalnym rozkładem dla fazy bazowej (80/15/5)
       </Typography>
 

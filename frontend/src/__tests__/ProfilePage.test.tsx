@@ -1,6 +1,6 @@
 import { ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi } from 'vitest';
 
@@ -36,5 +36,17 @@ describe('ProfilePage', () => {
     expect(screen.getByText('Podsumowanie treningowe')).toBeDefined();
     expect(screen.getByText('Galeria zdjęć')).toBeDefined();
     expect(screen.getByAltText('Morning Ride')).toBeDefined();
+  });
+
+  it('keeps profile actions in a dedicated responsive group', () => {
+    renderPage();
+
+    const identity = screen.getByTestId('profile-hero-identity');
+    const actions = screen.getByRole('group', { name: 'Akcje profilu' });
+
+    expect(within(identity).getByText('Test User')).toBeDefined();
+    expect(within(identity).getByText('Strava połączona')).toBeDefined();
+    expect(within(actions).getByRole('button', { name: 'Pełna analiza' })).toBeDefined();
+    expect(identity.contains(actions)).toBe(false);
   });
 });

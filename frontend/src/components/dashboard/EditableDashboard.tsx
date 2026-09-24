@@ -276,9 +276,17 @@ export default function EditableDashboard({
 
   return (
     <Stack spacing={editing ? 2.5 : 1.5}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent="space-between" alignItems={{ sm: 'center' }}>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={1}
+        sx={{
+          justifyContent: "space-between",
+          alignItems: { sm: 'center' }
+        }}>
         <Box>{toolbarStart}</Box>
-        <Stack direction="row" spacing={0.75} justifyContent="flex-end">
+        <Stack direction="row" spacing={0.75} sx={{
+          justifyContent: "flex-end"
+        }}>
           {editing ? (
             <>
             <Button startIcon={<AddIcon />} onClick={() => setAddOpen(true)}>
@@ -324,10 +332,17 @@ export default function EditableDashboard({
       {widgets.length === 0 ? (
         <Paper sx={{ p: 5, textAlign: 'center', borderStyle: 'dashed' }}>
           <Typography variant="h6">Pulpit jest pusty</Typography>
-          <Typography color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+          <Typography
+            sx={{
+              color: "text.secondary",
+              mt: 1,
+              mb: 2
+            }}>
             Dodaj wybrane moduły lub wróć do sprawdzonego układu startowego.
           </Typography>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent="center">
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{
+            justifyContent: "center"
+          }}>
             <Button variant="contained" onClick={() => { setEditing(true); setAddOpen(true); }}>
               Dodaj widget
             </Button>

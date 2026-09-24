@@ -43,7 +43,9 @@ export default function EditorialHero({
         boxShadow: (currentTheme) => currentTheme.tokens.cardShadow,
       }}
     >
-      <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 1.5, md: 2 }} alignItems="stretch">
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 1.5, md: 2 }} sx={{
+        alignItems: "stretch"
+      }}>
         <Stack spacing={1.25} sx={{ flex: 1, justifyContent: 'space-between', minWidth: 0 }}>
           <Box>
             <Typography
@@ -60,13 +62,22 @@ export default function EditorialHero({
             <Typography variant={compact ? 'h5' : 'h4'} sx={{ maxWidth: 620 }}>
               {title}
             </Typography>
-            <Typography variant={compact ? 'body2' : 'body2'} color="text.secondary" sx={{ mt: compact ? 0.75 : 1, maxWidth: 720, ...(compact && { fontSize: '0.82rem' }) }}>
+            <Typography
+              variant={compact ? 'body2' : 'body2'}
+              sx={{
+                color: "text.secondary",
+                mt: compact ? 0.75 : 1,
+                maxWidth: 720,
+                ...(compact && { fontSize: '0.82rem' })
+              }}>
               {description}
             </Typography>
           </Box>
 
           {highlights.length ? (
-            <Stack direction="row" spacing={0.75} useFlexGap flexWrap="wrap">
+            <Stack direction="row" spacing={0.75} useFlexGap sx={{
+              flexWrap: "wrap"
+            }}>
               {highlights.map((highlight) => (
                 <Box
                   key={highlight}

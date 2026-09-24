@@ -2,7 +2,7 @@ import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import CloudOutlinedIcon from '@mui/icons-material/CloudOutlined';
 import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
 import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutlineOutlined';
 import ScaleOutlinedIcon from '@mui/icons-material/ScaleOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import { Alert, Box, ButtonBase, Grid, Stack, Typography } from '@mui/material';
@@ -68,7 +68,12 @@ export default function MorePage() {
                   </Box>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography variant="subtitle1">{item.label}</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.35 }}>{item.description}</Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "text.secondary",
+                        mt: 0.35
+                      }}>{item.description}</Typography>
                   </Box>
                   <ArrowForwardRoundedIcon sx={{ color: 'text.secondary', alignSelf: 'center' }} />
                 </Stack>
@@ -89,7 +94,9 @@ export default function MorePage() {
             ) : preferences.isError ? (
               <Alert severity="warning">Nie udało się wczytać ustawień skrótów mobilnych.</Alert>
             ) : (
-              <Typography variant="body2" color="text.secondary">Wczytywanie skrótów mobilnych…</Typography>
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>Wczytywanie skrótów mobilnych…</Typography>
             )}
           </PerformanceSurface>
         </Grid>

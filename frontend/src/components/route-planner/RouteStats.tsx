@@ -40,7 +40,9 @@ function formatRoutingProfile(profile: string): string {
 function StatBox({ label, value }: { label: string; value: string }) {
   return (
     <Box>
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={{
+        color: "text.secondary"
+      }}>
         {label}
       </Typography>
       <Typography variant="body2" sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label }}>
@@ -87,14 +89,23 @@ export default function RouteStats({
       <Typography variant="subtitle2" gutterBottom>
         Statystyki
       </Typography>
-      <Stack direction="row" spacing={2} flexWrap="wrap">
+      <Stack direction="row" spacing={2} sx={{
+        flexWrap: "wrap"
+      }}>
         <StatBox label="Dystans" value={`${(totalDistance / 1000).toFixed(1)} km`} />
         <StatBox label="Przewyższenie" value={`${Math.round(totalGain)} m`} />
         <StatBox label="Czas (est.)" value={formatDuration(estimatedTimeSec)} />
         <StatBox label="TSS (est.)" value={estimatedTss > 0 ? estimatedTss.toString() : '—'} />
       </Stack>
       {routePreview ? (
-        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1.5 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          useFlexGap
+          sx={{
+            flexWrap: "wrap",
+            mt: 1.5
+          }}>
           {routeProviderLabel ? (
             <Chip size="small" label={`Routing: ${routeProviderLabel}`} variant="outlined" />
           ) : null}
@@ -135,7 +146,13 @@ export default function RouteStats({
         </Stack>
       ) : null}
       {!!showWeather && weatherStopCount > 0 && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            mt: 1,
+            display: 'block'
+          }}>
           Dymki pogodowe pokazują bieżące warunki dla kluczowych punktów trasy.
         </Typography>
       )}

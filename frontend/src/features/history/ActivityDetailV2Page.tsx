@@ -6,11 +6,6 @@ import {
   Grid,
   Stack,
   Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   Tabs,
   Typography,
 } from '@mui/material';
@@ -18,6 +13,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import ActivityMetricGrid from '@/components/activity/ActivityMetricGrid';
 import ActivityRoutePreview from '@/components/activity/ActivityRoutePreview';
+import LapsTab from '@/components/activity/LapsTab';
 import ActivityStreamsChart from '@/components/ActivityStreamsChart';
 import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
@@ -43,7 +39,7 @@ export default function ActivityDetailV2Page() {
   const requestedTab = params.get('tab');
   const tab: DetailTab = requestedTab === 'analysis' || requestedTab === 'laps' || requestedTab === 'segments' ? requestedTab : 'overview';
   const activity = useV2Activity(id);
-  const streams = useActivityStreams(id, tab === 'analysis');
+  const streams = useActivityStreams(id, tab === 'analysis' || tab === 'laps');
   const laps = useActivityLaps(id, tab === 'laps');
 
   if (activity.isLoading) return <LoadingState message="Ładowanie podsumowania aktywności…" />;
@@ -117,7 +113,13 @@ export default function ActivityDetailV2Page() {
               }}>
               <PerformanceSurface sx={{ p: 2.5 }}>
                 <Typography variant="h6">Podsumowanie</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, whiteSpace: 'pre-wrap' }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                    mt: 1.5,
+                    whiteSpace: 'pre-wrap'
+                  }}>
                   {data.description || 'Brak opisu aktywności.'}
                 </Typography>
               </PerformanceSurface>
@@ -141,7 +143,13 @@ export default function ActivityDetailV2Page() {
             {streams.isError ? <ErrorState message="Nie udało się pobrać strumieni." onRetry={() => void streams.refetch()} /> : null}
             {streamData != null && streamData.returnedPoints > 0 ? (
               <>
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{
+                    alignItems: "center",
+                    mb: 2
+                  }}>
                   <Typography variant="h6">Przebieg sesji</Typography>
                   <Chip size="small" label={`${streamData.returnedPoints}/${streamData.originalPoints} punktów`} />
                 </Stack>
@@ -162,14 +170,17 @@ export default function ActivityDetailV2Page() {
             {laps.isLoading ? <LoadingState message="Ładowanie okrążeń…" /> : null}
             {laps.isError ? <ErrorState message="Nie udało się pobrać okrążeń." onRetry={() => void laps.refetch()} /> : null}
             {lapData.length > 0 ? (
-              <Table size="small">
-                <TableHead><TableRow><TableCell>#</TableCell><TableCell>Nazwa</TableCell><TableCell align="right">Czas</TableCell><TableCell align="right">Moc</TableCell><TableCell align="right">Tętno</TableCell></TableRow></TableHead>
-                <TableBody>{lapData.map(lap => (
-                  <TableRow key={`${lap.lapIndex}-${lap.startIndex}`}>
-                    <TableCell>{lap.lapIndex + 1}</TableCell><TableCell>{lap.name || 'Okrążenie'}</TableCell><TableCell align="right">{Math.round(lap.movingTimeSec / 60)} min</TableCell><TableCell align="right">{metric(lap.avgPowerW, ' W')}</TableCell><TableCell align="right">{metric(lap.avgHeartrate, ' bpm')}</TableCell>
-                  </TableRow>
-                ))}</TableBody>
-              </Table>
+              <Box sx={{ p: { xs: 1.5, md: 2.5 } }}>
+                <LapsTab
+                  laps={lapData}
+                  sportType={data.sportType}
+                  altitudeStream={streamData?.altitude}
+                  powerStream={streamData?.power}
+                  heartrateStream={streamData?.heartrate}
+                  velocityStream={streamData?.velocity}
+                  timeStream={streamData?.time}
+                />
+              </Box>
             ) : laps.data ? <EmptyState title="Brak okrążeń" /> : null}
           </PerformanceSurface>
         )}

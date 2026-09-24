@@ -135,7 +135,9 @@ export default function RouteControls({
           multiline
           maxRows={2}
         />
-        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+        <Stack direction="row" spacing={1} useFlexGap sx={{
+          flexWrap: "wrap"
+        }}>
           <Chip
             size="small"
             icon={<DirectionsBikeOutlinedIcon />}
@@ -157,7 +159,9 @@ export default function RouteControls({
             />
           ) : null}
         </Stack>
-        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+        <Stack direction="row" spacing={1} useFlexGap sx={{
+          flexWrap: "wrap"
+        }}>
           <TextField
             select
             size="small"
@@ -247,13 +251,17 @@ export default function RouteControls({
             />
           )}
           label={(
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1} sx={{
+              alignItems: "center"
+            }}>
               <WbSunnyOutlinedIcon fontSize="small" />
               <Typography variant="body2">Pokaż dymki pogodowe na trasie</Typography>
             </Stack>
           )}
         />
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>
           Kliknij trasę dokładnie tam, gdzie chcesz wstawić punkt pośredni — meta zostaje
           ostatnim punktem. Potem przeciągnij numerowany marker, aby dopracować przebieg.
         </Typography>
@@ -262,15 +270,19 @@ export default function RouteControls({
           <Typography variant="subtitle2">
             Generator z historii
           </Typography>
-          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+          <Stack direction="row" spacing={1} useFlexGap sx={{
+            flexWrap: "wrap"
+          }}>
             <TextField
               size="small"
               type="number"
               label="Cel dystansu (km)"
               value={generatorDistanceKm}
               onChange={(event) => onGeneratorDistanceKmChange(Number(event.target.value) || defaultGeneratorDistanceKm)}
-              inputProps={{ min: 20, max: 220, step: 5 }}
               sx={{ minWidth: 150, flex: 1 }}
+              slotProps={{
+                htmlInput: { min: 20, max: 220, step: 5 }
+              }}
             />
             <TextField
               select
@@ -291,8 +303,10 @@ export default function RouteControls({
               label="Losowość (%)"
               value={generatorVariationLevel}
               onChange={(event) => onGeneratorVariationLevelChange(Number(event.target.value) || defaultGeneratorVariation)}
-              inputProps={{ min: 5, max: 95, step: 5 }}
               sx={{ minWidth: 140, flex: 1 }}
+              slotProps={{
+                htmlInput: { min: 5, max: 95, step: 5 }
+              }}
             />
           </Stack>
           <Button
@@ -303,7 +317,9 @@ export default function RouteControls({
           >
             {isGenerating ? 'Generowanie…' : 'Generuj 3 warianty'}
           </Button>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             Generator bazuje na Twoich zapisanych trasach i wcześniejszych aktywnościach.
             Jeśli ustawisz pierwszy punkt na mapie, potraktuje go jako preferowany start i przygotuje
             kilka wariantów do porównania.

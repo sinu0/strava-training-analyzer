@@ -81,13 +81,21 @@ export default function PlanPage() {
       {tab === 'library' && <WorkoutLibrary />}
       {tab === 'scenario' && (
         <PerformanceSurface accent sx={{ p: { xs: 1.5, md: 2.75 } }}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} alignItems={{ sm: 'center' }} sx={{ mb: 2.5 }}>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.25}
+            sx={{
+              alignItems: { sm: 'center' },
+              mb: 2.5
+            }}>
             <Box sx={{ flex: 1 }}>
               <Typography variant="h6">Scenariusz przyszłego obciążenia</Typography>
-              <Typography variant="body2" color="text.secondary">Zakres pozostaje w URL i może zostać odtworzony po powrocie.</Typography>
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>Zakres pozostaje w URL i może zostać odtworzony po powrocie.</Typography>
             </Box>
-            <PolishDateField size="small" label="Od" value={from} onChange={value => changeRange('from', value)} InputLabelProps={{ shrink: true }} />
-            <PolishDateField size="small" label="Do" value={to} onChange={value => changeRange('to', value)} InputLabelProps={{ shrink: true }} />
+            <PolishDateField size="small" label="Od" value={from} onChange={value => changeRange('from', value)} slotProps={{ inputLabel: { shrink: true } }} />
+            <PolishDateField size="small" label="Do" value={to} onChange={value => changeRange('to', value)} slotProps={{ inputLabel: { shrink: true } }} />
           </Stack>
           {scenario.isLoading ? <LoadingState message="Liczenie scenariusza…" /> : null}
           {scenario.isError ? <ErrorState message="Nie udało się policzyć scenariusza." onRetry={() => void scenario.refetch()} /> : null}
@@ -97,7 +105,12 @@ export default function PlanPage() {
           {scenario.data?.availability === 'AVAILABLE' ? (
             <>
               <Typography variant="h6">Jeśli wykonasz obecny plan</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  mt: 0.5
+                }}>
                 To scenariusz matematyczny CTL/ATL, a nie obietnica wyniku sportowego.
               </Typography>
               {lastPoint ? (

@@ -13,7 +13,9 @@ interface RecoveryWidgetProps {
 function MiniBar({ value, max, color, label }: { value: number; max: number; color: string; label: string }) {
   const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
   return (
-    <Stack direction="row" spacing={0.75} alignItems="center">
+    <Stack direction="row" spacing={0.75} sx={{
+      alignItems: "center"
+    }}>
       <Typography variant="caption" sx={{ fontWeight: 600, color, minWidth: 52, fontSize: '0.6rem' }}>
         {label}
       </Typography>
@@ -65,7 +67,13 @@ export default function RecoveryWidget({ data, isLoading }: RecoveryWidgetProps)
         {/* Fatigue score + Energy budget side by side */}
         <Stack direction="row" spacing={2}>
           <Box sx={{ flex: 1, textAlign: 'center' }}>
-            <Stack direction="row" spacing={0.5} alignItems="center" justifyContent="center">
+            <Stack
+              direction="row"
+              spacing={0.5}
+              sx={{
+                alignItems: "center",
+                justifyContent: "center"
+              }}>
               <BatteryAlertIcon sx={{ color: fatigueColor, fontSize: 16 }} />
               <Typography variant="overline" sx={{ fontWeight: 800, color: fatigueColor, letterSpacing: '0.06em', fontSize: '0.6rem' }}>
                 Zmęczenie
@@ -74,12 +82,23 @@ export default function RecoveryWidget({ data, isLoading }: RecoveryWidgetProps)
             <Typography variant="h4" sx={{ fontWeight: 900, color: fatigueColor, lineHeight: 1, my: 0.25 }}>
               {data.score}
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.55rem' }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                fontSize: '0.55rem'
+              }}>
               / 100 · {data.level}
             </Typography>
           </Box>
           <Box sx={{ flex: 1, textAlign: 'center' }}>
-            <Stack direction="row" spacing={0.5} alignItems="center" justifyContent="center">
+            <Stack
+              direction="row"
+              spacing={0.5}
+              sx={{
+                alignItems: "center",
+                justifyContent: "center"
+              }}>
               <BoltIcon sx={{ color: energyColor, fontSize: 16 }} />
               <Typography variant="overline" sx={{ fontWeight: 800, color: energyColor, letterSpacing: '0.06em', fontSize: '0.6rem' }}>
                 Energia
@@ -88,7 +107,12 @@ export default function RecoveryWidget({ data, isLoading }: RecoveryWidgetProps)
             <Typography variant="h4" sx={{ fontWeight: 900, color: energyColor, lineHeight: 1, my: 0.25 }}>
               {data.energyBudget}
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.55rem' }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                fontSize: '0.55rem'
+              }}>
               / 100 · max TSS: {data.maxTssToday}
             </Typography>
           </Box>
@@ -111,7 +135,13 @@ export default function RecoveryWidget({ data, isLoading }: RecoveryWidgetProps)
           <Typography variant="caption" sx={{ fontWeight: 700, color: energyColor, fontSize: '0.6rem' }}>
             {suggestion}
           </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.55rem', display: 'block' }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              fontSize: '0.55rem',
+              display: 'block'
+            }}>
             trend {data.trend}
             {data.weeklyRampRate !== 0 ? ` · rampa ${data.weeklyRampRate > 0 ? '+' : ''}${data.weeklyRampRate}%/tydz` : ''}
             {data.recoveryEfficiency > 0 ? ` · regeneracja ${data.recoveryEfficiency} pkt/h` : ''}

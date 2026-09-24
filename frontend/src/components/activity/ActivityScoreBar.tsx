@@ -42,7 +42,9 @@ function TeBar({ value, label, color }: { value: number | null; label: string | 
   if (value == null) {
     return (
       <Box sx={{ flex: 1, minWidth: 120 }}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>
           Brak danych
         </Typography>
       </Box>
@@ -51,7 +53,13 @@ function TeBar({ value, label, color }: { value: number | null; label: string | 
   const pct = Math.min(100, (value / 5.0) * 100);
   return (
     <Box sx={{ flex: 1, minWidth: 120 }}>
-      <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 0.25 }}>
+      <Stack
+        direction="row"
+        spacing={0.75}
+        sx={{
+          alignItems: "center",
+          mb: 0.25
+        }}>
         <Typography variant="caption" sx={{ fontWeight: 700, color }}>
           {value.toFixed(1)}
         </Typography>
@@ -67,7 +75,12 @@ function TeBar({ value, label, color }: { value: number | null; label: string | 
           }}
         />
       </Stack>
-      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          fontSize: '0.65rem'
+        }}>
         {label ?? '-'}
       </Typography>
     </Box>
@@ -127,16 +140,21 @@ export default function ActivityScoreBar({ effect }: ActivityScoreBarProps) {
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           spacing={1.5}
-          alignItems={{ sm: 'center' }}
-          justifyContent="space-between"
-        >
-          <Stack direction="row" spacing={1.5} alignItems="center">
+          sx={{
+            alignItems: { sm: 'center' },
+            justifyContent: "space-between"
+          }}>
+          <Stack direction="row" spacing={1.5} sx={{
+            alignItems: "center"
+          }}>
             <ScoreChip score={effect.trainingScore} color={scoreColor} />
             <Box>
               <Typography variant="body2" sx={{ fontWeight: 800, color: scoreColor, lineHeight: 1.1 }}>
                 {getTrainingScoreLabel(effect.trainingScore)}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 Training Score
                 {effect.qualityScore != null && (
                   <span style={{ color: '#39D353', marginLeft: 8, fontWeight: 700 }}>
@@ -147,7 +165,9 @@ export default function ActivityScoreBar({ effect }: ActivityScoreBarProps) {
             </Box>
           </Stack>
 
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} sx={{
+            alignItems: "center"
+          }}>
             <Chip
               label={benefitLabel}
               size="small"

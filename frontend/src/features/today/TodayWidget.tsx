@@ -47,7 +47,9 @@ function formatDuration(seconds?: number | null) {
 
 function WidgetHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
-    <Stack direction="row" spacing={1.2} alignItems="center">
+    <Stack direction="row" spacing={1.2} sx={{
+      alignItems: "center"
+    }}>
       <Box
         sx={{
           width: (currentTheme) => getAppThemeTokens(currentTheme).control.md,
@@ -98,7 +100,9 @@ function RouteMetric({ label, value }: { label: string; value: string }) {
       <Typography variant="h6" noWrap sx={{ lineHeight: 1.15 }}>
         {value}
       </Typography>
-      <Typography variant="caption" color="text.secondary" noWrap>
+      <Typography variant="caption" noWrap sx={{
+        color: "text.secondary"
+      }}>
         {label}
       </Typography>
     </Box>
@@ -181,7 +185,9 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
                 WebkitBackdropFilter: 'blur(12px)',
               }}
             >
-              <Stack direction="row" spacing={0.5} alignItems="baseline">
+              <Stack direction="row" spacing={0.5} sx={{
+                alignItems: "baseline"
+              }}>
                 <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1.65rem', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                   {primaryMetric.value}
                 </Typography>
@@ -199,10 +205,17 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
           <Stack
             direction="row"
             spacing={2}
-            alignItems="flex-end"
-            justifyContent="space-between"
-            sx={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 1, p: { xs: 2.5, sm: 3, md: 3.5 }, color: '#fff' }}
-          >
+            sx={{
+              alignItems: "flex-end",
+              justifyContent: "space-between",
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 1,
+              p: { xs: 2.5, sm: 3, md: 3.5 },
+              color: '#fff'
+            }}>
             <Box sx={{ minWidth: 0 }}>
               <Typography
                 component="h2"
@@ -218,7 +231,14 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
                 {recommendation?.description ?? 'Po synchronizacji system pokaże rekomendację wraz ze źródłami i zastrzeżeniami.'}
               </Typography>
               {secondaryMetrics.length > 0 && (
-                <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1.5 }}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  useFlexGap
+                  sx={{
+                    flexWrap: "wrap",
+                    mt: 1.5
+                  }}>
                   {secondaryMetrics.map((metric) => (
                     <HeroMetric key={metric.label} label={metric.label} value={`${metric.value} ${metric.unit}`} />
                   ))}
@@ -261,7 +281,12 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
         <Box sx={{ mt: 2 }}>
           <MetricReadout label="Ocena gotowości" value={readiness} />
         </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1.1 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mt: 1.1
+          }}>
           {form == null ? 'Brakuje historii do oceny gotowości.' : `Forma ${form.toFixed(1)} · ocena na podstawie obciążenia treningowego.`}
         </Typography>
         {form != null && <RecoveryFormGauge form={form} />}
@@ -282,7 +307,12 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
             </Stack>
             <LoadDotMatrix ctl={data.load.ctl42} atl={data.load.atl7} form={data.load.form} />
           </>
-        ) : <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>Brak historii wymaganej do obliczenia obciążenia.</Typography>}
+        ) : <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mt: 2
+          }}>Brak historii wymaganej do obliczenia obciążenia.</Typography>}
       </PerformanceSurface>
     );
   }
@@ -295,7 +325,14 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
           {data.lastActivity ? (
             <>
               <Typography variant="h5" sx={{ mt: 1.45 }} noWrap>{data.lastActivity.name}</Typography>
-              <Stack direction="row" spacing={{ xs: 1.5, md: 3 }} useFlexGap flexWrap="wrap" sx={{ mt: 1.25 }}>
+              <Stack
+                direction="row"
+                spacing={{ xs: 1.5, md: 3 }}
+                useFlexGap
+                sx={{
+                  flexWrap: "wrap",
+                  mt: 1.25
+                }}>
                 <RouteMetric label="Dystans" value={data.lastActivity.distanceM ? `${(data.lastActivity.distanceM / 1000).toFixed(1)} km` : '—'} />
                 <RouteMetric label="Przewyższenie" value={data.lastActivity.elevationGainM ? `${Math.round(data.lastActivity.elevationGainM)} m` : '—'} />
                 <RouteMetric label="Czas jazdy" value={formatDuration(data.lastActivity.movingTimeSec)} />
@@ -304,7 +341,12 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
           ) : (
             <>
               <Typography variant="h6" sx={{ mt: 1.6 }}>Zaplanuj następny przejazd</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.7 }}>Po synchronizacji pojawi się tutaj ostatnia trasa i jej parametry.</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  mt: 0.7
+                }}>Po synchronizacji pojawi się tutaj ostatnia trasa i jej parametry.</Typography>
               <Button size="small" endIcon={<ArrowForwardIcon fontSize="small" />} onClick={() => navigate('/routes')} sx={{ mt: 1.1, px: 0 }}>Otwórz trasy</Button>
             </>
           )}
@@ -345,7 +387,9 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
         {data.nextTraining ? (
           <>
             <Typography variant="h5" sx={{ mt: 2 }}>{data.nextTraining.plannedType}</Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               {new Date(`${data.nextTraining.date}T12:00:00`).toLocaleDateString('pl-PL')} · {data.nextTraining.plannedDurationMin ?? '—'} min
             </Typography>
             <Button
@@ -357,7 +401,12 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
               Otwórz trening
             </Button>
           </>
-        ) : <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>Brak zaplanowanej sesji.</Typography>}
+        ) : <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mt: 2
+          }}>Brak zaplanowanej sesji.</Typography>}
       </PerformanceSurface>
     );
   }
@@ -366,7 +415,12 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
     return (
       <PerformanceSurface sx={{ p: { xs: 2.5, md: 3 }, height: '100%' }}>
         <WidgetHeader icon={<CloudOutlinedIcon />} title={title} />
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mt: 1.5
+          }}>
           Sprawdź okno pogodowe, wiatr i opady przed wyborem godziny wyjazdu.
         </Typography>
         <Button variant="outlined" onClick={() => navigate('/weather')} sx={{ mt: 2 }}>Otwórz pogodę</Button>
@@ -378,7 +432,12 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
     return (
       <PerformanceSurface sx={{ p: { xs: 2.5, md: 3 }, height: '100%' }}>
         <WidgetHeader icon={<InsightsOutlinedIcon />} title={title} />
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mt: 2
+          }}>
           Szczegółowa objętość tygodnia jest dostępna w analizie obciążenia.
         </Typography>
         <Button onClick={() => navigate('/analytics')} sx={{ mt: 1 }}>Otwórz analizę</Button>
@@ -389,7 +448,12 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
   return (
     <PerformanceSurface sx={{ p: { xs: 2.5, md: 3 }, height: '100%' }}>
       <WidgetHeader icon={<FlagOutlinedIcon />} title={title} />
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mt: 2
+        }}>
         Ustaw priorytet sezonu i monitoruj drogę do celu w widoku planu.
       </Typography>
       <Button onClick={() => navigate('/training')} sx={{ mt: 1 }}>Otwórz plan</Button>

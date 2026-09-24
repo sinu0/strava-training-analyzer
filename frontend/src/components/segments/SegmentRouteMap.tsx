@@ -50,7 +50,11 @@ export default function SegmentRouteMap({
   const allPositions = useMemo(() => decoded.flatMap(route => route.positions), [decoded]);
 
   if (allPositions.length < 2) {
-    return <Box sx={{ height, display: 'grid', placeItems: 'center' }}><Typography color="text.secondary">Brak geometrii segmentu</Typography></Box>;
+    return (
+      <Box sx={{ height, display: 'grid', placeItems: 'center' }}><Typography sx={{
+        color: "text.secondary"
+      }}>Brak geometrii segmentu</Typography></Box>
+    );
   }
 
   return (

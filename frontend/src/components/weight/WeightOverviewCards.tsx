@@ -1,5 +1,5 @@
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import FlagIcon from '@mui/icons-material/Flag';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
@@ -145,7 +145,12 @@ export default function WeightOverviewCards({
               <Typography variant="h3" sx={{ fontWeight: 700, color: CHART_COLORS.secondary }}>
                 {currentWeight != null ? Number(currentWeight).toFixed(1) : '—'}
               </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mb: 1
+              }}>
               kg
             </Typography>
             <Chip
@@ -205,7 +210,12 @@ export default function WeightOverviewCards({
               <Typography variant="h3" sx={{ fontWeight: 700, color: CHART_COLORS.primary }}>
                 {Number(goal.targetWeightKg).toFixed(1)}
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  mb: 1
+                }}>
                 kg do {new Date(goal.targetDate).toLocaleDateString('pl-PL')}
               </Typography>
               {weeksRemaining != null && (
@@ -224,7 +234,9 @@ export default function WeightOverviewCards({
               {goalProgress != null && (
                 <Box sx={{ mt: 1.5 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{
+                      color: "text.secondary"
+                    }}>
                       Postęp
                     </Typography>
                     <Typography variant="caption" sx={{ color: CHART_COLORS.primary, fontWeight: 700 }}>
@@ -249,7 +261,9 @@ export default function WeightOverviewCards({
             </Box>
           ) : (
             <Box sx={{ textAlign: 'center', py: 3 }}>
-              <Typography color="text.secondary" variant="body2">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 Brak celu wagowego
               </Typography>
               <Button
@@ -356,7 +370,9 @@ export default function WeightOverviewCards({
                     <Typography variant="h4" sx={{ fontWeight: 700, color: CHART_COLORS.primary }}>
                       {dailyCaloricTarget} kcal
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{
+                      color: "text.secondary"
+                    }}>
                       dziennie, aby osiągnąć cel
                     </Typography>
                   </Box>
@@ -365,7 +381,9 @@ export default function WeightOverviewCards({
             </Box>
           ) : (
             <Box sx={{ textAlign: 'center', py: 3 }}>
-              <Typography color="text.secondary" variant="body2">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 {currentWeight == null
                   ? 'Dodaj wagę, aby obliczyć zapotrzebowanie'
                   : 'Ustaw cel wagowy, aby obliczyć zapotrzebowanie'}
@@ -387,7 +405,9 @@ export default function WeightOverviewCards({
                 ? Math.round(Number(overview.weeklyTrainingCalories))
                 : '—'}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               kcal / tydzień
             </Typography>
           </Box>
@@ -406,7 +426,9 @@ export default function WeightOverviewCards({
                 ? Math.round(Number(overview.recommendedDailyCalories))
                 : '—'}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               kcal / dzień
             </Typography>
           </Box>
@@ -436,7 +458,9 @@ export default function WeightOverviewCards({
                   : '—'}
               </Typography>
             </Box>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               kg / tydzień
             </Typography>
           </Box>

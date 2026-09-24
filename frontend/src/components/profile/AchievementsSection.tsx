@@ -95,15 +95,27 @@ function AchievementBadge({ achievement }: { achievement: Achievement }) {
           />
         ) : null}
         <Typography
-          fontSize={28}
-          sx={{ display: badgeSrc ? 'none' : 'block' }}
-        >
+          sx={{
+            fontSize: 28,
+            display: badgeSrc ? 'none' : 'block'
+          }}>
           {achievement.icon}
         </Typography>
-        <Typography variant="caption" fontWeight={600} noWrap sx={{ maxWidth: 90 }}>
+        <Typography
+          variant="caption"
+          noWrap
+          sx={{
+            fontWeight: 600,
+            maxWidth: 90
+          }}>
           {achievement.name}
         </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            fontSize: 10
+          }}>
           {TYPE_LABEL[achievement.type] ?? achievement.type}
         </Typography>
         {!!unlocked && !!achievement.unlockedAt && (

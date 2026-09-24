@@ -24,8 +24,9 @@ function parsePolishDate(value: string) {
   return `${match[3]}-${match[2]}-${match[1]}`;
 }
 
-export default function PolishDateField({ value, onChange, inputProps, ...props }: PolishDateFieldProps) {
+export default function PolishDateField({ value, onChange, slotProps, ...props }: PolishDateFieldProps) {
   const [displayValue, setDisplayValue] = useState(() => formatIsoDate(value));
+  const htmlInputSlotProps = slotProps?.htmlInput;
 
   useEffect(() => {
     setDisplayValue(formatIsoDate(value));
@@ -56,11 +57,16 @@ export default function PolishDateField({ value, onChange, inputProps, ...props 
       onKeyDown={(event) => {
         if (event.key === 'Enter') event.currentTarget.blur();
       }}
-      inputProps={{
-        ...inputProps,
-        lang: 'pl-PL',
-        inputMode: 'numeric',
-        maxLength: 10,
+      slotProps={{
+        ...slotProps,
+        htmlInput: (ownerState) => ({
+          ...(typeof htmlInputSlotProps === 'function'
+            ? htmlInputSlotProps(ownerState)
+            : htmlInputSlotProps),
+          lang: 'pl-PL',
+          inputMode: 'numeric',
+          maxLength: 10,
+        }),
       }}
     />
   );

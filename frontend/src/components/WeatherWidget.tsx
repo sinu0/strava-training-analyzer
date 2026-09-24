@@ -65,9 +65,13 @@ export default function WeatherWidget({
 
   if (!gradient) {
     return (
-      <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
-        Ładowanie pogody...
-      </Typography>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          py: 2,
+          textAlign: 'center'
+        }}>Ładowanie pogody...
+              </Typography>
     );
   }
 

@@ -1,4 +1,4 @@
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import { Box, Button, Chip, Paper, Stack, Typography } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -105,7 +105,9 @@ export default function ReadinessWidget({ readiness, onSave, isSaving = false }:
     >
       <Stack spacing={1.5}>
         {/* Header with score gauge */}
-        <Stack direction="row" spacing={1.5} alignItems="center">
+        <Stack direction="row" spacing={1.5} sx={{
+          alignItems: "center"
+        }}>
           <Box
             sx={{
               width: 56,
@@ -124,13 +126,20 @@ export default function ReadinessWidget({ readiness, onSave, isSaving = false }:
               <Typography variant="h6" sx={{ fontWeight: 900, lineHeight: 1, color: accentColor }}>
                 {score ?? '—'}
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.5rem' }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontSize: '0.5rem'
+                }}>
                 /100
               </Typography>
             </Box>
           </Box>
           <Box>
-            <Stack direction="row" spacing={0.5} alignItems="center">
+            <Stack direction="row" spacing={0.5} sx={{
+              alignItems: "center"
+            }}>
               <Typography
                 variant="caption"
                 sx={{
@@ -145,7 +154,12 @@ export default function ReadinessWidget({ readiness, onSave, isSaving = false }:
               </Typography>
               {!!hasCheckIn && <CheckCircleOutlineIcon sx={{ color: STATUS_COLORS.success, fontSize: 14 }} />}
             </Stack>
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.72rem' }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontSize: '0.72rem'
+              }}>
               {readiness?.dayLabel ?? 'Brak decyzji dnia'}{updatedAt ? ` · ${updatedAt}` : ''}
             </Typography>
           </Box>
@@ -153,7 +167,9 @@ export default function ReadinessWidget({ readiness, onSave, isSaving = false }:
 
         {/* Health signals */}
         {!!readiness?.healthSignals && (
-          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          <Stack direction="row" spacing={1} useFlexGap sx={{
+            flexWrap: "wrap"
+          }}>
             {readiness.healthSignals.sleepScore != null && (
               <Chip
                 label={`Sen: ${readiness.healthSignals.sleepScore}`}
@@ -183,7 +199,9 @@ export default function ReadinessWidget({ readiness, onSave, isSaving = false }:
 
         {/* Auto-suggestions */}
         {!!autoSuggestions && Object.keys(autoSuggestions).length > 0 && (
-          <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+          <Stack direction="row" spacing={0.5} useFlexGap sx={{
+            flexWrap: "wrap"
+          }}>
             {(Object.entries(autoSuggestions) as Array<[keyof SaveReadinessCheckInInput, number]>).map(([key, value]) => (
               <Chip
                 key={key}
@@ -243,7 +261,14 @@ export default function ReadinessWidget({ readiness, onSave, isSaving = false }:
                     );
                   })}
                 </Stack>
-                <Typography variant="caption" color="text.secondary" sx={{ width: 20, textAlign: 'right', fontSize: '0.6rem' }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                    width: 20,
+                    textAlign: 'right',
+                    fontSize: '0.6rem'
+                  }}>
                   {hint}
                 </Typography>
               </Box>
@@ -252,7 +277,13 @@ export default function ReadinessWidget({ readiness, onSave, isSaving = false }:
         </Stack>
 
         {/* Score + save */}
-        <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: "center",
+            justifyContent: "space-between"
+          }}>
           <Box sx={{
             px: 1, py: 0.4, borderRadius: 1,
             bgcolor: alphaColor(STATUS_COLORS.accent, 0.06),

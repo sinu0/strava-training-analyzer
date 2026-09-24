@@ -146,24 +146,34 @@ function GradientStrip({ hours, bestStart, bestEnd }: GradientStripProps) {
               {selectedHour.hour}
             </Typography>
             <Divider />
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1} sx={{
+              alignItems: "center"
+            }}>
               <ThermostatIcon fontSize="small" sx={{ color: WEATHER_METRIC_COLORS.temperature }} />
               <Typography variant="body2">{Math.round(selectedHour.temperature)}°C</Typography>
             </Stack>
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1} sx={{
+              alignItems: "center"
+            }}>
               <AirIcon fontSize="small" sx={{ color: WEATHER_METRIC_COLORS.wind }} />
               <Typography variant="body2">{Math.round(selectedHour.windSpeed)} km/h</Typography>
             </Stack>
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1} sx={{
+              alignItems: "center"
+            }}>
               <WaterDropIcon fontSize="small" sx={{ color: WEATHER_METRIC_COLORS.precipitation }} />
               <Typography variant="body2">{selectedHour.precipitation} mm</Typography>
             </Stack>
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1} sx={{
+              alignItems: "center"
+            }}>
               <WeatherConditionIcon kind="sunny" size={16} alt="" />
               <Typography variant="body2">Wynik: {selectedHour.score}/100</Typography>
             </Stack>
             {!!selectedHour.sunrise && (
-              <Stack direction="row" spacing={1} alignItems="center">
+              <Stack direction="row" spacing={1} sx={{
+                alignItems: "center"
+              }}>
                 <LightModeIcon fontSize="small" sx={{ color: WEATHER_METRIC_COLORS.sun }} />
                 <Typography variant="body2">Wschód słońca</Typography>
                 <Typography variant="body2" sx={{ ml: 'auto', fontWeight: 600 }}>
@@ -172,7 +182,9 @@ function GradientStrip({ hours, bestStart, bestEnd }: GradientStripProps) {
               </Stack>
             )}
             {!!selectedHour.sunset && (
-              <Stack direction="row" spacing={1} alignItems="center">
+              <Stack direction="row" spacing={1} sx={{
+                alignItems: "center"
+              }}>
                 <BedtimeIcon fontSize="small" sx={{ color: WEATHER_METRIC_COLORS.wind }} />
                 <Typography variant="body2">Zachód słońca</Typography>
                 <Typography variant="body2" sx={{ ml: 'auto', fontWeight: 600 }}>
@@ -238,7 +250,12 @@ function DayGradientRow({ day }: { day: GradientDay }) {
         >
           {Math.round(day.tempMin)}°
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            fontSize: '0.75rem'
+          }}>
           /
         </Typography>
         <Typography
@@ -293,7 +310,12 @@ export default function WeatherForecastViews({
     <>
       <Box sx={{ mb: 2 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              fontWeight: 500
+            }}>
             Ocena outdoor
           </Typography>
           <Typography variant="body2" sx={{ color: scoreColor, fontWeight: 700 }}>
@@ -385,16 +407,36 @@ export default function WeatherForecastViews({
             bestEnd={todayData.bestWindowEnd}
           />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.75 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontSize: '0.8rem'
+              }}>
               06:00
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontSize: '0.8rem'
+              }}>
               12:00
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontSize: '0.8rem'
+              }}>
               18:00
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontSize: '0.8rem'
+              }}>
               00:00
             </Typography>
           </Box>
@@ -410,7 +452,12 @@ export default function WeatherForecastViews({
                     border: `1px solid ${CHART_COLORS.grid}`,
                   }}
                 />
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                    fontSize: '0.8rem'
+                  }}>
                   {label}
                 </Typography>
               </Box>

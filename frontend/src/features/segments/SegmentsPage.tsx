@@ -49,7 +49,9 @@ export default function SegmentsPage() {
   return (
     <PageContainer title="Segmenty" subtitle="Katalog wszystkich segmentów napotkanych w Twoich aktywnościach" maxWidth={1200}>
       <PerformanceSurface sx={{ p: 2, mb: 2.5 }}>
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} alignItems={{ md: 'center' }}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{
+          alignItems: { md: 'center' }
+        }}>
           <TextField fullWidth label="Szukaj segmentu" value={query} onChange={event => update('q', event.target.value)}
             slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchRoundedIcon /></InputAdornment> } }} />
           <FormControl sx={{ minWidth: 190 }}><InputLabel id="segment-sort-label">Sortowanie</InputLabel>
@@ -71,9 +73,13 @@ export default function SegmentsPage() {
 
       {!!backfill.data && backfill.data.status !== 'COMPLETED' && (
         <PerformanceSurface sx={{ p: 2, mb: 2.5 }}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems={{ sm: 'center' }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{
+            alignItems: { sm: 'center' }
+          }}>
             <Box sx={{ flex: 1 }}><Typography sx={{ fontWeight: 800 }}>Backfill historycznych segmentów: {backfill.data.status}</Typography>
-              <Typography variant="body2" color="text.secondary">{backfill.data.processed}/{backfill.data.total} aktywności · capability: {backfill.data.capability}</Typography></Box>
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>{backfill.data.processed}/{backfill.data.total} aktywności · capability: {backfill.data.capability}</Typography></Box>
             <Button variant="contained" disabled={['RUNNING', 'RATE_LIMITED'].includes(backfill.data.status) || startBackfill.isPending} onClick={() => startBackfill.mutate('segments')}>Uruchom / wznów</Button>
           </Stack>
         </PerformanceSurface>
@@ -81,9 +87,13 @@ export default function SegmentsPage() {
 
       {!!routeBackfill.data && routeBackfill.data.status !== 'COMPLETED' && (
         <PerformanceSurface sx={{ p: 2, mb: 2.5 }}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems={{ sm: 'center' }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{
+            alignItems: { sm: 'center' }
+          }}>
             <Box sx={{ flex: 1 }}><Typography sx={{ fontWeight: 800 }}>Lokalny backfill dopasowanych tras: {routeBackfill.data.status}</Typography>
-              <Typography variant="body2" color="text.secondary">{routeBackfill.data.processed}/{routeBackfill.data.total} aktywności · bez wywołań Stravy</Typography></Box>
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>{routeBackfill.data.processed}/{routeBackfill.data.total} aktywności · bez wywołań Stravy</Typography></Box>
             <Button variant="outlined" disabled={routeBackfill.data.status === 'RUNNING' || startBackfill.isPending} onClick={() => startBackfill.mutate('routes')}>Uruchom / wznów</Button>
           </Stack>
         </PerformanceSurface>
@@ -96,10 +106,19 @@ export default function SegmentsPage() {
         {segments.data?.items.map(segment => (
           <Grid key={segment.id} size={{ xs: 12, md: 6 }}>
             <PerformanceSurface interactive sx={{ p: 2, height: '100%' }}>
-              <Stack direction="row" spacing={1} alignItems="flex-start">
+              <Stack direction="row" spacing={1} sx={{
+                alignItems: "flex-start"
+              }}>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography component="h2" variant="h6"><Box component="a" href={`/segments/${segment.id}`} sx={{ color: 'inherit', textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>{segment.name}</Box></Typography>
-                  <Stack direction="row" spacing={0.75} useFlexGap flexWrap="wrap" sx={{ mt: 0.5 }}>
+                  <Stack
+                    direction="row"
+                    spacing={0.75}
+                    useFlexGap
+                    sx={{
+                      flexWrap: "wrap",
+                      mt: 0.5
+                    }}>
                     {!!segment.city && <Chip size="small" label={segment.city} />}
                     <Chip size="small" variant="outlined" label={`${segment.effortCount} ${segment.effortCount === 1 ? 'próba' : 'prób'}`} />
                   </Stack>

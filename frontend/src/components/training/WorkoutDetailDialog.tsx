@@ -55,7 +55,12 @@ export default function WorkoutDetailDialog({ template, open, onClose, onDelete 
           </Box>
 
           {!!template.description && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mt: 2
+              }}>
               {template.description}
             </Typography>
           )}
@@ -91,7 +96,9 @@ export default function WorkoutDetailDialog({ template, open, onClose, onDelete 
 function StatBlock({ label, value }: { label: string; value: string }) {
   return (
     <Box>
-      <Typography variant="caption" color="text.secondary">{label}</Typography>
+      <Typography variant="caption" sx={{
+        color: "text.secondary"
+      }}>{label}</Typography>
       <Typography variant="h6">{value}</Typography>
     </Box>
   );

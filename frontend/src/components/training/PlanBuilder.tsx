@@ -250,8 +250,10 @@ export default function PlanBuilder() {
       <Card>
         <CardHeader
           title="Plan Builder"
-          titleTypographyProps={{ variant: 'h6' }}
           subheader="Polaczony wizard z optymalizacja algorytmiczna. Stan atlety zaciagany automatycznie."
+          slotProps={{
+            title: { variant: 'h6' }
+          }}
         />
         <CardContent>
           <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 3 }}>
@@ -267,12 +269,19 @@ export default function PlanBuilder() {
           {/* STEP 1: Athlete state & context */}
           {activeStep === 0 && (
             <Stack spacing={2.5}>
-              <Typography variant="subtitle2" color="text.secondary">
+              <Typography variant="subtitle2" sx={{
+                color: "text.secondary"
+              }}>
                 Stan atlety zaciagniety z danych treningowych. Mozesz go poprawic. Eventy zaciagane automatycznie.
               </Typography>
 
               <Box>
-                <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 1
+                  }}>
                   Parametry PMC (auto-wypelnione)
                 </Typography>
                 <Grid container spacing={1.5}>
@@ -324,9 +333,17 @@ export default function PlanBuilder() {
               <Divider />
 
               <Box>
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{
+                    alignItems: "center",
+                    mb: 1
+                  }}>
                   <EmojiEventsIcon sx={{ color: STATUS_COLORS.warning, fontSize: 20 }} />
-                  <Typography variant="subtitle2" fontWeight={700}>
+                  <Typography variant="subtitle2" sx={{
+                    fontWeight: 700
+                  }}>
                     Wydarzenia
                   </Typography>
                 </Stack>
@@ -349,12 +366,20 @@ export default function PlanBuilder() {
                     ))}
                   </Stack>
                 ) : (
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "text.secondary",
+                      display: 'block',
+                      mb: 1
+                    }}>
                     Brak wydarzen. Dodaj szybko ponizej lub w panelu bocznym.
                   </Typography>
                 )}
 
-                <Grid container spacing={1} alignItems="center">
+                <Grid container spacing={1} sx={{
+                  alignItems: "center"
+                }}>
                   <Grid size={{ xs: 12, sm: 3 }}>
                     <TextField
                       fullWidth size="small" label="Event date"
@@ -417,7 +442,9 @@ export default function PlanBuilder() {
           {/* STEP 2: Goal & constraints */}
           {activeStep === 1 && (
             <Stack spacing={2.5}>
-              <Typography variant="subtitle2" color="text.secondary">
+              <Typography variant="subtitle2" sx={{
+                color: "text.secondary"
+              }}>
                 Powiedz plannerowi, co chcesz osiagnac i ile masz czasu.
               </Typography>
 
@@ -481,11 +508,15 @@ export default function PlanBuilder() {
           {/* STEP 3: Summary & run */}
           {activeStep === 2 && (
             <Stack spacing={2.5}>
-              <Typography variant="subtitle2" color="text.secondary">
+              <Typography variant="subtitle2" sx={{
+                color: "text.secondary"
+              }}>
                 Sprawdz parametry przed optymalizacja.
               </Typography>
 
-              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+              <Stack direction="row" spacing={1} useFlexGap sx={{
+                flexWrap: "wrap"
+              }}>
                 <Chip label={GOALS.find((g) => g.value === goal)?.label ?? goal} color="primary" />
                 <Chip label={`Priorytet ${goalPriority}`} variant="outlined" />
                 <Chip label={`${weeks} tyg.`} variant="outlined" />
@@ -525,7 +556,9 @@ export default function PlanBuilder() {
               {!!isOptimizing && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 4 }}>
                   <CircularProgress />
-                  <Typography color="text.secondary">Optymalizuje plan z Monte Carlo...</Typography>
+                  <Typography sx={{
+                    color: "text.secondary"
+                  }}>Optymalizuje plan z Monte Carlo...</Typography>
                 </Box>
               )}
 
@@ -538,9 +571,18 @@ export default function PlanBuilder() {
                   ) : (
                     <Stack spacing={2}>
                       <Card>
-                        <CardHeader title="Strategia" titleTypographyProps={{ variant: 'subtitle2' }} />
+                        <CardHeader title="Strategia" slotProps={{
+                          title: { variant: 'subtitle2' }
+                        }} />
                         <CardContent>
-                          <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
+                          <Stack
+                            direction="row"
+                            spacing={2}
+                            useFlexGap
+                            sx={{
+                              alignItems: "center",
+                              flexWrap: "wrap"
+                            }}>
                             <Chip
                               icon={<WhatshotIcon />}
                               label={result.strategy.focus}
@@ -548,7 +590,9 @@ export default function PlanBuilder() {
                               color={result.strategy.focus === 'TAPER' ? 'warning' : result.strategy.focus === 'BUILD' ? 'primary' : 'default'}
                               variant="outlined"
                             />
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="body2" sx={{
+                              color: "text.secondary"
+                            }}>
                               {result.strategy.reasoning}
                             </Typography>
                           </Stack>
@@ -557,7 +601,9 @@ export default function PlanBuilder() {
 
                       {/* Plan selector */}
                       <Card>
-                        <CardHeader title="Wybierz wariant planu" titleTypographyProps={{ variant: 'subtitle2' }} />
+                        <CardHeader title="Wybierz wariant planu" slotProps={{
+                          title: { variant: 'subtitle2' }
+                        }} />
                         <CardContent>
                           <Grid container spacing={2}>
                             {result.plans.map((plan) => {
@@ -578,7 +624,12 @@ export default function PlanBuilder() {
                                     }}
                                   >
                                     <Stack spacing={1}>
-                                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                      <Stack
+                                        direction="row"
+                                        sx={{
+                                          justifyContent: "space-between",
+                                          alignItems: "center"
+                                        }}>
                                         <Chip
                                           label={PLAN_TYPE_CONFIG[plan.type].label}
                                           size="small"
@@ -592,20 +643,40 @@ export default function PlanBuilder() {
                                       </Stack>
                                       <Divider />
                                       <Box>
-                                        <Typography variant="caption" color="text.secondary">TSS szacowany</Typography>
-                                        <Typography variant="h6" fontWeight={700}>{plan.estimatedTss}</Typography>
+                                        <Typography variant="caption" sx={{
+                                          color: "text.secondary"
+                                        }}>TSS szacowany</Typography>
+                                        <Typography variant="h6" sx={{
+                                          fontWeight: 700
+                                        }}>{plan.estimatedTss}</Typography>
                                       </Box>
                                       <Box>
-                                        <Typography variant="caption" color="text.secondary">Wynik adaptacji</Typography>
-                                        <Typography fontWeight={600}>{plan.score}</Typography>
+                                        <Typography variant="caption" sx={{
+                                          color: "text.secondary"
+                                        }}>Wynik adaptacji</Typography>
+                                        <Typography sx={{
+                                          fontWeight: 600
+                                        }}>{plan.score}</Typography>
                                       </Box>
                                       <Box>
-                                        <Typography variant="caption" color="text.secondary">Zysk adaptacyjny</Typography>
-                                        <Typography fontWeight={600} color="success.main">{plan.adaptationGain}</Typography>
+                                        <Typography variant="caption" sx={{
+                                          color: "text.secondary"
+                                        }}>Zysk adaptacyjny</Typography>
+                                        <Typography
+                                          sx={{
+                                            fontWeight: 600,
+                                            color: "success.main"
+                                          }}>{plan.adaptationGain}</Typography>
                                       </Box>
                                       <Box>
-                                        <Typography variant="caption" color="text.secondary">Koszt zmeczenia</Typography>
-                                        <Typography fontWeight={600} color="error.main">{plan.fatigueCost}</Typography>
+                                        <Typography variant="caption" sx={{
+                                          color: "text.secondary"
+                                        }}>Koszt zmeczenia</Typography>
+                                        <Typography
+                                          sx={{
+                                            fontWeight: 600,
+                                            color: "error.main"
+                                          }}>{plan.fatigueCost}</Typography>
                                       </Box>
                                     </Stack>
                                   </Box>
@@ -660,12 +731,20 @@ export default function PlanBuilder() {
                         <Card>
                           <CardHeader
                             title={`Sesje: ${PLAN_TYPE_CONFIG[selectedType].label} (${selectedPlan.sessions.length} sesji | Pewnosc: ${result.confidence}%)`}
-                            titleTypographyProps={{ variant: 'subtitle2' }}
+                            slotProps={{
+                              title: { variant: 'subtitle2' }
+                            }}
                           />
                           <CardContent>
                             <Stack spacing={2}>
                               <Box>
-                                <Typography variant="caption" fontWeight={600} display="block" mb={0.5}>
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    fontWeight: 600,
+                                    display: "block",
+                                    mb: 0.5
+                                  }}>
                                   Rozklad intensywnosci
                                 </Typography>
                                 <Box sx={{ display: 'flex', gap: 0.5, borderRadius: 2, overflow: 'hidden', height: 28 }}>
@@ -674,7 +753,9 @@ export default function PlanBuilder() {
                                     bgcolor: INTENSITY_COLORS.LOW,
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                   }}>
-                                    <Typography variant="caption" fontWeight={700} color="white">
+                                    <Typography variant="caption" color="white" sx={{
+                                      fontWeight: 700
+                                    }}>
                                       LOW {selectedPlan.intensityDistribution.low}%
                                     </Typography>
                                   </Box>
@@ -684,7 +765,9 @@ export default function PlanBuilder() {
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                   }}>
                                     {selectedPlan.intensityDistribution.moderate > 8 && (
-                                      <Typography variant="caption" fontWeight={700} color="white">
+                                      <Typography variant="caption" color="white" sx={{
+                                        fontWeight: 700
+                                      }}>
                                         MOD {selectedPlan.intensityDistribution.moderate}%
                                       </Typography>
                                     )}
@@ -695,7 +778,9 @@ export default function PlanBuilder() {
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                   }}>
                                     {selectedPlan.intensityDistribution.high > 8 && (
-                                      <Typography variant="caption" fontWeight={700} color="white">
+                                      <Typography variant="caption" color="white" sx={{
+                                        fontWeight: 700
+                                      }}>
                                         HIGH {selectedPlan.intensityDistribution.high}%
                                       </Typography>
                                     )}
@@ -734,7 +819,14 @@ export default function PlanBuilder() {
                                         </TableCell>
                                         <TableCell>{session.tss}</TableCell>
                                         <TableCell>
-                                          <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 200, display: 'block', whiteSpace: 'normal' }}>
+                                          <Typography
+                                            variant="caption"
+                                            sx={{
+                                              color: "text.secondary",
+                                              maxWidth: 200,
+                                              display: 'block',
+                                              whiteSpace: 'normal'
+                                            }}>
                                             {session.goal}
                                           </Typography>
                                         </TableCell>
@@ -751,11 +843,15 @@ export default function PlanBuilder() {
                       {/* Load summary */}
                       {!!result.loadSummary && result.loadSummary.length > 0 && (
                         <Card>
-                          <CardHeader title="Podsumowanie obciazenia" titleTypographyProps={{ variant: 'subtitle2' }} />
+                          <CardHeader title="Podsumowanie obciazenia" slotProps={{
+                            title: { variant: 'subtitle2' }
+                          }} />
                           <CardContent>
                             <Stack spacing={0.5}>
                               {result.loadSummary.map((summary) => (
-                                <Typography key={summary} variant="body2" color="text.secondary">• {summary}</Typography>
+                                <Typography key={summary} variant="body2" sx={{
+                                  color: "text.secondary"
+                                }}>• {summary}</Typography>
                               ))}
                             </Stack>
                           </CardContent>
@@ -768,7 +864,13 @@ export default function PlanBuilder() {
           )}
 
           {/* Navigation */}
-          <Stack direction="row" spacing={1} justifyContent="space-between" sx={{ mt: 3 }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              justifyContent: "space-between",
+              mt: 3
+            }}>
             <Button
               disabled={activeStep === 0 || isOptimizing}
               onClick={() => setActiveStep((s) => s - 1)}
