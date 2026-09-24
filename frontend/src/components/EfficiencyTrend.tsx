@@ -3,6 +3,8 @@ import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
 import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import { getChartVisuals } from '../utils/chartStyles';
 
 import type { TrendPoint } from '../types/analytics';
@@ -55,7 +57,7 @@ const EfficiencyTrend = memo(function EfficiencyTrend({
           <YAxis
             dataKey="value"
             {...chart.axis}
-            label={{ value: 'EF', angle: -90, position: 'insideLeft', fill: theme.tokens.chart.tick, fontSize: 11, fontWeight: 700 }}
+            label={{ value: 'EF', angle: -90, position: 'insideLeft', fill: getAppThemeTokens(theme).chart.tick, fontSize: 11, fontWeight: 700 }}
           />
           <Tooltip
             {...chart.tooltip}
@@ -67,7 +69,7 @@ const EfficiencyTrend = memo(function EfficiencyTrend({
           />
           <Scatter
             data={chartData}
-            fill={theme.tokens.chart.secondary}
+            fill={getAppThemeTokens(theme).chart.secondary}
             shape="circle"
           />
         </ScatterChart>

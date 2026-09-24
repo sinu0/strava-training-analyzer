@@ -13,6 +13,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 
+import { getAppThemeTokens } from '@/theme/theme';
 import { StatusPill, Widget } from '@/ui';
 
 import { getChartVisuals } from '../../utils/chartStyles';
@@ -76,7 +77,7 @@ export default function TrainingProjectionChart({ days }: TrainingProjectionChar
               <XAxis dataKey="date" tickFormatter={formatDateTick} {...chart.axis} />
               <YAxis {...chart.axis} />
               <Tooltip {...chart.tooltip} />
-              <Bar dataKey="plannedTss" fill={theme.tokens.chart.tertiary} radius={chart.barRadius} name="Plan TSS" />
+              <Bar dataKey="plannedTss" fill={getAppThemeTokens(theme).chart.tertiary} radius={chart.barRadius} name="Plan TSS" />
               <Line type="monotone" dataKey="ctl" stroke={PMC_COLORS.CTL} strokeWidth={2.5} dot={false} name="CTL" />
               <Line type="monotone" dataKey="atl" stroke={PMC_COLORS.ATL} strokeWidth={2.5} dot={false} name="ATL" />
               <Line type="monotone" dataKey="tsb" stroke={PMC_COLORS.TSB} strokeWidth={2.5} dot={false} name="TSB" />

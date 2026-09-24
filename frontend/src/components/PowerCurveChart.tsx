@@ -3,6 +3,8 @@ import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import { CHART_ACTIVE_DOT, getChartVisuals } from '../utils/chartStyles';
 
 import type { PowerCurve as PowerCurveType } from '../types/analytics';
@@ -44,10 +46,10 @@ const PowerCurveChart = memo(function PowerCurveChart({
   const chart = getChartVisuals(theme);
   const series = useMemo(
     () => [
-      { key: 'current', label: 'Aktualny zakres', data, color: theme.tokens.chart.primary, dashed: false },
+      { key: 'current', label: 'Aktualny zakres', data, color: getAppThemeTokens(theme).chart.primary, dashed: false },
       ...comparisonSeries.filter((item) => item.data?.efforts && Object.keys(item.data.efforts).length > 0),
     ],
-    [comparisonSeries, data, theme.tokens.chart.primary],
+    [comparisonSeries, data, theme],
   );
 
   const chartData = useMemo(() => {
@@ -119,7 +121,7 @@ const PowerCurveChart = memo(function PowerCurveChart({
           />
            <YAxis
              {...chart.axis}
-             label={{ value: 'Moc (W)', angle: -90, position: 'insideLeft', fill: theme.tokens.chart.tick, fontSize: 11, fontWeight: 700 }}
+             label={{ value: 'Moc (W)', angle: -90, position: 'insideLeft', fill: getAppThemeTokens(theme).chart.tick, fontSize: 11, fontWeight: 700 }}
            />
            <Tooltip
              {...chart.tooltip}

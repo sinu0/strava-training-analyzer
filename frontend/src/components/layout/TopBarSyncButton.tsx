@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCreateImportJob, useProcessingJob } from '@/features/data/useDataJobs';
 import { invalidateAfterTrainingSync } from '@/hooks/queryInvalidation';
 import { useCheckNewActivities, useStravaConfig, useSyncStatus } from '@/hooks/useAnalytics';
+import { getAppThemeTokens } from '@/theme/theme';
 
 import type { Theme } from '@mui/material/styles';
 
@@ -16,19 +17,19 @@ import type { Theme } from '@mui/material/styles';
 const roundButtonSx = (theme: Theme) => ({
   width: 40,
   height: 40,
-  bgcolor: theme.tokens.searchPill,
+  bgcolor: getAppThemeTokens(theme).searchPill,
   color: theme.palette.text.primary,
-  boxShadow: theme.tokens.cardShadow,
-  transition: theme.tokens.transition,
+  boxShadow: getAppThemeTokens(theme).cardShadow,
+  transition: getAppThemeTokens(theme).transition,
   '&:hover': {
-    bgcolor: theme.tokens.searchPill,
-    backgroundImage: `linear-gradient(${theme.tokens.hoverOverlay}, ${theme.tokens.hoverOverlay})`,
-    boxShadow: theme.tokens.cardShadowHover,
+    bgcolor: getAppThemeTokens(theme).searchPill,
+    backgroundImage: `linear-gradient(${getAppThemeTokens(theme).hoverOverlay}, ${getAppThemeTokens(theme).hoverOverlay})`,
+    boxShadow: getAppThemeTokens(theme).cardShadowHover,
   },
   '&.Mui-disabled': {
-    bgcolor: theme.tokens.searchPill,
+    bgcolor: getAppThemeTokens(theme).searchPill,
     color: theme.palette.text.secondary,
-    boxShadow: theme.tokens.cardShadow,
+    boxShadow: getAppThemeTokens(theme).cardShadow,
   },
 });
 

@@ -3,6 +3,8 @@ import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import { CHART_ACTIVE_DOT, getChartVisuals } from '../utils/chartStyles';
 
 import type { TrendPoint } from '../types/analytics';
@@ -49,7 +51,7 @@ const FtpTrendChart = memo(function FtpTrendChart({
           />
           <YAxis
             {...chart.axis}
-            label={{ value: 'FTP (W)', angle: -90, position: 'insideLeft', fill: theme.tokens.chart.tick, fontSize: 11, fontWeight: 700 }}
+            label={{ value: 'FTP (W)', angle: -90, position: 'insideLeft', fill: getAppThemeTokens(theme).chart.tick, fontSize: 11, fontWeight: 700 }}
             domain={['dataMin - 10', 'dataMax + 10']}
           />
           <Tooltip
@@ -60,10 +62,10 @@ const FtpTrendChart = memo(function FtpTrendChart({
           <Line
             type="monotone"
             dataKey="value"
-            stroke={theme.tokens.chart.secondary}
+            stroke={getAppThemeTokens(theme).chart.secondary}
             strokeWidth={2.5}
-            dot={{ r: 3.5, fill: theme.tokens.chart.secondary, strokeWidth: 0 }}
-            activeDot={{ ...CHART_ACTIVE_DOT, stroke: theme.tokens.chart.secondary }}
+            dot={{ r: 3.5, fill: getAppThemeTokens(theme).chart.secondary, strokeWidth: 0 }}
+            activeDot={{ ...CHART_ACTIVE_DOT, stroke: getAppThemeTokens(theme).chart.secondary }}
             name="FTP"
           />
         </LineChart>

@@ -72,7 +72,7 @@ function StatPill({
       <Typography
         sx={{
           fontSize: '0.78rem',
-          color: 'rgba(255,255,255,0.66)',
+          color: (theme) => getAppThemeTokens(theme).media.inkQuiet,
           mt: 0.25,
           textAlign: 'center',
         }}

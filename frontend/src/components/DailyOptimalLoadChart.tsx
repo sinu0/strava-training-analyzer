@@ -16,6 +16,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 
+import { getAppThemeTokens } from '@/theme/theme';
 import { getChartVisuals } from '@/utils/chartStyles';
 import { CHART_COLORS, LOAD_COLORS, alphaColor } from '@/utils/colors';
 import { localDate } from '@/utils/localDate';
@@ -191,13 +192,13 @@ const DailyOptimalLoadChart = memo(function DailyOptimalLoadChart({
             <XAxis
               dataKey="date"
               {...chart.axis}
-              tick={{ fill: theme.tokens.chart.tick, fontSize: compact ? 9 : 11, fontWeight: 600 }}
+              tick={{ fill: getAppThemeTokens(theme).chart.tick, fontSize: compact ? 9 : 11, fontWeight: 600 }}
               interval={tickInterval - 1}
               tickFormatter={formatDateTick}
             />
             <YAxis
               {...chart.axis}
-              tick={{ fill: theme.tokens.chart.tick, fontSize: compact ? 9 : 11, fontWeight: 600 }}
+              tick={{ fill: getAppThemeTokens(theme).chart.tick, fontSize: compact ? 9 : 11, fontWeight: 600 }}
               width={compact ? 28 : 44}
             />
             <Tooltip

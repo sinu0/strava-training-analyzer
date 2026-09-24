@@ -14,6 +14,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 
+import { getAppThemeTokens } from '@/theme/theme';
 import { localDate } from '@/utils/localDate';
 import { getLoadStatusColor } from '@/utils/statusColors';
 
@@ -177,8 +178,8 @@ const OptimalLoadChart = memo(function OptimalLoadChart({
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartData} margin={{ top: 10, right: compact ? 50 : 60, left: compact ? -15 : 0, bottom: 0 }}>
             <CartesianGrid {...chart.grid} />
-            <XAxis dataKey="week" {...chart.axis} tick={{ fill: theme.tokens.chart.tick, fontSize: compact ? 10 : 12, fontWeight: 600 }} />
-            <YAxis {...chart.axis} tick={{ fill: theme.tokens.chart.tick, fontSize: compact ? 10 : 12, fontWeight: 600 }} width={compact ? 28 : 44} />
+            <XAxis dataKey="week" {...chart.axis} tick={{ fill: getAppThemeTokens(theme).chart.tick, fontSize: compact ? 10 : 12, fontWeight: 600 }} />
+            <YAxis {...chart.axis} tick={{ fill: getAppThemeTokens(theme).chart.tick, fontSize: compact ? 10 : 12, fontWeight: 600 }} width={compact ? 28 : 44} />
             <Tooltip
               {...chart.tooltip}
               formatter={(value, name) => {

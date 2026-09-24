@@ -4,10 +4,13 @@ import CloseIcon from '@mui/icons-material/Close';
 import { Box, Dialog, Fade, IconButton } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import StoryProgressBar from './StoryProgressBar';
 import SummaryStoryContent from './SummaryStoryContent';
 
 import type { WeeklySummary, ReadinessData } from '../../types/analytics';
+import type { Theme } from '@mui/material/styles';
 
 const TOTAL_SLIDES = 4;
 const TICK_INTERVAL_MS = 100;
@@ -75,8 +78,8 @@ export default function SummaryStoryModal({ open, onClose, weeklySummaries, read
     transform: 'translateY(-50%)',
     zIndex: 20,
     color: 'white',
-    bgcolor: 'rgba(0,0,0,0.35)',
-    '&:hover': { bgcolor: 'rgba(0,0,0,0.55)' },
+    bgcolor: (t: Theme) => getAppThemeTokens(t).media.control,
+    '&:hover': { bgcolor: (t: Theme) => getAppThemeTokens(t).media.controlHover },
   };
 
   return (
@@ -89,7 +92,7 @@ export default function SummaryStoryModal({ open, onClose, weeklySummaries, read
         paper: {
           sx: {
             bgcolor: 'transparent',
-            boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+            boxShadow: (t) => getAppThemeTokens(t).media.dialogShadow,
             overflow: 'hidden',
             borderRadius: 4,
             height: { xs: '80vh', sm: '85vh' },
@@ -111,7 +114,7 @@ export default function SummaryStoryModal({ open, onClose, weeklySummaries, read
           />
         </Box>
 
-        <IconButton aria-label="Zamknij" onClick={onClose} size="small" sx={{ position: 'absolute', top: 10, right: 10, zIndex: 20, color: 'white', bgcolor: 'rgba(0,0,0,0.35)', '&:hover': { bgcolor: 'rgba(0,0,0,0.55)' } }}>
+        <IconButton aria-label="Zamknij" onClick={onClose} size="small" sx={{ position: 'absolute', top: 10, right: 10, zIndex: 20, color: 'white', bgcolor: (t) => getAppThemeTokens(t).media.control, '&:hover': { bgcolor: (t) => getAppThemeTokens(t).media.controlHover } }}>
           <CloseIcon fontSize="small" />
         </IconButton>
 

@@ -3,6 +3,8 @@ import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import { getChartVisuals } from '../utils/chartStyles';
 
 import type { WeeklySummary } from '../types/analytics';
@@ -44,12 +46,12 @@ const WeeklyVolumeChart = memo(function WeeklyVolumeChart({
           <XAxis dataKey="week" {...chart.axis} />
           <YAxis
             {...chart.axis}
-            label={{ value: 'TSS', angle: -90, position: 'insideLeft', fill: theme.tokens.chart.tick, fontSize: 11, fontWeight: 700 }}
+            label={{ value: 'TSS', angle: -90, position: 'insideLeft', fill: getAppThemeTokens(theme).chart.tick, fontSize: 11, fontWeight: 700 }}
           />
           <Tooltip
             {...chart.tooltip}
           />
-          <Bar dataKey="tss" fill={theme.tokens.chart.primary} radius={chart.barRadius} name="TSS" />
+          <Bar dataKey="tss" fill={getAppThemeTokens(theme).chart.primary} radius={chart.barRadius} name="TSS" />
         </BarChart>
       </ResponsiveContainer>
     </Box>

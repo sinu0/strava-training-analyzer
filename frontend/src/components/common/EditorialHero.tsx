@@ -37,10 +37,10 @@ export default function EditorialHero({
         mb: compact ? { xs: 1.5, md: 2 } : { xs: 2, md: 2.5 },
         borderRadius: (currentTheme) => `${getAppThemeTokens(currentTheme).radius.card}px`,
         border: '1px solid',
-        borderColor: (currentTheme) => currentTheme.tokens.surfaceBorder,
+        borderColor: (currentTheme) => getAppThemeTokens(currentTheme).surfaceBorder,
         bgcolor: 'background.paper',
         overflow: 'hidden',
-        boxShadow: (currentTheme) => currentTheme.tokens.cardShadow,
+        boxShadow: (currentTheme) => getAppThemeTokens(currentTheme).cardShadow,
       }}
     >
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 1.5, md: 2 }} sx={{
@@ -87,7 +87,7 @@ export default function EditorialHero({
                     borderRadius: 999,
                     bgcolor: (currentTheme) => getAppThemeTokens(currentTheme).iconBubble,
                     border: '1px solid',
-                    borderColor: (currentTheme) => currentTheme.tokens.surfaceBorder,
+                    borderColor: (currentTheme) => getAppThemeTokens(currentTheme).surfaceBorder,
                   }}
                 >
                   <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: (currentTheme) => getAppThemeTokens(currentTheme).type.weight.label }}>
@@ -108,7 +108,7 @@ export default function EditorialHero({
             overflow: 'hidden',
             minHeight: { xs: compact ? 92 : 150, md: compact ? 120 : 210 },
             border: '1px solid',
-            borderColor: (currentTheme) => currentTheme.tokens.surfaceBorder,
+            borderColor: (currentTheme) => getAppThemeTokens(currentTheme).surfaceBorder,
           }}
         >
           <Box

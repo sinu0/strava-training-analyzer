@@ -22,33 +22,18 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
-import {
-  Alert,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemText,
-  Paper,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, List, ListItemButton, ListItemText, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { useEffect, useState, type ReactNode } from 'react';
 
+import { getAppThemeTokens } from '@/theme/theme';
 import {
   DASHBOARD_WIDGET_TYPES,
   type DashboardWidget,
   type DashboardWidgetType,
   type UiPreferences,
 } from '@/types/uiPreferences';
+import { Surface } from '@/ui';
 import {
   createDashboardWidget,
   DEFAULT_UI_PREFERENCES,
@@ -120,8 +105,7 @@ function SortableWidget({
       }}
     >
       {!!editing && (
-        <Paper
-          elevation={8}
+        <Box
           sx={{
             position: 'absolute',
             zIndex: 5,
@@ -132,8 +116,9 @@ function SortableWidget({
             gap: 0.25,
             p: 0.25,
             borderRadius: 2,
-            bgcolor: 'rgba(17,24,39,0.94)',
-            color: '#FFFFFF',
+            bgcolor: (theme) => getAppThemeTokens(theme).inverse.bg,
+            color: (theme) => getAppThemeTokens(theme).inverse.ink,
+            boxShadow: (theme) => getAppThemeTokens(theme).cardShadowHover,
           }}
         >
           <IconButton
@@ -178,7 +163,7 @@ function SortableWidget({
           >
             <CloseIcon fontSize="small" />
           </IconButton>
-        </Paper>
+        </Box>
       )}
       <Box
         sx={{
@@ -314,7 +299,7 @@ export default function EditableDashboard({
                   border: '1px solid',
                   borderColor: (theme) => theme.tokens?.surfaceStrongBorder ?? theme.palette.divider,
                   bgcolor: 'background.paper',
-                  boxShadow: (theme) => theme.tokens?.cardShadow ?? '0 12px 34px rgba(0,0,0,0.18)',
+                  boxShadow: (theme) => getAppThemeTokens(theme).cardShadow,
                 }}
               >
                 <EditOutlinedIcon fontSize="small" />
@@ -330,7 +315,7 @@ export default function EditableDashboard({
       )}
 
       {widgets.length === 0 ? (
-        <Paper sx={{ p: 5, textAlign: 'center', borderStyle: 'dashed' }}>
+        <Surface variant="outlined" sx={{ p: 5, textAlign: 'center', borderStyle: 'dashed' }}>
           <Typography variant="h6">Pulpit jest pusty</Typography>
           <Typography
             sx={{
@@ -348,7 +333,7 @@ export default function EditableDashboard({
             </Button>
             <Button onClick={restoreDefaults}>Przywróć domyślny układ</Button>
           </Stack>
-        </Paper>
+        </Surface>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={widgets.map((widget) => widget.id)} strategy={verticalListSortingStrategy}>

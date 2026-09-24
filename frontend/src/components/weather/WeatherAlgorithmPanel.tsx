@@ -2,8 +2,9 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AirIcon from '@mui/icons-material/Air';
 import OpacityIcon from '@mui/icons-material/Opacity';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
-import { Box, Paper, Slider, Stack, TextField, Typography } from '@mui/material';
+import { Box, Slider, Stack, TextField, Typography } from '@mui/material';
 
+import { Surface } from '@/ui';
 import { alphaColor, CHART_COLORS, STATUS_COLORS, WEATHER_METRIC_COLORS } from '@/utils/colors';
 
 interface WeatherAlgorithmPanelProps {
@@ -36,14 +37,10 @@ function GroupCard({
   children: React.ReactNode;
 }) {
   return (
-    <Paper
-      elevation={0}
+    <Surface
+      padding="none"
+      radius="panel"
       sx={{
-        borderRadius: 3,
-        border: '1px solid',
-        borderColor: 'divider',
-        overflow: 'hidden',
-        position: 'relative',
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -70,7 +67,7 @@ function GroupCard({
         </Typography>
         {children}
       </Box>
-    </Paper>
+    </Surface>
   );
 }
 

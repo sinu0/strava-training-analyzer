@@ -8,6 +8,8 @@ import {
   Radar,
 } from 'recharts';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import { STATUS_COLORS, alphaColor } from '../utils/colors';
 
 import type { PowerCurve } from '../types/analytics';
@@ -90,10 +92,10 @@ export default function PowerProfileRadar({ data, weightKg }: PowerProfileRadarP
       <Box sx={{ width: '100%', height: 220, position: 'relative' }}>
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={radarData} outerRadius="72%">
-            <PolarGrid stroke={alphaColor(theme.tokens.chart.grid, 0.72)} />
+            <PolarGrid stroke={alphaColor(getAppThemeTokens(theme).chart.grid, 0.72)} />
             <PolarAngleAxis
               dataKey="subject"
-              tick={{ fill: theme.tokens.chart.tick, fontSize: 10, fontWeight: 600 }}
+              tick={{ fill: getAppThemeTokens(theme).chart.tick, fontSize: 10, fontWeight: 600 }}
             />
             <Radar
               dataKey="value"

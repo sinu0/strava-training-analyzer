@@ -1,10 +1,10 @@
-import { CircularProgress, Paper, Stack, Typography } from '@mui/material';
+import { CircularProgress, Stack, Typography } from '@mui/material';
 
 import SavedRoutesList from '@/components/route/SavedRoutesList';
 import RouteControls from '@/components/route-planner/RouteControls';
 import RouteStats from '@/components/route-planner/RouteStats';
 import type { useRoutePlannerState } from '@/pages/route-planner/useRoutePlannerState';
-import { getAppThemeTokens } from '@/theme/theme';
+import { Surface } from '@/ui';
 
 interface RoutePlannerSidebarProps {
   planner: ReturnType<typeof useRoutePlannerState>;
@@ -60,17 +60,7 @@ export default function RoutePlannerSidebar({ planner }: RoutePlannerSidebarProp
         />
       )}
 
-      <Paper
-        sx={{
-          p: (theme) => getAppThemeTokens(theme).space.card,
-          backgroundColor: 'background.paper',
-          border: '1px solid',
-          borderColor: 'divider',
-          flex: 1,
-          minHeight: 0,
-          overflow: 'auto',
-        }}
-      >
+      <Surface sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
         <Typography variant="subtitle2" gutterBottom>
           Zapisane trasy
         </Typography>
@@ -85,7 +75,7 @@ export default function RoutePlannerSidebar({ planner }: RoutePlannerSidebarProp
             onExportGpx={planner.handleExportGpx}
           />
         )}
-      </Paper>
+      </Surface>
     </Stack>
   );
 }

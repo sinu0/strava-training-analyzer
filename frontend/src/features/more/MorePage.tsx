@@ -58,8 +58,8 @@ export default function MorePage() {
                       display: 'grid',
                       placeItems: 'center',
                       borderRadius: 2,
-                      color: index === 0 ? '#fff' : 'primary.main',
-                      bgcolor: index === 0 ? 'primary.main' : (theme) => theme.tokens.activeOverlay,
+                      color: index === 0 ? 'primary.contrastText' : 'primary.main',
+                      bgcolor: index === 0 ? 'primary.main' : (theme) => getAppThemeTokens(theme).activeOverlay,
                       '& svg': { fontSize: (theme) => getAppThemeTokens(theme).icon.lg },
                     }}
                   >

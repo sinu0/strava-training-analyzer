@@ -6,6 +6,7 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import { Box, Button, Chip, Divider, LinearProgress, Popover, Stack, Tooltip, Typography } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { useState, type MouseEvent } from 'react';
 
 import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
@@ -63,12 +64,7 @@ function GradientStrip({ hours, bestStart, bestEnd }: GradientStripProps) {
   });
 
   const gradientStops = stops
-    .map(({ percentage, color, opacity }) => {
-      const red = parseInt(color.slice(1, 3), 16);
-      const green = parseInt(color.slice(3, 5), 16);
-      const blue = parseInt(color.slice(5, 7), 16);
-      return `rgba(${red},${green},${blue},${opacity}) ${percentage.toFixed(1)}%`;
-    })
+    .map(({ percentage, color, opacity }) => `${alpha(color, opacity)} ${percentage.toFixed(1)}%`)
     .join(', ');
 
   const bestStartHr = bestStart ? parseInt(bestStart.split(':')[0] ?? '0', 10) : -1;

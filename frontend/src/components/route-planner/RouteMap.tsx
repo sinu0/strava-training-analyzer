@@ -1,16 +1,10 @@
 import ArrowBackIosNewRoundedIcon from '@mui/icons-material/ArrowBackIosNewRounded';
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 import SaveIcon from '@mui/icons-material/Save';
-import {
-  Box,
-  Paper,
-  Stack,
-  Typography,
-  Chip,
-  IconButton,
-  Button,
-} from '@mui/material';
+import { Box, Stack, Typography, Chip, IconButton, Button } from '@mui/material';
 import { alpha } from '@mui/material/styles';
+
+import { Surface } from '@/ui';
 
 import { getAppThemeTokens } from '../../theme/theme';
 import {
@@ -92,16 +86,7 @@ export default function RouteMap({
   onSaveAlternative,
 }: RouteMapProps) {
   return (
-    <Paper
-      sx={{
-        height: '100%',
-        overflow: 'hidden',
-        backgroundColor: 'background.paper',
-        border: '1px solid',
-        borderColor: 'divider',
-        position: 'relative',
-      }}
-    >
+    <Surface padding="none" sx={{ height: '100%' }}>
       <RouteDrawingMap
         waypoints={waypoints}
         polyline={polyline}
@@ -250,6 +235,6 @@ export default function RouteMap({
           </Stack>
         </Box>
       ) : null}
-    </Paper>
+    </Surface>
   );
 }

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useActivitySegments } from '@/hooks/useSegments';
+import { tokens } from '@/theme/theme';
 import { EmptyState, ErrorState, LoadingState, Surface } from '@/ui';
 
 import SegmentRankTrophy from './SegmentRankTrophy';
@@ -41,7 +42,7 @@ export default function ActivitySegmentsPanel({ activityId }: ActivitySegmentsPa
       <Surface padding="none" sx={{ overflow: 'hidden' }}>
         <SegmentRouteMap
           routes={[
-            ...(data.routePolyline ? [{ id: 'activity-route', label: 'Pełna trasa aktywności', polyline: data.routePolyline, color: '#64748b', weight: 4, interactive: false }] : []),
+            ...(data.routePolyline ? [{ id: 'activity-route', label: 'Pełna trasa aktywności', polyline: data.routePolyline, color: tokens.map.context, weight: 4, interactive: false }] : []),
             ...data.efforts.map(item => ({ id: item.id, label: item.segmentName, polyline: item.routePolyline })),
           ]}
           highlightedId={highlighted}

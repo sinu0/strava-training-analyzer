@@ -12,6 +12,8 @@ import {
   ReferenceArea,
 } from 'recharts';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import { getChartVisuals } from '../utils/chartStyles';
 import { LOAD_COLORS, STATUS_COLORS } from '../utils/colors';
 
@@ -91,7 +93,7 @@ export default function WeeklyLoadBarChart({ data, optimalLoad }: WeeklyLoadBarC
           />
           <Bar
             dataKey="TSS"
-            fill={theme.tokens.chart.primary}
+            fill={getAppThemeTokens(theme).chart.primary}
             radius={chart.barRadius}
             maxBarSize={40}
           />

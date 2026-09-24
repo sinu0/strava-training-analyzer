@@ -1,16 +1,9 @@
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  Typography,
-} from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 import { usePersonalRecords, type PersonalRecord } from '@/hooks/usePersonalRecords';
-import { STATUS_COLORS } from '@/utils/colors';
+import { StatusPill, Surface } from '@/ui';
 
 const GROUPED: Record<string, { icon: string; label: string }> = {
   BEST: { icon: '⚡', label: 'Power' },
@@ -49,19 +42,17 @@ export default function PersonalRecordWall() {
         const info = GROUPED[group] ?? { icon: '🏆', label: group };
         return (
           <Grid size={{ xs: 6, sm: 4, md: 3 }} key={group}>
-            <Card
-              sx={{
-                cursor: items[0]?.activityId ? 'pointer' : 'default',
-                transition: 'all 0.2s',
-                '&:hover': { borderColor: STATUS_COLORS.warning },
-              }}
+            <Surface
+              variant="muted"
+              padding="none"
+              radius="panel"
+              interactive={Boolean(items[0]?.activityId)}
+              sx={{ p: 1.5, height: '100%' }}
               onClick={() => {
                 const aid = items[0]?.activityId;
                 if (aid) navigate(`/activities/${aid}`);
               }}
-              variant="outlined"
             >
-              <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
                 <Typography variant="caption" sx={{
                   color: "text.secondary"
                 }}>
@@ -80,19 +71,13 @@ export default function PersonalRecordWall() {
                       {r.label}
                     </Typography>
                     {r.improvementPercent != null && r.improvementPercent > 0 && (
-                      <Chip
-                        icon={<TrendingUpIcon sx={{ fontSize: 12 }} />}
-                        label={`+${r.improvementPercent.toFixed(0)}%`}
-                        size="small"
-                        color="success"
-                        variant="outlined"
-                        sx={{ fontSize: '0.6rem', height: 20, mt: 0.5 }}
-                      />
+                      <Box sx={{ mt: 0.5 }}>
+                        <StatusPill size="sm" tone="success" icon={<TrendingUpIcon />} label={`+${r.improvementPercent.toFixed(0)}%`} />
+                      </Box>
                     )}
                   </Box>
                 ))}
-              </CardContent>
-            </Card>
+            </Surface>
           </Grid>
         );
       })}

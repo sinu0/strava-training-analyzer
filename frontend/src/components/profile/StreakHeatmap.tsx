@@ -1,14 +1,9 @@
 import { Box, Stack, Typography } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
 
 import { useStreakCalendar, useStreakStats } from '@/hooks/useStreak';
+import { useTokens } from '@/ui';
 
-const LEVEL_COLORS = [
-  '#1e2936',
-  '#0e4429',
-  '#006d32',
-  '#26a641',
-  '#39d353',
-];
 
 const MONTH_LABELS = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
 const DAY_LABELS_SHORT = ['Pon', '', 'Śro', '', 'Pią', '', 'Nie'];
@@ -24,6 +19,10 @@ export default function StreakHeatmap() {
   const currentYear = new Date().getFullYear();
   const { data: calendar } = useStreakCalendar(currentYear);
   const { data: stats } = useStreakStats();
+  const tokens = useTokens();
+  const theme = useTheme();
+  const LEVEL_COLORS = tokens.chart.heatmap;
+  const ink = { label: tokens.chart.tick, quiet: alpha(tokens.chart.tick, 0.6), cellEdge: tokens.surfaceBorder };
 
   if (!calendar || !stats) return null;
 
@@ -93,7 +92,7 @@ export default function StreakHeatmap() {
                     key={date.slice(0, 7)}
                     x={LEFT_PAD + wi * step}
                     y={TOP_PAD - 6}
-                    fill="rgba(255,255,255,0.7)"
+                    fill={theme.palette.text.secondary}
                     fontSize={11}
                     fontWeight={600}
                   >
@@ -112,7 +111,7 @@ export default function StreakHeatmap() {
               x={LEFT_PAD - 6}
               y={TOP_PAD + i * step + CELL_SIZE - 3}
               textAnchor="end"
-              fill={i % 2 === 1 ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.55)'}
+              fill={i % 2 === 1 ? ink.quiet : ink.label}
               fontSize={10}
             >
               {label}
@@ -131,7 +130,7 @@ export default function StreakHeatmap() {
                   height={CELL_SIZE}
                   rx={CELL_RX}
                   fill={LEVEL_COLORS[day.level] ?? LEVEL_COLORS[0]}
-                  stroke={day.level === 0 ? 'rgba(255,255,255,0.04)' : 'transparent'}
+                  stroke={day.level === 0 ? ink.cellEdge : 'transparent'}
                   strokeWidth={day.level === 0 ? 1 : 0}
                 />
               </g>
@@ -140,11 +139,11 @@ export default function StreakHeatmap() {
 
           {/* Legend */}
           <g transform={`translate(${LEFT_PAD}, ${svgHeight - BOTTOM_PAD})`}>
-            <text x={0} y={-6} fill="rgba(255,255,255,0.5)" fontSize={10}>Mniej</text>
+            <text x={0} y={-6} fill={ink.label} fontSize={10}>Mniej</text>
             {LEVEL_COLORS.map((color, i) => (
-              <rect key={color} x={28 + i * (CELL_SIZE + 2)} y={-CELL_SIZE} width={CELL_SIZE} height={CELL_SIZE} rx={2} fill={color} stroke="rgba(255,255,255,0.06)" strokeWidth={1} />
+              <rect key={color} x={28 + i * (CELL_SIZE + 2)} y={-CELL_SIZE} width={CELL_SIZE} height={CELL_SIZE} rx={2} fill={color} stroke={ink.cellEdge} strokeWidth={1} />
             ))}
-            <text x={28 + LEVEL_COLORS.length * (CELL_SIZE + 2) + 4} y={-6} fill="rgba(255,255,255,0.5)" fontSize={10}>Więcej</text>
+            <text x={28 + LEVEL_COLORS.length * (CELL_SIZE + 2) + 4} y={-6} fill={ink.label} fontSize={10}>Więcej</text>
           </g>
         </svg>
       </Box>

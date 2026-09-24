@@ -1,4 +1,6 @@
-import { Box, Paper, Typography, Stack, Chip, Alert } from '@mui/material';
+import { Box, Typography, Stack, Chip, Alert } from '@mui/material';
+
+import { Surface } from '@/ui';
 
 import { getAppThemeTokens } from '../../theme/theme';
 
@@ -78,14 +80,7 @@ export default function RouteStats({
   isRouting,
 }: RouteStatsProps) {
   return (
-    <Paper
-      sx={{
-        p: (theme) => getAppThemeTokens(theme).space.card,
-        backgroundColor: 'background.paper',
-        border: '1px solid',
-        borderColor: 'divider',
-      }}
-    >
+    <Surface>
       <Typography variant="subtitle2" gutterBottom>
         Statystyki
       </Typography>
@@ -166,6 +161,6 @@ export default function RouteStats({
           Obliczanie trasy…
         </Alert>
       )}
-    </Paper>
+    </Surface>
   );
 }

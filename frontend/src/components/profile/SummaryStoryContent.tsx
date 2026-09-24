@@ -4,17 +4,14 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import { Box, Typography } from '@mui/material';
 
+import { getAppThemeTokens, tokens } from '@/theme/theme';
+
 import { formatDistance, formatDuration } from '../../utils/formatters';
 
 import type { WeeklySummary, ReadinessData } from '../../types/analytics';
 
 
-const GRADIENTS: string[] = [
-  'linear-gradient(135deg, #1565C0 0%, #E65100 100%)',
-  'linear-gradient(135deg, #4A148C 0%, #1A237E 100%)',
-  'linear-gradient(135deg, #1B5E20 0%, #F57F17 100%)',
-  'linear-gradient(135deg, #BF360C 0%, #880E4F 100%)',
-];
+const GRADIENTS: readonly string[] = tokens.media.storyGradients;
 
 interface Props {
   slideIndex: number;
@@ -27,7 +24,7 @@ function StatBlock({ label, value }: { label: string; value: string | number }) 
   return (
     <Box sx={{ textAlign: 'center', px: 1.5 }}>
       <Typography sx={{ fontSize: '2rem', fontWeight: 800, color: 'white', lineHeight: 1 }}>{value}</Typography>
-      <Typography sx={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.65)', mt: 0.5, textTransform: 'uppercase', letterSpacing: 1 }}>
+      <Typography sx={{ fontSize: '0.62rem', color: (t) => getAppThemeTokens(t).media.inkQuiet, mt: 0.5, textTransform: 'uppercase', letterSpacing: 1 }}>
         {label}
       </Typography>
     </Box>
@@ -56,12 +53,12 @@ function formatWeekRange(weekStart: string): string {
 function Slide1({ week }: { week: WeeklySummary | undefined }) {
   return (
     <SlideWrapper gradient={GRADIENTS[0] ?? ''}>
-      <DirectionsBikeIcon sx={{ fontSize: 52, color: 'rgba(255,255,255,0.8)' }} />
-      <Typography variant="overline" sx={{ color: 'rgba(255,255,255,0.7)', letterSpacing: 4, fontSize: '0.78rem' }}>
+      <DirectionsBikeIcon sx={{ fontSize: 52, color: (t) => getAppThemeTokens(t).media.inkMuted }} />
+      <Typography variant="overline" sx={{ color: (t) => getAppThemeTokens(t).media.inkMuted, letterSpacing: 4, fontSize: '0.78rem' }}>
         Twój tydzień
       </Typography>
       {!!week && (
-        <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', mt: -1 }}>
+        <Typography sx={{ color: (t) => getAppThemeTokens(t).media.inkQuiet, fontSize: '0.85rem', mt: -1 }}>
           {formatWeekRange(week.weekStart)}
         </Typography>
       )}
@@ -80,8 +77,8 @@ function Slide1({ week }: { week: WeeklySummary | undefined }) {
 function Slide2({ week, readiness }: { week: WeeklySummary | undefined; readiness: ReadinessData | undefined }) {
   return (
     <SlideWrapper gradient={GRADIENTS[1] ?? ''}>
-      <TrendingUpIcon sx={{ fontSize: 52, color: 'rgba(255,255,255,0.8)' }} />
-      <Typography variant="overline" sx={{ color: 'rgba(255,255,255,0.7)', letterSpacing: 4, fontSize: '0.78rem' }}>
+      <TrendingUpIcon sx={{ fontSize: 52, color: (t) => getAppThemeTokens(t).media.inkMuted }} />
+      <Typography variant="overline" sx={{ color: (t) => getAppThemeTokens(t).media.inkMuted, letterSpacing: 4, fontSize: '0.78rem' }}>
         Wysiłek
       </Typography>
       {!!week && (
@@ -89,7 +86,7 @@ function Slide2({ week, readiness }: { week: WeeklySummary | undefined; readines
           <Typography sx={{ fontSize: '4rem', fontWeight: 900, color: 'white', lineHeight: 1 }}>
             {Math.round(week.totalTss)}
           </Typography>
-          <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: 1 }}>
+          <Typography sx={{ color: (t) => getAppThemeTokens(t).media.inkQuiet, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: 1 }}>
             TSS tygodnia
           </Typography>
         </Box>
@@ -110,12 +107,12 @@ function Slide3({ weeklySummaries }: { weeklySummaries: WeeklySummary[] }) {
   const best = [...weeklySummaries].sort((a, b) => b.totalTss - a.totalTss)[0];
   return (
     <SlideWrapper gradient={GRADIENTS[2] ?? ''}>
-      <EmojiEventsIcon sx={{ fontSize: 52, color: 'rgba(255,255,255,0.8)' }} />
-      <Typography variant="overline" sx={{ color: 'rgba(255,255,255,0.7)', letterSpacing: 4, fontSize: '0.78rem' }}>
+      <EmojiEventsIcon sx={{ fontSize: 52, color: (t) => getAppThemeTokens(t).media.inkMuted }} />
+      <Typography variant="overline" sx={{ color: (t) => getAppThemeTokens(t).media.inkMuted, letterSpacing: 4, fontSize: '0.78rem' }}>
         Najlepsze osiągnięcie
       </Typography>
       {!!best && <>
-          <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', mt: -1 }}>
+          <Typography sx={{ color: (t) => getAppThemeTokens(t).media.inkQuiet, fontSize: '0.85rem', mt: -1 }}>
             {formatWeekRange(best.weekStart)}
           </Typography>
           <Box sx={{ display: 'flex', gap: 1.5, mt: 0.5 }}>
@@ -138,15 +135,15 @@ function Slide4({ streak }: { streak: number }) {
         : 'Każdy trening się liczy. Do przodu!';
   return (
     <SlideWrapper gradient={GRADIENTS[3] ?? ''}>
-      <WhatshotIcon sx={{ fontSize: 68, color: '#FFB74D' }} />
-      <Typography variant="overline" sx={{ color: 'rgba(255,255,255,0.7)', letterSpacing: 4, fontSize: '0.78rem' }}>
+      <WhatshotIcon sx={{ fontSize: 68, color: (t) => getAppThemeTokens(t).status.sunny }} />
+      <Typography variant="overline" sx={{ color: (t) => getAppThemeTokens(t).media.inkMuted, letterSpacing: 4, fontSize: '0.78rem' }}>
         Tak trzymaj!
       </Typography>
       <Typography sx={{ fontSize: '3.5rem', fontWeight: 900, color: 'white', lineHeight: 1 }}>
         {streak} {plural}
       </Typography>
-      <Typography sx={{ color: 'rgba(255,255,255,0.75)', fontSize: '1rem', mt: -1 }}>z rzędu 🔥</Typography>
-      <Typography sx={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.9rem', textAlign: 'center', mt: 1, maxWidth: 260 }}>
+      <Typography sx={{ color: (t) => getAppThemeTokens(t).media.inkMuted, fontSize: '1rem', mt: -1 }}>z rzędu 🔥</Typography>
+      <Typography sx={{ color: (t) => getAppThemeTokens(t).media.inkQuiet, fontSize: '0.9rem', textAlign: 'center', mt: 1, maxWidth: 260 }}>
         {msg}
       </Typography>
     </SlideWrapper>

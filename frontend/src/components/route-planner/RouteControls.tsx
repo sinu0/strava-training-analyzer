@@ -4,22 +4,10 @@ import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import UndoIcon from '@mui/icons-material/Undo';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
-import {
-  Paper,
-  Typography,
-  Button,
-  TextField,
-  Stack,
-  Divider,
-  CircularProgress,
-  Alert,
-  Chip,
-  FormControlLabel,
-  MenuItem,
-  Switch,
-} from '@mui/material';
+import { Typography, Button, TextField, Stack, Divider, CircularProgress, Alert, Chip, FormControlLabel, MenuItem, Switch } from '@mui/material';
 
-import { getAppThemeTokens } from '../../theme/theme';
+import { Surface } from '@/ui';
+
 
 import type { MapTileVariant } from '../../constants/mapTiles';
 import type { GeneratedRouteStyle, RoutePlanningPreferences, RoutePreview } from '../../types/route';
@@ -107,14 +95,7 @@ export default function RouteControls({
   onSave,
 }: RouteControlsProps) {
   return (
-    <Paper
-      sx={{
-        p: (theme) => getAppThemeTokens(theme).space.card,
-        backgroundColor: 'background.paper',
-        border: '1px solid',
-        borderColor: 'divider',
-      }}
-    >
+    <Surface>
       <Typography variant="subtitle2" gutterBottom>
         Nowa trasa
       </Typography>
@@ -353,6 +334,6 @@ export default function RouteControls({
           </Button>
         </Stack>
       </Stack>
-    </Paper>
+    </Surface>
   );
 }

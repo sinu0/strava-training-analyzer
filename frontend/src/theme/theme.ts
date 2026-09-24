@@ -70,6 +70,10 @@ export const getThemeTokens = (mode: AppColorMode) => {
       accentIcon: 'drop-shadow(0 0 8px rgba(255,107,53,0.32))',
       success: '0 0 10px rgba(63,185,80,0.55)',
     },
+    /** Soft shadow under floating weather/map icons. */
+    iconShadow: 'drop-shadow(0 5px 10px rgba(15, 23, 42, 0.22))',
+    /** Dark floating toolbar used over content in edit modes (same in both modes). */
+    inverse: { bg: 'rgba(17,24,39,0.94)', ink: '#FFFFFF' },
     /** Ink placed on the solid accent (brand gradient, solid pills). */
     onAccent: '#FFFFFF',
     /** Ink for content that sits on photography or a dark scrim, in both modes. */
@@ -80,6 +84,26 @@ export const getThemeTokens = (mode: AppColorMode) => {
       actionBg: '#FFFFFF',
       actionInk: '#111827',
       actionShadow: '0 14px 30px rgba(5,10,16,0.35)',
+      inkDisabled: 'rgba(255,255,255,0.3)',
+      surface: 'rgba(255,255,255,0.04)',
+      /** Dark backdrops for lightboxes, stories and controls laid over images. */
+      backdrop: 'rgba(4,8,12,0.98)',
+      control: 'rgba(0,0,0,0.38)',
+      controlHover: 'rgba(0,0,0,0.55)',
+      controlDisabled: 'rgba(0,0,0,0.2)',
+      hairline: 'rgba(255,255,255,0.12)',
+      pageDot: 'rgba(255,255,255,0.16)',
+      fadeBottom: 'linear-gradient(180deg, rgba(6,12,18,0) 0%, rgba(6,12,18,0.88) 100%)',
+      fadeBottomStrong: 'linear-gradient(180deg, rgba(4,8,12,0) 0%, rgba(4,8,12,0.94) 52%, rgba(4,8,12,0.98) 100%)',
+      thumbnailBg: '#0D1117',
+      dialogShadow: '0 24px 80px rgba(0,0,0,0.6)',
+      /** Full-bleed backgrounds of the season story slides. */
+      storyGradients: [
+        'linear-gradient(135deg, #1565C0 0%, #E65100 100%)',
+        'linear-gradient(135deg, #4A148C 0%, #1A237E 100%)',
+        'linear-gradient(135deg, #1B5E20 0%, #F57F17 100%)',
+        'linear-gradient(135deg, #BF360C 0%, #880E4F 100%)',
+      ],
     },
     trackBg: isLight ? '#E9EDF5' : 'rgba(255,255,255,0.08)',
     searchPill: elevated,
@@ -166,6 +190,10 @@ export const getThemeTokens = (mode: AppColorMode) => {
         RECOVERY: STATUS.success, ENDURANCE: STATUS.info, TEMPO: STATUS.warning, THRESHOLD: STATUS.accent,
         VO2MAX: STATUS.error, ANAEROBIC: '#DB4A9A', SPRINT: STATUS.highlight,
       },
+      /** Activity-calendar intensity levels, from empty day to the heaviest. */
+      heatmap: isLight
+        ? ['#EBEDF0', '#9BE9A8', '#40C463', '#30A14E', '#216E39']
+        : ['#1E2936', '#0E4429', '#006D32', '#26A641', '#39D353'],
       /** Lap intensity classes. */
       intensity: { VO2: STATUS.error, THRESHOLD: STATUS.warning, ENDURANCE: STATUS.info, RECOVERY: STATUS.success, UNKNOWN: STATUS.neutral },
       load: {
@@ -195,6 +223,10 @@ export const getThemeTokens = (mode: AppColorMode) => {
       pathShadow: '#0F172A',
       pathHighlight: '#FF6B6B',
       alternative: '#3B82F6',
+      /** Colours for comparing several routes or efforts on one map. */
+      series: ['#FF6B35', '#31C4F3', '#8B5CF6', '#22C55E'],
+      context: '#64748B',
+      location: { active: '#FF6B35', inactive: '#58A6FF', route: '#4ECDC4' },
       densityStops: [
         { stop: 0, color: '#1A237E' },
         { stop: 0.35, color: STATUS.accent },

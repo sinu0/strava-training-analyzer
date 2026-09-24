@@ -8,6 +8,7 @@ import {
   Typography,
 } from '@mui/material';
 
+import { getAppThemeTokens } from '@/theme/theme';
 import type { ActivityTrainingEffect } from '@/types/trainingEffect';
 import {
   BENEFIT_COLORS,
@@ -70,7 +71,7 @@ function TeBar({ value, label, color }: { value: number | null; label: string | 
             flex: 1,
             height: 6,
             borderRadius: 3,
-            bgcolor: (theme) => theme.tokens.trackBg,
+            bgcolor: (theme) => getAppThemeTokens(theme).trackBg,
             '& .MuiLinearProgress-bar': { bgcolor: color, borderRadius: 3 },
           }}
         />
@@ -112,7 +113,7 @@ function RecoveryChip({ hours }: { hours: number }) {
         sx={{
           fontWeight: 700,
           fontSize: '0.75rem',
-          bgcolor: (theme) => theme.tokens.iconBubble,
+          bgcolor: (theme) => getAppThemeTokens(theme).iconBubble,
           color: 'text.secondary',
           border: '1px solid',
           borderColor: 'divider',

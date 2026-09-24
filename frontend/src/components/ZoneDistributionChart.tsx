@@ -3,6 +3,8 @@ import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from 'recharts';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import { getChartVisuals } from '../utils/chartStyles';
 import { ZONE_COLORS } from '../utils/colors';
 
@@ -25,9 +27,9 @@ const ZoneDistributionChart = memo(function ZoneDistributionChart({
         zone,
         seconds: Math.round(seconds),
         minutes: Math.round(seconds / 60),
-        color: ZONE_COLORS[zone as keyof typeof ZONE_COLORS] ?? theme.tokens.chart.tick,
+        color: ZONE_COLORS[zone as keyof typeof ZONE_COLORS] ?? getAppThemeTokens(theme).chart.tick,
       }));
-  }, [data, theme.tokens.chart.tick]);
+  }, [data, theme]);
 
   if (!chartData.length) {
     return (
@@ -50,7 +52,7 @@ const ZoneDistributionChart = memo(function ZoneDistributionChart({
             <XAxis dataKey="zone" {...chart.axis} />
             <YAxis
               {...chart.axis}
-              label={{ value: 'Minuty', angle: -90, position: 'insideLeft', fill: theme.tokens.chart.tick, fontSize: 11, fontWeight: 700 }}
+              label={{ value: 'Minuty', angle: -90, position: 'insideLeft', fill: getAppThemeTokens(theme).chart.tick, fontSize: 11, fontWeight: 700 }}
             />
             <Tooltip
               {...chart.tooltip}

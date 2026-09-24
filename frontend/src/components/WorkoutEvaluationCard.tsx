@@ -10,6 +10,7 @@ import {
   useTheme,
 } from '@mui/material';
 
+import { getAppThemeTokens } from '@/theme/theme';
 import type { WorkoutEvaluationResponse } from '@/types/evaluation';
 
 const OUTCOME_LABELS: Record<string, string> = {
@@ -143,11 +144,11 @@ export default function WorkoutEvaluationCard({ evaluation }: Props) {
           sx={{
             p: 1.5,
             borderRadius: 1,
-            bgcolor: theme.tokens.surfaceSubtle,
-            border: `1px solid ${theme.tokens.surfaceBorder}`,
+            bgcolor: getAppThemeTokens(theme).surfaceSubtle,
+            border: `1px solid ${getAppThemeTokens(theme).surfaceBorder}`,
           }}
         >
-          <Typography variant="subtitle2" sx={{ color: theme.tokens.status.accent, mb: 0.5 }}>
+          <Typography variant="subtitle2" sx={{ color: getAppThemeTokens(theme).status.accent, mb: 0.5 }}>
             Rekomendacja
           </Typography>
           <Typography variant="body2">{recommendation}</Typography>

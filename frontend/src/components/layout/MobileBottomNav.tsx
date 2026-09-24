@@ -52,8 +52,8 @@ export default function MobileBottomNav() {
         pb: 'env(safe-area-inset-bottom)',
         zIndex: (theme) => theme.zIndex.appBar,
         borderTop: '1px solid',
-        borderColor: (theme) => theme.tokens.surfaceBorder,
-        boxShadow: (theme) => theme.tokens.cardShadow,
+        borderColor: (theme) => getAppThemeTokens(theme).surfaceBorder,
+        boxShadow: (theme) => getAppThemeTokens(theme).cardShadow,
         bgcolor: (theme) => theme.palette.background.paper,
       }}
     >

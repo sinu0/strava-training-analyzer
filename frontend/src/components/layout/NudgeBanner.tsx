@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useNudges } from '@/hooks/useNudges';
+import { getAppThemeTokens } from '@/theme/theme';
 
 export default function NudgeBanner() {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ export default function NudgeBanner() {
               sx={{
                 cursor: nudge.actionUrl ? 'pointer' : 'default',
                 borderRadius: 4,
-                boxShadow: (t) => t.tokens.cardShadow,
+                boxShadow: (t) => getAppThemeTokens(t).cardShadow,
                 '& .MuiAlert-message': { flex: 1 },
               }}
             >

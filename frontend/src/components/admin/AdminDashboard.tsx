@@ -322,7 +322,7 @@ export default function AdminDashboard({
                   textTransform: 'none',
                   fontWeight: 700,
                   bgcolor: STATUS_COLORS.warning,
-                  '&:hover': { bgcolor: '#B87A1A' },
+                  '&:hover': { bgcolor: 'warning.dark' },
                   '&.Mui-disabled': {
                     bgcolor: alphaColor(COMMON_COLORS.white, 0.08),
                     color: alphaColor(COMMON_COLORS.white, 0.3),

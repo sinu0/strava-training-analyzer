@@ -11,6 +11,7 @@ import { alpha, type Theme } from '@mui/material/styles';
 import { useState } from 'react';
 
 import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
+import { getAppThemeTokens } from '@/theme/theme';
 import type { ReadinessData, FtpProgress, WeatherGradient } from '@/types/analytics';
 import {
   CHART_COLORS,
@@ -320,12 +321,12 @@ export default function StatusPill({ readiness, ftpProgress, weatherGradient }: 
         sx={{
           px: 0.8,
           py: 0.7,
-          bgcolor: (t) => alpha(t.tokens.chart.tooltip, 0.9),
+          bgcolor: (t) => alpha(getAppThemeTokens(t).chart.tooltip, 0.9),
           borderRadius: 999,
           border: '1px solid',
-          borderColor: (t) => t.tokens.surfaceBorder,
+          borderColor: (t) => getAppThemeTokens(t).surfaceBorder,
           backdropFilter: 'blur(14px)',
-          boxShadow: (t) => t.tokens.cardShadow,
+          boxShadow: (t) => getAppThemeTokens(t).cardShadow,
         }}
       >
         {/* Readiness segment */}
@@ -341,8 +342,8 @@ export default function StatusPill({ readiness, ftpProgress, weatherGradient }: 
               minWidth: 94,
               borderRadius: 999,
               cursor: 'pointer',
-              transition: (t) => t.tokens.transition,
-              '&:hover': { bgcolor: (t) => t.tokens.hoverOverlay, transform: 'translateY(-1px)' },
+              transition: (t) => getAppThemeTokens(t).transition,
+              '&:hover': { bgcolor: (t) => getAppThemeTokens(t).hoverOverlay, transform: 'translateY(-1px)' },
             }}
           >
             <Box
@@ -375,8 +376,8 @@ export default function StatusPill({ readiness, ftpProgress, weatherGradient }: 
               minWidth: 86,
               borderRadius: 999,
               cursor: 'pointer',
-              transition: (t) => t.tokens.transition,
-              '&:hover': { bgcolor: (t) => t.tokens.hoverOverlay, transform: 'translateY(-1px)' },
+              transition: (t) => getAppThemeTokens(t).transition,
+              '&:hover': { bgcolor: (t) => getAppThemeTokens(t).hoverOverlay, transform: 'translateY(-1px)' },
             }}
           >
             <BoltIcon sx={{ fontSize: 16, color: trendColors[ftpProgress.trend] }} />
@@ -404,8 +405,8 @@ export default function StatusPill({ readiness, ftpProgress, weatherGradient }: 
               minWidth: 88,
               borderRadius: 999,
               cursor: 'pointer',
-              transition: (t) => t.tokens.transition,
-              '&:hover': { bgcolor: (t) => t.tokens.hoverOverlay, transform: 'translateY(-1px)' },
+              transition: (t) => getAppThemeTokens(t).transition,
+              '&:hover': { bgcolor: (t) => getAppThemeTokens(t).hoverOverlay, transform: 'translateY(-1px)' },
             }}
           >
             <WeatherConditionIcon
@@ -438,9 +439,9 @@ export default function StatusPill({ readiness, ftpProgress, weatherGradient }: 
               mt: 1,
               bgcolor: 'background.paper',
               border: '1px solid',
-              borderColor: (t: Theme) => t.tokens.surfaceBorder,
+              borderColor: (t: Theme) => getAppThemeTokens(t).surfaceBorder,
               borderRadius: 3,
-              boxShadow: (t: Theme) => t.tokens.cardShadow,
+              boxShadow: (t: Theme) => getAppThemeTokens(t).cardShadow,
             },
           },
         }}
