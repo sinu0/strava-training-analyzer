@@ -19,12 +19,14 @@ public class AnalysisBackfillRepositoryAdapter implements AnalysisBackfillReposi
     private AnalysisBackfillStateEntity toEntity(AnalysisBackfillState v) {
         return AnalysisBackfillStateEntity.builder().jobType(v.getJobType()).status(v.getStatus()).processed(v.getProcessed())
                 .total(v.getTotal()).capability(v.getCapability()).rateLimitResetsAt(v.getRateLimitResetsAt())
+                .retryAt(v.getRetryAt()).attemptCount(v.getAttemptCount())
                 .errorMessage(v.getErrorMessage()).startedAt(v.getStartedAt()).updatedAt(v.getUpdatedAt())
                 .completedAt(v.getCompletedAt()).build();
     }
     private AnalysisBackfillState toDomain(AnalysisBackfillStateEntity v) {
         return AnalysisBackfillState.builder().jobType(v.getJobType()).status(v.getStatus()).processed(v.getProcessed())
                 .total(v.getTotal()).capability(v.getCapability()).rateLimitResetsAt(v.getRateLimitResetsAt())
+                .retryAt(v.getRetryAt()).attemptCount(v.getAttemptCount())
                 .errorMessage(v.getErrorMessage()).startedAt(v.getStartedAt()).updatedAt(v.getUpdatedAt())
                 .completedAt(v.getCompletedAt()).build();
     }

@@ -1,5 +1,11 @@
 package pl.strava.analizator.application;
 
+import java.io.InterruptedIOException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.net.http.HttpTimeoutException;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +35,10 @@ public class AnalysisBackfillService {
     private static final Logger log = LoggerFactory.getLogger(AnalysisBackfillService.class);
     private static final String SEGMENTS = "SEGMENTS";
     private static final String ROUTES = "ROUTES";
+    private static final String RETRYING = "RETRYING";
+    static final int MAX_ATTEMPTS = 8;
+    private static final Duration FIRST_RETRY_DELAY = Duration.ofMinutes(1);
+    private static final Duration MAX_RETRY_DELAY = Duration.ofMinutes(30);
 
     private final AnalysisBackfillRepository states;
     private final SegmentRepository segments;
@@ -39,6 +49,7 @@ public class AnalysisBackfillService {
     private final SyncDataSource syncDataSource;
     private final SegmentAnalysisService segmentAnalysisService;
     private final RouteMatchingService routeMatchingService;
+    private final Clock clock;
 
     public BackfillStatusDto start(String requestedType) {
         String type = normalizeType(requestedType);
@@ -51,11 +62,11 @@ public class AnalysisBackfillService {
                 && current.getProcessed() > 0;
         int processed = resuming ? current.getProcessed() : 0;
         int total = resuming ? Math.max(current.getTotal(), processed + remaining) : remaining;
-        Instant now = Instant.now();
+        Instant now = clock.instant();
         AnalysisBackfillState started = current.toBuilder().status(remaining == 0 ? "COMPLETED" : "RUNNING")
                 .processed(remaining == 0 ? total : processed).total(total)
                 .capability(type.equals(SEGMENTS) ? "UNKNOWN" : "LOCAL")
-                .rateLimitResetsAt(null).errorMessage(null)
+                .rateLimitResetsAt(null).retryAt(null).attemptCount(0).errorMessage(null)
                 .startedAt(resuming && current.getStartedAt() != null ? current.getStartedAt() : now).updatedAt(now)
                 .completedAt(remaining == 0 ? now : null).build();
         return toDto(states.save(started));
@@ -76,7 +87,7 @@ public class AnalysisBackfillService {
         if (!canRun(current)) return;
         SyncState syncState = syncStates.findFirst().orElse(null);
         if (syncState != null && "rate_limited".equals(syncState.getStatus())
-                && syncState.getRateLimitResetsAt() != null && Instant.now().isBefore(syncState.getRateLimitResetsAt())) {
+                && syncState.getRateLimitResetsAt() != null && clock.instant().isBefore(syncState.getRateLimitResetsAt())) {
             save(current.toBuilder().status("RATE_LIMITED").rateLimitResetsAt(syncState.getRateLimitResetsAt()).build());
             return;
         }
@@ -93,23 +104,23 @@ public class AnalysisBackfillService {
             Activity fetched = syncDataSource.fetchActivityForSegmentBackfill(profile, local.getExternalId())
                     .toBuilder().id(local.getId()).createdAt(local.getCreatedAt()).updatedAt(local.getUpdatedAt()).build();
             if (fetched.getRelativeEffort() != null && !fetched.getRelativeEffort().equals(local.getRelativeEffort())) {
-                activities.save(local.toBuilder().relativeEffort(fetched.getRelativeEffort()).updatedAt(Instant.now()).build());
+                activities.save(local.toBuilder().relativeEffort(fetched.getRelativeEffort()).updatedAt(clock.instant()).build());
             }
             segmentAnalysisService.importActivity(fetched, fetched.getSegmentEfforts(), fetched.getSegmentDataAvailability());
             if (!"AVAILABLE".equals(fetched.getSegmentDataAvailability())) {
                 save(current.toBuilder().status("UNAVAILABLE").capability("UNAVAILABLE")
                         .processed(current.getProcessed() + 1)
-                        .errorMessage("Strava did not expose segment efforts for detailed activities").completedAt(Instant.now()).build());
+                        .errorMessage("Strava did not expose segment efforts for detailed activities").completedAt(clock.instant()).build());
                 return;
             }
             save(current.toBuilder().status("RUNNING").capability("AVAILABLE")
-                    .processed(current.getProcessed() + 1).build());
+                    .processed(current.getProcessed() + 1).retryAt(null).attemptCount(0).errorMessage(null).build());
         } catch (RateLimitException exception) {
             save(current.toBuilder().status("RATE_LIMITED").rateLimitResetsAt(exception.getResetsAt())
                     .errorMessage("Strava rate limit reached; backfill will resume automatically").build());
         } catch (Exception exception) {
             log.warn("Segment backfill failed for activity {}: {}", local.getId(), exception.getMessage());
-            save(current.toBuilder().status("FAILED").errorMessage(abbreviate(exception.getMessage())).build());
+            save(failure(current, exception, current.getProcessed()));
         }
     }
 
@@ -125,16 +136,19 @@ public class AnalysisBackfillService {
                 processed++;
             }
             save(current.toBuilder().status("RUNNING")
-                    .processed(Math.min(current.getTotal(), current.getProcessed() + processed)).build());
+                    .processed(Math.min(current.getTotal(), current.getProcessed() + processed))
+                    .retryAt(null).attemptCount(0).errorMessage(null).build());
         } catch (Exception exception) {
             log.warn("Route fingerprint backfill failed: {}", exception.getMessage());
-            save(current.toBuilder().status("FAILED").processed(current.getProcessed() + processed)
-                    .errorMessage(abbreviate(exception.getMessage())).build());
+            save(failure(current, exception, current.getProcessed() + processed));
         }
     }
 
     private boolean canRun(AnalysisBackfillState state) {
         if ("RUNNING".equals(state.getStatus())) return true;
+        if (RETRYING.equals(state.getStatus())) {
+            return state.getRetryAt() == null || !clock.instant().isBefore(state.getRetryAt());
+        }
         if ("RATE_LIMITED".equals(state.getStatus()) && !activeRateLimit(state)) {
             save(state.toBuilder().status("RUNNING").rateLimitResetsAt(null).build());
             return true;
@@ -143,18 +157,47 @@ public class AnalysisBackfillService {
     }
     private boolean activeRateLimit(AnalysisBackfillState state) {
         return "RATE_LIMITED".equals(state.getStatus()) && state.getRateLimitResetsAt() != null
-                && Instant.now().isBefore(state.getRateLimitResetsAt());
+                && clock.instant().isBefore(state.getRateLimitResetsAt());
     }
+    /** Transient failures are retried with exponential backoff; anything else, or exhausted retries, fails. */
+    private AnalysisBackfillState failure(AnalysisBackfillState current, Exception exception, int processed) {
+        String message = abbreviate(exception.getMessage());
+        int attempt = current.getAttemptCount() + 1;
+        if (!isTransient(exception) || attempt >= MAX_ATTEMPTS) {
+            return current.toBuilder().status("FAILED").processed(processed).retryAt(null).attemptCount(attempt)
+                    .errorMessage(message).build();
+        }
+        return current.toBuilder().status(RETRYING).processed(processed).attemptCount(attempt)
+                .retryAt(clock.instant().plus(retryDelay(attempt))).errorMessage(message).build();
+    }
+
+    static Duration retryDelay(int attempt) {
+        Duration delay = FIRST_RETRY_DELAY.multipliedBy(1L << Math.min(attempt - 1, 10));
+        return delay.compareTo(MAX_RETRY_DELAY) > 0 ? MAX_RETRY_DELAY : delay;
+    }
+
+    static boolean isTransient(Throwable failure) {
+        for (Throwable current = failure; current != null; current = current.getCause()) {
+            if (current instanceof TransientSourceException || current instanceof SocketException
+                    || current instanceof UnknownHostException || current instanceof InterruptedIOException
+                    || current instanceof HttpTimeoutException) {
+                return true;
+            }
+            if (current.getCause() == current) break;
+        }
+        return false;
+    }
+
     private void complete(AnalysisBackfillState state, String capability) {
         save(state.toBuilder().status("COMPLETED").capability(capability).processed(state.getTotal())
-                .completedAt(Instant.now()).rateLimitResetsAt(null).errorMessage(null).build());
+                .completedAt(clock.instant()).rateLimitResetsAt(null).retryAt(null).attemptCount(0).errorMessage(null).build());
     }
     private AnalysisBackfillState save(AnalysisBackfillState state) {
-        return states.save(state.toBuilder().updatedAt(Instant.now()).build());
+        return states.save(state.toBuilder().updatedAt(clock.instant()).build());
     }
     private AnalysisBackfillState state(String type) {
         return states.find(type).orElseGet(() -> AnalysisBackfillState.builder().jobType(type).status("IDLE")
-                .capability(type.equals(ROUTES) ? "LOCAL" : "UNKNOWN").updatedAt(Instant.now()).build());
+                .capability(type.equals(ROUTES) ? "LOCAL" : "UNKNOWN").updatedAt(clock.instant()).build());
     }
     private String normalizeType(String type) {
         String normalized = type == null ? "" : type.trim().toUpperCase();
@@ -165,7 +208,8 @@ public class AnalysisBackfillService {
     private BackfillStatusDto toDto(AnalysisBackfillState state) {
         return BackfillStatusDto.builder().jobType(state.getJobType()).status(state.getStatus())
                 .processed(state.getProcessed()).total(state.getTotal()).capability(state.getCapability())
-                .rateLimitResetsAt(state.getRateLimitResetsAt()).errorMessage(state.getErrorMessage())
+                .rateLimitResetsAt(state.getRateLimitResetsAt()).retryAt(state.getRetryAt()).attemptCount(state.getAttemptCount())
+                .errorMessage(state.getErrorMessage())
                 .updatedAt(state.getUpdatedAt()).build();
     }
     private String abbreviate(String message) {

@@ -75,7 +75,7 @@ class ApplicationCoherenceIntegrationTest {
     private final UiPreferencesRepository uiPreferences;
 
     @Test void migratesAndExportsRealOpenApi() throws Exception {
-        assertThat(jdbc.queryForObject("SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1", String.class)).isEqualTo("60");
+        assertThat(jdbc.queryForObject("SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1", String.class)).isEqualTo("61");
         String schema = mvc.perform(get("/api-docs")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(json.readTree(schema).at("/paths/~1api~1v2~1training~1context").isMissingNode()).isFalse();
         Files.createDirectories(Path.of("build"));

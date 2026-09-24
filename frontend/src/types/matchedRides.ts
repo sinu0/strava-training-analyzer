@@ -46,6 +46,8 @@ export interface BackfillStatus {
   total: number;
   capability: string;
   rateLimitResetsAt?: string | null;
+  retryAt?: string | null;
+  attemptCount?: number;
   errorMessage?: string | null;
   updatedAt: string;
 }

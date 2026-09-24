@@ -5,6 +5,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.github.tomakehurst.wiremock.http.Fault;
 
 import pl.strava.analizator.domain.model.AthleteProfile;
 
@@ -68,5 +70,46 @@ class StravaApiClientWireMockTest {
             assertThat(effort.getSegment().getId()).isEqualTo(77L);
         });
         wireMock.verify(getRequestedFor(urlEqualTo("/activities/42?include_all_efforts=true")));
+    }
+
+    @Test
+    void serverErrorOnActivityDetailIsTransient() {
+        wireMock.stubFor(get(urlEqualTo("/activities/42?include_all_efforts=true"))
+                .willReturn(aResponse().withStatus(503)));
+
+        assertThatThrownBy(() -> client().getActivityDetail(profile(), "42"))
+                .isInstanceOf(pl.strava.analizator.application.TransientSourceException.class);
+    }
+
+    @Test
+    void droppedConnectionOnStreamsIsTransientInsteadOfEmptyStreams() {
+        wireMock.stubFor(get(com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo("/activities/42/streams"))
+                .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
+
+        assertThatThrownBy(() -> client().getActivityStreams(profile(), "42"))
+                .isInstanceOf(pl.strava.analizator.application.TransientSourceException.class);
+    }
+
+    @Test
+    void clientErrorOnActivityDetailStaysPermanent() {
+        wireMock.stubFor(get(urlEqualTo("/activities/42?include_all_efforts=true"))
+                .willReturn(aResponse().withStatus(404)));
+
+        assertThatThrownBy(() -> client().getActivityDetail(profile(), "42"))
+                .isInstanceOf(StravaApiException.class);
+    }
+
+    private final AthleteProfile profile = AthleteProfile.builder().stravaAthleteId(123L).build();
+
+    private AthleteProfile profile() {
+        return profile;
+    }
+
+    private StravaApiClient client() {
+        StravaConfigProvider config = mock(StravaConfigProvider.class);
+        StravaOAuth2Service oauth = mock(StravaOAuth2Service.class);
+        when(config.apiBaseUrl()).thenReturn(wireMock.baseUrl());
+        when(oauth.getValidAccessToken(profile)).thenReturn("token");
+        return new StravaApiClient(config, oauth, new RestTemplate(), new ObjectMapper());
     }
 }

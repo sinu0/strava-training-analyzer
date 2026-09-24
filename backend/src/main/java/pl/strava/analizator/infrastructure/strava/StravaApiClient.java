@@ -18,6 +18,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -71,6 +73,8 @@ public class StravaApiClient {
         } catch (HttpClientErrorException e) {
             throw new StravaApiException(
                     "Failed to fetch Strava activities: " + extractFaultMessage(e.getResponseBodyAsString(), e.getStatusText()), e);
+        } catch (HttpServerErrorException | ResourceAccessException e) {
+            throw transientFailure("activities list", e);
         } catch (RestClientException e) {
             throw new StravaApiException("Failed to parse Strava activities response: " + rootMessage(e), e);
         }
@@ -87,6 +91,8 @@ public class StravaApiClient {
             ).getBody();
         } catch (HttpClientErrorException.TooManyRequests e) {
             throw rateLimitException(e);
+        } catch (HttpServerErrorException | ResourceAccessException e) {
+            throw transientFailure("activity " + externalId, e);
         } catch (HttpClientErrorException e) {
             throw new StravaApiException(
                     "Failed to fetch activity " + externalId + ": "
@@ -110,6 +116,8 @@ public class StravaApiClient {
         } catch (HttpClientErrorException e) {
             log.warn("Failed to fetch streams for activity {}: {}", externalId, e.getStatusCode());
             return Collections.emptyList();
+        } catch (HttpServerErrorException | ResourceAccessException e) {
+            throw transientFailure("streams for activity " + externalId, e);
         } catch (RestClientException | StravaApiException e) {
             log.warn("Failed to parse streams for activity {}: {}", externalId, rootMessage(e));
             return Collections.emptyList();
@@ -205,6 +213,11 @@ public class StravaApiClient {
     private String abbreviate(String rawBody) {
         String compact = rawBody.replaceAll("\\s+", " ").trim();
         return compact.length() <= 240 ? compact : compact.substring(0, 240) + "...";
+    }
+
+    private StravaTransientException transientFailure(String resource, RestClientException e) {
+        log.warn("Transient Strava failure while fetching {}: {}", resource, rootMessage(e));
+        return new StravaTransientException("Strava temporarily unavailable for " + resource + ": " + rootMessage(e), e);
     }
 
     private RateLimitException rateLimitException(HttpClientErrorException.TooManyRequests e) {

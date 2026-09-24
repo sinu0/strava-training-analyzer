@@ -22,6 +22,8 @@ public class AnalysisBackfillStateEntity {
     private int total;
     private String capability;
     @Column(name = "rate_limit_resets_at") private Instant rateLimitResetsAt;
+    @Column(name = "retry_at") private Instant retryAt;
+    @Column(name = "attempt_count") private int attemptCount;
     @Column(name = "error_message", columnDefinition = "TEXT") private String errorMessage;
     @Column(name = "started_at") private Instant startedAt;
     @Column(name = "updated_at") private Instant updatedAt;
