@@ -58,7 +58,6 @@ export default function SavedRoutesList({
         >
           <ListItemText
             primary={route.name}
-            secondaryTypographyProps={{ component: 'div' }}
             secondary={
               <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
                 <Chip label={formatDistance(route.totalDistanceM)} size="small" variant="outlined" />
@@ -67,6 +66,9 @@ export default function SavedRoutesList({
                 <Chip label={`TSS ${route.estimatedTss}`} size="small" variant="outlined" />
               </Stack>
             }
+            slotProps={{
+              secondary: { component: 'div' }
+            }}
           />
           <IconButton size="small" onClick={(e) => { e.stopPropagation(); onExportGpx(route.id); }} title="Pobierz GPX">
             <DownloadIcon fontSize="small" />

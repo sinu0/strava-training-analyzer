@@ -32,7 +32,9 @@ function CountdownBadge({ event, ctl }: { event: TrainingEvent; ctl: number | nu
 
   return (
     <Box>
-      <Stack direction="row" spacing={0.75} alignItems="center">
+      <Stack direction="row" spacing={0.75} sx={{
+        alignItems: "center"
+      }}>
         <EmojiEventsIcon sx={{ color: priorityColor, fontSize: 16 }} />
         <Typography variant="caption" sx={{ fontWeight: 700, color: priorityColor }}>
           {event.name}
@@ -51,12 +53,22 @@ function CountdownBadge({ event, ctl }: { event: TrainingEvent; ctl: number | nu
           }}
         />
         {!isPast && ctl != null && (
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.6rem' }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              fontSize: '0.6rem'
+            }}>
             CTL: {ctl.toFixed(0)}
           </Typography>
         )}
         {!isPast && (
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.6rem' }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              fontSize: '0.6rem'
+            }}>
             priorytet {event.priority}
           </Typography>
         )}
@@ -103,7 +115,14 @@ export default function EventCountdownWidget({
           bgcolor: 'rgba(255,255,255,0.02)',
         }}
       >
-        <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between" sx={{ mb: activeEvents.length > 0 ? 1 : 0 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: activeEvents.length > 0 ? 1 : 0
+          }}>
           <Typography variant="overline" sx={{ fontWeight: 800, letterSpacing: '0.06em', fontSize: '0.6rem' }}>
             Wydarzenia
           </Typography>
@@ -128,7 +147,12 @@ export default function EventCountdownWidget({
             ))}
           </Stack>
         ) : (
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.6rem' }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              fontSize: '0.6rem'
+            }}>
             Brak zaplanowanych wydarzen. Kliknij + aby dodac.
           </Typography>
         )}
@@ -142,7 +166,14 @@ export default function EventCountdownWidget({
             <Typography variant="caption" sx={{ fontWeight: 700, color: STATUS_COLORS.warning, fontSize: '0.58rem', display: 'block', mb: 0.5 }}>
               CZAS NA TAPER
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.55rem', display: 'block', mb: 0.75 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                fontSize: '0.55rem',
+                display: 'block',
+                mb: 0.75
+              }}>
               {daysToNearest} dni do {nearestEvent?.name}. Rozwaz otwarcie Plan Buildera.
             </Typography>
             <Button
@@ -163,7 +194,9 @@ export default function EventCountdownWidget({
               PROJEKCJA
             </Typography>
             <Stack spacing={0.3}>
-              <Stack direction="row" justifyContent="space-between">
+              <Stack direction="row" sx={{
+                justifyContent: "space-between"
+              }}>
                 <Typography variant="caption" sx={{ fontSize: '0.55rem', color: 'text.secondary' }}>CTL dzis → event</Typography>
                 <Typography variant="caption" sx={{ fontSize: '0.6rem', fontWeight: 700 }}>
                   {projection.currentCtl.toFixed(0)} → {projection.projectedCtl.toFixed(0)}
@@ -182,7 +215,9 @@ export default function EventCountdownWidget({
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <TextField label="Nazwa" value={name} onChange={(e) => setName(e.target.value)} fullWidth size="small" placeholder="np. Maraton Karkonoski" />
-            <TextField label="Data" type="date" value={date} onChange={(e) => setDate(e.target.value)} fullWidth size="small" InputLabelProps={{ shrink: true }} />
+            <TextField label="Data" type="date" value={date} onChange={(e) => setDate(e.target.value)} fullWidth size="small" slotProps={{
+              inputLabel: { shrink: true }
+            }} />
             <FormControl fullWidth size="small">
               <InputLabel>Typ</InputLabel>
               <Select value={type} label="Typ" onChange={(e) => setType(e.target.value)}>

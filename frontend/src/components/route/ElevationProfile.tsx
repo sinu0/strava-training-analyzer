@@ -34,7 +34,9 @@ export default function ElevationProfile({ points, onHover }: ElevationProfilePr
   if (points.length === 0) {
     return (
       <Box sx={{ p: 2, textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           Dodaj punkty na mapie, aby zobaczyć profil wysokości
         </Typography>
       </Box>

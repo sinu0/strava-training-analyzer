@@ -44,8 +44,18 @@ function StatRow({ label, value, unit }: { label: string; value: string | number
   if (value == null || value === '') return null;
   return (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.75, borderBottom: '1px solid', borderColor: 'divider' }}>
-      <Typography color="text.secondary" sx={{ fontSize: '0.8rem' }}>{label}</Typography>
-      <Typography color="text.primary" sx={{ fontSize: '0.8rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          fontSize: '0.8rem'
+        }}>{label}</Typography>
+      <Typography
+        sx={{
+          color: "text.primary",
+          fontSize: '0.8rem',
+          fontWeight: 700,
+          fontVariantNumeric: 'tabular-nums'
+        }}>
         {value}{unit ? ` ${unit}` : ''}
       </Typography>
     </Box>
@@ -145,7 +155,9 @@ export default function AdvancedStatsTab({ activity }: AdvancedStatsTabProps) {
   if (!hasAny) {
     return (
       <Box sx={{ textAlign: 'center', py: 6 }}>
-        <Typography color="text.secondary">Brak danych strumieni do analizy zaawansowanej.</Typography>
+        <Typography sx={{
+          color: "text.secondary"
+        }}>Brak danych strumieni do analizy zaawansowanej.</Typography>
       </Box>
     );
   }

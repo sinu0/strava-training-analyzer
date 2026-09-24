@@ -41,8 +41,10 @@ export default function WeightGoalDialog({
           type="number"
           value={values.targetWeightKg}
           onChange={(event) => setValue('targetWeightKg', event.target.value)}
-          inputProps={{ step: '0.1', min: '30', max: '300' }}
           fullWidth
+          slotProps={{
+            htmlInput: { step: '0.1', min: '30', max: '300' }
+          }}
         />
         <TextField
           label="Data docelowa"

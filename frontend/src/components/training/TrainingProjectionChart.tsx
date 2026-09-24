@@ -58,7 +58,12 @@ export default function TrainingProjectionChart({ days }: TrainingProjectionChar
     <Card sx={{ mb: 2 }}>
       <CardContent>
         <Typography variant="h6" sx={{ mb: 0.5 }}>Projekcja PMC planu</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 1.5
+          }}>
           Szybki podgląd, jak obecny plan przesuwa CTL, ATL i świeżość w widocznym zakresie kalendarza.
         </Typography>
 

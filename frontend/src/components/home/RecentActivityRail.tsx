@@ -60,8 +60,20 @@ export default function RecentActivityRail({ activities, onSelect }: RecentActiv
             }}
           >
             <Stack spacing={1.25}>
-              <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                  alignItems: "center",
+                  justifyContent: "space-between"
+                }}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{
+                    alignItems: "center",
+                    minWidth: 0
+                  }}>
                   <Box
                     sx={{
                       width: 30,
@@ -84,14 +96,18 @@ export default function RecentActivityRail({ activities, onSelect }: RecentActiv
                 <Chip label={activity.sportType} size="small" variant="outlined" />
               </Stack>
 
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {new Date(activity.startedAt).toLocaleDateString('pl-PL', {
                   day: 'numeric',
                   month: 'short',
                 })}
               </Typography>
 
-              <Stack direction="row" spacing={0.75} useFlexGap flexWrap="wrap">
+              <Stack direction="row" spacing={0.75} useFlexGap sx={{
+                flexWrap: "wrap"
+              }}>
                 <Chip label={formatDistance(activity.distanceM)} size="small" />
                 <Chip label={formatDuration(activity.movingTimeSec)} size="small" />
                 {activity.avgPowerW != null ? (

@@ -63,12 +63,20 @@ export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
   const renderState = (message: string, detail?: string) => (
     <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
       <Stack spacing={0.75}>
-        <Typography variant="subtitle1" fontWeight={600}>
+        <Typography variant="subtitle1" sx={{
+          fontWeight: 600
+        }}>
           Trend mocy maksymalnej (MMP)
         </Typography>
-        <Typography color="text.secondary">{message}</Typography>
+        <Typography sx={{
+          color: "text.secondary"
+        }}>{message}</Typography>
         {detail ? (
-          <Typography color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+          <Typography
+            sx={{
+              color: "text.secondary",
+              fontSize: '0.8rem'
+            }}>
             {detail}
           </Typography>
         ) : null}
@@ -92,7 +100,9 @@ export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
   return (
     <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
       <Stack spacing={1}>
-        <Typography variant="subtitle1" fontWeight={600}>
+        <Typography variant="subtitle1" sx={{
+          fontWeight: 600
+        }}>
           Trend mocy maksymalnej (MMP)
         </Typography>
         <ToggleButtonGroup

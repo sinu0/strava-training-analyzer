@@ -1,5 +1,5 @@
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import StarOutlineIcon from '@mui/icons-material/StarOutline';
+import StarOutlineIcon from '@mui/icons-material/StarOutlineOutlined';
 import { Box, Chip, Grid, Stack, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -118,10 +118,14 @@ export default function AdminDashboard({
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
                 <AutoAwesomeIcon sx={{ color: BRAND_COLORS.ai, fontSize: 28 }} />
                 <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{
+                    color: "text.secondary"
+                  }}>
                     Batch prognoz AI (6 typów)
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     {aiStatus?.batchEnabled === false
                       ? 'Batch nocny wyłączony'
                       : `Automatycznie ${
@@ -255,7 +259,9 @@ export default function AdminDashboard({
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
                 <StarOutlineIcon sx={{ color: STATUS_COLORS.warning, fontSize: 28 }} />
                 <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{
+                    color: "text.secondary"
+                  }}>
                     Przelicz scoring (Training Score, Aerobic/Anaerobic TE, Recovery Time) dla wszystkich aktywności
                   </Typography>
                 </Box>
@@ -285,7 +291,9 @@ export default function AdminDashboard({
                       <Typography variant="caption" sx={{ color: STATUS_COLORS.success }}>
                         ✓ {recalculateAllTeData.success} sukces
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" sx={{
+                        color: "text.secondary"
+                      }}>
                         Łącznie: {recalculateAllTeData.total}
                       </Typography>
                       {recalculateAllTeData.failed > 0 && (
@@ -329,16 +337,22 @@ export default function AdminDashboard({
       <Grid size={12}>
         <DataCard title="Informacje">
           <Stack spacing={1} sx={{ py: 1 }}>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               <strong>Sync Strava</strong> — pobiera aktywności z API Strava, oblicza metryki (NP, TSS, IF, strefy) i zapisuje do bazy.
               „Ostatnie 30 dni" jest szybsze, „Pełny sync" importuje całą historię.
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               <strong>Cache pogody</strong> — automatycznie odświeżany 2x dziennie (06:00, 18:00).
               Pobiera 8-dniową prognozę godzinową i oblicza outdoor scores dla każdej godziny.
               Ręczne odświeżenie wymusza pobranie aktualnych danych.
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               Dane logowania są szyfrowane. Synchronizacja pobiera dane za wybrany okres.
             </Typography>
           </Stack>

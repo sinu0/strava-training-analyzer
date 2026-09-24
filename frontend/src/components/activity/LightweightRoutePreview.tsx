@@ -113,7 +113,12 @@ export default function LightweightRoutePreview({
           <circle cx={route.end[0]} cy={route.end[1]} r="2.7" fill="#FFFFFF" stroke={routeColor} strokeWidth="1.8" />
         </svg>
       ) : (
-        <Stack alignItems="center" spacing={0.5} color="text.secondary">
+        <Stack
+          spacing={0.5}
+          sx={{
+            alignItems: "center",
+            color: "text.secondary"
+          }}>
           <RouteOutlinedIcon />
           <Typography variant="caption">Brak zapisu trasy</Typography>
         </Stack>

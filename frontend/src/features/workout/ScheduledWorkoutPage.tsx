@@ -55,13 +55,23 @@ export default function ScheduledWorkoutPage() {
       {!!anotherActive && <Alert severity="warning" sx={{ mb: 2 }}>Inny trening jest aktywny. Najpierw go wznów lub zakończ.</Alert>}
       <Stack spacing={2.5}>
         <PerformanceSurface accent sx={{ p: { xs: 2, sm: 3 } }}>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} justifyContent="space-between">
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{
+            justifyContent: "space-between"
+          }}>
             <Box>
-              <Typography variant="overline" color="text.secondary">Niezmienny snapshot planu</Typography>
+              <Typography variant="overline" sx={{
+                color: "text.secondary"
+              }}>Niezmienny snapshot planu</Typography>
               <Typography variant="h4">{plan.workoutTemplateName ?? plan.plannedType}</Typography>
-              <Typography color="text.secondary" sx={{ mt: 1 }}>{plan.plannedDescription}</Typography>
+              <Typography
+                sx={{
+                  color: "text.secondary",
+                  mt: 1
+                }}>{plan.plannedDescription}</Typography>
             </Box>
-            <Stack direction="row" spacing={{ xs: 2, sm: 4 }} flexWrap="wrap">
+            <Stack direction="row" spacing={{ xs: 2, sm: 4 }} sx={{
+              flexWrap: "wrap"
+            }}>
               <MetricReadout label="Czas" value={plan.plannedDurationMin ?? '—'} unit="min" />
               <MetricReadout label="FTP wykonania" value={plan.ftpWatts ?? '—'} unit={plan.ftpWatts ? 'W' : undefined} hint="zapisane przy planowaniu" />
               <MetricReadout label="TSS" value={plan.plannedTss ?? '—'} />
@@ -94,11 +104,15 @@ export default function ScheduledWorkoutPage() {
         </Stack>
 
         <PerformanceSurface sx={{ p: 2.5 }}>
-          <Stack direction="row" spacing={1.5} alignItems="center">
+          <Stack direction="row" spacing={1.5} sx={{
+            alignItems: "center"
+          }}>
             <WatchOutlinedIcon color={garmin?.status === 'AVAILABLE' ? 'success' : 'disabled'} />
             <Box>
               <Typography variant="subtitle1">Garmin Training API</Typography>
-              <Typography variant="body2" color="text.secondary">{garmin?.reason ?? 'Sprawdzanie dostępności…'}</Typography>
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>{garmin?.reason ?? 'Sprawdzanie dostępności…'}</Typography>
             </Box>
             <Chip label={garmin?.status ?? '…'} size="small" color={garmin?.status === 'AVAILABLE' ? 'success' : 'default'} />
           </Stack>

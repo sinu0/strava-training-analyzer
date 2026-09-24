@@ -23,14 +23,30 @@ export default function ChallengeWidget() {
         borderColor: 'divider',
       }}
     >
-      <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mb: 1 }}>
+      <Stack
+        direction="row"
+        spacing={0.5}
+        sx={{
+          alignItems: "center",
+          mb: 1
+        }}>
         <FlagIcon sx={{ fontSize: 16, color: STATUS_COLORS.warning }} />
-        <Typography variant="caption" fontWeight={600} color="text.secondary">
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: 600,
+            color: "text.secondary"
+          }}>
           Aktywne wyzwanie
         </Typography>
       </Stack>
 
-      <Typography variant="body2" fontWeight={700} sx={{ mb: 0.5 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 700,
+          mb: 0.5
+        }}>
         {topChallenge.name}
       </Typography>
 
@@ -50,8 +66,15 @@ export default function ChallengeWidget() {
         }}
       />
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Typography variant="caption" color="text.secondary">
+      <Stack
+        direction="row"
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}>
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>
           {topChallenge.currentValue} / {topChallenge.targetValue} {topChallenge.targetUnit}
         </Typography>
         <Chip
@@ -59,7 +82,9 @@ export default function ChallengeWidget() {
           size="small"
           sx={{ fontSize: '0.6rem', fontWeight: 600 }}
         />
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>
           {topChallenge.daysLeft > 0 ? `${topChallenge.daysLeft} dni` : 'Koniec'}
         </Typography>
       </Stack>

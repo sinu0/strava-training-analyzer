@@ -27,9 +27,13 @@ export default function WeeklyLoadBarChart({ data, optimalLoad }: WeeklyLoadBarC
   const chart = getChartVisuals(theme);
   if (!data?.length) {
     return (
-      <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
-        Brak danych tygodniowych.
-      </Typography>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          py: 2,
+          textAlign: 'center'
+        }}>Brak danych tygodniowych.
+              </Typography>
     );
   }
 

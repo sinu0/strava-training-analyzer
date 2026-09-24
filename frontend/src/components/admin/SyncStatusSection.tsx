@@ -91,7 +91,9 @@ export default function SyncStatusSection({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
             <SyncIcon sx={{ color: STATUS_COLORS.info, fontSize: 28 }} />
             <Box sx={{ flex: 1 }}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 Status synchronizacji
               </Typography>
               {syncLoading ? (
@@ -113,7 +115,9 @@ export default function SyncStatusSection({
           >
             <Stack spacing={0.5}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   Ostatni sync:
                 </Typography>
                 <Typography variant="caption" sx={{ fontWeight: 600 }}>
@@ -121,7 +125,9 @@ export default function SyncStatusSection({
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   Zaimportowane:
                 </Typography>
                 <Typography variant="caption" sx={{ fontWeight: 600, color: STATUS_COLORS.success }}>
@@ -129,7 +135,9 @@ export default function SyncStatusSection({
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   Pominięte:
                 </Typography>
                 <Typography variant="caption" sx={{ fontWeight: 600, color: STATUS_COLORS.warning }}>
@@ -149,13 +157,17 @@ export default function SyncStatusSection({
                 border: `1px solid ${alphaColor(STATUS_COLORS.error, 0.3)}`,
               }}
             >
-              <Stack direction="row" alignItems="center" spacing={1}>
+              <Stack direction="row" spacing={1} sx={{
+                alignItems: "center"
+              }}>
                 <TimerIcon sx={{ color: STATUS_COLORS.error, fontSize: 20 }} />
                 <Box>
                   <Typography variant="caption" sx={{ fontWeight: 700, color: STATUS_COLORS.error, display: 'block' }}>
                     API zablokowane (rate limit)
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     {rateLimitCountdown
                       ? `Odblokowanie za: ${rateLimitCountdown}`
                       : 'Limit wygasł — możesz kontynuować sync'}
@@ -294,22 +306,35 @@ export default function SyncStatusSection({
               border: `1px solid ${SURFACE_COLORS.border}`,
             }}
           >
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                alignItems: "center",
+                mb: 1
+              }}>
               <UpdateIcon sx={{ fontSize: 18, color: STATUS_COLORS.accent }} />
               <Typography variant="caption" sx={{ fontWeight: 600 }}>
                 Auto-sync w tle
               </Typography>
             </Stack>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                display: 'block',
+                mb: 1
+              }}>
               Aplikacja automatycznie sprawdza nowe aktywności co X minut.
             </Typography>
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1} sx={{
+              alignItems: "center"
+            }}>
               <TextField
                 size="small"
                 type="number"
                 value={intervalInput}
                 onChange={(e) => setIntervalInput(e.target.value)}
-                inputProps={{ min: 1, max: 1440, style: { textAlign: 'center', width: 60 } }}
                 disabled={updateAutoSyncPending}
                 sx={{
                   '& .MuiOutlinedInput-root': {
@@ -317,8 +342,13 @@ export default function SyncStatusSection({
                     borderRadius: 1.5,
                   },
                 }}
+                slotProps={{
+                  htmlInput: { min: 1, max: 1440, style: { textAlign: 'center', width: 60 } }
+                }}
               />
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 minut
               </Typography>
               <Button

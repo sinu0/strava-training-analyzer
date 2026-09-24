@@ -156,7 +156,13 @@ export default function TodayRecommendation({ readiness, weather, weeklyLoad }: 
       {rec.details.length > 0 && (
         <>
           <Divider sx={{ my: 1.5 }} />
-          <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              mb: 1,
+              display: 'block'
+            }}>
             Na podstawie:
           </Typography>
           <Stack spacing={0.5}>

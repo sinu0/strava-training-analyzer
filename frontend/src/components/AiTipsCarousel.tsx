@@ -1,7 +1,7 @@
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import BatteryAlertIcon from '@mui/icons-material/BatteryAlert';
 import BoltIcon from '@mui/icons-material/Bolt';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -115,10 +115,14 @@ export default function AiTipsCarousel({ tips, loading, status }: AiTipsCarousel
     return (
       <Box sx={{ py: 2, textAlign: 'center' }}>
         <LightbulbIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           Brak prognoz na dziś
         </Typography>
-        <Typography variant="caption" color="text.disabled">
+        <Typography variant="caption" sx={{
+          color: "text.disabled"
+        }}>
           {subtitle}
         </Typography>
       </Box>
@@ -156,7 +160,13 @@ export default function AiTipsCarousel({ tips, loading, status }: AiTipsCarousel
             >
               <ChevronLeftIcon fontSize="small" />
             </IconButton>
-            <Typography variant="caption" color="text.secondary" sx={{ minWidth: 32, textAlign: 'center' }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                minWidth: 32,
+                textAlign: 'center'
+              }}>
               {index + 1}&thinsp;/&thinsp;{total}
             </Typography>
             <IconButton
@@ -181,7 +191,13 @@ export default function AiTipsCarousel({ tips, loading, status }: AiTipsCarousel
 
       {/* Insight body */}
       {!!insight && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, lineHeight: 1.5 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 1.5,
+            lineHeight: 1.5
+          }}>
           {insight}
         </Typography>
       )}
@@ -236,7 +252,12 @@ export default function AiTipsCarousel({ tips, loading, status }: AiTipsCarousel
 
       {/* Confidence bar */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Typography variant="caption" color="text.disabled" sx={{ minWidth: 60 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.disabled",
+            minWidth: 60
+          }}>
           Pewność:
         </Typography>
         <LinearProgress
@@ -250,7 +271,13 @@ export default function AiTipsCarousel({ tips, loading, status }: AiTipsCarousel
             '& .MuiLinearProgress-bar': { bgcolor: color, borderRadius: 2 },
           }}
         />
-        <Typography variant="caption" color="text.secondary" sx={{ minWidth: 32, textAlign: 'right' }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            minWidth: 32,
+            textAlign: 'right'
+          }}>
           {confidencePct}%
         </Typography>
       </Box>

@@ -115,7 +115,9 @@ export default function ReadinessGauge({
   if (!data) {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 2 }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           Ładowanie gotowości...
         </Typography>
       </Box>
@@ -126,7 +128,9 @@ export default function ReadinessGauge({
     return (
       <Box sx={{ py: 2 }}>
         <Typography variant="subtitle2">Gotowość niedostępna</Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           {data.description}
         </Typography>
       </Box>
@@ -203,7 +207,9 @@ export default function ReadinessGauge({
 
       <Box sx={{ mb: 1.5 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             Gotowość treningowa
           </Typography>
           <Typography variant="caption" sx={{ color, fontWeight: 700 }}>
@@ -259,10 +265,19 @@ export default function ReadinessGauge({
 
       {data.healthSignals ? (
         <Box sx={{ mb: 1.5 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.75, fontWeight: 700 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              display: 'block',
+              mb: 0.75,
+              fontWeight: 700
+            }}>
             Sygnały regeneracji
           </Typography>
-          <Stack direction="row" spacing={0.75} useFlexGap flexWrap="wrap">
+          <Stack direction="row" spacing={0.75} useFlexGap sx={{
+            flexWrap: "wrap"
+          }}>
             {data.healthSignals.sleepScore != null ? (
               <Chip size="small" label={`Sen ${data.healthSignals.sleepScore}/100`} />
             ) : null}
@@ -290,7 +305,14 @@ export default function ReadinessGauge({
 
       {data.sessionVariants?.length ? (
         <Box sx={{ mb: 1.5 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.75, fontWeight: 700 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              display: 'block',
+              mb: 0.75,
+              fontWeight: 700
+            }}>
             Warianty sesji
           </Typography>
           <Stack spacing={0.75}>

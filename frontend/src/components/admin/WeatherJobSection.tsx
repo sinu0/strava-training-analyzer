@@ -55,7 +55,9 @@ export default function WeatherJobSection({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
           <WeatherConditionIcon kind="sunny" size={28} alt="" />
           <Box sx={{ flex: 1 }}>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               Automatyczne odświeżanie
             </Typography>
             <Typography variant="caption" sx={{ color: STATUS_COLORS.success, fontWeight: 600 }}>
@@ -70,29 +72,44 @@ export default function WeatherJobSection({
           bgcolor: SURFACE_COLORS.subtle,
           border: `1px solid ${SURFACE_COLORS.border}`,
         }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, mb: 1, display: 'block' }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              fontWeight: 700,
+              mb: 1,
+              display: 'block'
+            }}>
             OSTATNIE WYKONANIE
           </Typography>
           <Stack spacing={0.5}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="caption" color="text.secondary">Status:</Typography>
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>Status:</Typography>
               <StatusChip status={weatherJobStatus?.status ?? 'idle'} />
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="caption" color="text.secondary">Czas wykonania:</Typography>
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>Czas wykonania:</Typography>
               <Typography variant="caption" sx={{ fontWeight: 600 }}>
                 {formatTimestamp(weatherJobStatus?.lastRunAt ?? null)}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="caption" color="text.secondary">Lokalizacje przetworzone:</Typography>
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>Lokalizacje przetworzone:</Typography>
               <Typography variant="caption" sx={{ fontWeight: 600, color: STATUS_COLORS.success }}>
                 {weatherJobStatus?.locationsProcessed ?? 0}
               </Typography>
             </Box>
             {(weatherJobStatus?.locationsFailed ?? 0) > 0 && (
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="caption" color="text.secondary">Błędy:</Typography>
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>Błędy:</Typography>
                 <Typography variant="caption" sx={{ fontWeight: 600, color: STATUS_COLORS.error }}>
                   {weatherJobStatus?.locationsFailed}
                 </Typography>
@@ -112,7 +129,14 @@ export default function WeatherJobSection({
           bgcolor: SURFACE_COLORS.subtle,
           border: `1px solid ${SURFACE_COLORS.border}`,
         }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, mb: 1, display: 'block' }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              fontWeight: 700,
+              mb: 1,
+              display: 'block'
+            }}>
             LOKALIZACJE ({weatherLocations?.length ?? 0})
           </Typography>
           <Stack spacing={0.5}>
@@ -139,7 +163,9 @@ export default function WeatherJobSection({
               </Box>
             ))}
             {(!weatherLocations || weatherLocations.length === 0) && (
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 Brak lokalizacji — dodaj w widżecie pogody na dashboardzie.
               </Typography>
             )}

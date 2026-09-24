@@ -62,7 +62,9 @@ export default function FtpProgressCard({ data, powerCurve, weightKg }: FtpProgr
   if (!data) {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 2 }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           Ładowanie danych FTP...
         </Typography>
       </Box>
@@ -143,7 +145,13 @@ export default function FtpProgressCard({ data, powerCurve, weightKg }: FtpProgr
               <Typography variant="caption" sx={{ color: trend.color, fontWeight: 700 }}>
                 {data.changePercent > 0 ? '+' : ''}
                 {data.changePercent.toFixed(1)}%
-                <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                <Typography
+                  component="span"
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                    ml: 0.5
+                  }}>
                   (90d)
                 </Typography>
               </Typography>
@@ -155,7 +163,9 @@ export default function FtpProgressCard({ data, powerCurve, weightKg }: FtpProgr
       {/* ─── Score bar ─── */}
       <Box sx={{ mb: 1.5 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
-          <Typography variant="caption" color="text.secondary">Poziom FTP</Typography>
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>Poziom FTP</Typography>
           <Typography variant="caption" sx={{ color: ftpColor, fontWeight: 700 }}>
             {getFtpLevel(ftp)}
           </Typography>

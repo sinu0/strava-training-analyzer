@@ -146,7 +146,9 @@ export default function AdaptiveTrainingPanel() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Card>
-        <CardHeader title="Plan treningowy (nastepne 7 dni)" titleTypographyProps={{ variant: 'subtitle2' }} />
+        <CardHeader title="Plan treningowy (nastepne 7 dni)" slotProps={{
+          title: { variant: 'subtitle2' }
+        }} />
         <CardContent>
           {plannedWorkouts.map((w, i) => (
             <Box key={w.rowId} sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
@@ -211,7 +213,9 @@ export default function AdaptiveTrainingPanel() {
       </Card>
 
       <Card>
-        <CardHeader title="Ostatnie sesje (5 treningow)" titleTypographyProps={{ variant: 'subtitle2' }} />
+        <CardHeader title="Ostatnie sesje (5 treningow)" slotProps={{
+          title: { variant: 'subtitle2' }
+        }} />
         <CardContent>
           {recentWorkouts.map((w, i) => (
             <Box key={w.rowId} sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1, flexWrap: 'wrap' }}>
@@ -254,7 +258,9 @@ export default function AdaptiveTrainingPanel() {
       </Card>
 
       <Card>
-        <CardHeader title="Stan obciazenia (CTL/ATL/TSB)" titleTypographyProps={{ variant: 'subtitle2' }} />
+        <CardHeader title="Stan obciazenia (CTL/ATL/TSB)" slotProps={{
+          title: { variant: 'subtitle2' }
+        }} />
         <CardContent>
           <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
@@ -286,7 +292,9 @@ export default function AdaptiveTrainingPanel() {
       </Card>
 
       <Card>
-        <CardHeader title="Sygnaly regeneracji" titleTypographyProps={{ variant: 'subtitle2' }} />
+        <CardHeader title="Sygnaly regeneracji" slotProps={{
+          title: { variant: 'subtitle2' }
+        }} />
         <CardContent>
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <TextField
@@ -342,7 +350,9 @@ export default function AdaptiveTrainingPanel() {
       </Card>
 
       <Card>
-        <CardHeader title="Poziomy progresji" titleTypographyProps={{ variant: 'subtitle2' }} />
+        <CardHeader title="Poziomy progresji" slotProps={{
+          title: { variant: 'subtitle2' }
+        }} />
         <CardContent>
           <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
@@ -451,7 +461,9 @@ function AdaptationResult({
               variant="outlined"
             />
           </Box>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {insight}
           </Typography>
         </CardContent>
@@ -461,11 +473,22 @@ function AdaptationResult({
       {warnings.length > 0 && (
         <Card>
           <CardContent>
-            <Typography variant="subtitle2" color="warning.main" sx={{ mb: 1 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                color: "warning.main",
+                mb: 1
+              }}>
               Ostrzezenia
             </Typography>
             {warnings.map((warning) => (
-              <Typography key={warning} variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+              <Typography
+                key={warning}
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  lineHeight: 1.6
+                }}>
                 • {warning}
               </Typography>
             ))}
@@ -495,7 +518,9 @@ function AdjustmentDayCard({
     <Card variant="outlined">
       <CardContent sx={{ '&:last-child': { pb: 2 } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <Typography variant="subtitle2" fontWeight={700}>
+          <Typography variant="subtitle2" sx={{
+            fontWeight: 700
+          }}>
             {day}
           </Typography>
           <Chip
@@ -504,7 +529,12 @@ function AdjustmentDayCard({
             size="small"
           />
         </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 1
+          }}>
           {reason}
         </Typography>
         <Box
@@ -518,10 +548,14 @@ function AdjustmentDayCard({
           }}
         >
           <Chip label={newWorkout.type} size="small" sx={{ fontWeight: 600 }} />
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             {INTENSITY_LABELS[newWorkout.intensityAdjustment] ?? newWorkout.intensityAdjustment}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             {VOLUME_LABELS[newWorkout.volumeAdjustment] ?? newWorkout.volumeAdjustment}
           </Typography>
         </Box>

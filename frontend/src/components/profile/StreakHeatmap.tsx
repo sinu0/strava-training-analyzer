@@ -36,22 +36,43 @@ export default function StreakHeatmap() {
     <Box>
       <Stack direction="row" spacing={3} sx={{ mb: 2 }}>
         <Box>
-          <Typography variant="h5" fontWeight={900} color="warning.main">
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 900,
+              color: "warning.main"
+            }}>
             {stats.currentStreak}
           </Typography>
-          <Typography variant="caption" color="text.secondary">obecna seria (dni)</Typography>
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>obecna seria (dni)</Typography>
         </Box>
         <Box>
-          <Typography variant="h5" fontWeight={900} color="primary.main">
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 900,
+              color: "primary.main"
+            }}>
             {stats.longestStreak}
           </Typography>
-          <Typography variant="caption" color="text.secondary">najdłuższa seria</Typography>
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>najdłuższa seria</Typography>
         </Box>
         <Box>
-          <Typography variant="h5" fontWeight={900} color="success.main">
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 900,
+              color: "success.main"
+            }}>
             {stats.totalActiveDays}
           </Typography>
-          <Typography variant="caption" color="text.secondary">aktywnych dni</Typography>
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>aktywnych dni</Typography>
         </Box>
       </Stack>
 

@@ -71,7 +71,9 @@ export default function ActivityStreamsChart({
         {legend.map((item) => (
           <Box key={item.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
             <Box sx={{ width: 22, height: item.style === 'area' ? 8 : 0, borderTop: item.style === 'area' ? 'none' : `3px ${item.style} ${item.color}`, bgcolor: item.style === 'area' ? item.color : undefined, opacity: item.style === 'area' ? 0.55 : 1 }} />
-            <Typography variant="caption" color="text.secondary">{item.label}</Typography>
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>{item.label}</Typography>
           </Box>
         ))}
       </Box>

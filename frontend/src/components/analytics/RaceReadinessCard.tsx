@@ -39,7 +39,9 @@ export default function RaceReadinessCard() {
   return (
     <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
       <Stack spacing={1.5}>
-        <Typography variant="subtitle1" fontWeight={600}>
+        <Typography variant="subtitle1" sx={{
+          fontWeight: 600
+        }}>
           Gotowość na wyścig
         </Typography>
 
@@ -49,19 +51,24 @@ export default function RaceReadinessCard() {
           label="Data wyścigu"
           value={raceDate}
           onChange={(e) => setRaceDate(e.target.value)}
-          InputLabelProps={{ shrink: true }}
-          inputProps={{ min: new Date().toISOString().split('T')[0] }}
           fullWidth
-        />
+          slotProps={{
+            htmlInput: { min: new Date().toISOString().split('T')[0] },
+            inputLabel: { shrink: true }
+          }} />
 
         {!!isLoading && (
-          <Typography color="text.secondary" variant="body2">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             Obliczanie projekcji…
           </Typography>
         )}
 
         {!!data && <>
-            <Stack direction="row" spacing={1} flexWrap="wrap">
+            <Stack direction="row" spacing={1} sx={{
+              flexWrap: "wrap"
+            }}>
               <Chip
                 label={`Forma: ${data.formAssessment}`}
                 sx={{

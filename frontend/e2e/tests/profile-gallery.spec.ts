@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '../fixtures';
 
 // E2E: Profile gallery lightbox
 // Runs with: npm run test:e2e -- e2e/tests/profile-gallery.spec.ts

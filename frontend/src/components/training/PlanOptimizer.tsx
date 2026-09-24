@@ -131,10 +131,11 @@ export default function PlanOptimizer() {
       <Card>
         <CardHeader
           title="Parametry planu"
-          titleTypographyProps={{ variant: 'subtitle2' }}
           subheader={initialized ? 'CTL, ATL i FTP zaciagnieto z aktualnych wyliczen' : undefined}
-          subheaderTypographyProps={{ variant: 'caption' }}
-        />
+          slotProps={{
+            title: { variant: 'subtitle2' },
+            subheader: { variant: 'caption' }
+          }} />
         <CardContent>
           <Grid container spacing={1.5}>
             <Grid
@@ -263,9 +264,18 @@ export default function PlanOptimizer() {
 
           {/* Strategy */}
           <Card>
-            <CardHeader title="Strategia" titleTypographyProps={{ variant: 'subtitle2' }} />
+            <CardHeader title="Strategia" slotProps={{
+              title: { variant: 'subtitle2' }
+            }} />
             <CardContent>
-              <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
+              <Stack
+                direction="row"
+                spacing={2}
+                useFlexGap
+                sx={{
+                  alignItems: "center",
+                  flexWrap: "wrap"
+                }}>
                 <Chip
                   icon={<WhatshotIcon />}
                   label={result.strategy.focus}
@@ -273,7 +283,9 @@ export default function PlanOptimizer() {
                   color={result.strategy.focus === 'TAPER' ? 'warning' : result.strategy.focus === 'BUILD' ? 'primary' : 'default'}
                   variant="outlined"
                 />
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   {result.strategy.reasoning}
                 </Typography>
               </Stack>
@@ -284,7 +296,9 @@ export default function PlanOptimizer() {
           <Card>
             <CardHeader
               title="Wybierz wariant planu"
-              titleTypographyProps={{ variant: 'subtitle2' }}
+              slotProps={{
+                title: { variant: 'subtitle2' }
+              }}
             />
             <CardContent>
               <Grid container spacing={2}>
@@ -311,7 +325,12 @@ export default function PlanOptimizer() {
                         }}
                       >
                         <Stack spacing={1}>
-                          <Stack direction="row" justifyContent="space-between" alignItems="center">
+                          <Stack
+                            direction="row"
+                            sx={{
+                              justifyContent: "space-between",
+                              alignItems: "center"
+                            }}>
                             <Chip
                               label={PLAN_TYPE_CONFIG[plan.type].label}
                               size="small"
@@ -325,20 +344,40 @@ export default function PlanOptimizer() {
                           </Stack>
                           <Divider />
                           <Box>
-                            <Typography variant="caption" color="text.secondary">TSS szacowany</Typography>
-                            <Typography variant="h6" fontWeight={700}>{plan.estimatedTss}</Typography>
+                            <Typography variant="caption" sx={{
+                              color: "text.secondary"
+                            }}>TSS szacowany</Typography>
+                            <Typography variant="h6" sx={{
+                              fontWeight: 700
+                            }}>{plan.estimatedTss}</Typography>
                           </Box>
                           <Box>
-                            <Typography variant="caption" color="text.secondary">Wynik adaptacji</Typography>
-                            <Typography fontWeight={600}>{plan.score}</Typography>
+                            <Typography variant="caption" sx={{
+                              color: "text.secondary"
+                            }}>Wynik adaptacji</Typography>
+                            <Typography sx={{
+                              fontWeight: 600
+                            }}>{plan.score}</Typography>
                           </Box>
                           <Box>
-                            <Typography variant="caption" color="text.secondary">Zysk adaptacyjny</Typography>
-                            <Typography fontWeight={600} color="success.main">{plan.adaptationGain}</Typography>
+                            <Typography variant="caption" sx={{
+                              color: "text.secondary"
+                            }}>Zysk adaptacyjny</Typography>
+                            <Typography
+                              sx={{
+                                fontWeight: 600,
+                                color: "success.main"
+                              }}>{plan.adaptationGain}</Typography>
                           </Box>
                           <Box>
-                            <Typography variant="caption" color="text.secondary">Koszt zmeczenia</Typography>
-                            <Typography fontWeight={600} color="error.main">{plan.fatigueCost}</Typography>
+                            <Typography variant="caption" sx={{
+                              color: "text.secondary"
+                            }}>Koszt zmeczenia</Typography>
+                            <Typography
+                              sx={{
+                                fontWeight: 600,
+                                color: "error.main"
+                              }}>{plan.fatigueCost}</Typography>
                           </Box>
                         </Stack>
                       </Box>
@@ -367,13 +406,21 @@ export default function PlanOptimizer() {
             <Card>
               <CardHeader
                 title={`Sesje: ${PLAN_TYPE_CONFIG[selectedType].label}`}
-                titleTypographyProps={{ variant: 'subtitle2' }}
+                slotProps={{
+                  title: { variant: 'subtitle2' }
+                }}
               />
               <CardContent>
                 <Stack spacing={2}>
                   {/* Intensity distribution bar */}
                   <Box>
-                    <Typography variant="caption" fontWeight={600} display="block" mb={0.5}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontWeight: 600,
+                        display: "block",
+                        mb: 0.5
+                      }}>
                       Rozklad intensywnosci
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 0.5, borderRadius: 2, overflow: 'hidden', height: 24 }}>
@@ -382,7 +429,9 @@ export default function PlanOptimizer() {
                         bgcolor: INTENSITY_COLORS.LOW,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
-                        <Typography variant="caption" fontWeight={700} color="white">
+                        <Typography variant="caption" color="white" sx={{
+                          fontWeight: 700
+                        }}>
                           LOW {selectedPlan.intensityDistribution.low}%
                         </Typography>
                       </Box>
@@ -392,7 +441,9 @@ export default function PlanOptimizer() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
                         {selectedPlan.intensityDistribution.moderate > 8 && (
-                          <Typography variant="caption" fontWeight={700} color="white">
+                          <Typography variant="caption" color="white" sx={{
+                            fontWeight: 700
+                          }}>
                             MOD {selectedPlan.intensityDistribution.moderate}%
                           </Typography>
                         )}
@@ -403,7 +454,9 @@ export default function PlanOptimizer() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
                         {selectedPlan.intensityDistribution.high > 8 && (
-                          <Typography variant="caption" fontWeight={700} color="white">
+                          <Typography variant="caption" color="white" sx={{
+                            fontWeight: 700
+                          }}>
                             HIGH {selectedPlan.intensityDistribution.high}%
                           </Typography>
                         )}
@@ -413,7 +466,13 @@ export default function PlanOptimizer() {
 
                   {/* Sessions table */}
                   <Box>
-                    <Typography variant="caption" fontWeight={600} display="block" mb={1}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontWeight: 600,
+                        display: "block",
+                        mb: 1
+                      }}>
                       {selectedPlan.sessions.length} sesji | Pewnosc: {result.confidence}%
                     </Typography>
                     <TableContainer component={Paper} variant="outlined" sx={{ bgcolor: 'transparent' }}>
@@ -447,7 +506,14 @@ export default function PlanOptimizer() {
                               </TableCell>
                               <TableCell>{session.tss}</TableCell>
                               <TableCell>
-                                <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 200, display: 'block', whiteSpace: 'normal' }}>
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    color: "text.secondary",
+                                    maxWidth: 200,
+                                    display: 'block',
+                                    whiteSpace: 'normal'
+                                  }}>
                                   {session.goal}
                                 </Typography>
                               </TableCell>

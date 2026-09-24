@@ -19,8 +19,16 @@ function clamp(value: number, min: number, max: number) {
 
 function DotRow({ label, value, filled, color }: { label: string; value: string; filled: number; color: string }) {
   return (
-    <Stack direction="row" spacing={1.1} alignItems="center">
-      <Typography variant="caption" color="text.secondary" sx={{ width: 42, fontWeight: 760 }}>
+    <Stack direction="row" spacing={1.1} sx={{
+      alignItems: "center"
+    }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          width: 42,
+          fontWeight: 760
+        }}>
         {label}
       </Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: `repeat(${DOT_COUNT}, 1fr)`, gap: 0.5, flex: 1 }}>
@@ -64,7 +72,14 @@ export function LoadDotMatrix({ ctl, atl, form }: LoadDotMatrixProps) {
       aria-label={`Porównanie obciążenia: CTL ${ctl.toFixed(1)}, ATL ${atl.toFixed(1)}, forma ${form.toFixed(1)}`}
       sx={{ mt: 2.5, p: 1.25, borderRadius: 2.5, bgcolor: (currentTheme) => currentTheme.tokens?.surfaceSubtle ?? 'rgba(255,255,255,0.025)' }}
     >
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, fontWeight: 700 }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          display: 'block',
+          mb: 1,
+          fontWeight: 700
+        }}>
         Bieżące natężenie
       </Typography>
       <Stack spacing={0.9}>
@@ -103,10 +118,19 @@ export function RecoveryFormGauge({ form }: RecoveryFormGaugeProps) {
           }}
         />
       </Box>
-      <Stack direction="row" justifyContent="space-between" sx={{ mt: 0.75 }}>
-        <Typography variant="caption" color="text.secondary">Zmęczenie −30</Typography>
+      <Stack
+        direction="row"
+        sx={{
+          justifyContent: "space-between",
+          mt: 0.75
+        }}>
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>Zmęczenie −30</Typography>
         <Typography variant="caption" sx={{ color: markerColor, fontWeight: 800 }}>Forma {form.toFixed(1)}</Typography>
-        <Typography variant="caption" color="text.secondary">Świeżość +30</Typography>
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>Świeżość +30</Typography>
       </Stack>
     </Box>
   );

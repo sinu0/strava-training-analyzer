@@ -56,8 +56,16 @@ export default function EquipmentList() {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="subtitle2" fontWeight={700}>Wyposażenie</Typography>
+      <Stack
+        direction="row"
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2
+        }}>
+        <Typography variant="subtitle2" sx={{
+          fontWeight: 700
+        }}>Wyposażenie</Typography>
         <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={() => setDialogOpen(true)}>
           Dodaj
         </Button>
@@ -72,7 +80,9 @@ export default function EquipmentList() {
       </Grid>
 
       {(!equipment || equipment.length === 0) && (
-        <Typography variant="body2" color="text.secondary">Brak wyposażenia. Dodaj swój pierwszy sprzęt.</Typography>
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>Brak wyposażenia. Dodaj swój pierwszy sprzęt.</Typography>
       )}
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="xs" fullWidth>
@@ -104,9 +114,19 @@ function EquipmentCard({ item, onDelete }: { item: Equipment; onDelete: () => vo
   return (
     <Card variant="outlined">
       <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Typography variant="body2" fontWeight={700}>{item.name}</Typography>
+        <Stack
+          direction="row"
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 1
+          }}>
+          <Stack direction="row" spacing={1} sx={{
+            alignItems: "center"
+          }}>
+            <Typography variant="body2" sx={{
+              fontWeight: 700
+            }}>{item.name}</Typography>
             <Chip label={TYPE_LABELS[item.type] ?? item.type} size="small" variant="outlined" sx={{ fontSize: '0.6rem' }} />
           </Stack>
           <Button size="small" color="error" onClick={onDelete} sx={{ minWidth: 30, p: 0.5 }}>
@@ -115,14 +135,23 @@ function EquipmentCard({ item, onDelete }: { item: Equipment; onDelete: () => vo
         </Stack>
 
         {!!item.brand && (
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             {item.brand} {item.model}
           </Typography>
         )}
 
         <Box sx={{ mt: 1 }}>
-          <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
-            <Typography variant="caption" color="text.secondary">
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: "space-between",
+              mb: 0.5
+            }}>
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               {item.totalKm.toFixed(0)} km
             </Typography>
             {!!item.replacementIntervalKm && (

@@ -22,7 +22,9 @@ function ContextForm({ initial }: { initial: TrainingContext }) {
       save.mutate(form, { onSuccess: saved => setForm(saved) });
     }}>
       <Typography variant="h6">Cel i dostępność</Typography>
-      <Typography color="text.secondary">Strefa treningowa: {initial.timezone ?? 'lokalna'}. Puste pole czasu oznacza brak informacji, a 0 — dzień wolny.</Typography>
+      <Typography sx={{
+        color: "text.secondary"
+      }}>Strefa treningowa: {initial.timezone ?? 'lokalna'}. Puste pole czasu oznacza brak informacji, a 0 — dzień wolny.</Typography>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 4 }}><TextField fullWidth select label="Cel" value={form.goalType ?? ''} onChange={e => set('goalType', (e.target.value || undefined) as TrainingContext['goalType'])}>
           <MenuItem value="">Wybierz cel</MenuItem><MenuItem value="FTP">Rozwój FTP</MenuItem><MenuItem value="ENDURANCE">Wytrzymałość</MenuItem><MenuItem value="CONSISTENCY">Regularność</MenuItem><MenuItem value="EVENT">Wydarzenie</MenuItem>
@@ -39,8 +41,12 @@ function ContextForm({ initial }: { initial: TrainingContext }) {
         </TextField></Grid>
       </Grid>
       <Typography variant="h6">Ograniczenia w kalendarzu</Typography>
-      <Typography variant="body2" color="text.secondary">Zaznacz dni wyłączone lub okres spokojnego powrotu do treningu. Uwzględnij własne zalecenia dotyczące zdrowia.</Typography>
-      {form.constraints.map((item, index) => <Stack key={`${item.from}-${item.to}-${item.type}-${item.note ?? ''}`} direction="row" spacing={1} alignItems="center">
+      <Typography variant="body2" sx={{
+        color: "text.secondary"
+      }}>Zaznacz dni wyłączone lub okres spokojnego powrotu do treningu. Uwzględnij własne zalecenia dotyczące zdrowia.</Typography>
+      {form.constraints.map((item, index) => <Stack key={`${item.from}-${item.to}-${item.type}-${item.note ?? ''}`} direction="row" spacing={1} sx={{
+        alignItems: "center"
+      }}>
         <Typography sx={{ flex: 1 }}>{item.from} – {item.to}: {item.type === 'BLOCKED' ? 'Dni wolne' : 'Spokojny powrót'}{item.note ? ` · ${item.note}` : ''}</Typography>
         <Button type="button" onClick={() => set('constraints', form.constraints.filter((_, i) => i !== index))} aria-label={`Usuń ograniczenie od ${item.from}`}>Usuń</Button>
       </Stack>)}

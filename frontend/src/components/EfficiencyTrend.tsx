@@ -28,9 +28,13 @@ const EfficiencyTrend = memo(function EfficiencyTrend({
 
   if (!data.length) {
     return (
-      <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-        Brak danych efektywności.
-      </Typography>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          py: 4,
+          textAlign: 'center'
+        }}>Brak danych efektywności.
+              </Typography>
     );
   }
 

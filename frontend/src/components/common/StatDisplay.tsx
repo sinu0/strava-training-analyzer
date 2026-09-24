@@ -68,7 +68,12 @@ export default function StatDisplay({
           {value}
         </Typography>
         {!!unit && (
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.regular }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              fontWeight: (theme) => getAppThemeTokens(theme).type.weight.regular
+            }}>
             {unit}
           </Typography>
         )}

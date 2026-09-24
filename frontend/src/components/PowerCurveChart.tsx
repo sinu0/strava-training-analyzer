@@ -81,9 +81,13 @@ const PowerCurveChart = memo(function PowerCurveChart({
 
   if (!chartData.length) {
     return (
-      <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-        Brak danych krzywej mocy.
-      </Typography>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          py: 4,
+          textAlign: 'center'
+        }}>Brak danych krzywej mocy.
+              </Typography>
     );
   }
 

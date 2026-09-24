@@ -52,7 +52,11 @@ function ZoneBar({ zoneSeconds }: { zoneSeconds: Record<string, number> }) {
   const entries = Object.entries(zoneSeconds);
   const total = entries.reduce((sum, [, val]) => sum + val, 0);
 
-  if (total === 0) return <Typography color="text.secondary">Brak danych</Typography>;
+  if (total === 0) return (
+    <Typography sx={{
+      color: "text.secondary"
+    }}>Brak danych</Typography>
+  );
 
   return (
     <Box>
@@ -96,7 +100,9 @@ function ZoneBar({ zoneSeconds }: { zoneSeconds: Record<string, number> }) {
           const mins = Math.floor(secs / 60);
           const colorKey = zone as keyof typeof ZONE_COLORS;
           return (
-            <Typography key={zone} variant="caption" color="text.secondary">
+            <Typography key={zone} variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               <Box
                 component="span"
                 sx={{
@@ -109,7 +115,7 @@ function ZoneBar({ zoneSeconds }: { zoneSeconds: Record<string, number> }) {
                  }}
                />
               {zone}: {mins}m ({pct.toFixed(0)}%)
-            </Typography>
+                          </Typography>
           );
         })}
       </Box>

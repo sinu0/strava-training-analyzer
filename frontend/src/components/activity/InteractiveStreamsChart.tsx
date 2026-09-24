@@ -254,7 +254,13 @@ export default function InteractiveStreamsChart({
           </ComposedChart>
         </ResponsiveContainer>
       </Box>
-      <Typography color="text.secondary" sx={{ fontSize: '0.7rem', textAlign: 'center', mt: 0.5 }}>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          fontSize: '0.7rem',
+          textAlign: 'center',
+          mt: 0.5
+        }}>
         Najedź myszką, aby zobaczyć punkt na mapie • Kliknij i przeciągnij, aby wybrać odcinek
       </Typography>
     </Box>

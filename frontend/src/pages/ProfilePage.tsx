@@ -161,89 +161,121 @@ export default function ProfilePage() {
         />
 
         <Box sx={{ position: 'relative', p: { xs: 2.5, sm: 3 } }}>
-          {/* Top row: avatar + name + action */}
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2.5, flexWrap: 'wrap' }}>
-            <Avatar
+          {/* Keep identity and actions separate so actions never squeeze the profile labels. */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 2.5,
+              flexDirection: { xs: 'column', lg: 'row' },
+            }}
+          >
+            <Box
+              data-testid="profile-hero-identity"
               sx={{
-                width: { xs: 72, sm: 88 },
-                height: { xs: 72, sm: 88 },
-                fontSize: { xs: 26, sm: 32 },
-                fontWeight: 700,
-                background: GRADIENTS.strava,
-                border: `3px solid ${alphaColor(BRAND_COLORS.strava, 0.4)}`,
-                boxShadow: `0 0 24px ${alphaColor(BRAND_COLORS.strava, 0.25)}`,
-                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 2.5,
+                flex: 1,
+                minWidth: 0,
+                width: { xs: '100%', lg: 'auto' },
               }}
             >
-              {initials}
-            </Avatar>
-
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography
-                variant="h5"
-                sx={{ color: 'white', lineHeight: 1.2, mb: 0.5 }}
+              <Avatar
+                sx={{
+                  width: { xs: 72, sm: 88 },
+                  height: { xs: 72, sm: 88 },
+                  fontSize: { xs: 26, sm: 32 },
+                  fontWeight: 700,
+                  background: GRADIENTS.strava,
+                  border: `3px solid ${alphaColor(BRAND_COLORS.strava, 0.4)}`,
+                  boxShadow: `0 0 24px ${alphaColor(BRAND_COLORS.strava, 0.25)}`,
+                  flexShrink: 0,
+                }}
               >
-                {profile?.name ?? 'Kolarz'}
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center', mt: 0.5 }}>
-                <Chip
-                  size="small"
-                  label={profile?.stravaConnected ? 'Strava połączona' : 'Brak Strava'}
-                  sx={{
-                    bgcolor: profile?.stravaConnected
-                      ? alphaColor(STATUS_COLORS.success, 0.15)
-                      : alphaColor(STATUS_COLORS.neutral, 0.12),
-                    color: profile?.stravaConnected ? STATUS_COLORS.success : STATUS_COLORS.neutral,
-                    border: `1px solid ${
-                      profile?.stravaConnected
-                        ? alphaColor(STATUS_COLORS.success, 0.3)
-                        : alphaColor(STATUS_COLORS.neutral, 0.2)
-                    }`,
-                    fontSize: '0.7rem',
-                    height: 22,
-                  }}
-                />
-                {!!profile?.createdAt && (
+                {initials}
+              </Avatar>
+
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  variant="h5"
+                  sx={{ color: 'white', lineHeight: 1.2, mb: 0.5 }}
+                >
+                  {profile?.name ?? 'Kolarz'}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center', mt: 0.5 }}>
                   <Chip
                     size="small"
-                    label={`od ${new Date(profile.createdAt).getFullYear()}`}
+                    label={profile?.stravaConnected ? 'Strava połączona' : 'Brak Strava'}
                     sx={{
-                      bgcolor: SURFACE_COLORS.subtle,
-                      color: CHART_COLORS.tickText,
-                      border: `1px solid ${alphaColor(CHART_COLORS.tooltipText, 0.08)}`,
+                      bgcolor: profile?.stravaConnected
+                        ? alphaColor(STATUS_COLORS.success, 0.15)
+                        : alphaColor(STATUS_COLORS.neutral, 0.12),
+                      color: profile?.stravaConnected ? STATUS_COLORS.success : STATUS_COLORS.neutral,
+                      border: `1px solid ${
+                        profile?.stravaConnected
+                          ? alphaColor(STATUS_COLORS.success, 0.3)
+                          : alphaColor(STATUS_COLORS.neutral, 0.2)
+                      }`,
                       fontSize: '0.7rem',
                       height: 22,
                     }}
                   />
-                )}
+                  {!!profile?.createdAt && (
+                    <Chip
+                      size="small"
+                      label={`od ${new Date(profile.createdAt).getFullYear()}`}
+                      sx={{
+                        bgcolor: SURFACE_COLORS.subtle,
+                        color: CHART_COLORS.tickText,
+                        border: `1px solid ${alphaColor(CHART_COLORS.tooltipText, 0.08)}`,
+                        fontSize: '0.7rem',
+                        height: 22,
+                      }}
+                    />
+                  )}
+                </Box>
               </Box>
             </Box>
 
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<BarChartIcon />}
-              onClick={() => navigate('/analytics')}
-              sx={{ flexShrink: 0, alignSelf: 'flex-start' }}
+            <Box
+              role="group"
+              aria-label="Akcje profilu"
+              sx={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                flexWrap: 'wrap',
+                gap: 1,
+                width: { xs: '100%', lg: 'auto' },
+                justifyContent: { xs: 'flex-start', lg: 'flex-end' },
+              }}
             >
-              Pełna analiza
-            </Button>
-            <Button
-              variant="contained"
-              size="small"
-              onClick={() => setStoryOpen(true)}
-              sx={{ flexShrink: 0, alignSelf: 'flex-start' }}
-            >
-              Podsumowanie tygodnia
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => setWrappedYear(new Date().getFullYear())}
-              sx={{ flexShrink: 0, alignSelf: 'flex-start' }}
-            >
-              Season Wrapped
-            </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<BarChartIcon />}
+                onClick={() => navigate('/analytics')}
+                sx={{ flexShrink: 0 }}
+              >
+                Pełna analiza
+              </Button>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => setStoryOpen(true)}
+                sx={{ flexShrink: 0 }}
+              >
+                Podsumowanie tygodnia
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => setWrappedYear(new Date().getFullYear())}
+                sx={{ flexShrink: 0 }}
+              >
+                Season Wrapped
+              </Button>
+            </Box>
           </Box>
 
           {/* Stats band */}

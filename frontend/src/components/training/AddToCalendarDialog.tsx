@@ -113,14 +113,18 @@ export default function AddToCalendarDialog({ template, open, onClose }: Props) 
       <DialogTitle sx={{ pb: 1 }}>Dodaj do kalendarza: {template.name}</DialogTitle>
       <DialogContent>
         <Stack spacing={3} sx={{ mt: 1 }}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="flex-start">
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{
+            alignItems: "flex-start"
+          }}>
             <TextField
               label="Data treningu"
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              InputLabelProps={{ shrink: true }}
               sx={{ minWidth: 180 }}
+              slotProps={{
+                inputLabel: { shrink: true }
+              }}
             />
             <TextField
               label="Czas docelowy (min)"
@@ -128,12 +132,20 @@ export default function AddToCalendarDialog({ template, open, onClose }: Props) 
               value={targetMin}
               onChange={(e) => setTargetMin(Math.max(1, Number(e.target.value)))}
               sx={{ width: 180 }}
-              inputProps={{ min: 1 }}
+              slotProps={{
+                htmlInput: { min: 1 }
+              }}
             />
           </Stack>
 
           <Box>
-            <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                mb: 0.5,
+                display: 'block'
+              }}>
               Tryb skalowania
             </Typography>
             <ToggleButtonGroup
@@ -151,7 +163,12 @@ export default function AddToCalendarDialog({ template, open, onClose }: Props) 
           <Divider />
 
           <Box>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mb: 1
+              }}>
               Podgląd po skalowaniu – {scaledTotalMin} min
             </Typography>
             <WorkoutPowerChart steps={scaledSteps} />

@@ -63,7 +63,14 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
       </DialogTitle>
       <DialogContent dividers>
         {sessions.length > 1 && (
-          <Stack direction="row" gap={1} sx={{ mb: 2, flexWrap: 'wrap' }} aria-label="Sesje tego dnia">
+          <Stack
+            direction="row"
+            aria-label="Sesje tego dnia"
+            sx={{
+              gap: 1,
+              mb: 2,
+              flexWrap: 'wrap'
+            }}>
             {sessions.map((session, index) => (
               <Button key={session.planned.id} size="small"
                 variant={session.planned.id === planned?.id ? 'contained' : 'outlined'}
@@ -81,10 +88,17 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
               {planned.plannedTss != null && <Chip label={`${planned.plannedTss} TSS`} size="small" variant="outlined" />}
               {planned.plannedDurationMin != null && <Chip label={`${planned.plannedDurationMin} min`} size="small" variant="outlined" />}
             </Stack>
-            {!!planned.plannedDescription && <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{planned.plannedDescription}</Typography>}
+            {!!planned.plannedDescription && <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mb: 1
+              }}>{planned.plannedDescription}</Typography>}
             {!!planned.workoutTemplateName && <Typography variant="body2" sx={{ mb: 1 }}>Szablon: {planned.workoutTemplateName}</Typography>}
             {!!planned.workoutStepsSnapshot?.length && <Box sx={{ mt: 1 }}><WorkoutPowerChart steps={planned.workoutStepsSnapshot} /></Box>}
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               Snapshot v{planned.workoutTemplateRevision ?? 'legacy'} · FTP {planned.ftpWatts ?? 'nieznane'}{planned.ftpWatts ? ' W' : ''}
             </Typography>
           </Box>
@@ -113,7 +127,12 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
             <Typography variant="subtitle2">{day.adjustment.title}</Typography>
             <Typography variant="body2">{day.adjustment.description}</Typography>
             {day.adjustment.memoryHint ? (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  mt: 1
+                }}>
                 {day.adjustment.memoryHint}
               </Typography>
             ) : null}
@@ -185,7 +204,12 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
             </Stack>
             <Typography variant="body2">{day.execution.description}</Typography>
             {day.execution.nextDayAdvice ? (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  mt: 1
+                }}>
                 Jutro: {day.execution.nextDayAdvice}
               </Typography>
             ) : null}
@@ -196,7 +220,9 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
           <Box>
             <Typography variant="subtitle2" gutterBottom>Zrealizowana aktywność</Typography>
             <Typography variant="body2">{actual.name}</Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               {actual.durationMin != null ? `${actual.durationMin} min` : 'Czas nieznany'} · {actual.distanceKm != null ? `${actual.distanceKm.toFixed(1)} km` : 'Dystans nieznany'}
               {actual.tss != null ? ` · ${actual.tss} TSS` : ''}
             </Typography>
@@ -206,12 +232,16 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
         {(originalDay.activities ?? []).filter((activity) => activity.id !== actual?.id).map((activity) => (
           <Box key={activity.id} sx={{ mt: 1 }}>
             <Button size="small" onClick={() => navigate(`/activities/${activity.id}`)}>{activity.name}</Button>
-            <Typography variant="caption" color="text.secondary">Pozostała aktywność z tego dnia</Typography>
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>Pozostała aktywność z tego dnia</Typography>
           </Box>
         ))}
 
         {!planned && !actual && (
-          <Typography variant="body2" color="text.secondary">Brak zaplanowanych treningów i aktywności</Typography>
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>Brak zaplanowanych treningów i aktywności</Typography>
         )}
       </DialogContent>
       <DialogActions sx={{ justifyContent: 'space-between', px: 2 }}>

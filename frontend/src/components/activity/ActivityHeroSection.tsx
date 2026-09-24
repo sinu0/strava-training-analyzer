@@ -73,7 +73,13 @@ function KeyMetric({ label, value }: { label: string; value: string }) {
         borderColor: 'divider',
       }}
     >
-      <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          textTransform: 'uppercase',
+          letterSpacing: '0.06em'
+        }}>
         {label}
       </Typography>
       <Typography variant="h5" sx={{ fontWeight: 800, mt: 0.5 }}>
@@ -173,9 +179,13 @@ export default function ActivityHeroSection({ activity, geoJson }: ActivityHeroS
     <Stack spacing={2.5} sx={{ mb: 3 }}>
       <Box sx={{ ...surfaceSx, p: { xs: 2, md: 3 } }}>
         <Stack spacing={1.75}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{
+            alignItems: { xs: 'flex-start', sm: 'center' }
+          }}>
             <Chip label={activity.sportType} color="primary" variant="outlined" />
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               {formatStartedAt(activity.startedAt)}
             </Typography>
           </Stack>
@@ -185,13 +195,21 @@ export default function ActivityHeroSection({ activity, geoJson }: ActivityHeroS
               {activity.name}
             </Typography>
             {activity.description ? (
-              <Typography variant="body1" color="text.secondary" sx={{ mt: 1, maxWidth: 840 }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "text.secondary",
+                  mt: 1,
+                  maxWidth: 840
+                }}>
                 {activity.description}
               </Typography>
             ) : null}
           </Box>
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} useFlexGap flexWrap="wrap">
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} useFlexGap sx={{
+            flexWrap: "wrap"
+          }}>
             {keyMetrics.map((metric) => (
               <KeyMetric key={metric.label} label={metric.label} value={metric.value} />
             ))}
@@ -227,15 +245,18 @@ export default function ActivityHeroSection({ activity, geoJson }: ActivityHeroS
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={1.5}
-            alignItems={{ xs: 'flex-start', sm: 'center' }}
-            justifyContent="space-between"
-            sx={{ mb: 1 }}
-          >
+            sx={{
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              justifyContent: "space-between",
+              mb: 1
+            }}>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 Najważniejsze metryki
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 Najpierw liczby, które naprawdę pomagają ocenić jednostkę.
               </Typography>
             </Box>
@@ -262,7 +283,13 @@ export default function ActivityHeroSection({ activity, geoJson }: ActivityHeroS
           ) : null}
 
           {activity.elapsedTimeSec !== activity.movingTimeSec ? (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, textAlign: 'right' }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mt: 1.5,
+                textAlign: 'right'
+              }}>
               Czas całkowity: {formatDuration(activity.elapsedTimeSec)}
             </Typography>
           ) : null}

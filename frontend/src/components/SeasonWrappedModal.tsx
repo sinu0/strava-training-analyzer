@@ -16,9 +16,18 @@ const SLIDES: Slide[] = [
     title: 'Rok w liczbach',
     subtitle: 'Podsumowanie Twojego sezonu',
     render: (d) => (
-      <Stack spacing={1} alignItems="center">
-        <Typography variant="h3" fontWeight={900} color="primary.main">{d.totalKm.toFixed(0)} km</Typography>
-        <Typography variant="body2" color="text.secondary">łącznie na rowerze</Typography>
+      <Stack spacing={1} sx={{
+        alignItems: "center"
+      }}>
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 900,
+            color: "primary.main"
+          }}>{d.totalKm.toFixed(0)} km</Typography>
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>łącznie na rowerze</Typography>
         <Stack direction="row" spacing={2}>
           <Chip label={`${d.totalElevation.toFixed(0)} m ↑`} variant="outlined" />
           <Chip label={`${d.totalHours.toFixed(0)} h`} variant="outlined" />
@@ -31,16 +40,25 @@ const SLIDES: Slide[] = [
     title: 'Najlepszy miesiąc',
     subtitle: 'Wtedy jeździłeś najwięcej',
     render: (d) => (
-      <Typography variant="h4" fontWeight={800} color="secondary.main">{d.bestMonth}</Typography>
+      <Typography
+        variant="h4"
+        sx={{
+          fontWeight: 800,
+          color: "secondary.main"
+        }}>{d.bestMonth}</Typography>
     ),
   },
   {
     title: 'Ulubiona pora',
     subtitle: 'Kiedy najchętniej wsiadasz na rower',
     render: (d) => (
-      <Stack spacing={1} alignItems="center">
+      <Stack spacing={1} sx={{
+        alignItems: "center"
+      }}>
         <Chip label={d.favoriteTime} size="medium" color="primary" />
-        <Typography variant="body2" color="text.secondary">{d.favoriteDay} to Twój dzień</Typography>
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>{d.favoriteDay} to Twój dzień</Typography>
       </Stack>
     ),
   },
@@ -48,17 +66,36 @@ const SLIDES: Slide[] = [
     title: 'Rekordy',
     subtitle: 'Twoje najlepsze wyniki w tym roku',
     render: (d) => (
-      <Stack spacing={1.5} alignItems="center" width="100%">
+      <Stack
+        spacing={1.5}
+        sx={{
+          alignItems: "center",
+          width: "100%"
+        }}>
         {!!d.longestRideName && (
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h5" fontWeight={700} color="warning.main">{d.longestRideKm?.toFixed(0)} km</Typography>
-            <Typography variant="caption" color="text.secondary">{d.longestRideName}</Typography>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 700,
+                color: "warning.main"
+              }}>{d.longestRideKm?.toFixed(0)} km</Typography>
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>{d.longestRideName}</Typography>
           </Box>
         )}
         {!!d.mostElevationName && (
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h5" fontWeight={700} color="error.main">{d.mostElevationM?.toFixed(0)} m</Typography>
-            <Typography variant="caption" color="text.secondary">{d.mostElevationName}</Typography>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 700,
+                color: "error.main"
+              }}>{d.mostElevationM?.toFixed(0)} m</Typography>
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>{d.mostElevationName}</Typography>
           </Box>
         )}
       </Stack>
@@ -68,9 +105,18 @@ const SLIDES: Slide[] = [
     title: 'Konsekwencja',
     subtitle: 'Regularność to klucz',
     render: (d) => (
-      <Stack spacing={1} alignItems="center">
-        <Typography variant="h3" fontWeight={900} color="success.main">{d.longestStreak}</Typography>
-        <Typography variant="body2" color="text.secondary">dni z rzędu — najdłuższa seria</Typography>
+      <Stack spacing={1} sx={{
+        alignItems: "center"
+      }}>
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 900,
+            color: "success.main"
+          }}>{d.longestStreak}</Typography>
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>dni z rzędu — najdłuższa seria</Typography>
         <Chip label={`${d.totalActiveDays} dni aktywnych w roku`} variant="outlined" />
       </Stack>
     ),
@@ -79,14 +125,21 @@ const SLIDES: Slide[] = [
     title: 'Średnio na jazdę',
     subtitle: 'Twój typowy trening',
     render: (d) => (
-      <Typography variant="h4" fontWeight={800} color="info.main">{d.averageKmPerRide.toFixed(0)} km</Typography>
+      <Typography
+        variant="h4"
+        sx={{
+          fontWeight: 800,
+          color: "info.main"
+        }}>{d.averageKmPerRide.toFixed(0)} km</Typography>
     ),
   },
   {
     title: 'Ciekawostki',
     subtitle: 'Skala Twoich osiągnięć',
     render: (d) => (
-      <Stack spacing={1.5} alignItems="center">
+      <Stack spacing={1.5} sx={{
+        alignItems: "center"
+      }}>
         <Chip label={d.distanceFun} color="primary" variant="outlined" />
         <Chip label={d.elevationFun} color="secondary" variant="outlined" />
       </Stack>
@@ -126,15 +179,24 @@ export default function SeasonWrappedModal({ year, onClose }: { year: number; on
           <CloseIcon />
         </IconButton>
 
-        <Typography variant="overline" color="text.secondary" letterSpacing={2}>
+        <Typography
+          variant="overline"
+          sx={{
+            color: "text.secondary",
+            letterSpacing: 2
+          }}>
           {data.year} — SEZON WRAPPED
         </Typography>
 
         <Box sx={{ minHeight: 160, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 1 }}>
-          <Typography variant="subtitle1" color="text.secondary">
+          <Typography variant="subtitle1" sx={{
+            color: "text.secondary"
+          }}>
             {current.subtitle}
           </Typography>
-          <Typography variant="h4" fontWeight={800}>{current.title}</Typography>
+          <Typography variant="h4" sx={{
+            fontWeight: 800
+          }}>{current.title}</Typography>
           <Box sx={{ mt: 2 }}>{current.render(data)}</Box>
         </Box>
 

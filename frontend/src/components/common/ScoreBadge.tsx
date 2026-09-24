@@ -33,7 +33,12 @@ export default function ScoreBadge({
       <Typography variant="caption" sx={{ fontWeight: 800, color: scale.color }}>
         {score}/100
       </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          fontWeight: 600
+        }}>
         {scale.label}
       </Typography>
     </Box>

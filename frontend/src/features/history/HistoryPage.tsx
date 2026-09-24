@@ -96,7 +96,9 @@ export default function HistoryPage() {
                 lg: 4
               }}>
               <Paper sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 3, height: '100%' }}>
-                <Typography variant="overline" color="text.secondary">{new Date(date).toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}</Typography>
+                <Typography variant="overline" sx={{
+                  color: "text.secondary"
+                }}>{new Date(date).toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}</Typography>
                 <Stack spacing={1} sx={{ mt: 1 }}>
                   {items.map(item => (
                     <Button key={item.id} variant="text" onClick={() => navigate(`/activities/${item.id}`)} sx={{ justifyContent: 'flex-start' }}>
@@ -113,11 +115,21 @@ export default function HistoryPage() {
 
     return (
       <Stack spacing={2}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ px: 0.5 }}>
-          <Typography variant="body2" color="text.secondary">
+        <Stack
+          direction="row"
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: 0.5
+          }}>
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {activities.data.total} aktywności · mapy wykorzystują lekką geometrię podsumowania
           </Typography>
-          <Typography variant="caption" color="text.secondary">Strona {page + 1} z {activities.data.totalPages}</Typography>
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>Strona {page + 1} z {activities.data.totalPages}</Typography>
         </Stack>
         {activities.data.items.map((activity, index) => (
           <ActivityListCardV2
@@ -163,7 +175,13 @@ export default function HistoryPage() {
             Wyniki dla „{query}”
           </Typography>
         ) : null}
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: "center",
+            mb: 1.5
+          }}>
           <TuneOutlinedIcon color="primary" fontSize="small" />
           <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>Widok i filtry</Typography>
         </Stack>
@@ -187,8 +205,8 @@ export default function HistoryPage() {
               <MenuItem value="virtual_ride">Wirtualna jazda</MenuItem>
             </Select>
           </FormControl>
-          <PolishDateField size="small" label="Od" value={from} onChange={value => updateParam('from', value)} InputLabelProps={{ shrink: true }} />
-          <PolishDateField size="small" label="Do" value={to} onChange={value => updateParam('to', value)} InputLabelProps={{ shrink: true }} />
+          <PolishDateField size="small" label="Od" value={from} onChange={value => updateParam('from', value)} slotProps={{ inputLabel: { shrink: true } }} />
+          <PolishDateField size="small" label="Do" value={to} onChange={value => updateParam('to', value)} slotProps={{ inputLabel: { shrink: true } }} />
           {(sportType || from || to) ? (
             <Button
               startIcon={<RestartAltOutlinedIcon />}

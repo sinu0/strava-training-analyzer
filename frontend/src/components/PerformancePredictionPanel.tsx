@@ -125,8 +125,16 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
           Nie udalo sie pobrac aktualnych danych treningowych — uzupelnij recznie.
         </Alert>
       )}
-      <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
-        <Typography variant="subtitle2" color="text.secondary">
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          alignItems: "center",
+          justifyContent: "space-between"
+        }}>
+        <Typography variant="subtitle2" sx={{
+          color: "text.secondary"
+        }}>
           {initialized ? (
             <Chip
               icon={<AutoAwesomeIcon />}
@@ -153,10 +161,11 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
       <Card>
         <CardHeader
           title="Dane treningowe (PMC)"
-          titleTypographyProps={{ variant: 'subtitle2' }}
           subheader={initialized ? 'Zaciagnieto z aktualnych wyliczen — mozesz poprawic przed prognoza' : undefined}
-          subheaderTypographyProps={{ variant: 'caption' }}
-        />
+          slotProps={{
+            title: { variant: 'subtitle2' },
+            subheader: { variant: 'caption' }
+          }} />
         <CardContent>
           <Grid container spacing={1.5}>
             <Grid
@@ -227,7 +236,9 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
       <Card>
         <CardHeader
           title="Wskazniki wydajnosci i sygnaly recovery"
-          titleTypographyProps={{ variant: 'subtitle2' }}
+          slotProps={{
+            title: { variant: 'subtitle2' }
+          }}
         />
         <CardContent>
           <Grid container spacing={1.5}>
@@ -316,7 +327,9 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
       {!!isPending && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 3 }}>
           <CircularProgress size={24} />
-          <Typography color="text.secondary">Analizuje dane treningowe...</Typography>
+          <Typography sx={{
+            color: "text.secondary"
+          }}>Analizuje dane treningowe...</Typography>
         </Box>
       )}
       {!!result && (
@@ -324,10 +337,19 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
           <Card>
             <CardHeader
               title="Stan formy"
-              titleTypographyProps={{ variant: 'subtitle2' }}
+              slotProps={{
+                title: { variant: 'subtitle2' }
+              }}
             />
             <CardContent>
-              <Stack direction="row" spacing={2} alignItems="flex-start" flexWrap="wrap" useFlexGap>
+              <Stack
+                direction="row"
+                spacing={2}
+                useFlexGap
+                sx={{
+                  alignItems: "flex-start",
+                  flexWrap: "wrap"
+                }}>
                 <Chip
                   icon={<WhatshotIcon />}
                   label={FORM_STATE_CONFIG[result.formState]?.label ?? result.formState}
@@ -343,7 +365,9 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
                   variant="outlined"
                 />
                 <Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{
+                    color: "text.secondary"
+                  }}>
                     {FORM_STATE_CONFIG[result.formState]?.description}
                   </Typography>
                 </Box>
@@ -360,8 +384,10 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
               <Card>
                 <CardHeader
                   title="Gotowosc"
-                  titleTypographyProps={{ variant: 'subtitle2' }}
                   avatar={<SpeedIcon />}
+                  slotProps={{
+                    title: { variant: 'subtitle2' }
+                  }}
                 />
                 <CardContent>
                   <Stack spacing={1.5}>
@@ -373,7 +399,13 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
                       }}
                     >
                       {result.readinessScore}
-                      <Typography component="span" variant="h5" color="text.secondary" sx={{ ml: 0.5 }}>
+                      <Typography
+                        component="span"
+                        variant="h5"
+                        sx={{
+                          color: "text.secondary",
+                          ml: 0.5
+                        }}>
                         /100
                       </Typography>
                     </Typography>
@@ -403,25 +435,37 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
               <Card>
                 <CardHeader
                   title="Okno peak"
-                  titleTypographyProps={{ variant: 'subtitle2' }}
                   avatar={<TimerIcon />}
+                  slotProps={{
+                    title: { variant: 'subtitle2' }
+                  }}
                 />
                 <CardContent>
-                  <Stack direction="row" spacing={3} alignItems="center">
+                  <Stack direction="row" spacing={3} sx={{
+                    alignItems: "center"
+                  }}>
                     <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="h4" fontWeight={900} color="primary">
+                      <Typography variant="h4" color="primary" sx={{
+                        fontWeight: 900
+                      }}>
                         {result.peakWindow.startInDays}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" sx={{
+                        color: "text.secondary"
+                      }}>
                         dni do startu
                       </Typography>
                     </Box>
                     <Divider orientation="vertical" flexItem />
                     <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="h4" fontWeight={900} color="primary">
+                      <Typography variant="h4" color="primary" sx={{
+                        fontWeight: 900
+                      }}>
                         {result.peakWindow.durationDays}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" sx={{
+                        color: "text.secondary"
+                      }}>
                         dni okna
                       </Typography>
                     </Box>
@@ -438,25 +482,37 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
               <Card>
                 <CardHeader
                   title="Prognoza wydajnosci"
-                  titleTypographyProps={{ variant: 'subtitle2' }}
                   avatar={<BoltIcon />}
+                  slotProps={{
+                    title: { variant: 'subtitle2' }
+                  }}
                 />
                 <CardContent>
-                  <Stack direction="row" spacing={3} alignItems="center">
+                  <Stack direction="row" spacing={3} sx={{
+                    alignItems: "center"
+                  }}>
                     <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" sx={{
+                        color: "text.secondary"
+                      }}>
                         FTP
                       </Typography>
-                      <Typography variant="h5" fontWeight={700}>
+                      <Typography variant="h5" sx={{
+                        fontWeight: 700
+                      }}>
                         {result.performancePrediction.ftp}W
                       </Typography>
                     </Box>
                     <Divider orientation="vertical" flexItem />
                     <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" sx={{
+                        color: "text.secondary"
+                      }}>
                         20min Power
                       </Typography>
-                      <Typography variant="h5" fontWeight={700}>
+                      <Typography variant="h5" sx={{
+                        fontWeight: 700
+                      }}>
                         {result.performancePrediction.power20min}W
                       </Typography>
                     </Box>
@@ -473,14 +529,20 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
               <Card>
                 <CardHeader
                   title="Pewnosc prognozy"
-                  titleTypographyProps={{ variant: 'subtitle2' }}
+                  slotProps={{
+                    title: { variant: 'subtitle2' }
+                  }}
                 />
                 <CardContent>
                   <Stack spacing={1}>
-                    <Typography variant="h4" fontWeight={900}>
+                    <Typography variant="h4" sx={{
+                      fontWeight: 900
+                    }}>
                       {result.confidence}%
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       {confidenceLabel(result.confidence)} — im wiecej danych treningowych, tym wyzsza pewnosc.
                     </Typography>
                   </Stack>
@@ -492,7 +554,9 @@ export default function PerformancePredictionPanel({ autoRun = true }: Props) {
           <Card>
             <CardHeader
               title="Rekomendacje"
-              titleTypographyProps={{ variant: 'subtitle2' }}
+              slotProps={{
+                title: { variant: 'subtitle2' }
+              }}
             />
             <CardContent>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

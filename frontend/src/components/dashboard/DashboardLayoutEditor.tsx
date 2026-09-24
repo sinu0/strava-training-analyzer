@@ -104,7 +104,13 @@ export default function DashboardLayoutEditor({
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle>Ustawienia dashboardu</DialogTitle>
       <DialogContent>
-        <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            mb: 1.5,
+            display: 'block'
+          }}>
           Pokaż/ukryj i zmień kolejność widgetów w lewym panelu.
         </Typography>
         <Stack spacing={0.5}>

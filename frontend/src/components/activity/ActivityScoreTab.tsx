@@ -43,7 +43,13 @@ function ScoreRing({ score, color, label }: { score: number; color: string; labe
         <Typography variant="h6" sx={{ fontWeight: 900, color, lineHeight: 1, fontSize: '1.1rem' }}>
           {score}
         </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.55rem', mt: 0.2 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            fontSize: '0.55rem',
+            mt: 0.2
+          }}>
           {label}
         </Typography>
       </Box>
@@ -68,7 +74,9 @@ function TeDetail({
         <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
           {label}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           Brak danych
         </Typography>
       </Paper>
@@ -81,7 +89,9 @@ function TeDetail({
       <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
         {label}
       </Typography>
-      <Stack direction="row" spacing={1.5} alignItems="center">
+      <Stack direction="row" spacing={1.5} sx={{
+        alignItems: "center"
+      }}>
         <Typography variant="h5" sx={{ fontWeight: 900, color, lineHeight: 1 }}>
           {value.toFixed(1)}
         </Typography>
@@ -96,7 +106,13 @@ function TeDetail({
               '& .MuiLinearProgress-bar': { bgcolor: color, borderRadius: 4 },
             }}
           />
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25, display: 'block' }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              mt: 0.25,
+              display: 'block'
+            }}>
             {subLabel}
           </Typography>
         </Box>
@@ -134,18 +150,27 @@ export default function ActivityScoreTab({ effect }: ActivityScoreTabProps) {
           border: '1px solid rgba(255,255,255,0.06)',
         }}
       >
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems="center">
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{
+          alignItems: "center"
+        }}>
           <ScoreRing score={effect.trainingScore} color={scoreColor} label="SCORE" />
 
           <Box sx={{ flex: 1 }}>
             <Typography variant="h5" sx={{ fontWeight: 800, color: scoreColor, mb: 0.5 }}>
               {getTrainingScoreLabel(effect.trainingScore)}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mb: 1.5
+              }}>
               Główny efekt: <strong style={{ color: benefitColor }}>{benefitLabel}</strong>
             </Typography>
 
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <Stack direction="row" spacing={1} useFlexGap sx={{
+              flexWrap: "wrap"
+            }}>
               <Chip
                 label={`Odpoczynek: ${effect.recoveryTimeHours}h`}
                 size="small"
@@ -191,7 +216,9 @@ export default function ActivityScoreTab({ effect }: ActivityScoreTabProps) {
         <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
           Regeneracja
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           Zalecany odpoczynek: <strong>{effect.recoveryTimeHours}h</strong>.
           Kolejny ciężki trening możliwy od{' '}
           {recoveryEnd.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}{' '}

@@ -68,7 +68,14 @@ export default function TrainingCalendar() {
       <Grid container columns={7} spacing={0.5} sx={{ mb: 1 }}>
         {DAY_HEADERS.map((h) => (
           <Grid key={h} size={1}>
-            <Typography variant="caption" align="center" display="block" color="text.secondary" fontWeight={600}>
+            <Typography
+              variant="caption"
+              align="center"
+              sx={{
+                display: "block",
+                color: "text.secondary",
+                fontWeight: 600
+              }}>
               {h}
             </Typography>
           </Grid>

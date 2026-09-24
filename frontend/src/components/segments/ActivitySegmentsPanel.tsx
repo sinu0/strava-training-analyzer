@@ -61,19 +61,34 @@ export default function ActivitySegmentsPanel({ activityId }: ActivitySegmentsPa
             onMouseLeave={() => setHighlighted(null)}
             sx={{ p: 2, borderColor: highlighted === effort.id ? 'primary.main' : undefined }}
           >
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems={{ sm: 'center' }}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{
+              alignItems: { sm: 'center' }
+            }}>
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
-                  <Typography variant="overline" color="text.secondary">#{index + 1}</Typography>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  useFlexGap
+                  sx={{
+                    alignItems: "center",
+                    flexWrap: "wrap"
+                  }}>
+                  <Typography variant="overline" sx={{
+                    color: "text.secondary"
+                  }}>#{index + 1}</Typography>
                   <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>{effort.segmentName}</Typography>
                   <SegmentRankTrophy rank={effort.personalRank} />
                 </Stack>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   {duration(effort.elapsedTimeSec)} · {effort.personalRank ? `${effort.personalRank}. wśród własnych prób` : 'pozycja nieznana'}
                   {effort.differenceToBestSec != null ? ` · +${effort.differenceToBestSec} s do najlepszego` : ''}
                 </Typography>
               </Box>
-              <Stack direction="row" spacing={2} useFlexGap flexWrap="wrap">
+              <Stack direction="row" spacing={2} useFlexGap sx={{
+                flexWrap: "wrap"
+              }}>
                 <Typography variant="body2"><b>{effort.averagePowerW ?? '—'}</b> W</Typography>
                 <Typography variant="body2"><b>{effort.averageHeartrate ?? '—'}</b> bpm</Typography>
                 <Typography variant="body2"><b>{effort.averageSpeedMs != null ? (effort.averageSpeedMs * 3.6).toFixed(1) : '—'}</b> km/h</Typography>

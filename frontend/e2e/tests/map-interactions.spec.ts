@@ -1,11 +1,11 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '../fixtures';
 
 // This e2e test suite checks basic map interactions on the Route Planner page
 // Run with: npm run test:e2e (requires Playwright to be installed and dev server running)
 
 test.describe('Route planner map interactions', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/route-planner?showWeather=1');
+    await page.goto('/routes?showWeather=1');
     // wait for map to initialize
     await page.waitForSelector('.leaflet-container', { timeout: 10000 });
   });
@@ -52,19 +52,22 @@ test.describe('Route planner map interactions', () => {
     await map.click({ position: { x: 460, y: 220 } });
     // Wait for waypoint markers to render before toggling weather
     await page.waitForSelector('.route-waypoint-marker', { timeout: 5000 });
-    // Toggle weather by directly setting the input checked state to avoid pointer interception in CI
-    await page.evaluate(() => {
-      const el = document.querySelector('[data-testid="route-weather-switch"]') as HTMLInputElement | null;
-      if (el) {
-        el.checked = true;
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-    });
-    // Expect weather bubble indicator (test hook) to exist when enabled
-    // Wait for the indicator element to be attached to the DOM (it is hidden by design)
-    await page.waitForSelector('[data-testid="route-weather-indicator"]', { timeout: 10000, state: 'attached' });
-    // For stability in CI, only assert that weather bubbles are present when enabled
-    const bubbles = await page.$$('.route-weather-bubble');
-    expect(bubbles.length).toBeGreaterThan(0);
+    const weatherSwitch = page.getByRole('switch', { name: 'Pokaż dymki pogodowe na trasie' });
+    const indicator = page.getByTestId('route-weather-indicator');
+    const bubbles = page.locator('.route-weather-bubble');
+
+    await expect(weatherSwitch).toBeChecked();
+    await expect(indicator).toBeAttached();
+    await expect.poll(() => bubbles.count()).toBeGreaterThan(0);
+
+    await weatherSwitch.click();
+    await expect(weatherSwitch).not.toBeChecked();
+    await expect(indicator).toHaveCount(0);
+    await expect(bubbles).toHaveCount(0);
+
+    await weatherSwitch.click();
+    await expect(weatherSwitch).toBeChecked();
+    await expect(indicator).toBeAttached();
+    await expect.poll(() => bubbles.count()).toBeGreaterThan(0);
   });
 });

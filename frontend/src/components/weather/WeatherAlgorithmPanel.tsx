@@ -98,7 +98,12 @@ function CompactNumberField({
       slotProps={{
         input: {
           endAdornment: adornment ? (
-            <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                ml: 0.5
+              }}>
               {adornment}
             </Typography>
           ) : undefined,
@@ -176,14 +181,21 @@ export default function WeatherAlgorithmPanel({ profile, onChange }: WeatherAlgo
   return (
     <Stack spacing={1.5}>
       <GroupCard title="Okno jazdy" accentColor={STATUS_COLORS.info}>
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} sx={{
+          alignItems: "center"
+        }}>
           <AccessTimeIcon sx={{ color: STATUS_COLORS.info, fontSize: 18 }} />
           <CompactNumberField
             label="Start"
             value={profile.rideWindowStartHour}
             onChange={(v) => onChange('rideWindowStartHour', v)}
           />
-          <Typography variant="body2" color="text.secondary" sx={{ px: 0.25 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              px: 0.25
+            }}>
             –
           </Typography>
           <CompactNumberField
@@ -196,7 +208,9 @@ export default function WeatherAlgorithmPanel({ profile, onChange }: WeatherAlgo
 
       <GroupCard title="Temperatura" accentColor={WEATHER_METRIC_COLORS.temperature}>
         <Stack spacing={1}>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} sx={{
+            alignItems: "center"
+          }}>
             <ThermostatIcon sx={{ color: WEATHER_METRIC_COLORS.temperature, fontSize: 18 }} />
             <CompactNumberField
               label="Idealne min"
@@ -211,7 +225,9 @@ export default function WeatherAlgorithmPanel({ profile, onChange }: WeatherAlgo
               adornment="°C"
             />
           </Stack>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} sx={{
+            alignItems: "center"
+          }}>
             <Box sx={{ width: 18 }} />
             <CompactNumberField
               label="Akcept. min"
@@ -231,7 +247,9 @@ export default function WeatherAlgorithmPanel({ profile, onChange }: WeatherAlgo
 
       <GroupCard title="Wiatr i opady" accentColor={WEATHER_METRIC_COLORS.wind}>
         <Stack spacing={1}>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} sx={{
+            alignItems: "center"
+          }}>
             <AirIcon sx={{ color: WEATHER_METRIC_COLORS.wind, fontSize: 18 }} />
             <CompactNumberField
               label="Komfortowy"
@@ -246,7 +264,9 @@ export default function WeatherAlgorithmPanel({ profile, onChange }: WeatherAlgo
               adornment="km/h"
             />
           </Stack>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} sx={{
+            alignItems: "center"
+          }}>
             <OpacityIcon sx={{ color: WEATHER_METRIC_COLORS.precipitation, fontSize: 18 }} />
             <CompactNumberField
               label="Maks. mżawka"

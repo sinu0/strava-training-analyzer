@@ -59,7 +59,9 @@ export default function TodayPage() {
       subtitle="Rekomendacja dnia, forma i kluczowe moduły w Twoim układzie."
       maxWidth={1440}
       actions={(
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} sx={{
+          alignItems: "center"
+        }}>
           <Chip
             size="small"
             label={statusLabels[data.dataStatus]}

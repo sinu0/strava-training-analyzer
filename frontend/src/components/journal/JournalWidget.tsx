@@ -30,7 +30,13 @@ export default function JournalWidget() {
         borderColor: 'divider',
       }}
     >
-      <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          mb: 0.5,
+          display: 'block'
+        }}>
         Ostatni wpis w dzienniku
       </Typography>
       <Chip
@@ -47,9 +53,11 @@ export default function JournalWidget() {
       {!!entry.note && (
         <Typography
           variant="body2"
-          color="text.secondary"
-          sx={{ fontSize: '0.8rem', lineHeight: 1.4 }}
-        >
+          sx={{
+            color: "text.secondary",
+            fontSize: '0.8rem',
+            lineHeight: 1.4
+          }}>
           {entry.note.length > 100 ? entry.note.slice(0, 100) + '...' : entry.note}
         </Typography>
       )}

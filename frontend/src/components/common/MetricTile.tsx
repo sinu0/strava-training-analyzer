@@ -55,10 +55,11 @@ export default function MetricTile({ label, value, unit, trend, icon }: MetricTi
             )}
             <Typography
               variant="body2"
-              color="text.secondary"
-              sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.medium }}
               noWrap
-            >
+              sx={{
+                color: "text.secondary",
+                fontWeight: (theme) => getAppThemeTokens(theme).type.weight.medium
+              }}>
               {label}
             </Typography>
           </Box>
@@ -93,7 +94,12 @@ export default function MetricTile({ label, value, unit, trend, icon }: MetricTi
             {value}
           </Typography>
           {!!unit && (
-            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.regular }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontWeight: (theme) => getAppThemeTokens(theme).type.weight.regular
+              }}>
               {unit}
             </Typography>
           )}

@@ -131,8 +131,8 @@ export default function ActivityMediaCarousel({
         <Stack
           direction="row"
           spacing={0.5}
-          alignItems="center"
           sx={{
+            alignItems: "center",
             position: 'absolute',
             bottom: 12,
             right: 12,
@@ -142,9 +142,8 @@ export default function ActivityMediaCarousel({
             px: 0.5,
             py: 0.25,
             backdropFilter: 'blur(10px)',
-            border: `1px solid ${alphaColor(COMMON_COLORS.white, 0.14)}`,
-          }}
-        >
+            border: `1px solid ${alphaColor(COMMON_COLORS.white, 0.14)}`
+          }}>
           <IconButton
             size="small"
             onClick={(e) => { e.stopPropagation(); setActiveIndex((c) => (c - 1 + items.length) % items.length); }}
@@ -180,7 +179,13 @@ export default function ActivityMediaCarousel({
 
       {/* Dot indicators */}
       {items.length > 1 && (
-        <Stack direction="row" spacing={0.5} justifyContent="center" sx={{ mt: 1 }}>
+        <Stack
+          direction="row"
+          spacing={0.5}
+          sx={{
+            justifyContent: "center",
+            mt: 1
+          }}>
           {items.map((item, i) => (
             <Box
               key={item.key}

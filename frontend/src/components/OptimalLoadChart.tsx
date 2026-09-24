@@ -126,9 +126,13 @@ const OptimalLoadChart = memo(function OptimalLoadChart({
 
   if (!chartData.length) {
     return (
-      <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-        Brak danych tygodniowego obciążenia.
-      </Typography>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          py: 4,
+          textAlign: 'center'
+        }}>Brak danych tygodniowego obciążenia.
+              </Typography>
     );
   }
 
@@ -137,7 +141,13 @@ const OptimalLoadChart = memo(function OptimalLoadChart({
   return (
     <Box>
       {!compact && (
-        <Stack direction="row" spacing={3} flexWrap="wrap" sx={{ mb: 1 }}>
+        <Stack
+          direction="row"
+          spacing={3}
+          sx={{
+            flexWrap: "wrap",
+            mb: 1
+          }}>
           {[
             { color: LOAD_COLORS.OPTIMAL, label: 'Optymalny' },
             { color: LOAD_COLORS.UNDER, label: 'Zbyt mało' },
@@ -145,7 +155,9 @@ const OptimalLoadChart = memo(function OptimalLoadChart({
             { color: LOAD_COLORS.DANGER, label: 'Ryzyko kontuzji' },
             { color: LOAD_COLORS.FUTURE, label: 'Tydzień w toku', hollow: true },
           ].map(({ color, label, hollow }) => (
-            <Stack key={label} direction="row" alignItems="center" spacing={0.5}>
+            <Stack key={label} direction="row" spacing={0.5} sx={{
+              alignItems: "center"
+            }}>
               <Box
                 sx={{
                   width: 12,
@@ -249,7 +261,14 @@ const OptimalLoadChart = memo(function OptimalLoadChart({
       </Box>
 
       {!compact && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block', lineHeight: 1.6 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            mt: 1,
+            display: 'block',
+            lineHeight: 1.6
+          }}>
           Optymalny zakres (0.8–1.3 × CTL × 7) wg modelu ACWR/Banister.
           Bieżący tydzień (koło przerywane) wyświetla zakres proporcjonalny do liczby minionych dni.
         </Typography>

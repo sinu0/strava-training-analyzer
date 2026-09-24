@@ -4,7 +4,7 @@ import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
 import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutlineOutlined';
 import RouteOutlinedIcon from '@mui/icons-material/RouteOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import TodayIcon from '@mui/icons-material/Today';

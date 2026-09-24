@@ -332,13 +332,35 @@ const ActivityFeedCard = memo(function ActivityFeedCard({
       <ActivityPreview positions={positions} photoUrls={activity.photoUrls} activityName={activity.name} />
 
       <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
-        <Stack direction="row" spacing={1} alignItems="flex-start" justifyContent="space-between">
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: "flex-start",
+            justifyContent: "space-between"
+          }}>
           <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Typography variant="body1" fontWeight={600} noWrap sx={{ lineHeight: 1.3 }}>
+            <Typography
+              variant="body1"
+              noWrap
+              sx={{
+                fontWeight: 600,
+                lineHeight: 1.3
+              }}>
               {activity.name}
             </Typography>
-            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" alignItems="center" sx={{ mt: 0.25 }}>
-              <Typography variant="caption" color="text.secondary">
+            <Stack
+              direction="row"
+              spacing={1}
+              useFlexGap
+              sx={{
+                flexWrap: "wrap",
+                alignItems: "center",
+                mt: 0.25
+              }}>
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {dateStr}
               </Typography>
               {isRecentActivity ? (
@@ -358,15 +380,14 @@ const ActivityFeedCard = memo(function ActivityFeedCard({
         {summaryText ? (
           <Typography
             variant="body2"
-            color="text.secondary"
             sx={{
+              color: "text.secondary",
               display: '-webkit-box',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-            }}
-          >
+              WebkitBoxOrient: 'vertical'
+            }}>
             {summaryText}
           </Typography>
         ) : null}

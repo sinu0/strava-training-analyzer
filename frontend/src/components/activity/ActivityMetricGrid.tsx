@@ -9,7 +9,11 @@ export default function ActivityMetricGrid({ metrics }: { metrics: ActivityMetri
   const numericMetrics = metrics.filter((item) => item.numericValue != null).slice(0, 8);
 
   if (numericMetrics.length === 0) {
-    return <Typography variant="body2" color="text.secondary">Brak policzonych metryk.</Typography>;
+    return (
+      <Typography variant="body2" sx={{
+        color: "text.secondary"
+      }}>Brak policzonych metryk.</Typography>
+    );
   }
 
   return (
@@ -19,8 +23,15 @@ export default function ActivityMetricGrid({ metrics }: { metrics: ActivityMetri
         return (
           <Grid key={item.name} size={{ xs: 12, sm: 6 }}>
             <PerformanceSurface sx={{ p: 1.5, height: '100%' }}>
-              <Stack direction="row" spacing={0.75} alignItems="center">
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 750 }}>
+              <Stack direction="row" spacing={0.75} sx={{
+                alignItems: "center"
+              }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                    fontWeight: 750
+                  }}>
                   {metadata.label}
                 </Typography>
                 <Tooltip title={metadata.description} arrow>

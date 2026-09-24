@@ -43,10 +43,14 @@ export default function WorkoutTemplateCard({ template, onDetails }: WorkoutTemp
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <Box>
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={{
+        color: "text.secondary"
+      }}>
         {label}
       </Typography>
-      <Typography variant="body2" fontWeight={600}>
+      <Typography variant="body2" sx={{
+        fontWeight: 600
+      }}>
         {value}
       </Typography>
     </Box>

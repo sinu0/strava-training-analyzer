@@ -71,7 +71,9 @@ export default function DataJobsPage() {
             md: 5
           }}>
           <PerformanceSurface accent sx={{ p: 2.5, height: '100%' }}>
-            <Stack direction="row" spacing={1} alignItems="center"><DataObjectOutlinedIcon color="primary" /><Typography variant="h6">Jakość danych</Typography></Stack>
+            <Stack direction="row" spacing={1} sx={{
+              alignItems: "center"
+            }}><DataObjectOutlinedIcon color="primary" /><Typography variant="h6">Jakość danych</Typography></Stack>
             {quality.isLoading ? <LoadingState message="Sprawdzanie jakości…" /> : null}
             {quality.isError ? <ErrorState message="Nie udało się pobrać jakości danych." onRetry={() => void quality.refetch()} /> : null}
             {quality.data ? (
@@ -99,15 +101,28 @@ export default function DataJobsPage() {
             md: 7
           }}>
           <PerformanceSurface sx={{ p: 2.5, height: '100%' }}>
-            <Stack direction="row" spacing={1} alignItems="center"><SyncOutlinedIcon color="primary" /><Typography variant="h6">Uruchom zadanie</Typography></Stack>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Każde zadanie zapisuje etap, próbę i błąd. Import nie uruchomi się równolegle drugi raz.</Typography>
+            <Stack direction="row" spacing={1} sx={{
+              alignItems: "center"
+            }}><SyncOutlinedIcon color="primary" /><Typography variant="h6">Uruchom zadanie</Typography></Stack>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mt: 1
+              }}>Każde zadanie zapisuje etap, próbę i błąd. Import nie uruchomi się równolegle drugi raz.</Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} sx={{ mt: 2.5 }}>
               <Button variant="contained" disabled={busy} onClick={() => startImport('RECENT')}>Import ostatnich</Button>
               <Button variant="outlined" disabled={busy} onClick={() => startImport('FULL')}>Pełny import</Button>
               <Button variant="outlined" disabled={busy} onClick={() => startImport('POWER_PROVENANCE')}>Uzupełnij źródło mocy</Button>
               <Button variant="outlined" startIcon={<RefreshOutlinedIcon />} disabled={busy} onClick={startRecalculation}>Przelicz metryki</Button>
             </Stack>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.5 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                display: 'block',
+                mt: 1.5
+              }}>
               Uzupełnienie źródła mocy pobiera ze Stravy wyłącznie jawne metadane pomiaru. Brakująca flaga pozostaje nieznana — aplikacja nie zgaduje jej na podstawie watów.
             </Typography>
           </PerformanceSurface>
@@ -116,8 +131,16 @@ export default function DataJobsPage() {
         {activeJob ? (
           <Grid size={12}>
             <PerformanceSurface sx={{ p: 2.5 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
-                <Box><Typography variant="overline" color="text.secondary">{activeJob.jobType} · próba {activeJob.attempt}</Typography><Typography variant="h6">{activeJob.stage}</Typography></Box>
+              <Stack
+                direction="row"
+                spacing={2}
+                sx={{
+                  justifyContent: "space-between",
+                  alignItems: "center"
+                }}>
+                <Box><Typography variant="overline" sx={{
+                  color: "text.secondary"
+                }}>{activeJob.jobType} · próba {activeJob.attempt}</Typography><Typography variant="h6">{activeJob.stage}</Typography></Box>
                 <Chip label={activeJob.status} color={activeJob.status === 'COMPLETED' ? 'success' : activeJob.status === 'FAILED' ? 'error' : 'primary'} variant="outlined" />
               </Stack>
               <LinearProgress variant="determinate" value={progress} sx={{ mt: 2, height: 8, borderRadius: 4 }} />

@@ -258,7 +258,9 @@ export default function TopBar({
             </ListItemIcon>
             <ListItemText
               primary="Profil"
-              primaryTypographyProps={{ fontSize: '0.85rem', fontWeight: 550 }}
+              slotProps={{
+                primary: { sx: { fontSize: '0.85rem', fontWeight: 550 } }
+              }}
             />
           </ListItemButton>
         </List>

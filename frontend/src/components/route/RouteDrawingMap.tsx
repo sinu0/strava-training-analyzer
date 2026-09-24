@@ -219,10 +219,14 @@ function WeatherPopup({
   if (isLoading) {
     return (
       <Box sx={{ minWidth: 180 }}>
-        <Typography variant="subtitle2" fontWeight={700}>
+        <Typography variant="subtitle2" sx={{
+          fontWeight: 700
+        }}>
           {label}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           Ładowanie warunków pogodowych…
         </Typography>
       </Box>
@@ -232,10 +236,14 @@ function WeatherPopup({
   if (!weather) {
     return (
       <Box sx={{ minWidth: 180 }}>
-        <Typography variant="subtitle2" fontWeight={700}>
+        <Typography variant="subtitle2" sx={{
+          fontWeight: 700
+        }}>
           {label}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           Brak danych pogodowych dla tego punktu.
         </Typography>
       </Box>
@@ -244,11 +252,18 @@ function WeatherPopup({
 
   return (
     <Box sx={{ minWidth: 190 }}>
-      <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 0.5 }}>
+      <Typography
+        variant="subtitle2"
+        sx={{
+          fontWeight: 700,
+          mb: 0.5
+        }}>
         {label}
       </Typography>
       <Stack spacing={0.35}>
-        <Stack direction="row" spacing={0.75} alignItems="center">
+        <Stack direction="row" spacing={0.75} sx={{
+          alignItems: "center"
+        }}>
           <Box
             component="img"
             src={getWeatherIconPath(weather.weatherCode)}
@@ -270,7 +285,9 @@ function WeatherPopup({
           Ocena outdoor: {Math.round(weather.outdoorScore)}/100
         </Typography>
         {weather.warnings.length > 0 && (
-          <Typography variant="caption" color="warning.main">
+          <Typography variant="caption" sx={{
+            color: "warning.main"
+          }}>
             {weather.warnings.join(' · ')}
           </Typography>
         )}
@@ -394,13 +411,22 @@ export default function RouteDrawingMap({
           >
             <Popup closeButton={false}>
               <Box sx={{ minWidth: 180 }}>
-                <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 0.5 }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 0.5
+                  }}>
                   Punkt {index + 1}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   Przeciągnij marker, aby zmienić przebieg trasy.
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   Dwuklik usuwa punkt pośredni.
                 </Typography>
               </Box>

@@ -368,7 +368,7 @@ export function createAppTheme(mode: AppColorMode = 'light'): Theme {
             '&.MuiInputBase-sizeSmall': { minHeight: 40 },
           },
           input: { paddingTop: 12, paddingBottom: 12, fontWeight: 500 },
-          inputSizeSmall: { paddingTop: 8, paddingBottom: 8 },
+          sizeSmall: { paddingTop: 8, paddingBottom: 8 },
         },
       },
       MuiInputLabel: {

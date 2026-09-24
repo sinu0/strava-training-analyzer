@@ -46,7 +46,9 @@ export default function DataCard({ title, subtitle, icon, children, action }: Da
         }
         subheader={
           subtitle ? (
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               {subtitle}
             </Typography>
           ) : undefined

@@ -74,9 +74,11 @@ export default function PageContainer({
             ) : (
               <Typography
                 key={item.label}
-                color="text.secondary"
-                sx={{ fontSize: '0.82rem', fontWeight: 600 }}
-              >
+                sx={{
+                  color: "text.secondary",
+                  fontSize: '0.82rem',
+                  fontWeight: 600
+                }}>
                 {item.label}
               </Typography>
             ),
@@ -101,7 +103,13 @@ export default function PageContainer({
               </Typography>
             )}
             {!!subtitle && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75, maxWidth: 760 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  mt: 0.75,
+                  maxWidth: 760
+                }}>
                 {subtitle}
               </Typography>
             )}

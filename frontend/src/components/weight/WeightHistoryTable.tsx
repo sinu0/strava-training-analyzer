@@ -47,7 +47,9 @@ export default function WeightHistoryTable({
                   <Typography variant="body2" sx={{ fontWeight: 700 }}>
                     {Number(record.weightKg).toFixed(1)} kg
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     {new Date(record.recordedDate).toLocaleDateString('pl-PL', {
                       weekday: 'short',
                       year: 'numeric',
@@ -70,7 +72,9 @@ export default function WeightHistoryTable({
                 flexWrap: 'wrap',
               }}
             >
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 Strona {page} z {pageCount}
               </Typography>
               <Pagination

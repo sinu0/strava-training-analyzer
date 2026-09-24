@@ -15,18 +15,21 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useQueryClient } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMemo, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import PageContainer from '@/components/common/PageContainer';
 import Section from '@/components/common/Section';
 import WeatherAlgorithmPanel from '@/components/weather/WeatherAlgorithmPanel';
 import WeatherForecastViews from '@/components/weather/WeatherForecastViews';
+import WeatherLocationMenu from '@/components/weather/WeatherLocationMenu';
 import WeatherStudioMap from '@/components/weather/WeatherStudioMap';
 import WeatherWidgetHeader from '@/components/weather/WeatherWidgetHeader';
 import { getCyclistType } from '@/components/weather/weatherWidgetUtils';
 import {
   useAddWeatherLocation,
+  useActivateWeatherLocation,
+  useDeleteWeatherLocation,
   useRefreshWeatherCache,
   useWeatherGradient,
   useWeatherLocations,
@@ -50,7 +53,10 @@ export default function WeatherPage() {
   const queryClient = useQueryClient();
   const { data: locations = [] } = useWeatherLocations();
   const addLocation = useAddWeatherLocation();
+  const activateLocation = useActivateWeatherLocation();
+  const deleteLocation = useDeleteWeatherLocation();
   const refreshCache = useRefreshWeatherCache();
+  const [locationMenuAnchor, setLocationMenuAnchor] = useState<HTMLElement | null>(null);
   const activeLocation = locations.find((location) => location.active) ?? locations[0];
   const [selectedPoint, setSelectedPoint] = useLocalStorage('weather-studio-point-v1', {
     lat: activeLocation?.latitude ?? 50.0614,
@@ -108,6 +114,18 @@ export default function WeatherPage() {
     queryClient.invalidateQueries({ queryKey: ['weatherPointGradient', selectedPoint.lat, selectedPoint.lon, selectedPoint.label] });
   };
 
+  const handleActivateLocation = (name: string) => {
+    const location = locations.find((candidate) => candidate.name === name);
+    if (location) {
+      setSelectedPoint({
+        lat: location.latitude,
+        lon: location.longitude,
+        label: location.name,
+      });
+    }
+    activateLocation.mutate(name);
+  };
+
   return (
     <PageContainer
       title="Studio pogody"
@@ -138,10 +156,23 @@ export default function WeatherPage() {
             <Typography variant="h6" sx={{ lineHeight: 1.15, mt: 0.25 }}>
               Studio pogody dla decyzji treningowych
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                mt: 0.5,
+                display: 'block'
+              }}>
               Kliknij punkt na mapie, zobacz dzień i tydzień, dostroj algorytm.
             </Typography>
-            <Stack direction="row" spacing={0.5} useFlexGap flexWrap="wrap" sx={{ mt: 0.75 }}>
+            <Stack
+              direction="row"
+              spacing={0.5}
+              useFlexGap
+              sx={{
+                flexWrap: "wrap",
+                mt: 0.75
+              }}>
               {['Mapa klików', 'Live scoring', 'Decyzja'].map((tag) => (
                 <Box
                   key={tag}
@@ -197,7 +228,9 @@ export default function WeatherPage() {
                     locations={locations}
                     onSelectPoint={setSelectedPoint}
                   />
-                  <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                  <Stack direction="row" spacing={1} useFlexGap sx={{
+                    flexWrap: "wrap"
+                  }}>
                     <Chip icon={<PlaceOutlinedIcon />} label={selectedPoint.label} />
                     <Chip label={`${selectedPoint.lat.toFixed(4)}, ${selectedPoint.lon.toFixed(4)}`} />
                     {!!comparison && <Chip icon={<TerrainOutlinedIcon />} label={comparison} />}
@@ -217,7 +250,9 @@ export default function WeatherPage() {
                     onViewChange={setForecastView}
                   />
                 ) : (
-                  <Typography color="text.secondary">Ładowanie widoku forecastu…</Typography>
+                  <Typography sx={{
+                    color: "text.secondary"
+                  }}>Ładowanie widoku forecastu…</Typography>
                 )}
               </Section>
             </Stack>
@@ -270,7 +305,22 @@ export default function WeatherPage() {
                       precipitation={pointGradient.current.precipitation}
                       outdoorScore={pointGradient.current.outdoorScore}
                       cyclistType={cyclistType}
-                      onOpenSettings={handleRefresh}
+                      onOpenSettings={(event: MouseEvent<HTMLButtonElement>) => {
+                        setLocationMenuAnchor(event.currentTarget);
+                      }}
+                    />
+                    <WeatherLocationMenu
+                      anchorEl={locationMenuAnchor}
+                      open={Boolean(locationMenuAnchor)}
+                      locations={locations}
+                      activeLocationName={activeLocation?.name}
+                      onClose={() => setLocationMenuAnchor(null)}
+                      onActivateLocation={handleActivateLocation}
+                      onAddLocation={(name, lat, lon) => {
+                        addLocation.mutate({ name, lat, lon });
+                      }}
+                      onDeleteLocation={(name) => deleteLocation.mutate(name)}
+                      onRefresh={(name) => refreshCache.mutate(name)}
                     />
                     {!!decision && (
                       <Alert severity={decision.variant === 'indoor' ? 'warning' : 'success'}>
@@ -298,7 +348,9 @@ export default function WeatherPage() {
                           <Typography variant="h5" sx={{ mt: 0.5 }}>
                             {today?.bestWindowStart ?? '—'} — {today?.bestWindowEnd ?? '—'}
                           </Typography>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography variant="body2" sx={{
+                            color: "text.secondary"
+                          }}>
                             Score {today?.bestWindowScore ?? 0}/100
                           </Typography>
                         </Box>
@@ -323,7 +375,9 @@ export default function WeatherPage() {
                           <Typography variant="h5" sx={{ mt: 0.5 }}>
                             {tomorrow?.bestWindowStart ?? '—'} — {tomorrow?.bestWindowEnd ?? '—'}
                           </Typography>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography variant="body2" sx={{
+                            color: "text.secondary"
+                          }}>
                             Score {tomorrow?.bestWindowScore ?? 0}/100
                           </Typography>
                         </Box>
@@ -331,7 +385,9 @@ export default function WeatherPage() {
                     </Grid>
                   </Stack>
                 ) : (
-                  <Typography color="text.secondary">Ładowanie pełnej analizy punktu…</Typography>
+                  <Typography sx={{
+                    color: "text.secondary"
+                  }}>Ładowanie pełnej analizy punktu…</Typography>
                 )}
               </Section>
 

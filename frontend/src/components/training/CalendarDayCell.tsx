@@ -61,16 +61,35 @@ export default function CalendarDayCell({ day, date, dateNum, isCurrentMonth, is
         />
       ))}
       {plans.length > 2 && <Typography variant="caption">+{plans.length - 2} sesje</Typography>}
-      {(day?.activities?.length ?? 0) > 1 && <Typography variant="caption" display="block">Aktywności: {day?.activities?.length}</Typography>}
+      {(day?.activities?.length ?? 0) > 1 && <Typography variant="caption" sx={{
+        display: "block"
+      }}>Aktywności: {day?.activities?.length}</Typography>}
 
       {!!day?.projection && (
-        <Typography variant="caption" display="block" noWrap sx={{ mt: 0.25, color: 'text.secondary', fontSize: '0.65rem', fontWeight: 600 }}>
+        <Typography
+          variant="caption"
+          noWrap
+          sx={{
+            display: "block",
+            mt: 0.25,
+            color: 'text.secondary',
+            fontSize: '0.65rem',
+            fontWeight: 600
+          }}>
           TSB {day.projection.projectedTsb > 0 ? '+' : ''}{Math.round(day.projection.projectedTsb)}
         </Typography>
       )}
 
       {!!day?.actual && (
-        <Typography variant="caption" display="block" noWrap sx={{ mt: 0.25, color: 'text.secondary', fontSize: '0.65rem' }}>
+        <Typography
+          variant="caption"
+          noWrap
+          sx={{
+            display: "block",
+            mt: 0.25,
+            color: 'text.secondary',
+            fontSize: '0.65rem'
+          }}>
           {day.actual.name} {day.actual.tss != null ? `(${day.actual.tss} TSS)` : ''}
         </Typography>
       )}

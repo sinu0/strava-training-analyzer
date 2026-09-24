@@ -194,7 +194,9 @@ function StatsOverlay({ routeCount, totalDistanceKm, uniqueKm, maxCount }: Stats
     >
       <Stack spacing={0.5}>
         {rows.map(({ label, value }) => (
-          <Stack key={label} direction="row" justifyContent="space-between" spacing={2}>
+          <Stack key={label} direction="row" spacing={2} sx={{
+            justifyContent: "space-between"
+          }}>
             <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
               {label}
             </Typography>
@@ -240,11 +242,17 @@ function LegendOverlay() {
           />
         ))}
       </Stack>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography variant="caption" color="text.secondary">
+      <Stack direction="row" sx={{
+        justifyContent: "space-between"
+      }}>
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>
           Rzadziej
         </Typography>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>
           Częściej
         </Typography>
       </Stack>
@@ -262,9 +270,13 @@ export default function RouteHeatmap() {
         data-testid="heatmap-loading"
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 500 }}
       >
-        <Stack alignItems="center" spacing={2}>
+        <Stack spacing={2} sx={{
+          alignItems: "center"
+        }}>
           <CircularProgress size={40} sx={{ color: STATUS_COLORS.accent }} />
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             Ładowanie mapy…
           </Typography>
         </Stack>
@@ -278,15 +290,21 @@ export default function RouteHeatmap() {
         data-testid="heatmap-rebuilding"
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 500 }}
         >
-          <Stack alignItems="center" spacing={2}>
-          <CircularProgress size={48} sx={{ color: STATUS_COLORS.accent }} />
-          <Typography variant="body2" color="text.secondary">
-            Przebudowuję heatmapę…
-          </Typography>
-          <Typography variant="caption" color="text.disabled">
-            Pierwsze uruchomienie może potrwać kilka minut
-          </Typography>
-        </Stack>
+        <Stack spacing={2} sx={{
+          alignItems: "center"
+        }}>
+        <CircularProgress size={48} sx={{ color: STATUS_COLORS.accent }} />
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
+          Przebudowuję heatmapę…
+        </Typography>
+        <Typography variant="caption" sx={{
+          color: "text.disabled"
+        }}>
+          Pierwsze uruchomienie może potrwać kilka minut
+        </Typography>
+      </Stack>
       </Box>
     );
   }
@@ -297,9 +315,15 @@ export default function RouteHeatmap() {
         data-testid="heatmap-empty"
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 500 }}
       >
-        <Stack alignItems="center" spacing={1}>
-          <Typography variant="h6" color="text.secondary">Brak tras</Typography>
-          <Typography variant="body2" color="text.secondary">
+        <Stack spacing={1} sx={{
+          alignItems: "center"
+        }}>
+          <Typography variant="h6" sx={{
+            color: "text.secondary"
+          }}>Brak tras</Typography>
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             Zsynchronizuj aktywności, aby zobaczyć mapę.
           </Typography>
         </Stack>

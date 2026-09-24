@@ -34,8 +34,8 @@ function MetricPill({
     <Stack
       direction="row"
       spacing={0.75}
-      alignItems="center"
       sx={{
+        alignItems: "center",
         minWidth: 0,
         flex: '1 1 96px',
         px: 0.95,
@@ -43,16 +43,20 @@ function MetricPill({
         borderRadius: 999,
         bgcolor: alphaColor(accentColor, 0.12),
         border: '1px solid',
-        borderColor: alphaColor(accentColor, 0.16),
-      }}
-    >
+        borderColor: alphaColor(accentColor, 0.16)
+      }}>
       <Box sx={{ color: accentColor, display: 'flex', alignItems: 'center' }}>{icon}</Box>
       <Box sx={{ minWidth: 0 }}>
         <Typography
           variant="caption"
-          color="text.secondary"
-          sx={{ display: 'block', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-        >
+          sx={{
+            color: "text.secondary",
+            display: 'block',
+            lineHeight: 1,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}>
           {label}
         </Typography>
         <Typography
@@ -92,24 +96,33 @@ export default function WeatherMiniWidget({ gradient, onOpen, artTestId }: Weath
       subtitleLines={1}
       onClick={onOpen}
     >
-      <Stack justifyContent="space-between" sx={{ height: '100%' }}>
-        <Stack direction="row" justifyContent="space-between" spacing={1} alignItems="flex-start">
+      <Stack
+        sx={{
+          justifyContent: "space-between",
+          height: '100%'
+        }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "flex-start"
+          }}>
           <Box sx={{ minWidth: 0 }}>
             <Typography variant="h3" sx={{ fontWeight: 900, lineHeight: 1 }}>
               {current ? `${Math.round(current.temperature)}°` : '--'}
             </Typography>
             <Typography
               variant="body2"
-              color="text.secondary"
               sx={{
+                color: "text.secondary",
                 mt: 0.5,
                 display: '-webkit-box',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-              }}
-            >
+                WebkitBoxOrient: 'vertical'
+              }}>
               {current?.weatherDescription ?? 'Ładowanie warunków'}
             </Typography>
           </Box>
@@ -134,7 +147,9 @@ export default function WeatherMiniWidget({ gradient, onOpen, artTestId }: Weath
           </Box>
         </Stack>
 
-        <Stack direction="row" spacing={0.75} useFlexGap flexWrap="wrap">
+        <Stack direction="row" spacing={0.75} useFlexGap sx={{
+          flexWrap: "wrap"
+        }}>
           <MetricPill
             icon={<AirIcon sx={{ fontSize: 14 }} />}
             label="Wiatr"

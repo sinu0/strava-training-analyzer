@@ -42,8 +42,10 @@ export default function AddWeightDialog({
           type="number"
           value={values.weightKg}
           onChange={(event) => setValue('weightKg', event.target.value)}
-          inputProps={{ step: '0.1', min: '30', max: '300' }}
           fullWidth
+          slotProps={{
+            htmlInput: { step: '0.1', min: '30', max: '300' }
+          }}
         />
         <TextField
           label="Data"

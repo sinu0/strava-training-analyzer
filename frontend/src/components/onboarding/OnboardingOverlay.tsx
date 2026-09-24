@@ -61,8 +61,15 @@ export default function OnboardingOverlay({ profile, ftpProgress }: Props) {
     <Dialog open={open} maxWidth="sm" fullWidth onClose={() => { completeOnboarding(); setOpen(false); }}>
       <DialogTitle sx={{ textAlign: 'center', pt: 3 }}>
         <AutoAwesome sx={{ color: 'primary.main', fontSize: 32, mb: 0.5 }} />
-        <Typography variant="h5" fontWeight={800}>Witaj w Strava Analizator!</Typography>
-        <Typography variant="body2" color="text.secondary" mt={0.5}>
+        <Typography variant="h5" sx={{
+          fontWeight: 800
+        }}>Witaj w Strava Analizator!</Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mt: 0.5
+          }}>
           Trzy kroki do inteligentnego treningu.
         </Typography>
       </DialogTitle>
@@ -76,16 +83,33 @@ export default function OnboardingOverlay({ profile, ftpProgress }: Props) {
         </Stepper>
 
         <Paper sx={{ p: 2, borderRadius: 2, bgcolor: alphaColor(STATUS_COLORS.success, 0.06), border: '1px solid', borderColor: alphaColor(STATUS_COLORS.success, 0.15) }}>
-          <Stack direction="row" spacing={1.5} alignItems="flex-start">
+          <Stack direction="row" spacing={1.5} sx={{
+            alignItems: "flex-start"
+          }}>
               <Box sx={{ color: 'primary.main', mt: 0.25 }}>{STEPS[step]!.icon}</Box>
               <Box>
-                <Typography fontWeight={700} fontSize="0.95rem">{STEPS[step]!.label}</Typography>
-                <Typography variant="body2" color="text.secondary" mt={0.25}>{STEPS[step]!.desc}</Typography>
+                <Typography
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: "0.95rem"
+                  }}>{STEPS[step]!.label}</Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                    mt: 0.25
+                  }}>{STEPS[step]!.desc}</Typography>
             </Box>
           </Stack>
         </Paper>
 
-        <Stack direction="row" spacing={1.5} justifyContent="center" mt={3}>
+        <Stack
+          direction="row"
+          spacing={1.5}
+          sx={{
+            justifyContent: "center",
+            mt: 3
+          }}>
           <Button variant="outlined" onClick={handleStart}>
             {step < 2 ? 'Ustaw w profilu' : 'Otwórz Coacha'}
           </Button>

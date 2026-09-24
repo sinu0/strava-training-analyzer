@@ -80,8 +80,17 @@ function CustomTooltip({
         boxShadow: theme.tokens.cardShadow,
       }}
     >
-      <Typography color="text.secondary" sx={{ fontSize: '0.75rem' }}>{label}</Typography>
-      <Typography color="text.primary" sx={{ fontSize: '0.85rem', fontWeight: 700 }}>
+      <Typography
+        sx={{
+          color: "text.secondary",
+          fontSize: '0.75rem'
+        }}>{label}</Typography>
+      <Typography
+        sx={{
+          color: "text.primary",
+          fontSize: '0.85rem',
+          fontWeight: 700
+        }}>
         {metric.format(payload[0]?.value ?? 0)}
       </Typography>
     </Box>

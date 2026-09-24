@@ -26,7 +26,9 @@ export default function BlockHealthPanel({ blockHealth }: BlockHealthPanelProps)
 
   return (
     <Stack spacing={1}>
-      <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+      <Stack direction="row" spacing={1} useFlexGap sx={{
+        flexWrap: "wrap"
+      }}>
         <Chip label={blockHealth.label} color={chipColor(blockHealth.status)} />
         {!!blockHealth.goalExecutionStatus && (
           <Chip label={`Cel: ${blockHealth.goalExecutionStatus}`} size="small" variant="outlined" />
@@ -36,7 +38,9 @@ export default function BlockHealthPanel({ blockHealth }: BlockHealthPanelProps)
         )}
       </Stack>
       <Typography variant="body2">{blockHealth.description}</Typography>
-      <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+      <Stack direction="row" spacing={1} useFlexGap sx={{
+        flexWrap: "wrap"
+      }}>
         <Chip label={`Korekty: ${blockHealth.adjustmentDays}`} size="small" variant="outlined" />
         <Chip label={`Nietrafione bodźce: ${blockHealth.missedStimulusDays}`} size="small" variant="outlined" />
         <Chip label={`Przeciążenia: ${blockHealth.overloadDays}`} size="small" variant="outlined" />
@@ -47,7 +51,9 @@ export default function BlockHealthPanel({ blockHealth }: BlockHealthPanelProps)
         </Alert>
       ))}
       {!!blockHealth.nextFocus && (
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           {blockHealth.nextFocus}
         </Typography>
       )}

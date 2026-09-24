@@ -40,11 +40,15 @@ export default function JournalEntryForm({ activityId }: JournalEntryFormProps) 
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Typography variant="subtitle2" fontWeight={700}>
+      <Typography variant="subtitle2" sx={{
+        fontWeight: 700
+      }}>
         Dziennik
       </Typography>
 
-      <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+      <Stack direction="row" spacing={0.5} useFlexGap sx={{
+        flexWrap: "wrap"
+      }}>
         {MOOD_OPTIONS.map((opt) => (
           <Chip
             key={opt.value}
@@ -75,7 +79,14 @@ export default function JournalEntryForm({ activityId }: JournalEntryFormProps) 
         onChange={(e) => setNote(e.target.value)}
       />
 
-      <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap alignItems="center">
+      <Stack
+        direction="row"
+        spacing={0.5}
+        useFlexGap
+        sx={{
+          flexWrap: "wrap",
+          alignItems: "center"
+        }}>
         {tags.map((tag) => (
           <Chip
             key={tag}
@@ -113,7 +124,9 @@ export default function JournalEntryForm({ activityId }: JournalEntryFormProps) 
       </Button>
 
       {!!saveMutation.isSuccess && (
-        <Typography variant="caption" color="success.main">
+        <Typography variant="caption" sx={{
+          color: "success.main"
+        }}>
           Zapisano!
         </Typography>
       )}

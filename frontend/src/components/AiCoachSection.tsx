@@ -1,5 +1,5 @@
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SendIcon from '@mui/icons-material/Send';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
@@ -114,7 +114,11 @@ export default function AiCoachSection({ activityId }: AiCoachSectionProps) {
           </Alert>
         )}
         <Box sx={{ textAlign: 'center', py: 2 }}>
-          <Typography color="text.secondary" sx={{ mb: 2 }}>
+          <Typography
+            sx={{
+              color: "text.secondary",
+              mb: 2
+            }}>
             Brak analizy AI dla tej aktywności.
           </Typography>
           <Button
@@ -150,7 +154,9 @@ export default function AiCoachSection({ activityId }: AiCoachSectionProps) {
         </Box>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 3, gap: 1 }}>
           <CircularProgress size={32} sx={{ color: STATUS_COLORS.accent }} />
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {note?.queueStatus === 'processing'
               ? 'AI analizuje Twój trening...'
               : 'Analiza w kolejce — zostanie wygenerowana automatycznie.'}
@@ -168,7 +174,9 @@ export default function AiCoachSection({ activityId }: AiCoachSectionProps) {
         <Typography variant="h6">AI Coach</Typography>
         <Box sx={{ flexGrow: 1 }} />
         {!!note?.generatedAt && (
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             {new Date(note.generatedAt).toLocaleString('pl-PL')}
           </Typography>
         )}
@@ -202,7 +210,13 @@ export default function AiCoachSection({ activityId }: AiCoachSectionProps) {
       </Box>
 
       {!!note?.providerName && (
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            display: 'block',
+            mt: 1
+          }}>
           Model: {note.modelId} ({note.providerName})
         </Typography>
       )}
@@ -256,7 +270,9 @@ export default function AiCoachSection({ activityId }: AiCoachSectionProps) {
               {!!askMutation.isPending && (
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', ml: 1 }}>
                   <CircularProgress size={16} />
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{
+                    color: "text.secondary"
+                  }}>
                     AI myśli...
                   </Typography>
                 </Box>

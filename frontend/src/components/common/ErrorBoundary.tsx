@@ -44,7 +44,12 @@ export default class ErrorBoundary extends React.Component<Props, State> {
             sx={{ width: 160, height: 160, objectFit: 'contain', opacity: 0.9 }}
           />
           <Typography variant="h6">Wystąpił nieoczekiwany błąd</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              maxWidth: 400
+            }}>
             {this.state.error?.message ?? 'Coś poszło nie tak. Spróbuj odświeżyć stronę.'}
           </Typography>
           <Button variant="outlined" size="small" onClick={this.handleReload} sx={{ mt: 1 }}>

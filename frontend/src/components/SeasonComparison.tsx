@@ -69,16 +69,25 @@ export default function SeasonComparison() {
                 md: 3
               }}>
               <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="caption" color="text.secondary">{label}</Typography>
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>{label}</Typography>
                 <Typography variant="body1">{v1}</Typography>
-                <Typography variant="body2" color="text.secondary">vs</Typography>
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>vs</Typography>
                 <Typography variant="body1">{v2}</Typography>
               </Box>
             </Grid>
           ))}
         </Grid>
       ) : (
-        <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+        <Typography
+          sx={{
+            color: "text.secondary",
+            py: 4,
+            textAlign: 'center'
+          }}>
           Wybierz dwa okresy do porównania.
         </Typography>
       )}
