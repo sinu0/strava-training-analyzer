@@ -60,11 +60,11 @@ export const AI_PREDICTION_COLORS = {
 } as const;
 
 export const HEALTH_COLORS = {
-  hrv: '#39D353',
+  hrv: tokens.health.hrv,
   restingHeartRate: STATUS_COLORS.error,
   sleepScore: STATUS_COLORS.info,
   stress: STATUS_COLORS.warning,
-  bodyBattery: '#FFA657',
+  bodyBattery: tokens.health.bodyBattery,
 } as const;
 
 export const TRAINING_ZONE_COLORS = {
@@ -72,29 +72,24 @@ export const TRAINING_ZONE_COLORS = {
   Z2: STATUS_COLORS.info,
   Z3: STATUS_COLORS.success,
   Z4: STATUS_COLORS.warning,
-  Z5: '#F78166',
+  Z5: tokens.health.zoneFive,
   Z6: STATUS_COLORS.error,
   Z7: ZONE_COLORS.Z6,
 } as const;
 
 export const PROFILE_GRADIENTS = {
-  hero: `linear-gradient(135deg, ${theme.palette.background.default} 0%, #152131 50%, #0B2036 100%)`,
+  hero: tokens.profileHero,
 } as const;
 
-export const ROUTE_HEATMAP_COLORS = [
-  { stop: 0, color: '#1A237E' },
-  { stop: 0.35, color: STATUS_COLORS.accent },
-  { stop: 0.7, color: '#FF2020' },
-  { stop: 1, color: '#FF1744' },
-] as const;
+export const ROUTE_HEATMAP_COLORS = tokens.map.densityStops;
 
 export const ROUTE_COLORS = {
-  waypointStart: '#2E7D32',
-  waypointEnd: '#C62828',
+  waypointStart: tokens.map.waypointStart,
+  waypointEnd: tokens.map.waypointEnd,
   path: STATUS_COLORS.accent,
-  pathShadow: '#0F172A',
-  highlight: '#FF6B6B',
-  alternative: '#3B82F6',
+  pathShadow: tokens.map.pathShadow,
+  highlight: tokens.map.pathHighlight,
+  alternative: tokens.map.alternative,
   elevation: STATUS_COLORS.info,
 } as const;
 
@@ -137,4 +132,20 @@ export function resolveThemeColor(theme: Theme, color: string): string {
 
   const resolved = (paletteEntry as Record<string, unknown>)[shade ?? 'main'];
   return typeof resolved === 'string' ? resolved : color;
+}
+
+function hexToRgb(hex: string) {
+  const value = hex.replace('#', '');
+  const full = value.length === 3 ? value.split('').map((c) => c + c).join('') : value;
+  return [0, 2, 4].map((offset) => parseInt(full.slice(offset, offset + 2), 16)) as [number, number, number];
+}
+
+/** Interpolates low → mid → high (hex colours) for t in [0, 1]; used for metric-coloured tracks. */
+export function heatColor(t: number, stops: { low: string; mid: string; high: string }): string {
+  const clamped = Math.max(0, Math.min(1, t));
+  const [from, to, local] = clamped <= 0.5 ? [stops.low, stops.mid, clamped * 2] : [stops.mid, stops.high, (clamped - 0.5) * 2];
+  const a = hexToRgb(from);
+  const b = hexToRgb(to);
+  const mix = a.map((channel, index) => Math.round(channel + ((b[index] ?? channel) - channel) * local));
+  return `#${mix.map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
 }

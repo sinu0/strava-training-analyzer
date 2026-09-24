@@ -19,8 +19,8 @@ import {
   Typography,
 } from '@mui/material';
 
-import Section from '@/components/common/Section';
 import type { WeightGoal, WeightOverview, WeightRecord } from '@/types/weight';
+import { Widget } from '@/ui';
 import { CHART_COLORS, STATUS_COLORS, alphaColor } from '@/utils/colors';
 import { WEIGHT_TREND_COLORS, getConfidenceColor } from '@/utils/statusColors';
 
@@ -124,7 +124,7 @@ export default function WeightOverviewCards({
           xs: 12,
           md: 4
         }}>
-        <Section title="Aktualna waga">
+        <Widget title="Aktualna waga">
           <Box sx={{ textAlign: 'center', py: 1 }}>
             <Box
               sx={{
@@ -170,14 +170,14 @@ export default function WeightOverviewCards({
               </Typography>
             )}
           </Box>
-        </Section>
+        </Widget>
       </Grid>
       <Grid
         size={{
           xs: 12,
           md: 4
         }}>
-        <Section
+        <Widget
           title="Cel wagowy"
           action={goal ? (
             <Tooltip title="Usuń cel">
@@ -277,14 +277,14 @@ export default function WeightOverviewCards({
               </Button>
             </Box>
           )}
-        </Section>
+        </Widget>
       </Grid>
       <Grid
         size={{
           xs: 12,
           md: 4
         }}>
-        <Section title="Zapotrzebowanie kaloryczne">
+        <Widget title="Zapotrzebowanie kaloryczne">
           {dailyCaloricNeed != null && goal ? (
             <Box sx={{ py: 1 }}>
               <Stack spacing={1.5}>
@@ -390,7 +390,7 @@ export default function WeightOverviewCards({
               </Typography>
             </Box>
           )}
-        </Section>
+        </Widget>
       </Grid>
       <Grid
         size={{
@@ -398,7 +398,7 @@ export default function WeightOverviewCards({
           sm: 6,
           md: 3
         }}>
-        <Section title="Kalorie z treningów (7 dni)">
+        <Widget title="Kalorie z treningów (7 dni)">
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Typography variant="h5" sx={{ fontWeight: 700, color: STATUS_COLORS.warning }}>
               {overview?.weeklyTrainingCalories != null
@@ -411,7 +411,7 @@ export default function WeightOverviewCards({
               kcal / tydzień
             </Typography>
           </Box>
-        </Section>
+        </Widget>
       </Grid>
       <Grid
         size={{
@@ -419,7 +419,7 @@ export default function WeightOverviewCards({
           sm: 6,
           md: 3
         }}>
-        <Section title="Zalecane spożycie">
+        <Widget title="Zalecane spożycie">
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Typography variant="h5" sx={{ fontWeight: 700, color: STATUS_COLORS.success }}>
               {overview?.recommendedDailyCalories != null
@@ -432,7 +432,7 @@ export default function WeightOverviewCards({
               kcal / dzień
             </Typography>
           </Box>
-        </Section>
+        </Widget>
       </Grid>
       <Grid
         size={{
@@ -440,7 +440,7 @@ export default function WeightOverviewCards({
           sm: 6,
           md: 3
         }}>
-        <Section title="Tygodniowa zmiana wagi">
+        <Widget title="Tygodniowa zmiana wagi">
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
               {overview?.weeklyWeightChange != null && Number(overview.weeklyWeightChange) < 0 ? (
@@ -464,7 +464,7 @@ export default function WeightOverviewCards({
               kg / tydzień
             </Typography>
           </Box>
-        </Section>
+        </Widget>
       </Grid>
       <Grid
         size={{
@@ -472,7 +472,7 @@ export default function WeightOverviewCards({
           sm: 6,
           md: 3
         }}>
-        <Section title="Pewność modelu">
+        <Widget title="Pewność modelu">
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Chip
               label={overview?.dataConfidence ?? 'niski'}
@@ -484,7 +484,7 @@ export default function WeightOverviewCards({
               }}
             />
           </Box>
-        </Section>
+        </Widget>
       </Grid>
     </>
   );

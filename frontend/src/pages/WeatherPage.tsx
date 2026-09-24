@@ -18,8 +18,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import PageContainer from '@/components/common/PageContainer';
-import Section from '@/components/common/Section';
 import WeatherAlgorithmPanel from '@/components/weather/WeatherAlgorithmPanel';
 import WeatherForecastViews from '@/components/weather/WeatherForecastViews';
 import WeatherLocationMenu from '@/components/weather/WeatherLocationMenu';
@@ -37,6 +35,7 @@ import {
 } from '@/hooks/useAnalytics';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { getAppThemeTokens } from '@/theme/theme';
+import { Page, Widget } from '@/ui';
 import { alphaColor, CHART_COLORS, STATUS_COLORS } from '@/utils/colors';
 import { getWeatherIllustrationPath } from '@/utils/illustrationAssets';
 import {
@@ -127,7 +126,7 @@ export default function WeatherPage() {
   };
 
   return (
-    <PageContainer
+    <Page
       title="Studio pogody"
       subtitle="Pełny widok pogody dla decyzji treningowej i eksploracji punktów na mapie."
       breadcrumbs={[{ label: 'Home' }, { label: 'Studio pogody' }]}
@@ -217,10 +216,9 @@ export default function WeatherPage() {
               xl: 8
             }}>
             <Stack spacing={2.5}>
-              <Section
+              <Widget
                 title="Punkt fokusowy"
                 subtitle="Kliknij na mapie lub wybierz zapisane miejsce, aby przebudować całą analizę."
-                accentColor={themeTokens.chart.secondary}
               >
                 <Stack spacing={1.5}>
                   <WeatherStudioMap
@@ -236,12 +234,11 @@ export default function WeatherPage() {
                     {!!comparison && <Chip icon={<TerrainOutlinedIcon />} label={comparison} />}
                   </Stack>
                 </Stack>
-              </Section>
+              </Widget>
 
-              <Section
+              <Widget
                 title="Dzień i tydzień"
                 subtitle="Histogram i forecast przeliczone dokładnie według Twoich ustawień."
-                accentColor={themeTokens.chart.secondary}
               >
                 {pointGradient ? (
                   <WeatherForecastViews
@@ -254,7 +251,7 @@ export default function WeatherPage() {
                     color: "text.secondary"
                   }}>Ładowanie widoku forecastu…</Typography>
                 )}
-              </Section>
+              </Widget>
             </Stack>
           </Grid>
 
@@ -272,10 +269,9 @@ export default function WeatherPage() {
                 alignSelf: 'flex-start',
               }}
             >
-              <Section
+              <Widget
                 title="Decyzja treningowa"
                 subtitle="Ta sama logika forecastu, ale z pełną kontrolą nad interpretacją."
-                accentColor={themeTokens.status.accent}
                 action={
                   <Tooltip title="Odśwież dane pogodowe">
                     <IconButton
@@ -389,20 +385,18 @@ export default function WeatherPage() {
                     color: "text.secondary"
                   }}>Ładowanie pełnej analizy punktu…</Typography>
                 )}
-              </Section>
+              </Widget>
 
-              <Section
+              <Widget
                 title="Sterowanie algorytmem"
                 subtitle="Parametry są stale pod ręką i od razu wpływają na histogram oraz rekomendacje."
-                accentColor={themeTokens.chart.primary}
               >
                 <WeatherAlgorithmPanel profile={profile} onChange={handleProfileChange} />
-              </Section>
+              </Widget>
 
-              <Section
+              <Widget
                 title="Szybkie akcje"
                 subtitle="Najkrótsza droga z explorera pogody do dalszych działań."
-                accentColor={themeTokens.status.highlight}
               >
                 <Stack spacing={1.2}>
                   <Button
@@ -426,11 +420,11 @@ export default function WeatherPage() {
                     Otwórz planer z pogodą
                   </Button>
                 </Stack>
-              </Section>
+              </Widget>
             </Stack>
           </Grid>
         </Grid>
       </Stack>
-    </PageContainer>
+    </Page>
   );
 }

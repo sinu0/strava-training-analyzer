@@ -3,16 +3,14 @@ import { act, fireEvent, render, renderHook, screen } from '@testing-library/rea
 import { AxiosError } from 'axios';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import ChartContainer from '@/components/common/ChartContainer';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
-import ErrorState from '@/components/common/ErrorState';
 import FormDialog from '@/components/common/FormDialog';
-import ScoreBadge from '@/components/common/ScoreBadge';
 import { useCountdown } from '@/hooks/useCountdown';
 import { useFormDialog } from '@/hooks/useFormDialog';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { NotificationProvider, useNotification } from '@/hooks/useNotification';
 import theme from '@/theme/theme';
+import { ChartFrame, ErrorState } from '@/ui';
 import { STATUS_COLORS, WEATHER_SCORE_COLORS } from '@/utils/colors';
 import { getApiErrorMessage } from '@/utils/errorHandling';
 import { getReadinessScale } from '@/utils/readinessScales';
@@ -196,14 +194,14 @@ describe('consistency foundation', () => {
 
   it('handles loading, error, empty and content states in chart container', () => {
     const { rerender } = renderWithTheme(
-      <ChartContainer title="Wykres" loading loadingMessage="Ładowanie wykresu" />,
+      <ChartFrame title="Wykres" loading loadingMessage="Ładowanie wykresu" />,
     );
 
     expect(screen.getByText('Ładowanie wykresu')).toBeDefined();
 
     rerender(
       <ThemeProvider theme={theme}>
-        <ChartContainer title="Wykres" error="Ups" />
+        <ChartFrame title="Wykres" error="Ups" />
       </ThemeProvider>,
     );
 
@@ -211,7 +209,7 @@ describe('consistency foundation', () => {
 
     rerender(
       <ThemeProvider theme={theme}>
-        <ChartContainer title="Wykres" empty emptyTitle="Brak punktów" />
+        <ChartFrame title="Wykres" empty emptyTitle="Brak punktów" />
       </ThemeProvider>,
     );
 
@@ -219,20 +217,13 @@ describe('consistency foundation', () => {
 
     rerender(
       <ThemeProvider theme={theme}>
-        <ChartContainer title="Wykres">
+        <ChartFrame title="Wykres">
           <div>Chart content</div>
-        </ChartContainer>
+        </ChartFrame>
       </ThemeProvider>,
     );
 
     expect(screen.getByText('Chart content')).toBeDefined();
-  });
-
-  it('renders score badge using shared ranges', () => {
-    renderWithTheme(<ScoreBadge score={82} />);
-
-    expect(screen.getByText('82/100')).toBeDefined();
-    expect(screen.getByText('Świetne')).toBeDefined();
   });
 
   it('shows notifications from the shared provider', () => {

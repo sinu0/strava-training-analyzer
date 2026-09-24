@@ -2,7 +2,8 @@ import { Box, Chip, Skeleton } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { useState } from 'react';
 
-import EmptyState from '@/components/common/EmptyState';
+
+import { EmptyState } from '@/ui';
 
 import WorkoutDetailDialog from './WorkoutDetailDialog';
 import WorkoutTemplateCard from './WorkoutTemplateCard';

@@ -14,6 +14,8 @@ import {
 } from 'react-leaflet';
 
 import 'leaflet/dist/leaflet.css';
+import { tokens } from '@/theme/theme';
+
 import { MAP_TILE_CONFIG, type MapTileVariant } from '../../constants/mapTiles';
 import { getWeatherIconConfig } from '../../constants/weatherIcons';
 import { getAppThemeTokens } from '../../theme/theme';
@@ -95,7 +97,7 @@ function createWeatherBubbleIcon(
   const wind = weather ? `${Math.round(weather.windSpeed)} km/h` : 'Ładowanie';
   const icon = isLoading
     ? '<span style="display:block;font-size:16px;line-height:1;">⋯</span>'
-    : `<img src="${getWeatherIconPath(weather?.weatherCode)}" alt="" style="width:18px;height:18px;display:block;filter:drop-shadow(0 5px 10px rgba(15, 23, 42, 0.24));" />`;
+    : `<img src="${getWeatherIconPath(weather?.weatherCode)}" alt="" style="width:18px;height:18px;display:block;filter:${tokens.iconShadow};" />`;
 
   return L.divIcon({
     className: 'route-weather-bubble',
@@ -103,10 +105,10 @@ function createWeatherBubbleIcon(
       min-width: 88px;
       padding: 8px 10px;
       border-radius: 16px;
-      background: ${alpha(theme?.palette.background.paper ?? '#FFFFFF', 0.94)};
+      background: ${alpha(theme?.palette.background.paper ?? tokens.surfaceElevated, 0.94)};
       border: 1px solid ${alphaColor(COMMON_COLORS.white, 0.12)};
       box-shadow: 0 14px 32px ${alphaColor(COMMON_COLORS.black, 0.24)};
-      color: ${theme?.palette.text.primary ?? '#111827'};
+      color: ${theme?.palette.text.primary ?? tokens.chart.tooltipText};
       transform: translateY(-36px);
       backdrop-filter: blur(10px);
       font-family: "Manrope Variable", Manrope, system-ui, sans-serif;
@@ -273,7 +275,7 @@ function WeatherPopup({
               height: 18,
               display: 'block',
               objectFit: 'contain',
-              filter: 'drop-shadow(0 5px 10px rgba(15, 23, 42, 0.2))',
+              filter: (theme) => getAppThemeTokens(theme).iconShadow,
             }}
           />
           <Typography variant="body2">{weather.weatherDescription}</Typography>

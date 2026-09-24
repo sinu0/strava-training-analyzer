@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 
 import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
+import { Widget } from '@/ui';
 import {
   CHART_COLORS,
   STATUS_COLORS,
@@ -16,7 +17,6 @@ import {
 } from '@/utils/colors';
 
 import { StatusChip, formatTimestamp } from './adminUtils';
-import DataCard from '../common/DataCard';
 
 export interface WeatherLocation {
   id: string;
@@ -50,7 +50,7 @@ export default function WeatherJobSection({
   onRefreshAllWeather,
 }: WeatherJobSectionProps) {
   return (
-    <DataCard title="Cache pogody">
+    <Widget title="Cache pogody">
       <Box sx={{ py: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
           <WeatherConditionIcon kind="sunny" size={28} alt="" />
@@ -196,6 +196,6 @@ export default function WeatherJobSection({
           Odśwież cache wszystkich lokalizacji
         </Button>
       </Box>
-    </DataCard>
+    </Widget>
   );
 }

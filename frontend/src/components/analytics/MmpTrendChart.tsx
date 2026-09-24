@@ -1,6 +1,5 @@
 import {
   Box,
-  Paper,
   Typography,
   Stack,
   ToggleButtonGroup,
@@ -19,16 +18,18 @@ import {
 } from 'recharts';
 
 import { useWeeklyMmp } from '@/hooks/usePowerAnalysis';
+import { Surface } from '@/ui';
 import { getChartVisuals } from '@/utils/chartStyles';
+import { STATUS_COLORS, ZONE_COLORS } from '@/utils/colors';
 
 const STANDARD_DURATIONS = ['5s', '1min', '5min', '20min', '60min'];
 
 const DURATION_COLORS: Record<string, string> = {
-  '5s': '#f44336',
-  '1min': '#ff9800',
-  '5min': '#ffc107',
-  '20min': '#4caf50',
-  '60min': '#2196f3',
+  '5s': ZONE_COLORS.Z5,
+  '1min': ZONE_COLORS.Z4,
+  '5min': ZONE_COLORS.Z3,
+  '20min': ZONE_COLORS.Z2,
+  '60min': ZONE_COLORS.Z1,
 };
 
 interface MmpTrendChartProps {
@@ -61,7 +62,7 @@ export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
   };
 
   const renderState = (message: string, detail?: string) => (
-    <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
+    <Surface padding="sm">
       <Stack spacing={0.75}>
         <Typography variant="subtitle1" sx={{
           fontWeight: 600
@@ -81,7 +82,7 @@ export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
           </Typography>
         ) : null}
       </Stack>
-    </Paper>
+    </Surface>
   );
 
   if (isLoading) {
@@ -98,7 +99,7 @@ export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
   }
 
   return (
-    <Paper sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider' }}>
+    <Surface padding="sm">
       <Stack spacing={1}>
         <Typography variant="subtitle1" sx={{
           fontWeight: 600
@@ -132,7 +133,7 @@ export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
                   key={d}
                   type="monotone"
                   dataKey={d}
-                  stroke={DURATION_COLORS[d] || '#999'}
+                  stroke={DURATION_COLORS[d] ?? STATUS_COLORS.neutral}
                   strokeWidth={2.5}
                   dot={{ r: 3.5, strokeWidth: 0 }}
                   name={d}
@@ -143,6 +144,6 @@ export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
           </ResponsiveContainer>
         </Box>
       </Stack>
-    </Paper>
+    </Surface>
   );
 }

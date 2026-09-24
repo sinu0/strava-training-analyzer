@@ -3,6 +3,8 @@ import RouteOutlinedIcon from '@mui/icons-material/RouteOutlined';
 import { Box, Skeleton, Stack, Typography } from '@mui/material';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 const ActivityMap = lazy(() => import('@/components/ActivityMap'));
 
 interface ActivityRoutePreviewProps {
@@ -102,9 +104,10 @@ export default function ActivityRoutePreview({
             px: 1,
             py: 0.55,
             borderRadius: 999,
-            bgcolor: 'rgba(8, 12, 18, 0.76)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            backdropFilter: 'blur(10px)'
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+            boxShadow: (theme) => getAppThemeTokens(theme).cardShadow
           }}>
           <MapOutlinedIcon sx={{ fontSize: 15, color: 'primary.main' }} />
           <Typography variant="caption" sx={{ fontWeight: 750, color: 'text.primary' }}>

@@ -2,13 +2,14 @@ import { Box, FormControl, InputLabel, MenuItem, Select, Stack, Typography } fro
 import { useMemo, useState } from 'react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
+import { tokens } from '@/theme/theme';
 import type { SegmentComparison } from '@/types/segments';
 
 import SegmentRouteMap from './SegmentRouteMap';
 
 interface SegmentComparisonVisualProps { comparison: SegmentComparison }
 
-const colors = ['#ff6b35', '#31c4f3', '#8b5cf6'];
+const colors = tokens.map.series;
 const metrics = {
   powerW: { label: 'Moc', unit: 'W' },
   heartrate: { label: 'Tętno', unit: 'bpm' },
@@ -40,7 +41,7 @@ export default function SegmentComparisonVisual({ comparison }: SegmentCompariso
   const markers = hoverIndex == null ? [] : comparison.series.flatMap((series, index) => {
     const point = series.points[hoverIndex];
     return point?.latitude != null && point.longitude != null
-      ? [{ id: series.effortId, position: [point.latitude, point.longitude] as [number, number], color: colors[index] ?? '#ff6b35' }]
+      ? [{ id: series.effortId, position: [point.latitude, point.longitude] as [number, number], color: colors[index % colors.length] ?? tokens.map.highlight }]
       : [];
   });
   return (

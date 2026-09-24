@@ -11,8 +11,9 @@ import {
   YAxis,
 } from 'recharts';
 
-import ChartContainer from '@/components/common/ChartContainer';
+import { getAppThemeTokens } from '@/theme/theme';
 import type { WeightGoal, WeightRecord } from '@/types/weight';
+import { ChartFrame } from '@/ui';
 import { CHART_ACTIVE_DOT, getChartVisuals } from '@/utils/chartStyles';
 
 const WEIGHT_GRADIENT_ID = 'weight-history-gradient';
@@ -35,7 +36,7 @@ export default function WeightChart({
 
   return (
     <Grid size={12}>
-      <ChartContainer
+      <ChartFrame
         title="Historia wagi"
         empty={chartData.length === 0}
         emptyTitle="Brak danych o wadze"
@@ -46,8 +47,8 @@ export default function WeightChart({
             <AreaChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id={WEIGHT_GRADIENT_ID} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={theme.tokens.chart.secondary} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={theme.tokens.chart.secondary} stopOpacity={0} />
+                  <stop offset="5%" stopColor={getAppThemeTokens(theme).chart.secondary} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={getAppThemeTokens(theme).chart.secondary} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid {...chart.grid} />
@@ -73,11 +74,11 @@ export default function WeightChart({
               {!!goal && (
                 <ReferenceLine
                   y={Number(goal.targetWeightKg)}
-                  stroke={theme.tokens.chart.primary}
+                  stroke={getAppThemeTokens(theme).chart.primary}
                   strokeDasharray="5 5"
                   label={{
                     value: `Cel: ${Number(goal.targetWeightKg).toFixed(1)} kg`,
-                    fill: theme.tokens.chart.primary,
+                    fill: getAppThemeTokens(theme).chart.primary,
                     fontSize: 11,
                     position: 'right',
                   }}
@@ -86,16 +87,16 @@ export default function WeightChart({
               <Area
                 type="monotone"
                 dataKey="weight"
-                stroke={theme.tokens.chart.secondary}
+                stroke={getAppThemeTokens(theme).chart.secondary}
                 strokeWidth={2.5}
                 fill={`url(#${WEIGHT_GRADIENT_ID})`}
-                dot={{ fill: theme.tokens.chart.secondary, r: 3.5, strokeWidth: 0 }}
-                activeDot={{ ...CHART_ACTIVE_DOT, stroke: theme.tokens.chart.secondary }}
+                dot={{ fill: getAppThemeTokens(theme).chart.secondary, r: 3.5, strokeWidth: 0 }}
+                activeDot={{ ...CHART_ACTIVE_DOT, stroke: getAppThemeTokens(theme).chart.secondary }}
               />
             </AreaChart>
           </ResponsiveContainer>
         </Box>
-      </ChartContainer>
+      </ChartFrame>
     </Grid>
   );
 }

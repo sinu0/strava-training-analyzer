@@ -1,10 +1,11 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
+import NotesOutlinedIcon from '@mui/icons-material/NotesOutlined';
+import ShowChartOutlinedIcon from '@mui/icons-material/ShowChartOutlined';
 import {
   Box,
   Button,
-  Chip,
   Grid,
-  Stack,
   Tab,
   Tabs,
   Typography,
@@ -15,14 +16,9 @@ import ActivityMetricGrid from '@/components/activity/ActivityMetricGrid';
 import ActivityRoutePreview from '@/components/activity/ActivityRoutePreview';
 import LapsTab from '@/components/activity/LapsTab';
 import ActivityStreamsChart from '@/components/ActivityStreamsChart';
-import EmptyState from '@/components/common/EmptyState';
-import ErrorState from '@/components/common/ErrorState';
-import LoadingState from '@/components/common/LoadingState';
-import PageContainer from '@/components/common/PageContainer';
 import MatchedRideCard from '@/components/matched-rides/MatchedRideCard';
 import ActivitySegmentsPanel from '@/components/segments/ActivitySegmentsPanel';
-import MetricReadout from '@/components/v2/MetricReadout';
-import PerformanceSurface from '@/components/v2/PerformanceSurface';
+import { EmptyState, ErrorState, LoadingState, Metric, Page, StatusPill, Surface, Widget } from '@/ui';
 
 import { useActivityLaps, useActivityStreams, useV2Activity } from './useHistory';
 
@@ -55,14 +51,14 @@ export default function ActivityDetailV2Page() {
   };
 
   return (
-    <PageContainer
+    <Page
       title={data.name}
       subtitle={`${new Date(data.startedAt).toLocaleString('pl-PL')} · ${data.sportType}`}
       maxWidth={1200}
       breadcrumbs={[{ label: 'Historia', href: '/activities' }, { label: data.name }]}
       actions={<Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/activities')}>Historia</Button>}
     >
-      <PerformanceSurface accent>
+      <Surface padding="none" variant="accent">
         <Box sx={{ p: { xs: 2, md: 3 } }}>
           <Grid container spacing={2}>
             {[
@@ -80,7 +76,7 @@ export default function ActivityDetailV2Page() {
                   sm: 4,
                   md: 2
                 }}>
-                <MetricReadout label={label} value={value} tone={label === 'Moc' ? 'primary' : undefined} />
+                <Metric label={label} value={value} tone={label.startsWith('Moc') ? 'primary' : undefined} />
               </Grid>
             ))}
           </Grid>
@@ -91,19 +87,19 @@ export default function ActivityDetailV2Page() {
           <Tab value="laps" label="Okrążenia" />
           <Tab value="segments" label="Segmenty" />
         </Tabs>
-      </PerformanceSurface>
+      </Surface>
       <Box sx={{ mt: 2.5 }}>
         {tab === 'overview' && (
           <Grid container spacing={2}>
             <Grid size={12}>
-              <PerformanceSurface>
+              <Surface padding="none">
                 <ActivityRoutePreview
                   activityName={data.name}
                   summaryPolyline={data.summaryPolyline}
                   height={380}
                   priority
                 />
-              </PerformanceSurface>
+              </Surface>
             </Grid>
             <Grid size={12}><MatchedRideCard activityId={data.id} /></Grid>
             <Grid
@@ -111,48 +107,34 @@ export default function ActivityDetailV2Page() {
                 xs: 12,
                 md: 7
               }}>
-              <PerformanceSurface sx={{ p: 2.5 }}>
-                <Typography variant="h6">Podsumowanie</Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                    mt: 1.5,
-                    whiteSpace: 'pre-wrap'
-                  }}>
+              <Widget title="Podsumowanie" icon={<NotesOutlinedIcon />}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'pre-wrap' }}>
                   {data.description || 'Brak opisu aktywności.'}
                 </Typography>
-              </PerformanceSurface>
+              </Widget>
             </Grid>
             <Grid
               size={{
                 xs: 12,
                 md: 5
               }}>
-              <PerformanceSurface sx={{ p: 2.5 }}>
-                <Typography variant="h6">Metryki i jakość</Typography>
+              <Widget title="Metryki i jakość" icon={<InsightsOutlinedIcon />}>
                 <ActivityMetricGrid metrics={data.metrics} />
-              </PerformanceSurface>
+              </Widget>
             </Grid>
           </Grid>
         )}
 
         {tab === 'analysis' && (
-          <PerformanceSurface sx={{ p: { xs: 1.5, md: 2.5 } }}>
+          <Widget
+            title="Przebieg sesji"
+            icon={<ShowChartOutlinedIcon />}
+            action={streamData != null && streamData.returnedPoints > 0 ? <StatusPill size="sm" label={`${streamData.returnedPoints}/${streamData.originalPoints} punktów`} /> : undefined}
+          >
             {streams.isLoading ? <LoadingState message="Ładowanie zredukowanych strumieni…" /> : null}
             {streams.isError ? <ErrorState message="Nie udało się pobrać strumieni." onRetry={() => void streams.refetch()} /> : null}
             {streamData != null && streamData.returnedPoints > 0 ? (
               <>
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  sx={{
-                    alignItems: "center",
-                    mb: 2
-                  }}>
-                  <Typography variant="h6">Przebieg sesji</Typography>
-                  <Chip size="small" label={`${streamData.returnedPoints}/${streamData.originalPoints} punktów`} />
-                </Stack>
                 <ActivityStreamsChart
                   timeStream={streamData.time ?? null}
                   powerStream={streamData.power ?? null}
@@ -162,11 +144,11 @@ export default function ActivityDetailV2Page() {
                 />
               </>
             ) : streamData ? <EmptyState title="Brak strumieni" description="Aktywność nie zawiera danych czasowych do analizy." /> : null}
-          </PerformanceSurface>
+          </Widget>
         )}
 
         {tab === 'laps' && (
-          <PerformanceSurface>
+          <Surface padding="none">
             {laps.isLoading ? <LoadingState message="Ładowanie okrążeń…" /> : null}
             {laps.isError ? <ErrorState message="Nie udało się pobrać okrążeń." onRetry={() => void laps.refetch()} /> : null}
             {lapData.length > 0 ? (
@@ -182,10 +164,10 @@ export default function ActivityDetailV2Page() {
                 />
               </Box>
             ) : laps.data ? <EmptyState title="Brak okrążeń" /> : null}
-          </PerformanceSurface>
+          </Surface>
         )}
         {tab === 'segments' && <ActivitySegmentsPanel activityId={data.id} />}
       </Box>
-    </PageContainer>
+    </Page>
   );
 }

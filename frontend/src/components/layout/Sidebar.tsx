@@ -15,6 +15,8 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION, type AppNavigationItem } from '@/navigation/appNavigation';
+import { getAppThemeTokens } from '@/theme/theme';
+import BrandMark from '@/ui/BrandMark';
 
 interface SidebarProps {
   width: number;
@@ -50,10 +52,10 @@ function NavButton({ item, selected, onClick }: { item: AppNavigationItem; selec
         borderRadius: 999,
         mb: 0.35,
         py: 0.95,
-        '&:hover': { bgcolor: (theme) => theme.tokens.hoverOverlay },
+        '&:hover': { bgcolor: (theme) => getAppThemeTokens(theme).hoverOverlay },
         '&.Mui-selected': {
-          bgcolor: (theme) => alpha(theme.tokens.chart.primary, 0.1),
-          '&:hover': { bgcolor: (theme) => alpha(theme.tokens.chart.primary, 0.16) },
+          bgcolor: (theme) => alpha(getAppThemeTokens(theme).chart.primary, 0.1),
+          '&:hover': { bgcolor: (theme) => alpha(getAppThemeTokens(theme).chart.primary, 0.16) },
         },
       }}
     >
@@ -133,7 +135,7 @@ export default function Sidebar({
           width,
           boxSizing: 'border-box',
           borderRight: '1px solid',
-          borderColor: (t) => t.tokens.surfaceBorder,
+          borderColor: (t) => getAppThemeTokens(t).surfaceBorder,
           bgcolor: (t) => t.palette.background.paper,
           position: 'relative',
           overflow: 'hidden',
@@ -148,20 +150,7 @@ export default function Sidebar({
     >
       {/* Header */}
       <Toolbar sx={{ gap: 1.25, px: 2.25, minHeight: 78 }}>
-        <Box
-          sx={{
-            width: 40,
-            height: 40,
-            display: 'grid',
-            placeItems: 'center',
-            borderRadius: '12px',
-            color: '#fff',
-            background: (t) => t.tokens.gradients.strava,
-            boxShadow: '0 10px 28px rgba(252,76,2,0.24)',
-          }}
-        >
-          <SpeedOutlinedIcon />
-        </Box>
+        <BrandMark icon={<SpeedOutlinedIcon />} />
         <Box sx={{ minWidth: 0 }}>
           <Typography
             noWrap
@@ -217,7 +206,7 @@ export default function Sidebar({
       <Box
         sx={{
           borderTop: '1px solid',
-          borderColor: (t) => t.tokens.surfaceBorder,
+          borderColor: (t) => getAppThemeTokens(t).surfaceBorder,
           pb: 1.25,
           pt: 0.75,
         }}
@@ -230,7 +219,7 @@ export default function Sidebar({
             px: 2.75,
             pt: 0.75
           }}>
-          <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: 'success.main', boxShadow: '0 0 10px rgba(63,185,80,0.55)' }} />
+          <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: 'success.main', boxShadow: (theme) => getAppThemeTokens(theme).glow.success }} />
           <Typography
             variant="caption"
             sx={{

@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { useMemo } from 'react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
+import { tokens } from '@/theme/theme';
 import type { SegmentEffort } from '@/types/segments';
 
 export default function SegmentProgressChart({ efforts }: { efforts: SegmentEffort[] }) {
@@ -25,7 +26,7 @@ export default function SegmentProgressChart({ efforts }: { efforts: SegmentEffo
             <XAxis dataKey="date" tickFormatter={value => new Date(String(value)).toLocaleDateString('pl-PL')} />
             <YAxis reversed unit=" s" domain={['dataMin - 3', 'dataMax + 3']} />
             <Tooltip labelFormatter={value => new Date(String(value)).toLocaleString('pl-PL')} formatter={value => [`${Number(value)} s`, 'Czas']} />
-            <Line type="monotone" dataKey="elapsedTimeSec" name="Czas" stroke="#ff6b35" strokeWidth={2.5} activeDot={{ r: 6 }} />
+            <Line type="monotone" dataKey="elapsedTimeSec" name="Czas" stroke={tokens.chart.primary} strokeWidth={2.5} activeDot={{ r: 6 }} />
           </LineChart>
         </ResponsiveContainer>
       </Box>

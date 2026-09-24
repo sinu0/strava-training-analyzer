@@ -4,13 +4,13 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Box, IconButton, Typography, Grid } from '@mui/material';
 import { useState, useMemo } from 'react';
 
+import { LoadingState } from '@/ui';
 import { localDate } from '@/utils/localDate';
 
 import CalendarDayCell from './CalendarDayCell';
 import CalendarDayDialog from './CalendarDayDialog';
 import TrainingProjectionChart from './TrainingProjectionChart';
 import { useCalendarView } from '../../hooks/useTrainingPlan';
-import LoadingState from '../common/LoadingState';
 
 import type { CalendarDay } from '../../types/training';
 

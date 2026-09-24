@@ -4,6 +4,7 @@ import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/ma
 
 import { useColorMode } from '@/context/ThemeModeContext';
 import type { AppColorMode } from '@/theme/theme';
+import { getAppThemeTokens } from '@/theme/theme';
 
 import type { ReactNode } from 'react';
 
@@ -78,7 +79,7 @@ export default function ThemeModeSettings() {
               color: 'text.primary',
               '&.Mui-selected': {
                 color: 'primary.main',
-                bgcolor: (theme) => theme.tokens.activeOverlay,
+                bgcolor: (theme) => getAppThemeTokens(theme).activeOverlay,
                 borderColor: 'primary.main !important',
               },
             }}

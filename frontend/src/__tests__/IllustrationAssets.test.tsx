@@ -2,7 +2,6 @@ import { ThemeProvider } from '@mui/material/styles';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import ReadinessGauge from '@/components/ReadinessGauge';
 import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
 import WeatherWidgetHeader from '@/components/weather/WeatherWidgetHeader';
 import {
@@ -82,25 +81,6 @@ describe('illustration assets', () => {
     expect(getPageHeroIllustrationPath('dashboard')).toBe('/illustrations/hero-dashboard.png');
     expect(getPageHeroIllustrationPath('analytics')).toBe('/illustrations/hero-analytics.png');
     expect(getPageHeroIllustrationPath('training')).toBe('/illustrations/hero-training.png');
-  });
-
-  it('renders readiness hero with matching home illustration', () => {
-    renderWithTheme(
-      <ReadinessGauge
-        data={{
-          score: 96,
-          level: 'pełna moc',
-          tsb: 6,
-          ctl: 74,
-          atl: 68,
-          description: 'Dzień pod mocny trening.',
-        }}
-      />,
-    );
-
-    expect(screen.getByRole('img', { name: 'Gotowość: pełna moc' }).getAttribute('src')).toBe(
-      '/illustrations/home-readiness.jpg',
-    );
   });
 
   it('renders weather hero with matching weather illustration', () => {

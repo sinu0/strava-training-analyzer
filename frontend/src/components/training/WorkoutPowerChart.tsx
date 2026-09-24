@@ -1,5 +1,8 @@
 import Box from '@mui/material/Box';
+import { useTheme } from '@mui/material/styles';
 import { useRef, useEffect, useState } from 'react';
+
+import { getAppThemeTokens } from '@/theme/theme';
 
 import { stepsToSegments, formatTime, getTypeLabel } from './workoutChartUtils';
 import { getZoneForPower, ZONE_COLORS_TRAINING } from '../../types/training';
@@ -27,6 +30,9 @@ export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPow
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(600);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const theme = useTheme();
+  const tokens = getAppThemeTokens(theme);
+  const ink = { grid: tokens.chart.grid, axis: tokens.surfaceStrongBorder, tick: tokens.chart.tick, strong: theme.palette.text.primary };
 
   useEffect(() => {
     const el = containerRef.current;
@@ -79,7 +85,7 @@ export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPow
               x2={margin.left + contentW}
               y1={toY(t)}
               y2={toY(t)}
-              stroke="#30363D"
+              stroke={ink.grid}
               strokeDasharray={t === 100 ? '4 3' : undefined}
               strokeWidth={t === 100 ? 1.5 : 0.8}
             />
@@ -91,7 +97,7 @@ export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPow
           const w = Math.max(1, toX(seg.endSec) - x);
           const avgPower = (seg.powerLow + seg.powerHigh) / 2;
           const zone = getZoneForPower(avgPower);
-          const fill = ZONE_COLORS_TRAINING[zone] ?? '#8B949E';
+          const fill = ZONE_COLORS_TRAINING[zone] ?? ink.tick;
 
           if (seg.type === 'warmup' || seg.type === 'cooldown') {
             const y0 = toY(seg.type === 'warmup' ? seg.powerLow : seg.powerHigh);
@@ -149,14 +155,14 @@ export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPow
         {/* Y axis */}
         {!compact && (
           <>
-            <line x1={margin.left} y1={margin.top} x2={margin.left} y2={margin.top + contentH} stroke="#444D56" />
+            <line x1={margin.left} y1={margin.top} x2={margin.left} y2={margin.top + contentH} stroke={ink.axis} />
             {yTicks.map((t) => (
               <text
                 key={t}
                 x={margin.left - 6}
                 y={toY(t) + 4}
                 textAnchor="end"
-                fill={t === 100 ? '#E6EDF3' : '#8B949E'}
+                fill={t === 100 ? ink.strong : ink.tick}
                 fontSize={11}
               >
                 {t}%
@@ -173,7 +179,7 @@ export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPow
               y1={margin.top + contentH}
               x2={margin.left + contentW}
               y2={margin.top + contentH}
-              stroke="#444D56"
+              stroke={ink.axis}
             />
             {xTicks.map((t) => (
               <text
@@ -181,7 +187,7 @@ export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPow
                 x={toX(t)}
                 y={margin.top + contentH + 18}
                 textAnchor="middle"
-                fill="#8B949E"
+                fill={ink.tick}
                 fontSize={11}
               >
                 {formatTime(t)}
@@ -192,7 +198,7 @@ export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPow
 
         {/* FTP label */}
         {!compact && (
-          <text x={margin.left + contentW + 4} y={toY(100) + 4} fill="#8B949E" fontSize={10}>
+          <text x={margin.left + contentW + 4} y={toY(100) + 4} fill={ink.tick} fontSize={10}>
             FTP
           </text>
         )}
@@ -205,20 +211,22 @@ export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPow
             position: 'fixed',
             left: tooltip.x + 12,
             top: tooltip.y - 8,
-            background: '#161B22',
-            border: '1px solid #30363D',
-            borderRadius: 1,
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: `${tokens.radius.control}px`,
+            boxShadow: tokens.cardShadow,
             px: 1.5,
             py: 1,
             pointerEvents: 'none',
             zIndex: 9999,
             fontSize: 12,
-            color: '#E6EDF3',
+            color: 'text.primary',
           }}
         >
           <div style={{ fontWeight: 600 }}>{tooltip.label}</div>
-          <div style={{ color: '#8B949E' }}>{tooltip.power}% FTP</div>
-          <div style={{ color: '#8B949E' }}>{formatTime(tooltip.duration)}</div>
+          <Box sx={{ color: 'text.secondary' }}>{tooltip.power}% FTP</Box>
+          <Box sx={{ color: 'text.secondary' }}>{formatTime(tooltip.duration)}</Box>
         </Box>
       )}
     </Box>

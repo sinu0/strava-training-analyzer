@@ -20,8 +20,6 @@ import EquipmentSection from '@/components/admin/EquipmentSection';
 import StravaConfigSection from '@/components/admin/StravaConfigSection';
 import SyncStatusSection from '@/components/admin/SyncStatusSection';
 import WeatherJobSection from '@/components/admin/WeatherJobSection';
-import PageContainer from '@/components/common/PageContainer';
-import Section from '@/components/common/Section';
 import ThemeModeSettings from '@/components/settings/ThemeModeSettings';
 import { useAiStatus, useAiValidationReport, useRunAiBatch } from '@/hooks/useAi';
 import {
@@ -49,6 +47,7 @@ import {
   useWeatherLocations,
 } from '@/hooks/useAnalytics';
 import { useCountdown } from '@/hooks/useCountdown';
+import { Page, Widget } from '@/ui';
 import { STATUS_COLORS } from '@/utils/colors';
 import { getApiErrorMessage } from '@/utils/errorHandling';
 
@@ -84,7 +83,7 @@ function getMutationErrorMessage(mutation: MutationWithError, fallback: string):
 
 function AdminActionSection({ title, subtitle, pending, success, idleLabel, pendingLabel, successLabel, onClick }: AdminActionSectionProps) {
   return (
-    <Section title={title} subtitle={subtitle}>
+    <Widget title={title} subtitle={subtitle}>
       <Button
         variant="outlined"
         color="primary"
@@ -99,7 +98,7 @@ function AdminActionSection({ title, subtitle, pending, success, idleLabel, pend
           {successLabel}
         </span>
       )}
-    </Section>
+    </Widget>
   );
 }
 
@@ -195,7 +194,7 @@ export default function AdminPage() {
     ?? getMutationErrorMessage(syncFull, 'Błąd synchronizacji. Sprawdź połączenie ze Strava.');
 
   return (
-    <PageContainer title="Ustawienia" subtitle="Konfiguracja: integracje, sync i dane oraz przetwarzanie." breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Ustawienia' }]}>
+    <Page title="Ustawienia" subtitle="Konfiguracja: integracje, sync i dane oraz przetwarzanie." breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Ustawienia' }]}>
       <AdminGroup title="Integracje" subtitle="Połączenia z usługami zewnętrznymi i stan autoryzacji." icon={<LinkIcon />} defaultExpanded={true}>
         <Grid container spacing={3}>
           <Grid size={12}>
@@ -283,6 +282,6 @@ export default function AdminPage() {
       <AdminGroup title="Sprzęt" subtitle="Zarządzaj rowerem i komponentami — śledź przebieg i terminy wymian." icon={<SettingsSuggestIcon />} defaultExpanded={true}>
         <EquipmentSection />
       </AdminGroup>
-    </PageContainer>
+    </Page>
   );
 }

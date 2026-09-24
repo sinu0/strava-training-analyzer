@@ -13,6 +13,9 @@ import {
   Cell,
 } from 'recharts';
 
+import { getAppThemeTokens } from '@/theme/theme';
+import { STATUS_COLORS } from '@/utils/colors';
+
 import { useWeeklySummaries } from '../../hooks/useAnalytics';
 import { getChartVisuals } from '../../utils/chartStyles';
 import { alphaColor } from '../../utils/colors';
@@ -32,7 +35,7 @@ const METRICS: MetricOption[] = [
   {
     key: 'distance',
     label: 'Dystans',
-    color: '#3B82F6',
+    color: STATUS_COLORS.info,
     unit: 'km',
     getValue: (s) => Math.round((s.totalDistanceM / 1000) * 10) / 10,
     format: (v) => `${v} km`,
@@ -40,7 +43,7 @@ const METRICS: MetricOption[] = [
   {
     key: 'time',
     label: 'Czas',
-    color: '#FF6B35',
+    color: STATUS_COLORS.accent,
     unit: 'h',
     getValue: (s) => Math.round((s.totalTimeSec / 3600) * 10) / 10,
     format: (v) => `${v} h`,
@@ -48,7 +51,7 @@ const METRICS: MetricOption[] = [
   {
     key: 'elevation',
     label: 'Przewyższenie',
-    color: '#3FB950',
+    color: STATUS_COLORS.success,
     unit: 'm',
     getValue: (s) => Math.round(s.totalElevationM),
     format: (v) => `${v} m`,
@@ -77,7 +80,7 @@ function CustomTooltip({
         borderRadius: 2,
         px: 1.5,
         py: 1,
-        boxShadow: theme.tokens.cardShadow,
+        boxShadow: getAppThemeTokens(theme).cardShadow,
       }}
     >
       <Typography

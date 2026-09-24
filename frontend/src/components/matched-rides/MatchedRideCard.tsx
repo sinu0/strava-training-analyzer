@@ -4,14 +4,11 @@ import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { Line, LineChart, ResponsiveContainer, YAxis } from 'recharts';
 
-import ErrorState from '@/components/common/ErrorState';
-import LoadingState from '@/components/common/LoadingState';
-import MetricReadout from '@/components/v2/MetricReadout';
-import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import { speedChartDomain } from '@/features/matched-rides/chartScale';
 import { useMatchedRide } from '@/hooks/useMatchedRides';
 import { getAppThemeTokens } from '@/theme/theme';
 import type { MatchedRideSummary } from '@/types/matchedRides';
+import { ErrorState, LoadingState, Metric, Surface } from '@/ui';
 
 interface MatchedRideCardProps { activityId: string }
 
@@ -41,7 +38,7 @@ export default function MatchedRideCard({ activityId }: MatchedRideCardProps) {
   if (!isRenderableSummary(data) || data.rideCount < 2) return null;
   const chartDomain = speedChartDomain(data.trend.map(point => point.averageSpeedKmh));
   return (
-    <PerformanceSurface sx={{ p: { xs: 2, md: 2.5 } }}>
+    <Surface>
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5} sx={{
         alignItems: { md: 'center' }
       }}>
@@ -78,10 +75,10 @@ export default function MatchedRideCard({ activityId }: MatchedRideCardProps) {
         </Box>
       </Stack>
       <Grid container spacing={2} sx={{ mt: 1 }}>
-        <Grid size={{ xs: 6, sm: 3 }}><MetricReadout label="Ta jazda" value={data.currentSpeedKmh != null ? `${data.currentSpeedKmh.toFixed(1)} km/h` : '—'} tone="primary" /></Grid>
-        <Grid size={{ xs: 6, sm: 3 }}><MetricReadout label="vs poprzednia" value={signed(data.changeFromPreviousKmh)} /></Grid>
-        <Grid size={{ xs: 6, sm: 3 }}><MetricReadout label="vs średnia" value={signed(data.changeFromAverageKmh)} /></Grid>
-        <Grid size={{ xs: 6, sm: 3 }}><MetricReadout label="vs rekord" value={signed(data.changeFromRecordKmh)} /></Grid>
+        <Grid size={{ xs: 6, sm: 3 }}><Metric label="Ta jazda" value={data.currentSpeedKmh != null ? `${data.currentSpeedKmh.toFixed(1)} km/h` : '—'} tone="primary" /></Grid>
+        <Grid size={{ xs: 6, sm: 3 }}><Metric label="vs poprzednia" value={signed(data.changeFromPreviousKmh)} /></Grid>
+        <Grid size={{ xs: 6, sm: 3 }}><Metric label="vs średnia" value={signed(data.changeFromAverageKmh)} /></Grid>
+        <Grid size={{ xs: 6, sm: 3 }}><Metric label="vs rekord" value={signed(data.changeFromRecordKmh)} /></Grid>
       </Grid>
       <Stack
         direction="row"
@@ -91,6 +88,6 @@ export default function MatchedRideCard({ activityId }: MatchedRideCardProps) {
         }}>
         <Button endIcon={<ArrowForwardRoundedIcon />} onClick={() => navigate(`/matched-rides/${data.routeGroupId}`)}>Zobacz dopasowane przejazdy</Button>
       </Stack>
-    </PerformanceSurface>
+    </Surface>
   );
 }

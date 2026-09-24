@@ -21,12 +21,15 @@ import {
   Typography,
 } from '@mui/material';
 import { alpha, type Theme } from '@mui/material/styles';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import TopBarSyncButton from '@/components/layout/TopBarSyncButton';
 import { useColorMode } from '@/context/ThemeModeContext';
 import { getAppThemeTokens } from '@/theme/theme';
+import BrandMark from '@/ui/BrandMark';
+
+// Sync status pulls the analytics hooks; loading it after first paint keeps the entry chunk small.
+const TopBarSyncButton = lazy(() => import('@/components/layout/TopBarSyncButton'));
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -41,14 +44,14 @@ const roundActionButtonSx = (theme: Theme) => ({
   width: getAppThemeTokens(theme).control.md,
   height: getAppThemeTokens(theme).control.md,
   flexShrink: 0,
-  bgcolor: theme.tokens.searchPill,
+  bgcolor: getAppThemeTokens(theme).searchPill,
   color: theme.palette.text.primary,
-  boxShadow: theme.tokens.cardShadow,
-  transition: theme.tokens.transition,
+  boxShadow: getAppThemeTokens(theme).cardShadow,
+  transition: getAppThemeTokens(theme).transition,
   '&:hover': {
-    bgcolor: theme.tokens.searchPill,
-    backgroundImage: `linear-gradient(${theme.tokens.hoverOverlay}, ${theme.tokens.hoverOverlay})`,
-    boxShadow: theme.tokens.cardShadowHover,
+    bgcolor: getAppThemeTokens(theme).searchPill,
+    backgroundImage: `linear-gradient(${getAppThemeTokens(theme).hoverOverlay}, ${getAppThemeTokens(theme).hoverOverlay})`,
+    boxShadow: getAppThemeTokens(theme).cardShadowHover,
   },
 });
 
@@ -77,10 +80,10 @@ export default function TopBar({
         position="sticky"
         elevation={0}
         sx={{
-          bgcolor: (theme) => theme.tokens.topBar,
+          bgcolor: (theme) => getAppThemeTokens(theme).topBar,
           color: 'text.primary',
           borderBottom: (theme) =>
-            theme.tokens.mode === 'dark' ? `1px solid ${theme.tokens.surfaceBorder}` : 'none',
+            getAppThemeTokens(theme).mode === 'dark' ? `1px solid ${getAppThemeTokens(theme).surfaceBorder}` : 'none',
           backdropFilter: 'blur(18px)',
           overflow: 'visible',
           zIndex: (theme) => theme.zIndex.appBar + 1,
@@ -100,21 +103,7 @@ export default function TopBar({
             </IconButton>
             {showBrand ? (
               <>
-                <Box
-                  sx={{
-                    width: 34,
-                    height: 34,
-                    display: 'grid',
-                    placeItems: 'center',
-                    flexShrink: 0,
-                    borderRadius: '12px',
-                    color: '#fff',
-                    background: (theme) => theme.tokens.gradients.strava,
-                    boxShadow: '0 8px 20px rgba(252,76,2,0.28)',
-                  }}
-                >
-                  <PedalBikeOutlinedIcon sx={{ fontSize: 20 }} />
-                </Box>
+                <BrandMark size={34} icon={<PedalBikeOutlinedIcon />} />
                 <Typography variant="subtitle1" sx={{ lineHeight: 1.2, whiteSpace: 'nowrap' }}>
                   Training Lab
                 </Typography>
@@ -133,11 +122,11 @@ export default function TopBar({
                 minHeight: (theme) => getAppThemeTokens(theme).control.md,
                 px: 1.75,
                 borderRadius: 999,
-                bgcolor: (theme) => theme.tokens.searchPill,
-                boxShadow: (theme) => theme.tokens.cardShadow,
-                transition: (theme) => theme.tokens.transition,
+                bgcolor: (theme) => getAppThemeTokens(theme).searchPill,
+                boxShadow: (theme) => getAppThemeTokens(theme).cardShadow,
+                transition: (theme) => getAppThemeTokens(theme).transition,
                 '&:focus-within': {
-                  boxShadow: (theme) => theme.tokens.cardShadowHover,
+                  boxShadow: (theme) => getAppThemeTokens(theme).cardShadowHover,
                 },
               }}
             >
@@ -182,7 +171,9 @@ export default function TopBar({
                 bgcolor: (theme) => alpha(theme.palette.success.main, 0.08),
               }}
             />
-            <TopBarSyncButton />
+            <Suspense fallback={<Box sx={{ width: 44, height: 44 }} />}>
+              <TopBarSyncButton />
+            </Suspense>
 
             <Tooltip title={mode === 'dark' ? 'Włącz jasny motyw' : 'Włącz ciemny motyw'}>
               <IconButton
@@ -232,9 +223,9 @@ export default function TopBar({
               mt: 1,
               bgcolor: 'background.paper',
               border: '1px solid',
-              borderColor: (t: Theme) => t.tokens.surfaceBorder,
+              borderColor: (t: Theme) => getAppThemeTokens(t).surfaceBorder,
               borderRadius: 3,
-              boxShadow: (t: Theme) => t.tokens.cardShadow,
+              boxShadow: (t: Theme) => getAppThemeTokens(t).cardShadow,
               minWidth: 180,
             },
           },

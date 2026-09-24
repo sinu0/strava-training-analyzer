@@ -3,6 +3,7 @@ import { useEffect, useMemo } from 'react';
 import { CircleMarker, MapContainer, Polyline, TileLayer, Tooltip, useMap } from 'react-leaflet';
 
 import { DEFAULT_MAP_TILE_VARIANT, MAP_TILE_CONFIG } from '@/constants/mapTiles';
+import { tokens } from '@/theme/theme';
 import { decodePolyline } from '@/utils/map';
 
 import 'leaflet/dist/leaflet.css';
@@ -67,7 +68,7 @@ export default function SegmentRouteMap({
             <Polyline
               key={route.id}
               positions={route.positions}
-              pathOptions={{ color: active ? '#ff6b35' : route.color ?? ['#31c4f3', '#8b5cf6', '#22c55e'][index % 3], weight: active ? 8 : route.weight ?? 5, opacity: active ? 1 : route.interactive === false ? 0.5 : 0.82 }}
+              pathOptions={{ color: active ? tokens.map.highlight : route.color ?? tokens.map.series[(index % 3) + 1], weight: active ? 8 : route.weight ?? 5, opacity: active ? 1 : route.interactive === false ? 0.5 : 0.82 }}
               eventHandlers={onOpen && route.interactive !== false ? { click: () => onOpen(route.id) } : undefined}
             ><Tooltip>{route.label}</Tooltip></Polyline>
           );

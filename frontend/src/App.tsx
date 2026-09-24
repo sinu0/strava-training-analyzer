@@ -1,8 +1,8 @@
 import { lazy, Suspense, type ComponentType, type LazyExoticComponent } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import LoadingState from '@/components/common/LoadingState';
 import AppLayout from '@/components/layout/AppLayout';
+import LoadingState from '@/ui/feedback/LoadingState';
 
 const TodayPage = lazy(() => import('@/features/today/TodayPage'));
 const MorePage = lazy(() => import('@/features/more/MorePage'));
@@ -23,6 +23,7 @@ const SegmentDetailPage = lazy(() => import('@/features/segments/SegmentDetailPa
 const MatchedRidesPage = lazy(() => import('@/features/matched-rides/MatchedRidesPage'));
 const ScheduledWorkoutPage = lazy(() => import('@/features/workout/ScheduledWorkoutPage'));
 const WorkoutPlayerPage = lazy(() => import('@/features/workout/WorkoutPlayerPage'));
+const DesignSystemPage = lazy(() => import('@/features/design-system/DesignSystemPage'));
 
 type LazyPageComponent = LazyExoticComponent<ComponentType>;
 
@@ -38,6 +39,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/workout/:executionId" element={renderLazyPage(WorkoutPlayerPage)} />
+      <Route path="/design-system" element={renderLazyPage(DesignSystemPage)} />
       <Route element={<AppLayout />}>
         <Route path="/" element={renderLazyPage(TodayPage)} />
         <Route path="/dashboard" element={<Navigate to="/" replace />} />

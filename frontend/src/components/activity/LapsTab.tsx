@@ -7,6 +7,7 @@ import {
 import { useState, useMemo, useCallback } from 'react';
 
 import type { ActivityLap } from '@/types/activity';
+import { Surface } from '@/ui';
 import { formatDuration, formatDistance, formatPower } from '@/utils/formatters';
 
 import LapCard from './LapCard';
@@ -130,7 +131,7 @@ export default function LapsTab({
   if (!laps.length) {
     return (
       <Box sx={{ textAlign: 'center', py: 6 }}>
-        <Typography sx={{ color: '#8B949E' }}>Brak danych okrążeń.</Typography>
+        <Typography sx={{ color: 'text.secondary' }}>Brak danych okrążeń.</Typography>
       </Box>
     );
   }
@@ -139,7 +140,7 @@ export default function LapsTab({
     <Box>
       {/* Controls */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Typography sx={{ color: '#8B949E', fontSize: '0.8rem', fontWeight: 600 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
           {resolvedLaps.length} okrąż{ resolvedLaps.length === 1 ? 'enie' : resolvedLaps.length >= 5 ? 'eń' : 'enia'}
         </Typography>
         <ToggleButtonGroup
@@ -152,19 +153,6 @@ export default function LapsTab({
               setCompareLaps([]);
             }
           }}
-          sx={{
-            '& .MuiToggleButton-root': {
-              color: '#8B949E',
-              fontSize: '0.7rem',
-              px: 1.5,
-              py: 0.3,
-              borderColor: '#30363D',
-              '&.Mui-selected': {
-                color: '#E6EDF3',
-                bgcolor: 'rgba(88,166,255,0.15)',
-              },
-            },
-          }}
         >
           <ToggleButton value="view">Przegląd</ToggleButton>
           <ToggleButton value="compare">Porównaj</ToggleButton>
@@ -173,8 +161,8 @@ export default function LapsTab({
 
       {/* Comparison mode header */}
       {!!compareMode && compareLaps.length > 0 && (
-        <Box sx={{ mb: 2, p: 2, bgcolor: '#161B22', borderRadius: 2, border: '1px solid #30363D' }}>
-          <Typography sx={{ color: '#8B949E', fontSize: '0.75rem', mb: 1 }}>
+        <Surface variant="muted" padding="sm" radius="panel" sx={{ mb: 2 }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block' }}>
             Porównanie okrążeń {compareLaps.map((i) => `#${i + 1}`).join(' vs ')}
           </Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 2 }}>
@@ -182,26 +170,26 @@ export default function LapsTab({
               const lap = resolvedLaps[idx];
               if (!lap) return null;
               return (
-                <Box key={idx} sx={{ p: 1.5, bgcolor: '#0D1117', borderRadius: 1 }}>
-                  <Typography sx={{ fontSize: '0.7rem', color: '#8B949E', mb: 0.5 }}>
+                <Surface key={idx} padding="none" radius="panel" sx={{ p: 1.5 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0.5, display: 'block' }}>
                     Okr. {idx + 1}
                   </Typography>
-                  <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: '#E6EDF3' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
                     {formatDuration(lap.movingTimeSec)}
                   </Typography>
-                  <Typography sx={{ fontSize: '0.7rem', color: '#8B949E' }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
                     {formatPower(lap.avgPowerW ?? 0)}
                     {lap.normalizedPowerW != null && ` · NP ${lap.normalizedPowerW} W`}
                   </Typography>
-                  <Typography sx={{ fontSize: '0.7rem', color: '#8B949E' }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
                     {formatDistance(lap.distanceM)}
                     {lap.powerDropPct != null && ` · ${lap.powerDropPct > 0 ? '-' : '+'}${Math.abs(lap.powerDropPct).toFixed(1)}%`}
                   </Typography>
-                </Box>
+                </Surface>
               );
             })}
           </Box>
-        </Box>
+        </Surface>
       )}
 
       {/* Lap cards */}

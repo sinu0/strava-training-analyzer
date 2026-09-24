@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 
 import { getWeatherIconConfig, type WeatherIconKind } from '@/constants/weatherIcons';
+import { getAppThemeTokens } from '@/theme/theme';
 import { getWeatherUiIconPath } from '@/utils/illustrationAssets';
 
 interface WeatherConditionIconProps {
@@ -29,7 +30,7 @@ export default function WeatherConditionIcon({
         height: size,
         display: 'block',
         objectFit: 'contain',
-        filter: 'drop-shadow(0 6px 12px rgba(15, 23, 42, 0.24))',
+        filter: (theme) => getAppThemeTokens(theme).iconShadow,
       }}
     />
   );

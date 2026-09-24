@@ -6,9 +6,6 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 import TopBar from '../components/layout/TopBar';
 import theme from '../theme/theme';
 
-vi.mock('../components/layout/StatusPill', () => ({
-  default: () => <div>Status pill</div>,
-}));
 
 vi.mock('../components/layout/TopBarSyncButton', () => ({
   default: () => <div>Sync button</div>,

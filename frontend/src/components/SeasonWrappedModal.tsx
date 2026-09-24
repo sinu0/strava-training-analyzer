@@ -1,9 +1,11 @@
 
 import CloseIcon from '@mui/icons-material/Close';
 import { Box, Button, Chip, Dialog, DialogContent, IconButton, Stack, Typography } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { useState, useCallback } from 'react';
 
 import { useSeasonWrapped, type SeasonWrappedData } from '@/hooks/useSeasonWrapped';
+import { getAppThemeTokens } from '@/theme/theme';
 
 interface Slide {
   title: string;
@@ -169,8 +171,8 @@ export default function SeasonWrappedModal({ year, onClose }: { year: number; on
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          bgcolor: '#0D1117',
-          backgroundImage: 'radial-gradient(ellipse at center, rgba(255,107,53,0.08) 0%, transparent 70%)',
+          bgcolor: (theme) => getAppThemeTokens(theme).media.thumbnailBg,
+          backgroundImage: (theme) => `radial-gradient(ellipse at center, ${alpha(theme.palette.primary.main, 0.08)} 0%, transparent 70%)`,
           textAlign: 'center',
           gap: 3,
         }}
@@ -208,7 +210,7 @@ export default function SeasonWrappedModal({ year, onClose }: { year: number; on
                 width: i === slide ? 24 : 6,
                 height: 6,
                 borderRadius: 3,
-                bgcolor: i === slide ? 'primary.main' : 'rgba(255,255,255,0.2)',
+                bgcolor: i === slide ? 'primary.main' : (theme) => getAppThemeTokens(theme).media.pageDot,
                 transition: 'all 0.3s',
               }}
             />

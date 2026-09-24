@@ -9,12 +9,14 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { forwardRef, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import EmptyState from '@/components/common/EmptyState';
 import { useRecentActivities } from '@/hooks/useAnalytics';
+import { getAppThemeTokens } from '@/theme/theme';
 import type { ActivitySummary } from '@/types/activity';
+import { EmptyState } from '@/ui';
 import { formatDistance, formatDuration } from '@/utils/formatters';
 
 import type { TransitionProps } from '@mui/material/transitions';
@@ -66,14 +68,14 @@ function Stat({ label, value }: { label: string; value: string | null }) {
   return (
     <Box
       sx={{
-        border: '1px solid rgba(255,255,255,0.12)',
+        border: (t) => `1px solid ${getAppThemeTokens(t).media.hairline}`,
         borderRadius: 999,
         px: 1.25,
         py: 0.5,
-        bgcolor: 'rgba(255,255,255,0.04)',
+        bgcolor: (t) => getAppThemeTokens(t).media.surface,
       }}
     >
-      <Typography sx={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.72rem' }}>
+      <Typography sx={{ color: (t) => getAppThemeTokens(t).media.inkMuted, fontSize: '0.72rem' }}>
         {label}
       </Typography>
       <Typography sx={{ color: 'white', fontSize: '0.82rem', fontWeight: 600 }}>
@@ -149,9 +151,9 @@ export default function ProfileGallery() {
             left: -8,
             top: '40%',
             zIndex: 5,
-            bgcolor: 'rgba(0,0,0,0.38)',
+            bgcolor: (t) => getAppThemeTokens(t).media.control,
             color: 'white',
-            '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)', bgcolor: 'rgba(0,0,0,0.2)' },
+            '&.Mui-disabled': { color: (t) => getAppThemeTokens(t).media.inkDisabled, bgcolor: (t) => getAppThemeTokens(t).media.controlDisabled },
           }}
         >
           <ChevronLeftIcon />
@@ -181,20 +183,20 @@ export default function ProfileGallery() {
                   width: '100%',
                   aspectRatio: '1 / 1',
                   p: 0,
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  border: (t) => `1px solid ${getAppThemeTokens(t).media.hairline}`,
                   borderRadius: 3,
                   overflow: 'hidden',
                   cursor: 'pointer',
-                  bgcolor: '#0D1117',
+                  bgcolor: (t) => getAppThemeTokens(t).media.thumbnailBg,
                   appearance: 'none',
                   transition: 'transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease',
                   '&:hover': {
                     transform: 'translateY(-2px)',
-                    borderColor: 'rgba(255,107,53,0.55)',
-                    boxShadow: '0 14px 30px rgba(0,0,0,0.28)',
+                    borderColor: (t) => alpha(t.palette.primary.main, 0.55),
+                    boxShadow: (t) => getAppThemeTokens(t).cardShadowHover,
                   },
                   '&:focus-visible': {
-                    outline: '2px solid #FF6B35',
+                    outline: (t) => `2px solid ${t.palette.primary.main}`,
                     outlineOffset: 2,
                   },
                 }}
@@ -219,7 +221,7 @@ export default function ProfileGallery() {
                     inset: 'auto 0 0 0',
                     px: 1,
                     py: 0.75,
-                    background: 'linear-gradient(180deg, rgba(6,12,18,0) 0%, rgba(6,12,18,0.88) 100%)',
+                    background: (t) => getAppThemeTokens(t).media.fadeBottom,
                     textAlign: 'left',
                   }}
                 >
@@ -250,9 +252,9 @@ export default function ProfileGallery() {
             right: -8,
             top: '40%',
             zIndex: 5,
-            bgcolor: 'rgba(0,0,0,0.38)',
+            bgcolor: (t) => getAppThemeTokens(t).media.control,
             color: 'white',
-            '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)', bgcolor: 'rgba(0,0,0,0.2)' },
+            '&.Mui-disabled': { color: (t) => getAppThemeTokens(t).media.inkDisabled, bgcolor: (t) => getAppThemeTokens(t).media.controlDisabled },
           }}
         >
           <ChevronRightIcon />
@@ -267,7 +269,7 @@ export default function ProfileGallery() {
                   width: pageNumber - 1 === currentPage ? 22 : 8,
                   height: 8,
                   borderRadius: 999,
-                  bgcolor: pageNumber - 1 === currentPage ? 'primary.main' : 'rgba(255,255,255,0.16)',
+                  bgcolor: pageNumber - 1 === currentPage ? 'primary.main' : (t) => getAppThemeTokens(t).media.pageDot,
                   mx: 0.4,
                   transition: 'all 0.18s ease',
                 }}
@@ -306,7 +308,7 @@ export default function ProfileGallery() {
         slotProps={{
           paper: {
             sx: {
-              bgcolor: 'rgba(4, 8, 12, 0.98)',
+              bgcolor: (t) => getAppThemeTokens(t).media.backdrop,
               backgroundImage: 'none',
             },
           }
@@ -332,7 +334,7 @@ export default function ProfileGallery() {
                 transform: 'translateY(-50%)',
                 color: 'white',
                 zIndex: 10,
-                bgcolor: 'rgba(0,0,0,0.35)',
+                bgcolor: (t) => getAppThemeTokens(t).media.control,
               }}
             >
               <ChevronLeftIcon />
@@ -348,7 +350,7 @@ export default function ProfileGallery() {
                 transform: 'translateY(-50%)',
                 color: 'white',
                 zIndex: 10,
-                bgcolor: 'rgba(0,0,0,0.35)',
+                bgcolor: (t) => getAppThemeTokens(t).media.control,
               }}
             >
               <ChevronRightIcon />
@@ -374,7 +376,7 @@ export default function ProfileGallery() {
                 inset: 'auto 0 0 0',
                 px: { xs: 2, md: 3 },
                 py: 2,
-                background: 'linear-gradient(180deg, rgba(4,8,12,0) 0%, rgba(4,8,12,0.94) 52%, rgba(4,8,12,0.98) 100%)',
+                background: (t) => getAppThemeTokens(t).media.fadeBottomStrong,
               }}
             >
               <Stack
@@ -389,7 +391,7 @@ export default function ProfileGallery() {
                     {currentPhoto.title}
                   </Typography>
                   {!!currentPhoto.startedAt && (
-                    <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', mt: 0.5 }}>
+                    <Typography sx={{ color: (t) => getAppThemeTokens(t).media.inkMuted, fontSize: '0.85rem', mt: 0.5 }}>
                       {formatStartedAt(currentPhoto.startedAt)}
                     </Typography>
                   )}

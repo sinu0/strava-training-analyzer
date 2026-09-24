@@ -3,6 +3,8 @@ import { useTheme } from '@mui/material/styles';
 import { memo } from 'react';
 import { ResponsiveContainer, ComposedChart, Line, Area, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine } from 'recharts';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import { getChartVisuals } from '../utils/chartStyles';
 import { PMC_COLORS, STATUS_COLORS } from '../utils/colors';
 
@@ -38,7 +40,7 @@ function PmcTooltipContent({ active, payload, label }: { active?: boolean; paylo
   ];
 
   return (
-    <Box sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: theme.tokens.cardShadow, p: 1.5, borderRadius: 2, minWidth: 180 }}>
+    <Box sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: getAppThemeTokens(theme).cardShadow, p: 1.5, borderRadius: 2, minWidth: 180 }}>
       <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0.5, display: 'block' }}>
         {label ? new Date(label).toLocaleDateString('pl-PL') : ''}
       </Typography>
@@ -125,7 +127,7 @@ const PMChart = memo(function PMChart({ data }: PMChartProps) {
             />
             <YAxis {...chart.axis} />
             <Tooltip content={<PmcTooltipContent />} cursor={chart.tooltip.cursor} />
-            <ReferenceLine y={0} stroke={theme.tokens.chart.tick} strokeDasharray="2 5" />
+            <ReferenceLine y={0} stroke={getAppThemeTokens(theme).chart.tick} strokeDasharray="2 5" />
           <Area
             type="monotone"
             dataKey="tsb"

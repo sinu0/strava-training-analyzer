@@ -1,5 +1,5 @@
 import WidgetsIcon from '@mui/icons-material/Widgets';
-import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
+import { BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useUiPreferences } from '@/hooks/useUiPreferences';
@@ -40,8 +40,9 @@ export default function MobileBottomNav() {
   ];
 
   return (
-    <Paper
-      elevation={0}
+    <Box
+      component="nav"
+      aria-label="Nawigacja główna"
       sx={{
         display: { xs: 'block', md: 'none' },
         position: 'fixed',
@@ -51,8 +52,8 @@ export default function MobileBottomNav() {
         pb: 'env(safe-area-inset-bottom)',
         zIndex: (theme) => theme.zIndex.appBar,
         borderTop: '1px solid',
-        borderColor: (theme) => theme.tokens.surfaceBorder,
-        boxShadow: (theme) => theme.tokens.cardShadow,
+        borderColor: (theme) => getAppThemeTokens(theme).surfaceBorder,
+        boxShadow: (theme) => getAppThemeTokens(theme).cardShadow,
         bgcolor: (theme) => theme.palette.background.paper,
       }}
     >
@@ -77,7 +78,7 @@ export default function MobileBottomNav() {
           '& .Mui-selected': {
             color: 'primary.main',
             '& .MuiSvgIcon-root': {
-              filter: 'drop-shadow(0 0 8px rgba(255,107,53,0.32))',
+              filter: (theme) => getAppThemeTokens(theme).glow.accentIcon,
             },
           },
         }}
@@ -91,6 +92,6 @@ export default function MobileBottomNav() {
           />
         ))}
       </BottomNavigation>
-    </Paper>
+    </Box>
   );
 }

@@ -35,6 +35,8 @@ export const getThemeTokens = (mode: AppColorMode) => {
   const standardMotion = '220ms cubic-bezier(0.2, 0, 0, 1)';
   const action = {
     primary: isLight ? '#D93F00' : '#FF8051',
+    /** Accent used for small text (eyebrows, links) where it must reach 4.5:1 on the canvas. */
+    primaryInk: isLight ? '#B23600' : '#FF8051',
     primaryContrast: isLight ? '#FFFFFF' : '#081018',
     secondary: isLight ? '#08758D' : '#54D0EB',
     secondaryContrast: '#081018',
@@ -57,6 +59,54 @@ export const getThemeTokens = (mode: AppColorMode) => {
     canvas,
     topBar: isLight ? 'rgba(243,244,250,0.88)' : 'rgba(8,16,24,0.82)',
     iconBubble: isLight ? '#F2F4FA' : 'rgba(255,255,255,0.05)',
+    /** Frosted surfaces placed over photography (hero pills, floating stats). */
+    glass: {
+      bg: 'rgba(255,255,255,0.18)',
+      bgStrong: 'rgba(255,255,255,0.26)',
+      border: 'rgba(255,255,255,0.25)',
+      blur: 'blur(12px)',
+    },
+    /** Coloured light around accent elements (brand mark, active nav, live status). */
+    glow: {
+      accent: '0 10px 28px rgba(252,76,2,0.26)',
+      accentIcon: 'drop-shadow(0 0 8px rgba(255,107,53,0.32))',
+      success: '0 0 10px rgba(63,185,80,0.55)',
+    },
+    /** Soft shadow under floating weather/map icons. */
+    iconShadow: 'drop-shadow(0 5px 10px rgba(15, 23, 42, 0.22))',
+    /** Dark floating toolbar used over content in edit modes (same in both modes). */
+    inverse: { bg: 'rgba(17,24,39,0.94)', ink: '#FFFFFF' },
+    /** Ink placed on the solid accent (brand gradient, solid pills). */
+    onAccent: '#FFFFFF',
+    /** Ink for content that sits on photography or a dark scrim, in both modes. */
+    media: {
+      ink: '#FFFFFF',
+      inkMuted: 'rgba(255,255,255,0.78)',
+      inkQuiet: 'rgba(255,255,255,0.66)',
+      actionBg: '#FFFFFF',
+      actionInk: '#111827',
+      actionShadow: '0 14px 30px rgba(5,10,16,0.35)',
+      inkDisabled: 'rgba(255,255,255,0.3)',
+      surface: 'rgba(255,255,255,0.04)',
+      /** Dark backdrops for lightboxes, stories and controls laid over images. */
+      backdrop: 'rgba(4,8,12,0.98)',
+      control: 'rgba(0,0,0,0.38)',
+      controlHover: 'rgba(0,0,0,0.55)',
+      controlDisabled: 'rgba(0,0,0,0.2)',
+      hairline: 'rgba(255,255,255,0.12)',
+      pageDot: 'rgba(255,255,255,0.16)',
+      fadeBottom: 'linear-gradient(180deg, rgba(6,12,18,0) 0%, rgba(6,12,18,0.88) 100%)',
+      fadeBottomStrong: 'linear-gradient(180deg, rgba(4,8,12,0) 0%, rgba(4,8,12,0.94) 52%, rgba(4,8,12,0.98) 100%)',
+      thumbnailBg: '#0D1117',
+      dialogShadow: '0 24px 80px rgba(0,0,0,0.6)',
+      /** Full-bleed backgrounds of the season story slides. */
+      storyGradients: [
+        'linear-gradient(135deg, #1565C0 0%, #E65100 100%)',
+        'linear-gradient(135deg, #4A148C 0%, #1A237E 100%)',
+        'linear-gradient(135deg, #1B5E20 0%, #F57F17 100%)',
+        'linear-gradient(135deg, #BF360C 0%, #880E4F 100%)',
+      ],
+    },
     trackBg: isLight ? '#E9EDF5' : 'rgba(255,255,255,0.08)',
     searchPill: elevated,
     radius: {
@@ -92,6 +142,8 @@ export const getThemeTokens = (mode: AppColorMode) => {
         label: 650,
         heading: 650,
         display: 700,
+        /** Large numeric readouts stay lighter than headings, as in the reference dashboard. */
+        metric: 560,
       },
       tracking: {
         tight: '-0.03em',
@@ -135,11 +187,58 @@ export const getThemeTokens = (mode: AppColorMode) => {
         Z5: '#D84444', Z6: '#9A61E4', Z7: '#DB4A9A',
       },
       pmc: { CTL: '#2687D9', ATL: '#D84444', TSB: '#2E9E5B' },
+      /** Primary physiological benefit of a session (training effect). */
+      benefit: {
+        RECOVERY: STATUS.success, ENDURANCE: STATUS.info, TEMPO: STATUS.warning, THRESHOLD: STATUS.accent,
+        VO2MAX: STATUS.error, ANAEROBIC: '#DB4A9A', SPRINT: STATUS.highlight,
+      },
+      /** Activity-calendar intensity levels, from empty day to the heaviest. */
+      heatmap: isLight
+        ? ['#EBEDF0', '#9BE9A8', '#40C463', '#30A14E', '#216E39']
+        : ['#1E2936', '#0E4429', '#006D32', '#26A641', '#39D353'],
+      /** Lap intensity classes. */
+      intensity: { VO2: STATUS.error, THRESHOLD: STATUS.warning, ENDURANCE: STATUS.info, RECOVERY: STATUS.success, UNKNOWN: STATUS.neutral },
       load: {
         OPTIMAL: '#2E9E5B', UNDER: '#C98516', OVER: '#A96808', DANGER: '#D84444',
         INSUFFICIENT: '#788596', NO_DATA: '#596575', FUTURE: '#2687D9', CTL: '#8A62D4',
       },
     },
+    /** Route drawings, previews and interactive maps. */
+    map: {
+      route: isLight ? '#FC4C02' : '#4ECDC4',
+      road: isLight ? '#DCE3E9' : '#2A3948',
+      canvas: isLight ? '#F7F9FB' : 'rgba(8,13,19,0.65)',
+      canvasGlow: isLight
+        ? 'radial-gradient(circle at 66% 40%, rgba(22,166,200,0.10), transparent 52%), linear-gradient(145deg, #FFFFFF, #EEF3F6)'
+        : 'radial-gradient(circle at 50% 50%, rgba(22,166,200,0.12), transparent 64%)',
+      halo: isLight ? '#FFFFFF' : '#071018',
+      endpoint: '#FFFFFF',
+      inactive: '#8B949E',
+      highlight: '#FF6B35',
+      /** Low → mid → high gradient for metric-coloured tracks (speed, power, HR). */
+      heat: { low: '#3B82F6', mid: '#FF6B35', high: '#D90429' },
+      overlayBg: 'rgba(8,12,18,0.76)',
+      overlayBorder: 'rgba(255,255,255,0.12)',
+      /** Route planner specifics. */
+      waypointStart: '#2E7D32',
+      waypointEnd: '#C62828',
+      pathShadow: '#0F172A',
+      pathHighlight: '#FF6B6B',
+      alternative: '#3B82F6',
+      /** Colours for comparing several routes or efforts on one map. */
+      series: ['#FF6B35', '#31C4F3', '#8B5CF6', '#22C55E'],
+      context: '#64748B',
+      location: { active: '#FF6B35', inactive: '#58A6FF', route: '#4ECDC4' },
+      densityStops: [
+        { stop: 0, color: '#1A237E' },
+        { stop: 0.35, color: STATUS.accent },
+        { stop: 0.7, color: '#FF2020' },
+        { stop: 1, color: '#FF1744' },
+      ],
+    },
+    /** Health signals. */
+    health: { hrv: '#39D353', bodyBattery: '#FFA657', zoneFive: '#F78166' },
+    profileHero: `linear-gradient(135deg, ${canvas} 0%, #152131 50%, #0B2036 100%)`,
     sport: { cycling: '#FC4C02', running: '#2E9E5B', swimming: '#2687D9', walking: '#C98516', strength: '#C98516', default: '#C98516' },
     weather: {
       score: { excellent: '#22A65A', good: '#C98516', poor: '#D84444', severe: '#252B34' },

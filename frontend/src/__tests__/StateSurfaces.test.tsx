@@ -2,8 +2,8 @@ import { ThemeProvider } from '@mui/material/styles';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import LoadingState from '../components/common/LoadingState';
-import SkeletonCard from '../components/common/SkeletonCard';
+import { LoadingState, SkeletonCard } from '@/ui';
+
 import theme from '../theme/theme';
 
 function renderWithTheme(ui: React.ReactElement) {

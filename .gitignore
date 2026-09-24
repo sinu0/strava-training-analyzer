@@ -62,3 +62,6 @@ AI_PROGRESS.md
 !frontend/public/illustrations/v4/*.webp
 !/image-gen/*.py
 .playwright-mcp/
+
+# Visual regression baselines of the component catalogue
+!frontend/e2e/tests/*-snapshots/*.png

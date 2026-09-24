@@ -3,11 +3,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, beforeAll } from 'vitest';
 
-import ChartWrapper from '../components/common/ChartWrapper';
-import EmptyState from '../components/common/EmptyState';
-import PageContainer from '../components/common/PageContainer';
-import Section from '../components/common/Section';
-import StatDisplay from '../components/common/StatDisplay';
+import { EmptyState, Page } from '@/ui';
+
 import TabsNav from '../components/common/TabsNav';
 import theme from '../theme/theme';
 
@@ -31,49 +28,26 @@ function renderWithThemeAndRouter(ui: React.ReactElement) {
   );
 }
 
-describe('Section', () => {
+describe('Page', () => {
   it('renders title and children', () => {
-    renderWithTheme(<Section title="Test Title">Content here</Section>);
-    expect(screen.getByText('Test Title')).toBeDefined();
-    expect(screen.getByText('Content here')).toBeDefined();
-  });
-
-  it('renders subtitle when provided', () => {
-    renderWithTheme(<Section title="T" subtitle="Sub text">Child</Section>);
-    expect(screen.getByText('Sub text')).toBeDefined();
-  });
-
-  it('renders action slot', () => {
-    renderWithTheme(<Section title="T" action={<button>Act</button>}>Child</Section>);
-    expect(screen.getByText('Act')).toBeDefined();
-  });
-
-  it('renders without title', () => {
-    renderWithTheme(<Section>No title content</Section>);
-    expect(screen.getByText('No title content')).toBeDefined();
-  });
-});
-
-describe('PageContainer', () => {
-  it('renders title and children', () => {
-    renderWithTheme(<PageContainer title="Page">Page content</PageContainer>);
+    renderWithTheme(<Page title="Page">Page content</Page>);
     expect(screen.getByText('Page')).toBeDefined();
     expect(screen.getByText('Page content')).toBeDefined();
   });
 
   it('renders subtitle', () => {
-    renderWithTheme(<PageContainer title="P" subtitle="Description">C</PageContainer>);
+    renderWithTheme(<Page title="P" subtitle="Description">C</Page>);
     expect(screen.getByText('Description')).toBeDefined();
   });
 
   it('renders actions', () => {
-    renderWithTheme(<PageContainer title="P" actions={<button>Action</button>}>C</PageContainer>);
+    renderWithTheme(<Page title="P" actions={<button>Action</button>}>C</Page>);
     expect(screen.getByText('Action')).toBeDefined();
   });
 
   it('renders breadcrumbs when provided', () => {
     renderWithThemeAndRouter(
-      <PageContainer
+      <Page
         title="Aktywności"
         breadcrumbs={[
           { label: 'Dashboard', href: '/' },
@@ -81,7 +55,7 @@ describe('PageContainer', () => {
         ]}
       >
         C
-      </PageContainer>,
+      </Page>,
     );
 
     expect(screen.getByText('Dashboard')).toBeDefined();
@@ -89,34 +63,8 @@ describe('PageContainer', () => {
   });
 
   it('renders without title', () => {
-    renderWithTheme(<PageContainer>Just content</PageContainer>);
+    renderWithTheme(<Page>Just content</Page>);
     expect(screen.getByText('Just content')).toBeDefined();
-  });
-});
-
-describe('StatDisplay', () => {
-  it('renders value and label', () => {
-    renderWithTheme(<StatDisplay value={250} label="FTP" unit="W" />);
-    expect(screen.getByText('250')).toBeDefined();
-    expect(screen.getByText('FTP')).toBeDefined();
-    expect(screen.getByText('W')).toBeDefined();
-  });
-
-  it('shows positive trend', () => {
-    renderWithTheme(<StatDisplay value={100} label="Test" trend={5.2} />);
-    expect(screen.getByText('+5.2%')).toBeDefined();
-  });
-
-  it('shows negative trend', () => {
-    renderWithTheme(<StatDisplay value={100} label="Test" trend={-3.1} />);
-    expect(screen.getByText('-3.1%')).toBeDefined();
-  });
-
-  it('respects size prop', () => {
-    const { container } = renderWithTheme(<StatDisplay value="42" label="Metric" size="lg" />);
-    const h4 = container.querySelector('.MuiTypography-h4');
-    expect(h4).toBeDefined();
-    expect(h4?.textContent).toBe('42');
   });
 });
 
@@ -152,23 +100,6 @@ describe('EmptyState', () => {
       <EmptyState title="Brak" illustration="/illustrations/empty-ai.png" />,
     );
     expect(container.querySelector('svg')).toBeNull();
-  });
-});
-
-describe('ChartWrapper', () => {
-  it('renders title and children', () => {
-    renderWithTheme(<ChartWrapper title="Chart Title"><div>Chart goes here</div></ChartWrapper>);
-    expect(screen.getByText('Chart Title')).toBeDefined();
-    expect(screen.getByText('Chart goes here')).toBeDefined();
-  });
-
-  it('renders legend slot', () => {
-    renderWithTheme(
-      <ChartWrapper title="C" legend={<span>Legend items</span>}>
-        <div>Chart</div>
-      </ChartWrapper>,
-    );
-    expect(screen.getByText('Legend items')).toBeDefined();
   });
 });
 

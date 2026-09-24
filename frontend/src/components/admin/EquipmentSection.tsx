@@ -2,27 +2,11 @@
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  LinearProgress,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Grid, LinearProgress, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 
 import { useCreateEquipment, useDeleteEquipment, useEquipment, type Equipment } from '@/hooks/useEquipment';
+import { Surface } from '@/ui';
 import { STATUS_COLORS } from '@/utils/colors';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -112,8 +96,7 @@ function EquipmentCard({ item, onDelete }: { item: Equipment; onDelete: () => vo
   const needsReplace = pct > 80;
 
   return (
-    <Card variant="outlined">
-      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+    <Surface variant="outlined" padding="none" radius="panel" sx={{ p: 2 }}>
         <Stack
           direction="row"
           sx={{
@@ -165,7 +148,6 @@ function EquipmentCard({ item, onDelete }: { item: Equipment; onDelete: () => vo
             value={Math.min(pct, 100)}
             sx={{
               height: 6, borderRadius: 3,
-              bgcolor: 'rgba(255,255,255,0.08)',
               '& .MuiLinearProgress-bar': {
                 bgcolor: needsReplace ? STATUS_COLORS.error : pct > 50 ? STATUS_COLORS.warning : STATUS_COLORS.success,
               },
@@ -178,7 +160,6 @@ function EquipmentCard({ item, onDelete }: { item: Equipment; onDelete: () => vo
             <Typography variant="caption">Czas na wymianę ({pct.toFixed(0)}% zużycia)</Typography>
           </Alert>
         )}
-      </CardContent>
-    </Card>
+    </Surface>
   );
 }

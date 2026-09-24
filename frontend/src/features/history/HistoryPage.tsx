@@ -10,7 +10,6 @@ import {
   InputLabel,
   MenuItem,
   Pagination,
-  Paper,
   Select,
   Stack,
   ToggleButton,
@@ -21,12 +20,8 @@ import { lazy, Suspense } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import ActivityListCardV2 from '@/components/activity/ActivityListCardV2';
-import EmptyState from '@/components/common/EmptyState';
-import ErrorState from '@/components/common/ErrorState';
-import LoadingState from '@/components/common/LoadingState';
-import PageContainer from '@/components/common/PageContainer';
 import PolishDateField from '@/components/common/PolishDateField';
-import { getAppThemeTokens } from '@/theme/theme';
+import { EmptyState, ErrorState, LoadingState, Page, Surface } from '@/ui';
 import { getPolishPaginationAriaLabel } from '@/utils/accessibility';
 
 import { useHistoryActivities } from './useHistory';
@@ -95,7 +90,7 @@ export default function HistoryPage() {
                 sm: 6,
                 lg: 4
               }}>
-              <Paper sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 3, height: '100%' }}>
+              <Surface padding="sm" sx={{ height: '100%' }}>
                 <Typography variant="overline" sx={{
                   color: "text.secondary"
                 }}>{new Date(date).toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}</Typography>
@@ -106,7 +101,7 @@ export default function HistoryPage() {
                     </Button>
                   ))}
                 </Stack>
-              </Paper>
+              </Surface>
             </Grid>
           ))}
         </Grid>
@@ -153,23 +148,12 @@ export default function HistoryPage() {
   };
 
   return (
-    <PageContainer
+    <Page
       title="Historia treningów"
       subtitle="Trasy, liczby i kontekst każdej sesji. Mapa jest widoczna od razu, strumienie dopiero w szczególe."
       maxWidth={1320}
     >
-      <Paper
-        elevation={0}
-        sx={{
-          p: (theme) => getAppThemeTokens(theme).space.card,
-          mb: 2.5,
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: (theme) => `${getAppThemeTokens(theme).radius.card}px`,
-          bgcolor: 'background.paper',
-          boxShadow: (theme) => theme.tokens.cardShadow,
-        }}
-      >
+      <Surface sx={{ mb: 2.5 }}>
         {query ? (
           <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 700 }}>
             Wyniki dla „{query}”
@@ -217,8 +201,8 @@ export default function HistoryPage() {
             </Button>
           ) : null}
         </Stack>
-      </Paper>
+      </Surface>
       {content()}
-    </PageContainer>
+    </Page>
   );
 }

@@ -24,7 +24,7 @@ cd backend
 ### Frontend
 ```bash
 cd frontend
-npm run test                    # vitest (363 testów)
+npm run test                    # vitest
 npx tsc --noEmit               # typecheck
 npm run build                   # tsc + vite build
 npm run dev                     # dev server
@@ -64,7 +64,8 @@ docker compose up -d
 - backend: implementacja testów przez WireMock + MockMvc
 - frontend: `apiClient` z `@/api/client` do REST
 - frontend: lazy loading stron przez `React.lazy`
-- frontend: Material UI `sx` prop, `tokens` z theme dla kolorów
+- frontend: UI wyłącznie z `@/ui` (standard komponentów, patrz `docs/DESIGN_SYSTEM.md`) i tokenów z `theme.ts`; żadnych literałów kolorów ani `Card`/`Paper` poza `src/ui`
+- frontend: Material UI `sx` prop, tokeny czytane przez `getAppThemeTokens(theme)` / `useTokens()`
 - frontend: typy w `types/`, hooki w `hooks/`, komponenty w `components/`
 - commit message: conventional commits (feat:, fix:, chore:, docs:)
 - UI w ciemnym motywie, mobile-first

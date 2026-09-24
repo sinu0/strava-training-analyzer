@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import { CircleMarker, MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
 
+import { tokens } from '@/theme/theme';
 import type { WeatherLocation } from '@/types/analytics';
 
 import 'leaflet/dist/leaflet.css';
@@ -63,7 +64,7 @@ export default function WeatherStudioMap({
             center={[location.latitude, location.longitude]}
             radius={location.active ? 8 : 6}
             pathOptions={{
-              color: location.active ? '#FF6B35' : '#58A6FF',
+              color: location.active ? tokens.map.location.active : tokens.map.location.inactive,
               fillOpacity: 0.7,
             }}
             eventHandlers={{
@@ -82,7 +83,7 @@ export default function WeatherStudioMap({
           center={[selectedPoint.lat, selectedPoint.lon]}
           radius={10}
           pathOptions={{
-            color: '#4ECDC4',
+            color: tokens.map.location.route,
             fillOpacity: 0.85,
           }}
         />

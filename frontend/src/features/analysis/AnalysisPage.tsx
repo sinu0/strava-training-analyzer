@@ -9,16 +9,10 @@ import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined';
 import { Alert, Box, Checkbox, FormControlLabel, Grid, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
 
-import EditorialHero from '@/components/common/EditorialHero';
-import EmptyState from '@/components/common/EmptyState';
-import ErrorState from '@/components/common/ErrorState';
-import LoadingState from '@/components/common/LoadingState';
-import PageContainer from '@/components/common/PageContainer';
 import PolishDateField from '@/components/common/PolishDateField';
 import PMChart from '@/components/PMChart';
 import PowerCurveChart from '@/components/PowerCurveChart';
-import MetricReadout from '@/components/v2/MetricReadout';
-import PerformanceSurface from '@/components/v2/PerformanceSurface';
+import { EmptyState, ErrorState, HeroCard, LoadingState, Metric, Page, Surface } from '@/ui';
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
 import { localDate } from '@/utils/localDate';
 
@@ -90,14 +84,14 @@ export default function AnalysisPage() {
                 xs: 12,
                 md: 6
               }}>
-              <PerformanceSurface accent={index === 0} sx={{ p: { xs: 2, md: 2.75 }, height: '100%' }}>
+              <Surface variant={index === 0 ? 'accent' : 'default'} sx={{ height: '100%' }}>
                 <Typography variant="overline" sx={{
                   color: "text.secondary"
                 }}>{index === 0 ? 'Wybrany okres' : 'Poprzedni okres'}</Typography>
                 <Typography variant="h6">{period.from} — {period.to}</Typography>
                 <Grid container spacing={2.25} sx={{ mt: 0.75 }}>
                   <Grid size={6}>
-                    <MetricReadout
+                    <Metric
                       icon={<DirectionsBikeOutlinedIcon />}
                       label="Aktywności"
                       value={period.activityCount}
@@ -106,7 +100,7 @@ export default function AnalysisPage() {
                     />
                   </Grid>
                   <Grid size={6}>
-                    <MetricReadout
+                    <Metric
                       icon={<StraightenOutlinedIcon />}
                       label="Dystans"
                       value={formatSummary(period.totalDistanceM, 'distance')}
@@ -114,13 +108,13 @@ export default function AnalysisPage() {
                     />
                   </Grid>
                   <Grid size={6}>
-                    <MetricReadout icon={<TimerOutlinedIcon />} label="Czas" value={formatSummary(period.totalTimeSec, 'time')} />
+                    <Metric icon={<TimerOutlinedIcon />} label="Czas" value={formatSummary(period.totalTimeSec, 'time')} />
                   </Grid>
                   <Grid size={6}>
-                    <MetricReadout icon={<LandscapeOutlinedIcon />} label="Przewyższenie" value={formatSummary(period.totalElevationM, 'elevation')} />
+                    <Metric icon={<LandscapeOutlinedIcon />} label="Przewyższenie" value={formatSummary(period.totalElevationM, 'elevation')} />
                   </Grid>
                 </Grid>
-              </PerformanceSurface>
+              </Surface>
             </Grid>
           ))}
         </Grid>
@@ -131,41 +125,40 @@ export default function AnalysisPage() {
       return load.data.availability === 'UNKNOWN'
         ? <EmptyState title="Brak obciążenia" description="Brak danych nie jest prezentowany jako zerowa forma." />
         : (
-          <PerformanceSurface sx={{ p: { xs: 1.25, md: 2.25 } }}>
+          <Surface padding="sm">
             {load.data.availability === 'PARTIAL' ? (
               <Alert severity="warning" sx={{ mb: 2 }}>
                 Niepełne dane. Pokrycie obciążenia: {load.data.coverage == null ? 'nieznane' : `${Math.round(load.data.coverage * 100)}%`}. Dostępność dni: {load.data.temporalCoverage == null ? 'nieznana' : `${Math.round(load.data.temporalCoverage * 100)}%`}. Ostatnie obliczenie: {load.data.asOf ?? 'brak'}. Luki oznaczają brak danych.
               </Alert>
             ) : null}
             <PMChart data={load.data.points} />
-          </PerformanceSurface>
+          </Surface>
         );
     }
 
     if (tab === 'power' && power.data) {
-      return <PerformanceSurface sx={{ p: { xs: 1.25, md: 2.25 } }}>
+      return <Surface padding="sm">
         <Alert severity={includeUnverified ? 'warning' : 'info'} sx={{ mb: 2 }}>{includeUnverified ? 'Widok mieszany: zawiera estymacje i źródła niepotwierdzone. Nie traktuj tej krzywej jako zweryfikowanego pomiaru ani podstawy do wyznaczania FTP.' : 'Krzywa obejmuje wyłącznie potwierdzony pomiar mocy.'} Aktywności z pomiarem: {power.data.curve.measuredActivities ?? 'brak informacji'}, z estymacją: {power.data.curve.estimatedActivities ?? 'brak informacji'}, bez potwierdzonego źródła: {power.data.curve.unknownSourceActivities ?? 'brak informacji'}.</Alert>
         {power.data.availability === 'UNKNOWN'
           ? <EmptyState title="Brak krzywej mocy" description="Wybierz okres z aktywnościami zawierającymi potwierdzony pomiar mocy." />
           : <PowerCurveChart data={power.data.curve} />}
-      </PerformanceSurface>;
+      </Surface>;
     }
     return null;
   };
 
   return (
-    <PageContainer title="Laboratorium wydolności" subtitle="Porównuj okresy, obserwuj obciążenie i analizuj moc bez ukrywania jakości danych." maxWidth={1320}>
-      <EditorialHero
-        compact
+    <Page title="Laboratorium wydolności" subtitle="Porównuj okresy, obserwuj obciążenie i analizuj moc bez ukrywania jakości danych." maxWidth={1320}>
+      <HeroCard
+        layout="split"
         eyebrow="Dane, nie hałas"
         title="Zobacz, co zmienia Twój trening"
         description="Porównuj bloki, obciążenie i moc w jednym spokojnym widoku analitycznym."
-        accentColor="secondary.main"
-        imageSrc={getCyclingHeroIllustrationPath('analytics')}
-        imageAlt="Kokpit roweru na górskiej drodze o świcie"
-        highlights={[`${dayCount} dni`, 'Porównanie okresów', 'Moc i obciążenie']}
+        image={{ src: getCyclingHeroIllustrationPath('analytics'), alt: 'Kokpit roweru na górskiej drodze o świcie' }}
+        tags={[`${dayCount} dni`, 'Porównanie okresów', 'Moc i obciążenie']}
+        headingComponent="h2"
       />
-      <PerformanceSurface sx={{ mb: 2.5 }}>
+      <Surface padding="none" sx={{ mb: 2.5 }}>
         <Tabs
           value={tab}
           onChange={(_, value: AnalysisTab) => update('tab', value)}
@@ -199,8 +192,8 @@ export default function AnalysisPage() {
               alignSelf: "center"
             }}>Zakres jest zapisany w URL</Typography>
         </Stack>
-      </PerformanceSurface>
+      </Surface>
       {renderContent()}
-    </PageContainer>
+    </Page>
   );
 }
