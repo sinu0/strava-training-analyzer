@@ -41,6 +41,9 @@ import pl.strava.analizator.domain.model.Activity;
 import pl.strava.analizator.domain.model.CoachingFeedback;
 import pl.strava.analizator.domain.port.ActivityRepository;
 import pl.strava.analizator.domain.port.CoachingFeedbackRepository;
+import pl.strava.analizator.domain.port.UiPreferencesRepository;
+import pl.strava.analizator.domain.model.DashboardWidget;
+import pl.strava.analizator.domain.model.UiPreferences;
 
 @Tag("integration")
 @Testcontainers
@@ -69,6 +72,7 @@ class ApplicationCoherenceIntegrationTest {
     private final ActivityRepository activities;
     private final CoachingFeedbackRepository feedback;
     private final KnowledgeIndexPort knowledgeIndex;
+    private final UiPreferencesRepository uiPreferences;
 
     @Test void migratesAndExportsRealOpenApi() throws Exception {
         assertThat(jdbc.queryForObject("SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1", String.class)).isEqualTo("60");
@@ -142,6 +146,22 @@ class ApplicationCoherenceIntegrationTest {
                 .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
 
         jdbc.update("DELETE FROM processing_jobs WHERE job_type = ?", jobType);
+    }
+
+    @Test void persistsDashboardPreferencesAsJsonb() {
+        UiPreferences saved = uiPreferences.save(UiPreferences.defaults().toBuilder()
+                .revision(3)
+                .widgets(List.of(DashboardWidget.builder().id("load-main").type("load").order(0).span(6)
+                        .settings(java.util.Map.of("range", 42)).build()))
+                .build());
+
+        assertThat(saved.getRevision()).isEqualTo(3);
+        UiPreferences reloaded = uiPreferences.find().orElseThrow();
+        assertThat(reloaded.getWidgets()).singleElement().satisfies(widget -> {
+            assertThat(widget.getId()).isEqualTo("load-main");
+            assertThat(widget.getSettings()).containsEntry("range", 42);
+        });
+        assertThat(jdbc.queryForObject("SELECT jsonb_typeof(dashboard_json) FROM ui_preferences", String.class)).isEqualTo("array");
     }
 
     private KnowledgeIndexEntry knowledgeEntry(String version, String content, int dimensions) {

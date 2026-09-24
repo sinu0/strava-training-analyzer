@@ -2,6 +2,9 @@ package pl.strava.analizator.infrastructure.persistence.entity;
 
 import java.time.Instant;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -29,9 +32,11 @@ public class UiPreferencesEntity {
     @Column(nullable = false)
     private long revision;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "dashboard_json", nullable = false, columnDefinition = "jsonb")
     private String dashboardJson;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "mobile_navigation_json", nullable = false, columnDefinition = "jsonb")
     private String mobileNavigationJson;
 
