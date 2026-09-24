@@ -14,6 +14,7 @@ import {
   UI_COLORS,
   WEATHER_ICON_COLORS,
   WEATHER_SCORE_COLORS,
+  ZONE_COLORS,
   getSportColor,
   resolveThemeColor,
 } from '@/utils/colors';
@@ -44,7 +45,7 @@ describe('colors utilities', () => {
   it('centralizes ai, health, training, and neutral palette colors', () => {
     expect(AI_PREDICTION_COLORS.FTP_PREDICTION).toBe(STATUS_COLORS.accent);
     expect(HEALTH_COLORS.restingHeartRate).toBe(STATUS_COLORS.error);
-    expect(TRAINING_ZONE_COLORS.Z2).toBe(STATUS_COLORS.info);
+    expect(TRAINING_ZONE_COLORS).toBe(ZONE_COLORS);
     expect(UI_COLORS.backgroundDefault).toBe(theme.palette.background.default);
     expect(COMMON_COLORS.white).toBe('#fff');
     expect(PROFILE_GRADIENTS.hero).toContain(UI_COLORS.backgroundDefault);

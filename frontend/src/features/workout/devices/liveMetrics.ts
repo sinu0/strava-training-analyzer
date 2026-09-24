@@ -9,6 +9,7 @@ export interface TickValues {
   powerWatts: number | null;
   heartRateBpm: number | null;
   cadenceRpm: number | null;
+  speedKph?: number | null;
 }
 
 export interface MetricsWindow {
@@ -22,6 +23,8 @@ export interface MetricsWindow {
 
 export interface SessionMetrics extends MetricsWindow {
   kilojoules: number;
+  /** Virtual distance integrated from the trainer's speed. */
+  distanceKm: number;
   normalizedPower: number | null;
   intensityFactor: number | null;
   tss: number | null;
@@ -96,6 +99,7 @@ export function createLiveMetrics(ftpWatts: number | null) {
   let step = new Accumulator();
   let stepIndex: number | null = null;
   let joules = 0;
+  let distanceKm = 0;
   const rolling: number[] = [];
   let rollingSum = 0;
   let fourthPowerSum = 0;
@@ -111,6 +115,7 @@ export function createLiveMetrics(ftpWatts: number | null) {
       step.add(values);
       const watts = values.powerWatts ?? 0;
       joules += watts;
+      distanceKm += (values.speedKph ?? 0) / 3600;
       rolling.push(watts);
       rollingSum += watts;
       if (rolling.length > NP_WINDOW_SEC) rollingSum -= rolling.shift() ?? 0;
@@ -127,7 +132,7 @@ export function createLiveMetrics(ftpWatts: number | null) {
         ? (base.durationSec * normalizedPower * intensityFactor) / (ftpWatts * 3600) * 100
         : null;
       return {
-        session: { ...base, kilojoules: joules / 1000, normalizedPower, intensityFactor, tss },
+        session: { ...base, kilojoules: joules / 1000, distanceKm, normalizedPower, intensityFactor, tss },
         step: step.window(),
       };
     },

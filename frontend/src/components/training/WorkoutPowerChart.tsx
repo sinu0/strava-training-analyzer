@@ -10,9 +10,20 @@ import { getZoneForPower, ZONE_COLORS_TRAINING } from '../../types/training';
 import type { WorkoutStep } from '../../types/training';
 
 
+export interface ActualPowerPoint {
+  sec: number;
+  /** Actual power as % of FTP. */
+  pct: number;
+}
+
 interface WorkoutPowerChartProps {
   steps: WorkoutStep[];
   compact?: boolean;
+  /** Ridden power drawn over the planned profile (trainer mode). */
+  actual?: ActualPowerPoint[];
+  /** Current workout position in seconds. */
+  playheadSec?: number | null;
+  height?: number;
 }
 
 interface TooltipState {
@@ -26,7 +37,7 @@ interface TooltipState {
 const MARGIN_FULL = { top: 8, right: 32, bottom: 32, left: 44 };
 const MARGIN_COMPACT = { top: 2, right: 2, bottom: 2, left: 2 };
 
-export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPowerChartProps) {
+export default function WorkoutPowerChart({ steps, compact = false, actual, playheadSec = null, height: heightOverride }: WorkoutPowerChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(600);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
@@ -49,7 +60,7 @@ export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPow
   const totalSec = segments[segments.length - 1]?.endSec ?? 0;
   if (totalSec === 0) return null;
 
-  const height = compact ? 72 : 240;
+  const height = heightOverride ?? (compact ? 72 : 240);
   const margin = compact ? MARGIN_COMPACT : MARGIN_FULL;
   const contentW = Math.max(1, width - margin.left - margin.right);
   const contentH = Math.max(1, height - margin.top - margin.bottom);
@@ -151,6 +162,32 @@ export default function WorkoutPowerChart({ steps, compact = false }: WorkoutPow
             />
           );
         })}
+
+        {/* Ridden power */}
+        {actual && actual.length > 1 ? (
+          <polyline
+            data-testid="actual-power"
+            points={actual.filter((point) => point.sec <= totalSec).map((point) => `${toX(point.sec)},${toY(Math.min(point.pct, domainMax))}`).join(' ')}
+            fill="none"
+            stroke={theme.palette.text.primary}
+            strokeOpacity={0.85}
+            strokeWidth={1.6}
+            strokeLinejoin="round"
+          />
+        ) : null}
+
+        {/* Playhead */}
+        {playheadSec != null ? (
+          <line
+            data-testid="playhead"
+            x1={toX(Math.min(playheadSec, totalSec))}
+            x2={toX(Math.min(playheadSec, totalSec))}
+            y1={margin.top}
+            y2={margin.top + contentH}
+            stroke={theme.palette.text.primary}
+            strokeWidth={2}
+          />
+        ) : null}
 
         {/* Y axis */}
         {!compact && (

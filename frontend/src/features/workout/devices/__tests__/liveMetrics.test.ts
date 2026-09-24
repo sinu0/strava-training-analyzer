@@ -30,6 +30,12 @@ describe('live metrics', () => {
     expect(session.tss).toBeCloseTo(100, 0);
   });
 
+  it('integrates virtual distance from trainer speed', () => {
+    const metrics = createLiveMetrics(250);
+    for (let second = 0; second < 360; second += 1) metrics.tick({ powerWatts: 200, heartRateBpm: null, cadenceRpm: 90, speedKph: 36 }, 0);
+    expect(metrics.snapshot().session.distanceKm).toBeCloseTo(3.6, 5);
+  });
+
   it('ignores missing values instead of counting zeros', () => {
     const metrics = createLiveMetrics(null);
     metrics.tick({ powerWatts: null, heartRateBpm: 150, cadenceRpm: null }, 0);

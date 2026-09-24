@@ -86,3 +86,12 @@ export async function flushWorkoutQueue(): Promise<number> {
 export function scheduledExportUrl(planId: string, format: 'fit' | 'zwo'): string {
   return `/api/v2/workouts/scheduled/${planId}/export/${format}`;
 }
+
+/** Uploads one recorded chunk; the server stores it idempotently by chunk index. */
+export async function uploadRideSamples(executionId: string, chunkIndex: number, samples: unknown[]): Promise<void> {
+  await apiClient.post(`/v2/workouts/executions/${executionId}/samples`, { chunkIndex, samples });
+}
+
+export function activityFitUrl(executionId: string): string {
+  return `/api/v2/workouts/executions/${executionId}/export/activity.fit`;
+}
