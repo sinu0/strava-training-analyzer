@@ -117,7 +117,7 @@ describe('Fitness Machine Control Point (0x2AD9)', () => {
   it('parses responses and rejects unrelated notifications', () => {
     expect(parseControlPointResponse(view(0x80, FtmsOpCode.SetTargetPower, FtmsResult.Success)))
       .toEqual({ requestOpCode: FtmsOpCode.SetTargetPower, result: FtmsResult.Success, ok: true });
-    expect(parseControlPointResponse(view(0x80, FtmsOpCode.RequestControl, FtmsResult.ControlNotPermitted)).ok).toBe(false);
+    expect(parseControlPointResponse(view(0x80, FtmsOpCode.RequestControl, FtmsResult.ControlNotPermitted))?.ok).toBe(false);
     expect(parseControlPointResponse(view(0x05, 0x00))).toBeNull();
   });
 });
