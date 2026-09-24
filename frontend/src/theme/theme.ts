@@ -161,11 +161,50 @@ export const getThemeTokens = (mode: AppColorMode) => {
         Z5: '#D84444', Z6: '#9A61E4', Z7: '#DB4A9A',
       },
       pmc: { CTL: '#2687D9', ATL: '#D84444', TSB: '#2E9E5B' },
+      /** Primary physiological benefit of a session (training effect). */
+      benefit: {
+        RECOVERY: STATUS.success, ENDURANCE: STATUS.info, TEMPO: STATUS.warning, THRESHOLD: STATUS.accent,
+        VO2MAX: STATUS.error, ANAEROBIC: '#DB4A9A', SPRINT: STATUS.highlight,
+      },
+      /** Lap intensity classes. */
+      intensity: { VO2: STATUS.error, THRESHOLD: STATUS.warning, ENDURANCE: STATUS.info, RECOVERY: STATUS.success, UNKNOWN: STATUS.neutral },
       load: {
         OPTIMAL: '#2E9E5B', UNDER: '#C98516', OVER: '#A96808', DANGER: '#D84444',
         INSUFFICIENT: '#788596', NO_DATA: '#596575', FUTURE: '#2687D9', CTL: '#8A62D4',
       },
     },
+    /** Route drawings, previews and interactive maps. */
+    map: {
+      route: isLight ? '#FC4C02' : '#4ECDC4',
+      road: isLight ? '#DCE3E9' : '#2A3948',
+      canvas: isLight ? '#F7F9FB' : 'rgba(8,13,19,0.65)',
+      canvasGlow: isLight
+        ? 'radial-gradient(circle at 66% 40%, rgba(22,166,200,0.10), transparent 52%), linear-gradient(145deg, #FFFFFF, #EEF3F6)'
+        : 'radial-gradient(circle at 50% 50%, rgba(22,166,200,0.12), transparent 64%)',
+      halo: isLight ? '#FFFFFF' : '#071018',
+      endpoint: '#FFFFFF',
+      inactive: '#8B949E',
+      highlight: '#FF6B35',
+      /** Low → mid → high gradient for metric-coloured tracks (speed, power, HR). */
+      heat: { low: '#3B82F6', mid: '#FF6B35', high: '#D90429' },
+      overlayBg: 'rgba(8,12,18,0.76)',
+      overlayBorder: 'rgba(255,255,255,0.12)',
+      /** Route planner specifics. */
+      waypointStart: '#2E7D32',
+      waypointEnd: '#C62828',
+      pathShadow: '#0F172A',
+      pathHighlight: '#FF6B6B',
+      alternative: '#3B82F6',
+      densityStops: [
+        { stop: 0, color: '#1A237E' },
+        { stop: 0.35, color: STATUS.accent },
+        { stop: 0.7, color: '#FF2020' },
+        { stop: 1, color: '#FF1744' },
+      ],
+    },
+    /** Health signals. */
+    health: { hrv: '#39D353', bodyBattery: '#FFA657', zoneFive: '#F78166' },
+    profileHero: `linear-gradient(135deg, ${canvas} 0%, #152131 50%, #0B2036 100%)`,
     sport: { cycling: '#FC4C02', running: '#2E9E5B', swimming: '#2687D9', walking: '#C98516', strength: '#C98516', default: '#C98516' },
     weather: {
       score: { excellent: '#22A65A', good: '#C98516', poor: '#D84444', severe: '#252B34' },

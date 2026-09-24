@@ -6,9 +6,10 @@ import LandscapeOutlinedIcon from '@mui/icons-material/LandscapeOutlined';
 import SpeedOutlinedIcon from '@mui/icons-material/SpeedOutlined';
 import StraightenOutlinedIcon from '@mui/icons-material/StraightenOutlined';
 import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined';
-import { Box, Button, Chip, Paper, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 
 import type { ActivitySummary } from '@/types/activity';
+import { StatusPill, Surface } from '@/ui';
 
 import ActivityRoutePreview from './ActivityRoutePreview';
 
@@ -63,23 +64,14 @@ export default function ActivityListCardV2({ activity, onOpen, priority = false 
   const timeLabel = date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <Paper
+    <Surface
       component="article"
-      elevation={0}
+      padding="none"
+      interactive
       sx={{
         display: 'grid',
         gridTemplateColumns: { xs: '1fr', md: 'minmax(300px, 36%) minmax(0, 1fr)' },
-        overflow: 'hidden',
-        border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: 3,
-        bgcolor: 'background.paper',
-        transition: 'transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease',
-        '&:hover': {
-          transform: 'translateY(-2px)',
-          borderColor: 'rgba(255,107,53,0.38)',
-          boxShadow: '0 18px 44px rgba(0,0,0,0.28)',
-        },
+        cursor: 'default',
       }}
     >
       <ActivityRoutePreview
@@ -122,12 +114,7 @@ export default function ActivityListCardV2({ activity, onOpen, priority = false 
             </Typography>
           </Box>
           {activity.trainingScore != null ? (
-            <Chip
-              size="small"
-              color="primary"
-              label={`Score ${activity.trainingScore}`}
-              sx={{ flexShrink: 0, fontWeight: 800 }}
-            />
+            <StatusPill size="sm" tone="primary" variant="solid" label={`Score ${activity.trainingScore}`} />
           ) : null}
         </Stack>
 
@@ -155,14 +142,14 @@ export default function ActivityListCardV2({ activity, onOpen, priority = false 
             mt: 'auto',
             pt: 2.2
           }}>
-          {activity.primaryBenefit ? <Chip size="small" variant="outlined" label={activity.primaryBenefit} /> : null}
-          {(activity.segmentCount ?? 0) > 0 ? <Chip size="small" variant="outlined" label={`${activity.segmentCount} segmentów · ${activity.newRecordCount ?? 0} nowe rekordy`} /> : null}
+          {activity.primaryBenefit ? <StatusPill size="sm" variant="outline" tone="neutral" label={activity.primaryBenefit} /> : null}
+          {(activity.segmentCount ?? 0) > 0 ? <StatusPill size="sm" variant="outline" tone="neutral" label={`${activity.segmentCount} segmentów · ${activity.newRecordCount ?? 0} nowe rekordy`} /> : null}
           <Box sx={{ flex: 1 }} />
           <Button endIcon={<ArrowForwardRoundedIcon />} onClick={() => onOpen(activity.id)}>
             Otwórz analizę
           </Button>
         </Stack>
       </Box>
-    </Paper>
+    </Surface>
   );
 }

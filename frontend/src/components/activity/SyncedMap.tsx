@@ -4,6 +4,8 @@ import { CircleMarker, MapContainer, Polyline, TileLayer, useMap } from 'react-l
 import 'leaflet/dist/leaflet.css';
 
 import { DEFAULT_MAP_TILE_VARIANT, MAP_TILE_CONFIG } from '@/constants/mapTiles';
+import { useTokens } from '@/ui';
+import { heatColor } from '@/utils/colors';
 
 import type { BrushRange } from './InteractiveStreamsChart';
 import type { LatLngBoundsExpression } from 'leaflet';
@@ -27,6 +29,7 @@ function FitBounds({ bounds }: { bounds: LatLngBoundsExpression }) {
 }
 
 export default function SyncedMap({ latStream, lngStream, powerStream, hoverIndex, selection }: SyncedMapProps) {
+  const mapTokens = useTokens().map;
   const lat = latStream ?? EMPTY_STREAM;
   const lng = lngStream ?? EMPTY_STREAM;
 
@@ -73,20 +76,9 @@ export default function SyncedMap({ latStream, lngStream, powerStream, hoverInde
     const minVal = Math.min(...values);
     const maxVal = Math.max(...values);
 
-    const low = { r: 59, g: 130, b: 246 }; // #3B82F6
-    const mid = { r: 255, g: 107, b: 53 }; // #FF6B35
-    const high = { r: 217, g: 4, b: 41 }; // #d90429
-    const lerp = (a: number, b: number, t: number) => Math.round(a + (b - a) * t);
-    const valueToColor = (v: number) => {
-      if (maxVal <= minVal) return `rgb(${mid.r},${mid.g},${mid.b})`;
-      const t = Math.max(0, Math.min(1, (v - minVal) / (maxVal - minVal)));
-      if (t <= 0.5) {
-        const tt = t * 2;
-        return `rgb(${lerp(low.r, mid.r, tt)},${lerp(low.g, mid.g, tt)},${lerp(low.b, mid.b, tt)})`;
-      }
-      const tt = (t - 0.5) * 2;
-      return `rgb(${lerp(mid.r, high.r, tt)},${lerp(mid.g, high.g, tt)},${lerp(mid.b, high.b, tt)})`;
-    };
+    const valueToColor = (v: number) => (maxVal <= minVal
+      ? mapTokens.heat.mid
+      : heatColor((v - minVal) / (maxVal - minVal), mapTokens.heat));
 
     for (let i = 0; i < sampledWithPower.positions.length - 1; i++) {
       const p1 = sampledWithPower.positions[i]!;
@@ -95,7 +87,7 @@ export default function SyncedMap({ latStream, lngStream, powerStream, hoverInde
       segs.push({ points: [p1, p2], value: val, color: valueToColor(val) });
     }
     return segs;
-  }, [sampledWithPower]);
+  }, [sampledWithPower, mapTokens.heat]);
 
 
   const bounds = useMemo((): LatLngBoundsExpression => {
@@ -176,7 +168,7 @@ export default function SyncedMap({ latStream, lngStream, powerStream, hoverInde
           <Polyline
             positions={fullRoute}
             pathOptions={{
-              color: selection ? '#8B949E' : '#FF6B35',
+              color: selection ? mapTokens.inactive : mapTokens.highlight,
               weight: selection ? 2 : 3,
               opacity: selection ? 0.4 : 0.8,
             }}
@@ -188,7 +180,7 @@ export default function SyncedMap({ latStream, lngStream, powerStream, hoverInde
           <Polyline
             positions={selectedSegment}
             pathOptions={{
-              color: '#FF6B35',
+              color: mapTokens.highlight,
               weight: 4,
               opacity: 1,
             }}
@@ -201,8 +193,8 @@ export default function SyncedMap({ latStream, lngStream, powerStream, hoverInde
             center={hoverPoint}
             radius={6}
             pathOptions={{
-              color: '#FF6B35',
-              fillColor: '#FF6B35',
+              color: mapTokens.highlight,
+              fillColor: mapTokens.highlight,
               fillOpacity: 1,
               weight: 2,
             }}

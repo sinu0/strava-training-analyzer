@@ -22,6 +22,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 
+import { getAppThemeTokens } from '@/theme/theme';
 import type { ActivityLap } from '@/types/activity';
 import { getChartVisuals } from '@/utils/chartStyles';
 import { formatDuration, formatDistance } from '@/utils/formatters';
@@ -43,12 +44,6 @@ interface LapCardProps {
   onSelect?: () => void;
 }
 
-const INTENSITY_COLORS: Record<string, string> = {
-  VO2: '#FF4444',
-  THRESHOLD: '#FFAA00',
-  ENDURANCE: '#4488FF',
-  RECOVERY: '#44CC44',
-};
 
 const INTENSITY_LABELS: Record<string, string> = {
   VO2: 'VO2max',
@@ -94,7 +89,8 @@ export default function LapCard({
     speed: theme.tokens?.chart.secondary ?? theme.palette.secondary.main,
     elevation: theme.palette.success.main,
   };
-  const intensityColor = lap.intensityClass ? INTENSITY_COLORS[lap.intensityClass] ?? '#666' : '#666';
+  const intensityColors: Record<string, string> = getAppThemeTokens(theme).chart.intensity;
+  const intensityColor = (lap.intensityClass ? intensityColors[lap.intensityClass] : undefined) ?? intensityColors.UNKNOWN ?? theme.palette.text.secondary;
   const intensityLabel = lap.intensityClass ? INTENSITY_LABELS[lap.intensityClass] ?? '' : '';
 
   const mergedChartData = useMemo((): LapChartPoint[] => {

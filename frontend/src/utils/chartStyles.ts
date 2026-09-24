@@ -1,3 +1,4 @@
+import { getAppThemeTokens, tokens } from '@/theme/theme';
 import { CHART_COLORS } from '@/utils/colors';
 
 import type { Theme } from '@mui/material/styles';
@@ -12,7 +13,7 @@ export const CHART_TOOLTIP_CONTENT_STYLE = {
   border: `1px solid ${CHART_COLORS.grid}`,
   borderRadius: 16,
   padding: '12px 14px',
-  boxShadow: '0 16px 34px rgba(49, 56, 90, 0.16)',
+  boxShadow: tokens.cardShadow,
 } as const;
 
 export const CHART_TOOLTIP_LABEL_STYLE = {
@@ -52,16 +53,12 @@ export const CHART_BAR_RADIUS: [number, number, number, number] = [8, 8, 2, 2];
 export function getChartVisuals(theme: Theme) {
   // Isolated component tests and embedders can provide MUI's base theme without
   // the application augmentation. Keep charts readable in that case as well.
-  const appTokens = theme.tokens;
-  const chart = appTokens?.chart ?? {
-    grid: '#D9E2EC',
-    tick: theme.palette.text.secondary,
-    tooltipText: theme.palette.text.primary,
-  };
-  const surfaceBorder = appTokens?.surfaceBorder ?? theme.palette.divider;
-  const surfaceElevated = appTokens?.surfaceElevated ?? theme.palette.background.paper;
-  const hoverOverlay = appTokens?.hoverOverlay ?? 'rgba(17,24,39,0.045)';
-  const cardShadow = appTokens?.cardShadow ?? '0 16px 34px rgba(49,56,90,0.16)';
+  const appTokens = getAppThemeTokens(theme);
+  const chart = appTokens.chart;
+  const surfaceBorder = appTokens.surfaceBorder;
+  const surfaceElevated = appTokens.surfaceElevated;
+  const hoverOverlay = appTokens.hoverOverlay;
+  const cardShadow = appTokens.cardShadow;
 
   return {
     grid: {

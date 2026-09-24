@@ -1,3 +1,5 @@
+import { tokens } from '@/theme/theme';
+
 export interface ActivityTrainingEffect {
   id: string;
   activityId: string;
@@ -25,15 +27,7 @@ export const BENEFIT_LABELS: Record<string, string> = {
   SPRINT: 'Sprint',
 };
 
-export const BENEFIT_COLORS: Record<string, string> = {
-  RECOVERY: '#39D353',
-  ENDURANCE: '#58A6FF',
-  TEMPO: '#D29922',
-  THRESHOLD: '#F85149',
-  VO2MAX: '#DA3633',
-  ANAEROBIC: '#FFA657',
-  SPRINT: '#BC8CFF',
-};
+export const BENEFIT_COLORS: Record<string, string> = tokens.chart.benefit;
 
 export function getTrainingScoreLabel(score: number): string {
   if (score >= 80) return 'Ekstremalny';
@@ -44,9 +38,10 @@ export function getTrainingScoreLabel(score: number): string {
 }
 
 export function getTrainingScoreColor(score: number): string {
-  if (score >= 80) return '#DA3633';
-  if (score >= 60) return '#F85149';
-  if (score >= 40) return '#D29922';
-  if (score >= 20) return '#58A6FF';
-  return '#39D353';
+  const benefit = tokens.chart.benefit;
+  if (score >= 80) return benefit.VO2MAX;
+  if (score >= 60) return benefit.THRESHOLD;
+  if (score >= 40) return benefit.TEMPO;
+  if (score >= 20) return benefit.ENDURANCE;
+  return benefit.RECOVERY;
 }

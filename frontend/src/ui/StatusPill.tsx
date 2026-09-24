@@ -10,6 +10,8 @@ import type { ReactNode } from 'react';
 export interface StatusPillProps {
   label: ReactNode;
   tone?: Tone;
+  /** Explicit colour for data categories (zones, benefits); wins over `tone`. */
+  color?: string;
   /** soft — tinted (default); solid — filled accent (e.g. "● 87%"); outline — quiet border; glass — over photography. */
   variant?: 'soft' | 'solid' | 'outline' | 'glass';
   dot?: boolean;
@@ -22,7 +24,7 @@ export interface StatusPillProps {
 
 /** Rounded status label. Use instead of ad-hoc Chips for state, freshness and badges. */
 export default function StatusPill({
-  label, tone = 'neutral', variant = 'soft', dot = false, icon, size = 'md', eyebrow = false, title,
+  label, tone = 'neutral', color: customColor, variant = 'soft', dot = false, icon, size = 'md', eyebrow = false, title,
 }: StatusPillProps) {
   return (
     <Box
@@ -30,8 +32,10 @@ export default function StatusPill({
       title={title}
       sx={(theme) => {
         const tokens = getAppThemeTokens(theme);
-        const color = tone === 'neutral' ? theme.palette.text.primary : toneColor(theme, tone);
-        const solidInk = tone === 'neutral' ? theme.palette.background.paper : theme.palette[tone].contrastText;
+        const neutral = tone === 'neutral' && !customColor;
+        const color = customColor ?? (tone === 'neutral' ? theme.palette.text.primary : toneColor(theme, tone));
+        const solidInk = customColor ? theme.palette.getContrastText(customColor)
+          : tone === 'neutral' ? theme.palette.background.paper : theme.palette[tone].contrastText;
         return {
           display: 'inline-flex',
           alignItems: 'center',
@@ -49,9 +53,9 @@ export default function StatusPill({
           border: '1px solid',
           ...(variant === 'solid' && { bgcolor: color, color: solidInk, borderColor: color }),
           ...(variant === 'soft' && {
-            bgcolor: tone === 'neutral' ? tokens.iconBubble : alpha(color, 0.12),
-            color: tone === 'neutral' ? 'text.primary' : color,
-            borderColor: tone === 'neutral' ? tokens.surfaceBorder : alpha(color, 0.24),
+            bgcolor: neutral ? tokens.iconBubble : alpha(color, 0.12),
+            color: neutral ? 'text.primary' : color,
+            borderColor: neutral ? tokens.surfaceBorder : alpha(color, 0.24),
           }),
           ...(variant === 'outline' && { bgcolor: 'transparent', color, borderColor: alpha(color, 0.5) }),
           ...(variant === 'glass' && {

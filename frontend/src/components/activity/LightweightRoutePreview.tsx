@@ -3,6 +3,7 @@ import { Box, Stack, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useMemo } from 'react';
 
+import { getAppThemeTokens } from '@/theme/theme';
 import { decodePolyline } from '@/utils/map';
 
 interface LightweightRoutePreviewProps {
@@ -58,8 +59,9 @@ export default function LightweightRoutePreview({
       return null;
     }
   }, [summaryPolyline]);
-  const routeColor = theme.palette.mode === 'light' ? '#FC4C02' : '#4ECDC4';
-  const roadColor = theme.palette.mode === 'light' ? '#DCE3E9' : '#2A3948';
+  const mapTokens = getAppThemeTokens(theme).map;
+  const routeColor = mapTokens.route;
+  const roadColor = mapTokens.road;
 
   return (
     <Box
@@ -72,10 +74,8 @@ export default function LightweightRoutePreview({
         placeItems: 'center',
         overflow: 'hidden',
         position: 'relative',
-        bgcolor: theme.palette.mode === 'light' ? '#F7F9FB' : 'rgba(8,13,19,0.65)',
-        backgroundImage: theme.palette.mode === 'light'
-          ? 'radial-gradient(circle at 66% 40%, rgba(22,166,200,0.10), transparent 52%), linear-gradient(145deg, #FFFFFF, #EEF3F6)'
-          : 'radial-gradient(circle at 50% 50%, rgba(22,166,200,0.12), transparent 64%)',
+        bgcolor: mapTokens.canvas,
+        backgroundImage: mapTokens.canvasGlow,
       }}
     >
       {route ? (
@@ -93,7 +93,7 @@ export default function LightweightRoutePreview({
           <path
             d={route.path}
             fill="none"
-            stroke={theme.palette.mode === 'light' ? '#FFFFFF' : '#071018'}
+            stroke={mapTokens.halo}
             strokeWidth="5.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -109,8 +109,8 @@ export default function LightweightRoutePreview({
             vectorEffect="non-scaling-stroke"
           />
           <circle cx={route.start[0]} cy={route.start[1]} r="4.2" fill={routeColor} />
-          <path d={`M ${route.start[0] - 1.5} ${route.start[1] + 1.9} L ${route.start[0] + 2.3} ${route.start[1]} L ${route.start[0] - 1.5} ${route.start[1] - 1.9} Z`} fill="#FFFFFF" />
-          <circle cx={route.end[0]} cy={route.end[1]} r="2.7" fill="#FFFFFF" stroke={routeColor} strokeWidth="1.8" />
+          <path d={`M ${route.start[0] - 1.5} ${route.start[1] + 1.9} L ${route.start[0] + 2.3} ${route.start[1]} L ${route.start[0] - 1.5} ${route.start[1] - 1.9} Z`} fill={mapTokens.endpoint} />
+          <circle cx={route.end[0]} cy={route.end[1]} r="2.7" fill={mapTokens.endpoint} stroke={routeColor} strokeWidth="1.8" />
         </svg>
       ) : (
         <Stack

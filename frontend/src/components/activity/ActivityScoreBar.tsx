@@ -2,7 +2,6 @@ import {
   Box,
   Chip,
   LinearProgress,
-  Paper,
   Stack,
   SvgIcon,
   Tooltip,
@@ -16,6 +15,7 @@ import {
   getTrainingScoreColor,
   getTrainingScoreLabel,
 } from '@/types/trainingEffect';
+import { StatusPill, Surface } from '@/ui';
 
 interface ActivityScoreBarProps {
   effect: ActivityTrainingEffect;
@@ -70,7 +70,7 @@ function TeBar({ value, label, color }: { value: number | null; label: string | 
             flex: 1,
             height: 6,
             borderRadius: 3,
-            bgcolor: 'rgba(255,255,255,0.06)',
+            bgcolor: (theme) => theme.tokens.trackBg,
             '& .MuiLinearProgress-bar': { bgcolor: color, borderRadius: 3 },
           }}
         />
@@ -112,9 +112,10 @@ function RecoveryChip({ hours }: { hours: number }) {
         sx={{
           fontWeight: 700,
           fontSize: '0.75rem',
-          bgcolor: 'rgba(255,255,255,0.04)',
+          bgcolor: (theme) => theme.tokens.iconBubble,
           color: 'text.secondary',
-          border: '1px solid rgba(255,255,255,0.08)',
+          border: '1px solid',
+          borderColor: 'divider',
         }}
       />
     </Tooltip>
@@ -123,18 +124,11 @@ function RecoveryChip({ hours }: { hours: number }) {
 
 export default function ActivityScoreBar({ effect }: ActivityScoreBarProps) {
   const scoreColor = getTrainingScoreColor(effect.trainingScore);
-  const benefitColor = BENEFIT_COLORS[effect.primaryBenefit] ?? '#58A6FF';
+  const benefitColor = BENEFIT_COLORS[effect.primaryBenefit] ?? BENEFIT_COLORS.ENDURANCE ?? scoreColor;
   const benefitLabel = BENEFIT_LABELS[effect.primaryBenefit] ?? effect.primaryBenefit;
 
   return (
-    <Paper
-      sx={{
-        p: { xs: 1.5, md: 2 },
-        borderRadius: 3,
-        bgcolor: 'rgba(255,255,255,0.02)',
-        border: '1px solid rgba(255,255,255,0.06)',
-      }}
-    >
+    <Surface variant="muted" padding="sm" radius="panel">
       <Stack spacing={1.5}>
         {/* Row 1: Training Score + Primary Benefit + Recovery */}
         <Stack
@@ -157,9 +151,9 @@ export default function ActivityScoreBar({ effect }: ActivityScoreBarProps) {
               }}>
                 Training Score
                 {effect.qualityScore != null && (
-                  <span style={{ color: '#39D353', marginLeft: 8, fontWeight: 700 }}>
+                  <Box component="span" sx={{ color: 'success.main', ml: 1, fontWeight: 700 }}>
                     · Quality {effect.qualityScore}
-                  </span>
+                  </Box>
                 )}
               </Typography>
             </Box>
@@ -168,27 +162,17 @@ export default function ActivityScoreBar({ effect }: ActivityScoreBarProps) {
           <Stack direction="row" spacing={1} sx={{
             alignItems: "center"
           }}>
-            <Chip
-              label={benefitLabel}
-              size="small"
-              sx={{
-                fontWeight: 800,
-                fontSize: '0.75rem',
-                bgcolor: `${benefitColor}22`,
-                color: benefitColor,
-                border: `1px solid ${benefitColor}44`,
-              }}
-            />
+            <StatusPill size="sm" label={benefitLabel} color={benefitColor} />
             <RecoveryChip hours={effect.recoveryTimeHours} />
           </Stack>
         </Stack>
 
         {/* Row 2: Aerobic + Anaerobic TE */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <TeBar value={effect.aerobicTe} label={effect.aerobicLabel} color="#58A6FF" />
-          <TeBar value={effect.anaerobicTe} label={effect.anaerobicLabel} color="#F85149" />
+          <TeBar value={effect.aerobicTe} label={effect.aerobicLabel} color={BENEFIT_COLORS.ENDURANCE ?? scoreColor} />
+          <TeBar value={effect.anaerobicTe} label={effect.anaerobicLabel} color={BENEFIT_COLORS.VO2MAX ?? scoreColor} />
         </Stack>
       </Stack>
-    </Paper>
+    </Surface>
   );
 }
