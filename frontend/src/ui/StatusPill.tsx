@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { alpha } from '@mui/material/styles';
+import { alpha, darken } from '@mui/material/styles';
 
 import { getAppThemeTokens } from '@/theme/theme';
 
@@ -34,6 +34,8 @@ export default function StatusPill({
         const tokens = getAppThemeTokens(theme);
         const neutral = tone === 'neutral' && !customColor;
         const color = customColor ?? (tone === 'neutral' ? theme.palette.text.primary : toneColor(theme, tone));
+        // Tinted pills keep text legible (WCAG AA) by darkening the ink in light mode.
+        const ink = tokens.mode === 'light' ? darken(color, 0.28) : color;
         const solidInk = customColor ? theme.palette.getContrastText(customColor)
           : tone === 'neutral' ? theme.palette.background.paper : theme.palette[tone].contrastText;
         return {
@@ -54,10 +56,10 @@ export default function StatusPill({
           ...(variant === 'solid' && { bgcolor: color, color: solidInk, borderColor: color }),
           ...(variant === 'soft' && {
             bgcolor: neutral ? tokens.iconBubble : alpha(color, 0.12),
-            color: neutral ? 'text.primary' : color,
+            color: neutral ? 'text.primary' : ink,
             borderColor: neutral ? tokens.surfaceBorder : alpha(color, 0.24),
           }),
-          ...(variant === 'outline' && { bgcolor: 'transparent', color, borderColor: alpha(color, 0.5) }),
+          ...(variant === 'outline' && { bgcolor: 'transparent', color: neutral ? color : ink, borderColor: alpha(color, 0.5) }),
           ...(variant === 'glass' && {
             bgcolor: tokens.glass.bg, color: tokens.media.ink, borderColor: tokens.glass.border, backdropFilter: tokens.glass.blur,
           }),

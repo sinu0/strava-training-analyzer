@@ -16,7 +16,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION, type AppNavigationItem } from '@/navigation/appNavigation';
 import { getAppThemeTokens } from '@/theme/theme';
-import { BrandMark } from '@/ui';
+import BrandMark from '@/ui/BrandMark';
 
 interface SidebarProps {
   width: number;

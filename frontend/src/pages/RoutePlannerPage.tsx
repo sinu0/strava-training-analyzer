@@ -7,6 +7,7 @@ import MobileShortcutPinButton from '@/components/settings/MobileShortcutPinButt
 import { useSaveUiPreferences, useUiPreferences } from '@/hooks/useUiPreferences';
 import RoutePlannerSidebar from '@/pages/route-planner/RoutePlannerSidebar';
 import { useRoutePlannerState } from '@/pages/route-planner/useRoutePlannerState';
+import { getAppThemeTokens } from '@/theme/theme';
 import { HeroCard, Page } from '@/ui';
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
 
@@ -29,7 +30,15 @@ export default function RoutePlannerPage() {
           minHeight={{ xs: 260, md: 290 }}
         >
           {preferences.data ? (
-            <Box sx={{ pt: 1.5 }}>
+            <Box
+              sx={(theme) => {
+                const tokens = getAppThemeTokens(theme);
+                return {
+                  pt: 1.5,
+                  '& .MuiButton-root': { color: tokens.media.ink, bgcolor: tokens.glass.bg, border: `1px solid ${tokens.glass.border}`, backdropFilter: tokens.glass.blur },
+                };
+              }}
+            >
               <MobileShortcutPinButton
                 label="Trasy"
                 path="/routes"

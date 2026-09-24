@@ -1,5 +1,7 @@
 import { Box, Stack, Typography } from '@mui/material';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import type { ReactNode } from 'react';
 
 export interface SectionHeaderProps {
@@ -18,7 +20,7 @@ export default function SectionHeader({ eyebrow, title, description, icon, actio
       <Stack direction="row" spacing={1.25} sx={{ alignItems: 'flex-start', minWidth: 0 }}>
         {icon ? <Box sx={{ mt: 0.25, display: 'grid', placeItems: 'center', color: 'primary.main' }}>{icon}</Box> : null}
         <Box sx={{ minWidth: 0 }}>
-          {eyebrow ? <Typography variant="overline" sx={{ color: 'primary.main', display: 'block', lineHeight: 1.4 }}>{eyebrow}</Typography> : null}
+          {eyebrow ? <Typography variant="overline" sx={(theme) => ({ color: getAppThemeTokens(theme).action.primaryInk, display: 'block', lineHeight: 1.4 })}>{eyebrow}</Typography> : null}
           <Typography variant="h5" component={component}>{title}</Typography>
           {description ? <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.35, maxWidth: 760 }}>{description}</Typography> : null}
         </Box>

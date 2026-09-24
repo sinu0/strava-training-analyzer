@@ -21,13 +21,15 @@ import {
   Typography,
 } from '@mui/material';
 import { alpha, type Theme } from '@mui/material/styles';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import TopBarSyncButton from '@/components/layout/TopBarSyncButton';
 import { useColorMode } from '@/context/ThemeModeContext';
 import { getAppThemeTokens } from '@/theme/theme';
-import { BrandMark } from '@/ui';
+import BrandMark from '@/ui/BrandMark';
+
+// Sync status pulls the analytics hooks; loading it after first paint keeps the entry chunk small.
+const TopBarSyncButton = lazy(() => import('@/components/layout/TopBarSyncButton'));
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -169,7 +171,9 @@ export default function TopBar({
                 bgcolor: (theme) => alpha(theme.palette.success.main, 0.08),
               }}
             />
-            <TopBarSyncButton />
+            <Suspense fallback={<Box sx={{ width: 44, height: 44 }} />}>
+              <TopBarSyncButton />
+            </Suspense>
 
             <Tooltip title={mode === 'dark' ? 'Włącz jasny motyw' : 'Włącz ciemny motyw'}>
               <IconButton

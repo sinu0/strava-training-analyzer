@@ -58,7 +58,7 @@ export default function HeroCard({
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 1.5, md: 2.5 }} sx={{ alignItems: 'stretch' }}>
           <Stack spacing={1.25} sx={{ flex: 1, minWidth: 0, justifyContent: 'space-between' }}>
             <Box>
-              {eyebrow ? <Typography variant="overline" sx={{ color: 'primary.main', display: 'block' }}>{eyebrow}</Typography> : null}
+              {eyebrow ? <Typography variant="overline" sx={(theme) => ({ color: getAppThemeTokens(theme).action.primaryInk, display: 'block' })}>{eyebrow}</Typography> : null}
               <Typography variant="h4" component={headingComponent} sx={{ maxWidth: 620 }}>{title}</Typography>
               {description ? <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1, maxWidth: 720 }}>{description}</Typography> : null}
             </Box>

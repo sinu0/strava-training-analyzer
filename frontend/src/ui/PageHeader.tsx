@@ -1,5 +1,7 @@
 import { Box, Stack, Typography } from '@mui/material';
 
+import { getAppThemeTokens } from '@/theme/theme';
+
 import type { ReactNode } from 'react';
 
 export interface PageHeaderProps {
@@ -20,7 +22,7 @@ export default function PageHeader({ title, description, eyebrow, meta, actions 
       sx={{ alignItems: { md: 'flex-end' }, justifyContent: 'space-between', mb: { xs: 3, md: 4 } }}
     >
       <Box sx={{ minWidth: 0 }}>
-        {eyebrow ? <Typography variant="overline" sx={{ color: 'primary.main', display: 'block' }}>{eyebrow}</Typography> : null}
+        {eyebrow ? <Typography variant="overline" sx={(theme) => ({ color: getAppThemeTokens(theme).action.primaryInk, display: 'block' })}>{eyebrow}</Typography> : null}
         <Typography component="h1" variant="h3">{title}</Typography>
         {description ? <Typography variant="body1" sx={{ color: 'text.secondary', mt: 0.75, maxWidth: 760 }}>{description}</Typography> : null}
       </Box>

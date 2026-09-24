@@ -2,7 +2,7 @@ import { lazy, Suspense, type ComponentType, type LazyExoticComponent } from 're
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import AppLayout from '@/components/layout/AppLayout';
-import { LoadingState } from '@/ui';
+import LoadingState from '@/ui/feedback/LoadingState';
 
 const TodayPage = lazy(() => import('@/features/today/TodayPage'));
 const MorePage = lazy(() => import('@/features/more/MorePage'));

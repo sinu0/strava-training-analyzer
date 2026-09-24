@@ -35,6 +35,8 @@ export const getThemeTokens = (mode: AppColorMode) => {
   const standardMotion = '220ms cubic-bezier(0.2, 0, 0, 1)';
   const action = {
     primary: isLight ? '#D93F00' : '#FF8051',
+    /** Accent used for small text (eyebrows, links) where it must reach 4.5:1 on the canvas. */
+    primaryInk: isLight ? '#B23600' : '#FF8051',
     primaryContrast: isLight ? '#FFFFFF' : '#081018',
     secondary: isLight ? '#08758D' : '#54D0EB',
     secondaryContrast: '#081018',
