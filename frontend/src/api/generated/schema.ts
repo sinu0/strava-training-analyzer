@@ -3521,6 +3521,8 @@ export interface components {
             intervalMinutes?: number;
         };
         BackfillStatusDto: {
+            /** Format: int32 */
+            attemptCount?: number;
             capability?: string;
             errorMessage?: string;
             jobType?: string;
@@ -3528,6 +3530,8 @@ export interface components {
             processed?: number;
             /** Format: date-time */
             rateLimitResetsAt?: string;
+            /** Format: date-time */
+            retryAt?: string;
             status?: string;
             /** Format: int32 */
             total?: number;

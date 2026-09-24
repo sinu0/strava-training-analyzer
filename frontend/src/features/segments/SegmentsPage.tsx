@@ -11,6 +11,7 @@ import PageContainer from '@/components/common/PageContainer';
 import MetricReadout from '@/components/v2/MetricReadout';
 import PerformanceSurface from '@/components/v2/PerformanceSurface';
 import { useBackfillStatus, useSegments, useSetSegmentFavorite, useStartBackfill } from '@/hooks/useSegments';
+import { describeBackfillStatus, isBackfillBusy } from '@/utils/backfillStatus';
 
 function duration(seconds?: number | null) {
   if (seconds == null) return '—';
@@ -76,11 +77,11 @@ export default function SegmentsPage() {
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{
             alignItems: { sm: 'center' }
           }}>
-            <Box sx={{ flex: 1 }}><Typography sx={{ fontWeight: 800 }}>Backfill historycznych segmentów: {backfill.data.status}</Typography>
+            <Box sx={{ flex: 1 }}><Typography sx={{ fontWeight: 800 }}>Backfill historycznych segmentów: {describeBackfillStatus(backfill.data)}</Typography>
               <Typography variant="body2" sx={{
                 color: "text.secondary"
               }}>{backfill.data.processed}/{backfill.data.total} aktywności · capability: {backfill.data.capability}</Typography></Box>
-            <Button variant="contained" disabled={['RUNNING', 'RATE_LIMITED'].includes(backfill.data.status) || startBackfill.isPending} onClick={() => startBackfill.mutate('segments')}>Uruchom / wznów</Button>
+            <Button variant="contained" disabled={isBackfillBusy(backfill.data.status) || startBackfill.isPending} onClick={() => startBackfill.mutate('segments')}>Uruchom / wznów</Button>
           </Stack>
         </PerformanceSurface>
       )}
@@ -90,11 +91,11 @@ export default function SegmentsPage() {
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{
             alignItems: { sm: 'center' }
           }}>
-            <Box sx={{ flex: 1 }}><Typography sx={{ fontWeight: 800 }}>Lokalny backfill dopasowanych tras: {routeBackfill.data.status}</Typography>
+            <Box sx={{ flex: 1 }}><Typography sx={{ fontWeight: 800 }}>Lokalny backfill dopasowanych tras: {describeBackfillStatus(routeBackfill.data)}</Typography>
               <Typography variant="body2" sx={{
                 color: "text.secondary"
               }}>{routeBackfill.data.processed}/{routeBackfill.data.total} aktywności · bez wywołań Stravy</Typography></Box>
-            <Button variant="outlined" disabled={routeBackfill.data.status === 'RUNNING' || startBackfill.isPending} onClick={() => startBackfill.mutate('routes')}>Uruchom / wznów</Button>
+            <Button variant="outlined" disabled={isBackfillBusy(routeBackfill.data.status) || startBackfill.isPending} onClick={() => startBackfill.mutate('routes')}>Uruchom / wznów</Button>
           </Stack>
         </PerformanceSurface>
       )}

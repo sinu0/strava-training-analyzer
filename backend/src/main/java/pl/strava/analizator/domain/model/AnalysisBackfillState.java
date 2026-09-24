@@ -17,6 +17,8 @@ public class AnalysisBackfillState {
     private int total;
     private String capability;
     private Instant rateLimitResetsAt;
+    private Instant retryAt;
+    private int attemptCount;
     private String errorMessage;
     private Instant startedAt;
     private Instant updatedAt;
