@@ -2703,6 +2703,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/workouts/executions/{id}/export/activity.fit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["exportActivityFit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/workouts/executions/{id}/feedback": {
         parameters: {
             query?: never;
@@ -2713,6 +2729,22 @@ export interface paths {
         get?: never;
         put: operations["feedback"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/workouts/executions/{id}/samples": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["samples"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4917,6 +4949,27 @@ export interface components {
             /** Format: int32 */
             current?: number;
             direction?: string;
+        };
+        RideSampleChunkRequest: {
+            /** Format: int32 */
+            chunkIndex?: number;
+            samples?: components["schemas"]["RideSampleDto"][];
+        };
+        RideSampleDto: {
+            /** Format: int64 */
+            atMs?: number;
+            /** Format: int32 */
+            cadenceRpm?: number;
+            /** Format: int64 */
+            elapsedMs?: number;
+            /** Format: int32 */
+            heartRateBpm?: number;
+            /** Format: int32 */
+            powerWatts?: number;
+            /** Format: double */
+            speedKph?: number;
+            /** Format: int32 */
+            stepIndex?: number;
         };
         RiskDto: {
             level?: string;
@@ -10257,6 +10310,28 @@ export interface operations {
             };
         };
     };
+    exportActivityFit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
     feedback: {
         parameters: {
             query?: never;
@@ -10280,6 +10355,30 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["WorkoutExecutionDto"];
                 };
+            };
+        };
+    };
+    samples: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RideSampleChunkRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

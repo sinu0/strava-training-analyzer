@@ -17,10 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import pl.strava.analizator.application.RideRecordingService;
 import pl.strava.analizator.application.WorkoutExecutionService;
 import pl.strava.analizator.application.WorkoutActivityMatchingService;
 import pl.strava.analizator.application.WorkoutExportService;
 import pl.strava.analizator.application.dto.FinishWorkoutExecutionRequest;
+import pl.strava.analizator.application.dto.RideSampleChunkRequest;
 import pl.strava.analizator.application.dto.StartWorkoutExecutionRequest;
 import pl.strava.analizator.application.dto.TrainingPlanDto;
 import pl.strava.analizator.application.dto.WorkoutActivityLinkRequest;
@@ -39,6 +41,7 @@ public class WorkoutExecutionController {
     private final WorkoutExecutionService executionService;
     private final WorkoutActivityMatchingService matchingService;
     private final WorkoutExportService exportService;
+    private final RideRecordingService recordingService;
     private final TrainingPlanRepository trainingPlanRepository;
     private final WorkoutDeliveryPort deliveryPort;
     private final Clock clock;
@@ -106,6 +109,20 @@ public class WorkoutExecutionController {
     @GetMapping("/executions/{id}/activity-candidates")
     public List<WorkoutActivityCandidateDto> candidates(@PathVariable UUID id) {
         return matchingService.candidates(id).stream().map(WorkoutActivityCandidateDto::fromDomain).toList();
+    }
+
+    @PostMapping("/executions/{id}/samples")
+    public ResponseEntity<Void> samples(@PathVariable UUID id, @RequestBody RideSampleChunkRequest request) {
+        recordingService.saveChunk(id, request.getChunkIndex(), request.getSamples());
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/executions/{id}/export/activity.fit")
+    public ResponseEntity<byte[]> exportActivityFit(@PathVariable UUID id) {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"trainer-ride-" + id + ".fit\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(recordingService.exportActivityFit(id));
     }
 
     @GetMapping("/scheduled/{id}/export/fit")

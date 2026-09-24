@@ -82,6 +82,33 @@ test.describe('Tryb trenażera', () => {
     await page.screenshot({ path: '../artifacts/trainer-cockpit/cockpit-desktop-dark.png' });
   });
 
+  test('nagrywa przejazd w aplikacji i po treningu udostępnia plik FIT', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const calls = await mockWorkoutApi(page);
+    await page.goto('/workout/exec-e2e?devices=sim');
+    await expect(page.getByRole('heading', { level: 1, name: 'Rozgrzewka' })).toBeVisible();
+    await connectSimulatedDevices(page);
+
+    await page.getByRole('button', { name: 'Urządzenia' }).click();
+    await page.getByLabel('Nagrywaj przejazd w aplikacji').check();
+    await page.getByRole('button', { name: 'Zamknij panel urządzeń' }).click();
+    await expect(page.getByText('REC', { exact: true })).toBeVisible();
+    await page.waitForTimeout(4_000);
+
+    page.once('dialog', (dialog) => void dialog.accept());
+    await page.getByRole('button', { name: 'Zakończ' }).click();
+    await expect(page.getByText('Trening przerwany')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Pobierz plik FIT' })).toHaveAttribute('href', '/api/v2/workouts/executions/exec-e2e/export/activity.fit');
+    await expect(page.getByLabel('Dane z trenażera')).toBeVisible();
+
+    const uploads = calls.filter((call) => call.path.endsWith('/executions/exec-e2e/samples'));
+    expect(uploads.length).toBeGreaterThan(0);
+    const first = uploads[0]?.body as { chunkIndex: number; samples: Array<{ powerWatts: number | null; atMs: number }> };
+    expect(first.chunkIndex).toBe(0);
+    expect(first.samples.length).toBeGreaterThanOrEqual(3);
+    expect(first.samples.some((sample) => (sample.powerWatts ?? 0) > 0)).toBe(true);
+  });
+
   test('układ mobilny bez poziomego przewijania', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await mockWorkoutApi(page);

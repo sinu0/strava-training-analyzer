@@ -42,6 +42,8 @@ import pl.strava.analizator.domain.model.CoachingFeedback;
 import pl.strava.analizator.domain.port.ActivityRepository;
 import pl.strava.analizator.domain.port.CoachingFeedbackRepository;
 import pl.strava.analizator.domain.port.UiPreferencesRepository;
+import pl.strava.analizator.domain.port.RideRecordingRepository;
+import pl.strava.analizator.domain.model.RideSample;
 import pl.strava.analizator.domain.model.DashboardWidget;
 import pl.strava.analizator.domain.model.UiPreferences;
 
@@ -73,9 +75,10 @@ class ApplicationCoherenceIntegrationTest {
     private final CoachingFeedbackRepository feedback;
     private final KnowledgeIndexPort knowledgeIndex;
     private final UiPreferencesRepository uiPreferences;
+    private final RideRecordingRepository rideRecordings;
 
     @Test void migratesAndExportsRealOpenApi() throws Exception {
-        assertThat(jdbc.queryForObject("SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1", String.class)).isEqualTo("61");
+        assertThat(jdbc.queryForObject("SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1", String.class)).isEqualTo("62");
         String schema = mvc.perform(get("/api-docs")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(json.readTree(schema).at("/paths/~1api~1v2~1training~1context").isMissingNode()).isFalse();
         Files.createDirectories(Path.of("build"));
@@ -162,6 +165,27 @@ class ApplicationCoherenceIntegrationTest {
             assertThat(widget.getSettings()).containsEntry("range", 42);
         });
         assertThat(jdbc.queryForObject("SELECT jsonb_typeof(dashboard_json) FROM ui_preferences", String.class)).isEqualTo("array");
+    }
+
+    @Test void storesRideRecordingChunksIdempotentlyAndCascadesWithExecution() {
+        UUID plan = jdbc.queryForObject("INSERT INTO training_plans (date) VALUES (DATE '2026-09-24') RETURNING id", UUID.class);
+        UUID execution = jdbc.queryForObject("""
+                INSERT INTO workout_executions (training_plan_id, workout_name_snapshot, workout_steps_snapshot, started_at, status, start_idempotency_key)
+                VALUES (?, 'Próg', '[]'::jsonb, NOW(), 'RUNNING', ?) RETURNING id
+                """, UUID.class, plan, "ride-" + UUID.randomUUID());
+        Instant start = Instant.parse("2026-09-24T17:00:00Z");
+        RideSample first = RideSample.builder().at(start).elapsedMs(0).stepIndex(0).powerWatts(200).heartRateBpm(130).cadenceRpm(90).speedKph(33.3).build();
+        RideSample second = RideSample.builder().at(start.plusSeconds(1)).elapsedMs(1000).stepIndex(0).powerWatts(205).build();
+
+        rideRecordings.saveChunk(execution, 1, List.of(second));
+        rideRecordings.saveChunk(execution, 0, List.of(first));
+        rideRecordings.saveChunk(execution, 0, List.of(first));
+
+        assertThat(rideRecordings.findByExecution(execution)).containsExactly(first, second);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM workout_execution_sample_chunks WHERE execution_id = ?", Integer.class, execution)).isEqualTo(2);
+        jdbc.update("DELETE FROM workout_executions WHERE id = ?", execution);
+        assertThat(rideRecordings.findByExecution(execution)).isEmpty();
+        jdbc.update("DELETE FROM training_plans WHERE id = ?", plan);
     }
 
     private KnowledgeIndexEntry knowledgeEntry(String version, String content, int dimensions) {
