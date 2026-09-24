@@ -20,7 +20,7 @@
       "@/*": ["./src/*"]
     },
     "baseUrl": ".",
-    "types": ["vitest/globals", "vite/client", "react"]
+    "types": ["vitest/globals", "vite/client", "react", "web-bluetooth"]
   },
   "include": ["src", "scripts/**/*.d.ts"]
 }
