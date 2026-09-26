@@ -1,36 +1,36 @@
-# System komponentów `@/ui`
+# `@/ui` component system
 
-Jedno miejsce, które wyznacza wygląd aplikacji. Wzorem jest referencyjny dashboard „Granger”: zaokrąglone karty, ikony w okrągłych bąblach, duże lekkie liczby z małą jednostką, pigułki statusu, cienkie paski postępu i wykresy kropkowe.
+The single place that defines how the app looks. The reference is the "Granger" dashboard: rounded cards, icons in round bubbles, large light numbers with a small unit, status pills, thin progress bars and dot charts.
 
-## Gdzie co zmieniać
+## Where to change what
 
-| Co zmieniasz | Gdzie |
+| What you change | Where |
 |---|---|
-| Kolory, promienie, odstępy, typografia, cienie, ruch, szkło, kolory map i stref | `frontend/src/theme/theme.ts` → `getThemeTokens(mode)` |
-| Wygląd i budowa części interfejsu | `frontend/src/ui/*` (import zawsze z `@/ui`) |
-| Nadpisania surowych komponentów MUI (Button, Chip, Tabs, Slider…) | `createAppTheme()` w `theme.ts` |
+| Colors, radii, spacing, typography, shadows, motion, glass, map and zone colors | `frontend/src/theme/theme.ts` → `getThemeTokens(mode)` |
+| Look and structure of UI parts | `frontend/src/ui/*` (always import from `@/ui`) |
+| Overrides of raw MUI components (Button, Chip, Tabs, Slider…) | `createAppTheme()` in `theme.ts` |
 
-Podgląd wszystkich części w obu motywach: trasa `/design-system` (ukryta w nawigacji). Test `e2e/tests/design-system.spec.ts` porównuje ją ze zrzutami wzorcowymi.
+Preview of all parts in both themes: route `/design-system` (hidden from navigation). The test `e2e/tests/design-system.spec.ts` compares it against baseline screenshots.
 
-## Części
+## Parts
 
-| Grupa | Komponenty |
+| Group | Components |
 |---|---|
-| Powierzchnie | `Surface` (default / accent / muted / glass / outlined), `Widget` (Surface + nagłówek + treść), `HeroCard` (overlay / split), `WidgetGrid` + `WidgetCell` |
-| Nagłówki | `PageHeader`, `Page`, `SectionHeader`, `WidgetHeader`, `IconBubble`, `BrandMark` |
-| Wartości | `Metric` (readout / stat / hero), `LegendStat`, `StatRow`, `GlassStat` |
-| Status i postęp | `StatusPill` (soft / solid / outline / glass, `tone` albo `color`), `ProgressTrack` (bar / marker / segmenty) |
-| Wykresy | `DotMatrixRow`, `DotMatrixChart`, `Sparkline`, `ChartFrame` + `useChartVisuals()` dla Recharts |
-| Akcje | `RoundAction` (media / accent / bubble) |
-| Stany | `LoadingState`, `ErrorState`, `EmptyState`, `SkeletonCard` |
+| Surfaces | `Surface` (default / accent / muted / glass / outlined), `Widget` (Surface + header + content), `HeroCard` (overlay / split), `WidgetGrid` + `WidgetCell` |
+| Headers | `PageHeader`, `Page`, `SectionHeader`, `WidgetHeader`, `IconBubble`, `BrandMark` |
+| Values | `Metric` (readout / stat / hero), `LegendStat`, `StatRow`, `GlassStat` |
+| Status and progress | `StatusPill` (soft / solid / outline / glass, `tone` or `color`), `ProgressTrack` (bar / marker / segments) |
+| Charts | `DotMatrixRow`, `DotMatrixChart`, `Sparkline`, `ChartFrame` + `useChartVisuals()` for Recharts |
+| Actions | `RoundAction` (media / accent / bubble) |
+| States | `LoadingState`, `ErrorState`, `EmptyState`, `SkeletonCard` |
 
-## Zasady
+## Rules
 
-- Ekrany składają się z `@/ui` i zwykłych komponentów układu MUI (`Box`, `Stack`, `Grid`, `Typography`, `Button`). `Card` i `Paper` są zarezerwowane dla `src/ui`.
-- Żadnych literałów kolorów (`#hex`, `rgba(`) poza `src/theme`. Kolor bierzesz z palety (`'primary.main'`, `'text.secondary'`) albo z tokenów.
-- Tokeny czytasz zawsze przez `getAppThemeTokens(theme)` lub `useTokens()`, nigdy przez `theme.tokens.x`, bo testy mogą renderować na gołym motywie MUI.
-- Kolory kategorii danych (strefy, efekt treningowy, serie map) leżą w `tokens.chart.*` i `tokens.map.*`. Nie definiuj ich lokalnie w komponencie.
-- Pliki ładowane na starcie (`App.tsx`, `components/layout/*`) importują konkretne moduły (`@/ui/feedback/LoadingState`, `@/ui/BrandMark`), nie barrel `@/ui`. Inaczej cały zestaw trafia do początkowego bundla i łamie budżet `npm run budget`.
-- Brakuje części? Dodaj ją do `src/ui`, eksportuj w `src/ui/index.ts`, pokaż w katalogu i napisz test w `src/ui/__tests__`. Nie buduj lokalnego odpowiednika w feature.
+- Screens are composed of `@/ui` and plain MUI layout components (`Box`, `Stack`, `Grid`, `Typography`, `Button`). `Card` and `Paper` are reserved for `src/ui`.
+- No color literals (`#hex`, `rgba(`) outside `src/theme`. Take colors from the palette (`'primary.main'`, `'text.secondary'`) or from tokens.
+- Always read tokens via `getAppThemeTokens(theme)` or `useTokens()`, never `theme.tokens.x` — tests may render with a bare MUI theme.
+- Data category colors (zones, training effect, map series) live in `tokens.chart.*` and `tokens.map.*`. Do not define them locally in a component.
+- Files loaded at startup (`App.tsx`, `components/layout/*`) import concrete modules (`@/ui/feedback/LoadingState`, `@/ui/BrandMark`), not the `@/ui` barrel. Otherwise the whole set lands in the initial bundle and breaks the `npm run budget` limit.
+- Missing a part? Add it to `src/ui`, export it from `src/ui/index.ts`, show it in the catalogue and write a test in `src/ui/__tests__`. Do not build a local equivalent inside a feature.
 
-Strażnik w ESLint (`eslint.config.mjs`) jest częścią `npm run lint` i odrzuca literały kolorów oraz importy starych powierzchni.
+The ESLint guard (`eslint.config.mjs`) is part of `npm run lint` and rejects color literals and imports of legacy surfaces.

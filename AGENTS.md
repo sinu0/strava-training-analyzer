@@ -1,82 +1,74 @@
 # Strava Training Analyzer
 
-Projekt typu self-hosted do zaawansowanej analizy treningów kolarskich.
-Java/Spring Boot + React/TypeScript, architektura heksagonalna.
+Self-hosted, single-user app for cycling training analysis (Strava → metrics, planning, workout execution on a smart trainer).
+Java 21/Spring Boot 3 (hexagonal) + React 19/TypeScript/MUI + PostgreSQL/PostGIS. Dark theme, mobile-first.
+**Language: code, docs and commits in English; UI text in Polish.**
 
-## Stack
+## Project knowledge — load only what you need
 
-- **Backend**: Java 21+, Spring Boot 3, Gradle, hexagonal (port-adapter)
-- **Frontend**: React 19, TypeScript, MUI, TanStack Query, Recharts, Leaflet, Vite
-- **Baza**: PostgreSQL z Flyway migracjami
-- **AI**: Ollama / OpenAI / Anthropic / Gemini (opcjonalne)
-- **Grafika**: Python 3 + zimage (Z-Image-Turbo SDNQ)
+| File | When to read |
+|---|---|
+| `docs/agents/STATUS.md` | at the start of every session (short current state and open threads) |
+| `docs/agents/FEATURE_MAP.md` | always before changing a feature — maps screen → hook → endpoint → service |
+| `docs/agents/ARCHITECTURE.md` | cross-cutting change, new module, flows (import, metrics, jobs, AI), large files |
+| `docs/agents/WORKFLOW.md` | new feature: BE/FE recipes, verification, knowledge updates |
+| `docs/agents/DECISIONS.md` | before a product/technical decision — binding rules |
+| `docs/DESIGN_SYSTEM.md` | any UI change |
+| `docs/WORKOUT_EXECUTION_PWA.md`, `docs/LAN_ACCESS.md`, `docs/BACKUP_AND_RECOVERY.md` | only for those areas |
 
-## Komendy
+Context-saving rules:
+- Do not read README, whole directories or files "just in case". Start with `FEATURE_MAP.md`, then `rg -n` in the indicated place.
+- Read large files (`AnalyticsService`, `TrainingPlanService`, `theme.ts`, `api/generated/schema.ts`, `hooks/useAnalytics.ts`) in ranges.
+- Ignore: `do_usuniecia/`, `node_modules/`, `build/`, `dist/`, `test-results/`, `package-lock.json`, `.opencode/`.
 
-### Backend
+## Commands
+
 ```bash
-cd backend
-./gradlew compileJava           # kompilacja
-./gradlew test                  # testy jednostkowe
-./gradlew bootRun               # uruchomienie
+# backend
+cd backend && ./gradlew compileJava        # compile
+./gradlew test                             # unit (no Docker)
+./gradlew test --tests '*NameTest'         # single test
+./gradlew integrationTest                  # PostgreSQL + OpenAPI contract (Docker) → build/openapi.json
+./gradlew bootRun                          # dev :8080
+
+# frontend
+cd frontend && npx tsc --noEmit            # typecheck
+npm run test -- <path>                     # vitest (all: npm run test)
+npm run lint                               # ESLint + design-system guard
+npm run api:generate                       # TS types from openapi.json
+npm run quality                            # lint+typecheck+test+build+budget (as CI)
+npm run dev                                # :5173, proxy /api → :8080
+
+# stack
+docker compose up -d --build               # :80 frontend, :8080 backend, :5432 db (loopback)
+docker compose --profile ai up -d          # + Ollama
+
+# illustrations (needs GPU — tell the user)
+./image-gen/setup.sh && /tmp/z-image-studio/.venv/bin/python image-gen/generate.py <prefix> [--force]
+node tools/llm-svg-studio/serve.mjs        # asset studio :4177 (SVG via LM Studio :1234, images via Z-Image)
 ```
 
-### Frontend
-```bash
-cd frontend
-npm run test                    # vitest
-npx tsc --noEmit               # typecheck
-npm run build                   # tsc + vite build
-npm run dev                     # dev server
-```
+## Conventions
 
-### Generowanie ilustracji
-```bash
-./image-gen/setup.sh                                # pierwsze uruchomienie
-/tmp/z-image-studio/.venv/bin/python image-gen/generate.py <prefix> [--force]
-```
+- backend: hexagonal — `domain` free of Spring/JPA (ArchUnit), `application` depends on ports, controllers call services only
+- backend: `@RequiredArgsConstructor` instead of `@Autowired`; DTOs are separate public classes (not `record`)
+- backend: tests — MockMvc (`@WebMvcTest`) for controllers, WireMock for external HTTP, `@Tag("integration")` for a real database
+- backend: Flyway migrations forward-only (`V<n+1>__description.sql`); new APIs under `/api/v2/...`
+- frontend: new areas in `features/<name>/` (page + hook + types + tests); pages lazy-loaded via `React.lazy`
+- frontend: REST through `apiClient` from `@/api/client`, data through TanStack Query hooks
+- frontend: UI only from `@/ui` and `theme.ts` tokens (`getAppThemeTokens(theme)` / `useTokens()`), `sx` prop; no color literals and no `Card`/`Paper` outside `src/ui`
+- frontend: types in `types/` or `features/*/types.ts`, hooks in `hooks/` or `features/*/`, components in `components/` or `features/*/`
+- configuration via environment variables (`.env`, `.env.example`), nothing hardcoded; `AI_ENABLED=true` enables the AI module
+- commit messages: conventional commits (`feat:`, `fix:`, `chore:`, `docs:`)
 
-### Docker
-```bash
-docker compose up -d
-```
+## How to work
 
-## Struktura kodu
+- use TDD: test → implementation → refactor; a failing test gets fixed immediately
+- new feature (not a fix to previous work) → propose a new branch `feat/<name>`
+- design for reuse: isolated, clean and easy to extend (port/adapter, `features/<name>`, component in `@/ui`)
+- need images → consider generating them (`image-gen/`, needs a running GPU — tell the user)
+- when work is finished always run `docker compose up -d --build` so the whole stack reloads
+- **after every feature update the knowledge** per the table in `docs/agents/WORKFLOW.md` (FEATURE_MAP / DECISIONS / STATUS); never create AUDIT/PROGRESS/HANDOFF files in the root
+- never push or merge without the user's consent
 
-### Backend (hexagonal)
-- `domain/model/` — czyste modele domenowe (POJO, żadnych frameworków)
-- `domain/port/` — interfejsy wyjściowe (repozytoria, adaptery)
-- `application/` — serwisy aplikacyjne + DTO
-- `infrastructure/persistence/` — JPA, encje, mapperzy
-- `infrastructure/web/` — REST controllery
-
-### Frontend
-- `src/hooks/` — TanStack Query hooks (useAnalytics.ts, useTrainingPriorities.ts, itd.)
-- `src/pages/` — strony (lazy-loaded)
-- `src/types/` — TypeScript interfejsy
-- `src/components/` — komponenty UI
-- `src/utils/` — helpery (kolory, formatowanie, ilustracje)
-
-## Konwencje
-
-- backend: `@RequiredArgsConstructor` zamiast `@Autowired`
-- backend: DTO osobne publiczne klasy (nie `record` w DTO warstwie)
-- backend: implementacja testów przez WireMock + MockMvc
-- frontend: `apiClient` z `@/api/client` do REST
-- frontend: lazy loading stron przez `React.lazy`
-- frontend: UI wyłącznie z `@/ui` (standard komponentów, patrz `docs/DESIGN_SYSTEM.md`) i tokenów z `theme.ts`; żadnych literałów kolorów ani `Card`/`Paper` poza `src/ui`
-- frontend: Material UI `sx` prop, tokeny czytane przez `getAppThemeTokens(theme)` / `useTokens()`
-- frontend: typy w `types/`, hooki w `hooks/`, komponenty w `components/`
-- commit message: conventional commits (feat:, fix:, chore:, docs:)
-- UI w ciemnym motywie, mobile-first
-- testujesz najpierw cos nie dziala naprawiasz odrazu
-- stosujesz tdd
-- przy wprowadzaniu nowego feature myslisz o architekturze oraz o rozwiazaniu aby bylo reuzywalnie jak najbardziej odizolowane czyste i proste w rozwijaniu
-- jezeli potrzebujesz obrazow rozwaz jego wygenerowanie (ptrzeba uruchomionego gpu zglos to jezeli trzeba)
-- dla kazdego nowego feature jezeli to nie sa fixy do porzednich zaproponuj stworzenie nowego brancha
-- po zakonczeniu pracy zawsze przebuduj dockera z opcja `docker compose up -d --build` aby caly stack sie przeladowal
-- 
-# Opcjonalne moduły
-
-- `ai.enabled=true` w `.env` włącza moduł AI/LLM
-- `*.properties` przez environment variables, nie hardcoded
+`CLAUDE.md` and `.github/copilot-instructions.md` only point to this file — edit `AGENTS.md` only.

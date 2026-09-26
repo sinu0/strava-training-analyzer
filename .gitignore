@@ -27,6 +27,7 @@ frontend/dist/
 frontend/.vite/
 frontend/test-results/
 frontend/playwright-report/
+frontend/tsconfig.tsbuildinfo
 
 # === IDEs ===
 .idea/
@@ -65,3 +66,6 @@ AI_PROGRESS.md
 
 # Visual regression baselines of the component catalogue
 !frontend/e2e/tests/*-snapshots/*.png
+
+# === Staging area for files to delete (not tracked, not indexed by agents) ===
+do_usuniecia/

@@ -1,14 +1,14 @@
-# Opcjonalny dostęp LAN
+# Optional LAN access
 
-Domyślny Compose wiąże porty tylko z `127.0.0.1`. Nie zmieniaj backendu ani bazy na `0.0.0.0`. Dostęp z innych urządzeń jest opcjonalny i wymaga HTTPS oraz hasła:
+[← README](../README.md)
 
-1. Przygotuj zaufany na urządzeniach certyfikat `certs/lan.pem` i klucz `certs/lan-key.pem`, pasujące do nazwy/IP hosta. Nie publikuj klucza prywatnego.
-2. Uruchom `bash scripts/setup-lan-auth.sh użytkownik` i ustaw silne, unikalne hasło. Hasło nie jest przekazywane w argumentach ani zapisywane jawnie; plik zawiera bcrypt.
-3. W `.env` ustaw `APP_FRONTEND_URL=https://nazwa-lub-ip-hosta` (dokładny adres otwierany na urządzeniu, z portem jeśli niestandardowy), aby backend akceptował zapis z tego originu. Nie ustawiaj `*`.
-4. Dopiero wtedy uruchom `docker compose -f docker-compose.yml -f docker-compose.https.yml up -d --build`.
+The default Compose binds ports to `127.0.0.1` only. Do not switch the backend or database to `0.0.0.0`. Access from other devices is optional and requires HTTPS and a password:
 
-Brak pliku hasła blokuje uruchomienie wariantu HTTPS. HTTPS chroni zarówno UI, jak i API. Zapis inicjowany przez obcą witrynę (`Sec-Fetch-Site: cross-site`) jest odrzucany. Nie jest to wieloużytkownikowy system uprawnień: wszyscy zalogowani mają dostęp do tej samej prywatnej instalacji. Nie wystawiaj jej bezpośrednio do Internetu; do dostępu spoza domu użyj zaufanej sieci/VPN.
+1. Prepare a certificate trusted by your devices, `certs/lan.pem`, and key `certs/lan-key.pem`, matching the host name/IP (`tools/setup-lan-https.sh <ip>` creates them with mkcert). Never publish the private key.
+2. Run `bash scripts/setup-lan-auth.sh <user>` and set a strong, unique password. The password is not passed as an argument or stored in plain text; the file contains a bcrypt hash.
+3. In `.env` set `APP_FRONTEND_URL=https://host-name-or-ip` (the exact address opened on the device, including a non-standard port) so the backend accepts writes from that origin. Do not use `*`.
+4. Only then run `docker compose -f docker-compose.yml -f docker-compose.https.yml up -d --build`.
 
-`bash scripts/check-lan-access.sh` sprawdza 401 bez hasła, 200 po zalogowaniu i 403 dla zapisu cross-site na tymczasowym kontenerze z portem wyłącznie loopback. Nie włącza dostępu LAN w działającej aplikacji.
+A missing password file blocks the HTTPS variant from starting. HTTPS protects both the UI and the API. Writes initiated by a foreign site (`Sec-Fetch-Site: cross-site`) are rejected. This is not a multi-user permission system: every logged-in user has access to the same private installation. Do not expose it directly to the Internet; use a trusted network/VPN for access from outside home.
 
-PWA przechowuje część treningu offline na urządzeniu. Korzystaj z zaufanych urządzeń; przed przekazaniem urządzenia innej osobie wyczyść dane witryny. Hasło HTTP Basic może pozostać w pamięci przeglądarki do zamknięcia sesji.
+`bash scripts/check-lan-access.sh` verifies 401 without a password, 200 after login and 403 for a cross-site write, on a temporary container with a loopback-only port. It does not enable LAN access in the running app.
