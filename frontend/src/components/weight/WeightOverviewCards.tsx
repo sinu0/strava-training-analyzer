@@ -19,6 +19,8 @@ import {
   Typography,
 } from '@mui/material';
 
+import { weightMessages } from '@/components/weight/messages';
+import { getLocale } from '@/i18n';
 import type { WeightGoal, WeightOverview, WeightRecord } from '@/types/weight';
 import { Widget } from '@/ui';
 import { CHART_COLORS, STATUS_COLORS, alphaColor } from '@/utils/colors';
@@ -26,11 +28,17 @@ import { WEIGHT_TREND_COLORS, getConfidenceColor } from '@/utils/statusColors';
 
 type WeightTrend = 'down' | 'up' | 'flat';
 
-const TREND_CONFIG = {
-  down: { icon: <TrendingDownIcon />, color: WEIGHT_TREND_COLORS.down, label: 'Spadek' },
-  up: { icon: <TrendingUpIcon />, color: WEIGHT_TREND_COLORS.up, label: 'Wzrost' },
-  flat: { icon: <TrendingFlatIcon />, color: WEIGHT_TREND_COLORS.flat, label: 'Stabilna' },
-} as const;
+/** Backend sends Polish confidence levels; map them to message keys. */
+const CONFIDENCE_KEYS: Record<string, 'low' | 'medium' | 'high'> = { niski: 'low', 'średni': 'medium', wysoki: 'high' };
+
+function useTrendConfig() {
+  const t = weightMessages.useT();
+  return {
+    down: { icon: <TrendingDownIcon />, color: WEIGHT_TREND_COLORS.down, label: t('overview.trendDown') },
+    up: { icon: <TrendingUpIcon />, color: WEIGHT_TREND_COLORS.up, label: t('overview.trendUp') },
+    flat: { icon: <TrendingFlatIcon />, color: WEIGHT_TREND_COLORS.flat, label: t('overview.trendFlat') },
+  } as const;
+}
 
 function getWeightTrend(history: WeightRecord[]): WeightTrend {
   if (history.length < 2) {
@@ -99,6 +107,7 @@ export default function WeightOverviewCards({
   onOpenGoalDialog,
   onDeleteGoal,
 }: WeightOverviewCardsProps) {
+  const t = weightMessages.useT();
   const currentWeight = overview?.currentWeightKg ?? null;
   const goal = overview?.goal ?? null;
   const history = overview?.history ?? [];
@@ -106,7 +115,7 @@ export default function WeightOverviewCards({
   const dailyDeficit = overview?.dailyDeficitOrSurplus;
   const weeksRemaining = overview?.weeksRemaining;
   const trend = getWeightTrend(history);
-  const trendInfo = TREND_CONFIG[trend];
+  const trendInfo = useTrendConfig()[trend];
   const recentChange = getRecentWeightChange(history);
   const goalProgress = getGoalProgress(history, currentWeight, goal);
   const dailyCaloricTarget =
@@ -124,7 +133,7 @@ export default function WeightOverviewCards({
           xs: 12,
           md: 4
         }}>
-        <Widget title="Aktualna waga">
+        <Widget title={t('overview.currentWeight')}>
           <Box sx={{ textAlign: 'center', py: 1 }}>
             <Box
               sx={{
@@ -166,7 +175,7 @@ export default function WeightOverviewCards({
             />
             {recentChange != null && (
               <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: trendInfo.color }}>
-                {`${recentChange > 0 ? '+' : ''}${recentChange.toFixed(1)} kg od ostatniego pomiaru`}
+                {t('overview.recentChange', { sign: recentChange > 0 ? '+' : '', value: recentChange.toFixed(1) })}
               </Typography>
             )}
           </Box>
@@ -178,9 +187,9 @@ export default function WeightOverviewCards({
           md: 4
         }}>
         <Widget
-          title="Cel wagowy"
+          title={t('overview.weightGoal')}
           action={goal ? (
-            <Tooltip title="Usuń cel">
+            <Tooltip title={t('overview.deleteGoal')}>
               <Box component="span">
                 <IconButton size="small" disabled={isDeletingGoal} onClick={onDeleteGoal}>
                   <DeleteOutlineIcon fontSize="small" />
@@ -216,12 +225,12 @@ export default function WeightOverviewCards({
                   color: "text.secondary",
                   mb: 1
                 }}>
-                kg do {new Date(goal.targetDate).toLocaleDateString('pl-PL')}
+                {t('overview.goalUntil', { date: new Date(goal.targetDate).toLocaleDateString(getLocale()) })}
               </Typography>
               {weeksRemaining != null && (
                 <Chip
                   icon={<CalendarMonthIcon />}
-                  label={`${Number(weeksRemaining).toFixed(0)} tyg. pozostało`}
+                  label={t('overview.weeksRemaining', { count: Number(weeksRemaining).toFixed(0) })}
                   size="small"
                   sx={{
                     bgcolor: alphaColor(STATUS_COLORS.info, 0.12),
@@ -237,7 +246,7 @@ export default function WeightOverviewCards({
                     <Typography variant="caption" sx={{
                       color: "text.secondary"
                     }}>
-                      Postęp
+                      {t('overview.goalProgress')}
                     </Typography>
                     <Typography variant="caption" sx={{ color: CHART_COLORS.primary, fontWeight: 700 }}>
                       {goalProgress.toFixed(0)}%
@@ -264,7 +273,7 @@ export default function WeightOverviewCards({
               <Typography variant="body2" sx={{
                 color: "text.secondary"
               }}>
-                Brak celu wagowego
+                {t('overview.noGoal')}
               </Typography>
               <Button
                 variant="outlined"
@@ -273,7 +282,7 @@ export default function WeightOverviewCards({
                 onClick={onOpenGoalDialog}
                 sx={{ mt: 1 }}
               >
-                Ustaw cel
+                {t('overview.setGoal')}
               </Button>
             </Box>
           )}
@@ -284,7 +293,7 @@ export default function WeightOverviewCards({
           xs: 12,
           md: 4
         }}>
-        <Widget title="Zapotrzebowanie kaloryczne">
+        <Widget title={t('overview.caloricNeed')}>
           {dailyCaloricNeed != null && goal ? (
             <Box sx={{ py: 1 }}>
               <Stack spacing={1.5}>
@@ -301,7 +310,7 @@ export default function WeightOverviewCards({
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.25 }}>
                     <LocalFireDepartmentIcon sx={{ fontSize: 16, color: STATUS_COLORS.info }} />
                     <Typography variant="caption" sx={{ color: STATUS_COLORS.info, fontWeight: 600 }}>
-                      TDEE (bazowe)
+                      {t('overview.tdee')}
                     </Typography>
                   </Box>
                   <Typography variant="h5" sx={{ fontWeight: 700, color: STATUS_COLORS.info }}>
@@ -333,10 +342,10 @@ export default function WeightOverviewCards({
                       }}
                     >
                       {isWeightLoss
-                        ? 'Dzienny deficyt'
+                        ? t('overview.dailyDeficit')
                         : isWeightGain
-                          ? 'Dzienna nadwyżka'
-                          : 'Utrzymanie'}
+                          ? t('overview.dailySurplus')
+                          : t('overview.maintenance')}
                     </Typography>
                     <Typography
                       variant="h6"
@@ -364,7 +373,7 @@ export default function WeightOverviewCards({
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.25 }}>
                       <RestaurantIcon sx={{ fontSize: 16, color: CHART_COLORS.primary }} />
                       <Typography variant="caption" sx={{ color: CHART_COLORS.primary, fontWeight: 600 }}>
-                        Docelowe spożycie
+                        {t('overview.targetIntake')}
                       </Typography>
                     </Box>
                     <Typography variant="h4" sx={{ fontWeight: 700, color: CHART_COLORS.primary }}>
@@ -373,7 +382,7 @@ export default function WeightOverviewCards({
                     <Typography variant="caption" sx={{
                       color: "text.secondary"
                     }}>
-                      dziennie, aby osiągnąć cel
+                      {t('overview.targetIntakeHint')}
                     </Typography>
                   </Box>
                 )}
@@ -385,8 +394,8 @@ export default function WeightOverviewCards({
                 color: "text.secondary"
               }}>
                 {currentWeight == null
-                  ? 'Dodaj wagę, aby obliczyć zapotrzebowanie'
-                  : 'Ustaw cel wagowy, aby obliczyć zapotrzebowanie'}
+                  ? t('overview.addWeightHint')
+                  : t('overview.setGoalHint')}
               </Typography>
             </Box>
           )}
@@ -398,7 +407,7 @@ export default function WeightOverviewCards({
           sm: 6,
           md: 3
         }}>
-        <Widget title="Kalorie z treningów (7 dni)">
+        <Widget title={t('overview.trainingCalories')}>
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Typography variant="h5" sx={{ fontWeight: 700, color: STATUS_COLORS.warning }}>
               {overview?.weeklyTrainingCalories != null
@@ -408,7 +417,7 @@ export default function WeightOverviewCards({
             <Typography variant="caption" sx={{
               color: "text.secondary"
             }}>
-              kcal / tydzień
+              {t('overview.perWeek')}
             </Typography>
           </Box>
         </Widget>
@@ -419,7 +428,7 @@ export default function WeightOverviewCards({
           sm: 6,
           md: 3
         }}>
-        <Widget title="Zalecane spożycie">
+        <Widget title={t('overview.recommendedIntake')}>
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Typography variant="h5" sx={{ fontWeight: 700, color: STATUS_COLORS.success }}>
               {overview?.recommendedDailyCalories != null
@@ -429,7 +438,7 @@ export default function WeightOverviewCards({
             <Typography variant="caption" sx={{
               color: "text.secondary"
             }}>
-              kcal / dzień
+              {t('overview.perDay')}
             </Typography>
           </Box>
         </Widget>
@@ -440,7 +449,7 @@ export default function WeightOverviewCards({
           sm: 6,
           md: 3
         }}>
-        <Widget title="Tygodniowa zmiana wagi">
+        <Widget title={t('overview.weeklyWeightChange')}>
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
               {overview?.weeklyWeightChange != null && Number(overview.weeklyWeightChange) < 0 ? (
@@ -461,7 +470,7 @@ export default function WeightOverviewCards({
             <Typography variant="caption" sx={{
               color: "text.secondary"
             }}>
-              kg / tydzień
+              {t('overview.kgPerWeek')}
             </Typography>
           </Box>
         </Widget>
@@ -472,10 +481,10 @@ export default function WeightOverviewCards({
           sm: 6,
           md: 3
         }}>
-        <Widget title="Pewność modelu">
+        <Widget title={t('overview.modelConfidence')}>
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Chip
-              label={overview?.dataConfidence ?? 'niski'}
+              label={t(`overview.confidence.${CONFIDENCE_KEYS[overview?.dataConfidence ?? 'niski'] ?? 'low'}`)}
               sx={{
                 ...confidenceStyles,
                 fontWeight: 700,

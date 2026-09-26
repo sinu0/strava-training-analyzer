@@ -1,3 +1,4 @@
+import { localized } from '@/i18n';
 import { STATUS_COLORS } from '@/utils/colors';
 
 import { getZoneForPower, ZONE_COLORS_TRAINING } from '../../types/training';
@@ -104,13 +105,22 @@ export function formatTime(sec: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  warmup: 'Rozgrzewka',
-  cooldown: 'Schładzanie',
-  steady: 'Stały',
-  work: 'Praca',
-  rest: 'Odpoczynek',
-};
+const TYPE_LABELS: Record<string, string> = localized<Record<string, string>>({
+  pl: {
+    warmup: 'Rozgrzewka',
+    cooldown: 'Schładzanie',
+    steady: 'Stały',
+    work: 'Praca',
+    rest: 'Odpoczynek',
+  },
+  en: {
+    warmup: 'Warm-up',
+    cooldown: 'Cool-down',
+    steady: 'Steady',
+    work: 'Work',
+    rest: 'Rest',
+  },
+});
 
 export function getTypeLabel(type: string): string {
   return TYPE_LABELS[type] || type;

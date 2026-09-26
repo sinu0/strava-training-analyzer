@@ -4,37 +4,29 @@ import { useNavigate } from 'react-router-dom';
 import EditableDashboard from '@/components/dashboard/EditableDashboard';
 import PwaCapabilityBanner from '@/components/PwaCapabilityBanner';
 import { useSaveUiPreferences, useUiPreferences } from '@/hooks/useUiPreferences';
+import { useI18n } from '@/i18n';
 import { ErrorState, LoadingState, Page, StatusPill } from '@/ui';
 
+import { todayMessages } from './messages';
 import TodayWidget from './TodayWidget';
 import { useToday } from './useToday';
-
-const statusLabels = {
-  UNKNOWN: 'Brak danych',
-  PARTIAL: 'Dane częściowe',
-  AVAILABLE: 'Dane aktualne',
-} as const;
-
-const confidenceLabels = {
-  LOW: 'Podstawa danych: niska',
-  MEDIUM: 'Podstawa danych: częściowa',
-  HIGH: 'Podstawa danych: pełna',
-} as const;
 
 export default function TodayPage() {
   const navigate = useNavigate();
   const today = useToday();
   const preferences = useUiPreferences();
   const savePreferences = useSaveUiPreferences();
+  const t = todayMessages.useT();
+  const { t: common } = useI18n();
 
   if (today.isLoading || preferences.isLoading) {
-    return <LoadingState message="Buduję dzisiejszy kokpit…" />;
+    return <LoadingState message={t('buildingCockpit')} />;
   }
   if (today.isError || !today.data) {
     return (
       <ErrorState
-        title="Nie udało się przygotować widoku Dzisiaj"
-        message="Sprawdź synchronizację danych i spróbuj ponownie."
+        title={t('todayErrorTitle')}
+        message={t('todayErrorMessage')}
         onRetry={() => void today.refetch()}
       />
     );
@@ -42,8 +34,8 @@ export default function TodayPage() {
   if (preferences.isError || !preferences.data) {
     return (
       <ErrorState
-        title="Nie udało się wczytać układu kokpitu"
-        message="Dane treningowe są bezpieczne. Odśwież preferencje i spróbuj ponownie."
+        title={t('layoutErrorTitle')}
+        message={t('layoutErrorMessage')}
         onRetry={() => void preferences.refetch()}
       />
     );
@@ -53,18 +45,18 @@ export default function TodayPage() {
 
   return (
     <Page
-      title="Dzisiaj"
-      subtitle="Rekomendacja dnia, forma i kluczowe moduły w Twoim układzie."
+      title={common('nav.today.label')}
+      subtitle={t('subtitle')}
       maxWidth={1440}
       meta={(
         <>
           <StatusPill
             size="sm"
             variant="outline"
-            label={statusLabels[data.dataStatus]}
+            label={t(`status.${data.dataStatus}`)}
             tone={data.dataStatus === 'AVAILABLE' ? 'success' : data.dataStatus === 'PARTIAL' ? 'warning' : 'neutral'}
           />
-          <StatusPill size="sm" variant="outline" label={confidenceLabels[data.confidence.level]} />
+          <StatusPill size="sm" variant="outline" label={t(`confidence.${data.confidence.level}`)} />
         </>
       )}
     >

@@ -2,7 +2,7 @@
 
 Self-hosted, single-user app for cycling training analysis (Strava → metrics, planning, workout execution on a smart trainer).
 Java 21/Spring Boot 3 (hexagonal) + React 19/TypeScript/MUI + PostgreSQL/PostGIS. Dark theme, mobile-first.
-**Language: code, docs and commits in English; UI text in Polish.**
+**Language: code, docs and commits in English; UI text via i18n keys (Polish default + English).**
 
 ## Project knowledge — load only what you need
 
@@ -57,6 +57,7 @@ node tools/llm-svg-studio/serve.mjs        # asset studio :4177 (SVG via LM Stud
 - frontend: new areas in `features/<name>/` (page + hook + types + tests); pages lazy-loaded via `React.lazy`
 - frontend: REST through `apiClient` from `@/api/client`, data through TanStack Query hooks
 - frontend: UI only from `@/ui` and `theme.ts` tokens (`getAppThemeTokens(theme)` / `useTokens()`), `sx` prop; no color literals and no `Card`/`Paper` outside `src/ui`
+- frontend: UI text never hard-coded — feature text in a colocated `messages.ts` (`defineMessages({ pl, en })` → `xMessages.useT()` in components, `xMessages.t()` in helpers), module-level label maps via `localized({ pl, en })`, shell/common text in `src/i18n/locales/{pl,en}.ts` (`useI18n().t`); dates/numbers with `getLocale()`
 - frontend: types in `types/` or `features/*/types.ts`, hooks in `hooks/` or `features/*/`, components in `components/` or `features/*/`
 - configuration via environment variables (`.env`, `.env.example`), nothing hardcoded; `AI_ENABLED=true` enables the AI module
 - commit messages: conventional commits (`feat:`, `fix:`, `chore:`, `docs:`)

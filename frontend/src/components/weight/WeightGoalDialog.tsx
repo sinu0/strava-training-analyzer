@@ -2,6 +2,7 @@
 import { Stack, TextField } from '@mui/material';
 
 import FormDialog from '@/components/common/FormDialog';
+import { weightMessages } from '@/components/weight/messages';
 import type { UseFormDialogResult } from '@/hooks/useFormDialog';
 
 import type { FormEvent } from 'react';
@@ -24,12 +25,13 @@ export default function WeightGoalDialog({
   onSubmit,
 }: WeightGoalDialogProps) {
   const { open, values, closeDialog, setValue } = dialog;
+  const t = weightMessages.useT();
 
   return (
     <FormDialog
       open={open}
-      title="Ustaw cel wagowy"
-      submitLabel="Zapisz cel"
+      title={t('goalDialog.title')}
+      submitLabel={t('goalDialog.submit')}
       maxWidth="xs"
       disableSubmit={pending || !values.targetWeightKg.trim() || !values.targetDate}
       onSubmit={onSubmit}
@@ -37,7 +39,7 @@ export default function WeightGoalDialog({
     >
       <Stack spacing={2} sx={{ mt: 1 }}>
         <TextField
-          label="Docelowa waga (kg)"
+          label={t('goalDialog.targetWeightLabel')}
           type="number"
           value={values.targetWeightKg}
           onChange={(event) => setValue('targetWeightKg', event.target.value)}
@@ -47,7 +49,7 @@ export default function WeightGoalDialog({
           }}
         />
         <TextField
-          label="Data docelowa"
+          label={t('goalDialog.targetDateLabel')}
           type="date"
           value={values.targetDate}
           onChange={(event) => setValue('targetDate', event.target.value)}

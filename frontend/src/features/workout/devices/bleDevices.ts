@@ -8,6 +8,7 @@ import {
 import { parseFitnessMachineFeature, parseSupportedRange, type SupportedRange } from './ble/protocol/ftmsFeature';
 import { parseHeartRate } from './ble/protocol/heartRate';
 import { parseIndoorBikeData } from './ble/protocol/indoorBikeData';
+import { devicesMessages } from './messages';
 import { NO_CAPABILITIES } from './types';
 
 import type { BleConnection, BleDeviceHandle, BleTransport, DeviceRequest } from './ble/BleTransport';
@@ -29,7 +30,6 @@ const COMMAND_TIMEOUT_MS = 3_000;
 const CADENCE_STALE_MS = 3_000;
 /** FTMS encodes the target resistance as UINT8 with 0.1 resolution. */
 const MAX_RESISTANCE_LEVEL = 25.5;
-const CONTROL_REFUSED = 'Inna aplikacja lub licznik steruje trenażerem. Wyłącz sterowanie trenażerem w Garminie/Zwifcie i spróbuj ponownie.';
 
 type Listener<T extends unknown[]> = (...args: T) => void;
 
@@ -96,7 +96,7 @@ abstract class BleDevice implements FitnessDevice {
   }
 
   protected link(): BleConnection {
-    if (!this.connection) throw new Error('Urządzenie nie jest połączone');
+    if (!this.connection) throw new Error(devicesMessages.t('notConnected'));
     return this.connection;
   }
 
@@ -190,7 +190,7 @@ class TrainerBleDevice extends BleDevice implements Trainer {
     } else if (await connection.hasService(GATT.cyclingPowerService)) {
       await this.setupCyclingPower(connection);
     } else {
-      throw new Error('Urządzenie nie udostępnia danych mocy (FTMS ani Cycling Power)');
+      throw new Error(devicesMessages.t('noPowerData'));
     }
   }
 
@@ -222,7 +222,7 @@ class TrainerBleDevice extends BleDevice implements Trainer {
 
   private requireControlSupport(kind: 'erg' | 'resistance') {
     if (!this.status().capabilities[kind]) {
-      throw new Error(kind === 'erg' ? 'Ten trenażer nie obsługuje trybu ERG przez Bluetooth' : 'Ten trenażer nie obsługuje sterowania oporem');
+      throw new Error(kind === 'erg' ? devicesMessages.t('ergNotSupported') : devicesMessages.t('resistanceNotSupported'));
     }
   }
 
@@ -298,7 +298,7 @@ class TrainerBleDevice extends BleDevice implements Trainer {
   private async takeControl() {
     const ok = await this.send(encodeRequestControl());
     this.hasControl = ok;
-    this.update({ error: ok ? null : CONTROL_REFUSED });
+    this.update({ error: ok ? null : devicesMessages.t('controlRefused') });
     return ok;
   }
 
@@ -306,10 +306,10 @@ class TrainerBleDevice extends BleDevice implements Trainer {
   private command(value: DataView): Promise<void> {
     const run = async () => {
       if (!this.hasControl && !(await this.takeControl())) {
-        throw new Error('Trenażer odmówił przejęcia sterowania');
+        throw new Error(devicesMessages.t('controlNotTaken'));
       }
       const ok = await this.send(value);
-      if (!ok) throw new Error('Trenażer odrzucił polecenie sterowania');
+      if (!ok) throw new Error(devicesMessages.t('commandRejected'));
     };
     const next = this.queue.then(run, run);
     this.queue = next.catch(() => undefined);
@@ -321,13 +321,13 @@ class TrainerBleDevice extends BleDevice implements Trainer {
     return new Promise<boolean>((resolve, reject) => {
       const timer = setTimeout(() => {
         if (this.pending?.opCode === opCode) this.pending = null;
-        reject(new Error('Trenażer nie potwierdził polecenia w ciągu 3 s'));
+        reject(new Error(devicesMessages.t('commandTimeout')));
       }, COMMAND_TIMEOUT_MS);
       this.pending = {
         opCode,
         resolve: (ok) => {
           clearTimeout(timer);
-          if (!ok && opCode !== 0x00) this.update({ error: 'Trenażer odrzucił polecenie sterowania' });
+          if (!ok && opCode !== 0x00) this.update({ error: devicesMessages.t('commandRejected') });
           resolve(ok);
         },
       };

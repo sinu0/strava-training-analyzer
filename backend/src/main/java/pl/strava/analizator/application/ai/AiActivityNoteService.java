@@ -50,6 +50,7 @@ public class AiActivityNoteService {
     private final LlmProviderRegistry providerRegistry;
     private final ToolCallingLoop toolCallingLoop;
     private final JournalService journalService;
+    private final AiPromptDirectives aiPromptDirectives;
     private final String defaultProvider;
     private final String defaultModel;
     private final boolean enabled;
@@ -63,6 +64,7 @@ public class AiActivityNoteService {
                                   LlmProviderRegistry providerRegistry,
                                   ToolCallingLoop toolCallingLoop,
                                   JournalService journalService,
+                                  AiPromptDirectives aiPromptDirectives,
                                   @Value("${ai.provider:ollama}") String defaultProvider,
                                   @Value("${ai.model:llama3}") String defaultModel,
                                   @Value("${ai.enabled:false}") boolean enabled) {
@@ -75,6 +77,7 @@ public class AiActivityNoteService {
         this.providerRegistry = providerRegistry;
         this.toolCallingLoop = toolCallingLoop;
         this.journalService = journalService;
+        this.aiPromptDirectives = aiPromptDirectives;
         this.defaultProvider = defaultProvider;
         this.defaultModel = defaultModel;
         this.enabled = enabled;
@@ -137,8 +140,8 @@ public class AiActivityNoteService {
                 You are an expert endurance sports coach. Answer the athlete's follow-up question \
                 about a specific training session. You have access to the activity data and the \
                 previously generated coaching note. Answer concisely and specifically, backed by \
-                the numbers provided. Respond in English only. Maximum 300 words.
-                """;
+                the numbers provided. Maximum 300 words.
+                """ + "\n" + aiPromptDirectives.systemSuffix();
 
         StringBuilder userPrompt = new StringBuilder();
         userPrompt.append("ACTIVITY DATA:\n").append(buildActivityContext(activity));
@@ -311,7 +314,7 @@ public class AiActivityNoteService {
     // ------- Internal -------
 
     private AiActivityNoteDto generateAndSaveNote(Activity activity) {
-        String systemPrompt = buildSystemPrompt();
+        String systemPrompt = buildSystemPrompt() + "\n" + aiPromptDirectives.systemSuffix();
         String userPrompt = buildCoachPrompt(activity);
 
         String rawResponse = toolCallingLoop.run(systemPrompt, userPrompt, activity.getId(),
@@ -399,7 +402,6 @@ public class AiActivityNoteService {
                 - Use vague praise such as "great job!" or "well done!" without supporting numbers.
                 - Repeat the same observation in multiple sections.
                 - Invent or estimate numbers that are not in the input data.
-                - Write in Polish or any language other than English.
                 - Add extra sections, preambles, or closing remarks beyond the six sections.
                 """;
     }

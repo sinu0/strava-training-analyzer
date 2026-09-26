@@ -7,6 +7,7 @@ import { Button, Stack } from '@mui/material';
 import { StatusPill } from '@/ui';
 
 import { deviceStateText, deviceTone } from './deviceLabels';
+import { cockpitMessages } from './messages';
 
 import type { DeviceKind, DeviceStatus } from '../devices/types';
 
@@ -18,6 +19,7 @@ interface DeviceBarProps {
 
 /** Glanceable device health: trainer, strap and recording state. */
 export default function DeviceBar({ devices, recording, onOpen }: DeviceBarProps) {
+  const t = cockpitMessages.useT();
   const trainer = devices.trainer;
   const strap = devices.heartRate;
   return (
@@ -27,17 +29,17 @@ export default function DeviceBar({ devices, recording, onOpen }: DeviceBarProps
         dot
         tone={deviceTone(trainer)}
         icon={<DirectionsBikeIcon />}
-        label={trainer?.state === 'CONNECTED' ? `${trainer.name ?? 'Trenażer'}${trainer.batteryPct != null ? ` · ${trainer.batteryPct}%` : ''}` : `Trenażer: ${deviceStateText(trainer)}`}
+        label={trainer?.state === 'CONNECTED' ? `${trainer.name ?? t('deviceBar.trainerFallback')}${trainer.batteryPct != null ? ` · ${trainer.batteryPct}%` : ''}` : t('deviceBar.trainerStatus', { status: deviceStateText(trainer) })}
       />
       <StatusPill
         size="sm"
         dot
         tone={deviceTone(strap)}
         icon={<FavoriteIcon />}
-        label={strap?.state === 'CONNECTED' ? `${strap.name ?? 'Pasek HR'}${strap.batteryPct != null ? ` · ${strap.batteryPct}%` : ''}` : `Pasek HR: ${deviceStateText(strap)}`}
+        label={strap?.state === 'CONNECTED' ? `${strap.name ?? t('deviceBar.hrFallback')}${strap.batteryPct != null ? ` · ${strap.batteryPct}%` : ''}` : t('deviceBar.hrStatus', { status: deviceStateText(strap) })}
       />
       {recording ? <StatusPill size="sm" tone="error" variant="solid" icon={<FiberManualRecordIcon />} label="REC" /> : null}
-      <Button size="small" variant="outlined" startIcon={<BluetoothIcon />} onClick={onOpen}>Urządzenia</Button>
+      <Button size="small" variant="outlined" startIcon={<BluetoothIcon />} onClick={onOpen}>{t('deviceBar.devicesButton')}</Button>
     </Stack>
   );
 }

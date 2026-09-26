@@ -1,3 +1,4 @@
+import { localized } from '@/i18n';
 import { STATUS_COLORS } from '@/utils/colors';
 
 export type ReadinessImage =
@@ -20,10 +21,36 @@ export interface ReadinessScale {
   level: string;
 }
 
+const READINESS_LABELS = localized<Record<ReadinessImage, string>>({
+  pl: {
+    peak: 'Pełna moc',
+    rested: 'Wypoczęty',
+    energetic: 'Energia',
+    fresh: 'Świeży',
+    good: 'Dobra',
+    recovering: 'Regeneracja',
+    tired: 'Zmęczenie',
+    struggling: 'Trudność',
+    exhausted: 'Wyczerpanie',
+  },
+  en: {
+    peak: 'Peak form',
+    rested: 'Rested',
+    energetic: 'Energetic',
+    fresh: 'Fresh',
+    good: 'Good',
+    recovering: 'Recovering',
+    tired: 'Tired',
+    struggling: 'Struggling',
+    exhausted: 'Exhausted',
+  },
+});
+
+// `level` stays Polish: it matches the level names sent by the backend.
 export const READINESS_SCALES: ReadinessScale[] = [
   {
     min: 95,
-    label: 'Pełna moc',
+    get label() { return READINESS_LABELS.peak; },
     color: STATUS_COLORS.success,
     emoji: '🔥',
     image: 'peak',
@@ -31,7 +58,7 @@ export const READINESS_SCALES: ReadinessScale[] = [
   },
   {
     min: 85,
-    label: 'Wypoczęty',
+    get label() { return READINESS_LABELS.rested; },
     color: STATUS_COLORS.success,
     emoji: '🌟',
     image: 'rested',
@@ -39,7 +66,7 @@ export const READINESS_SCALES: ReadinessScale[] = [
   },
   {
     min: 75,
-    label: 'Energia',
+    get label() { return READINESS_LABELS.energetic; },
     color: STATUS_COLORS.successLight,
     emoji: '⚡',
     image: 'energetic',
@@ -47,7 +74,7 @@ export const READINESS_SCALES: ReadinessScale[] = [
   },
   {
     min: 65,
-    label: 'Świeży',
+    get label() { return READINESS_LABELS.fresh; },
     color: STATUS_COLORS.successLight,
     emoji: '💚',
     image: 'fresh',
@@ -55,7 +82,7 @@ export const READINESS_SCALES: ReadinessScale[] = [
   },
   {
     min: 55,
-    label: 'Dobra',
+    get label() { return READINESS_LABELS.good; },
     color: STATUS_COLORS.secondary,
     emoji: '💪',
     image: 'good',
@@ -63,7 +90,7 @@ export const READINESS_SCALES: ReadinessScale[] = [
   },
   {
     min: 45,
-    label: 'Regeneracja',
+    get label() { return READINESS_LABELS.recovering; },
     color: STATUS_COLORS.secondary,
     emoji: '🔄',
     image: 'recovering',
@@ -71,7 +98,7 @@ export const READINESS_SCALES: ReadinessScale[] = [
   },
   {
     min: 35,
-    label: 'Zmęczenie',
+    get label() { return READINESS_LABELS.tired; },
     color: STATUS_COLORS.warning,
     emoji: '😓',
     image: 'tired',
@@ -79,7 +106,7 @@ export const READINESS_SCALES: ReadinessScale[] = [
   },
   {
     min: 15,
-    label: 'Trudność',
+    get label() { return READINESS_LABELS.struggling; },
     color: STATUS_COLORS.warningStrong,
     emoji: '🥵',
     image: 'struggling',
@@ -87,7 +114,7 @@ export const READINESS_SCALES: ReadinessScale[] = [
   },
   {
     min: 0,
-    label: 'Wyczerpanie',
+    get label() { return READINESS_LABELS.exhausted; },
     color: STATUS_COLORS.error,
     emoji: '😴',
     image: 'exhausted',

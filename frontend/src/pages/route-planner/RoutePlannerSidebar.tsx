@@ -1,6 +1,7 @@
 import { CircularProgress, Stack, Typography } from '@mui/material';
 
 import SavedRoutesList from '@/components/route/SavedRoutesList';
+import { routePlannerControlsMessages } from '@/components/route-planner/messages';
 import RouteControls from '@/components/route-planner/RouteControls';
 import RouteStats from '@/components/route-planner/RouteStats';
 import type { useRoutePlannerState } from '@/pages/route-planner/useRoutePlannerState';
@@ -11,6 +12,7 @@ interface RoutePlannerSidebarProps {
 }
 
 export default function RoutePlannerSidebar({ planner }: RoutePlannerSidebarProps) {
+  const t = routePlannerControlsMessages.useT();
   return (
     <Stack spacing={2} sx={{ height: '100%', minHeight: 0 }}>
       <RouteControls
@@ -62,7 +64,7 @@ export default function RoutePlannerSidebar({ planner }: RoutePlannerSidebarProp
 
       <Surface sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
         <Typography variant="subtitle2" gutterBottom>
-          Zapisane trasy
+          {t('page.savedRoutesTitle')}
         </Typography>
         {planner.routesLoading ? (
           <CircularProgress size={20} />

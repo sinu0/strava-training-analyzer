@@ -40,6 +40,8 @@ import PullToRefreshPanel from '@/components/common/PullToRefreshPanel';
 import SwipeableContent from '@/components/common/SwipeableContent';
 import TabsNav from '@/components/common/TabsNav';
 import { useHealthOverview, useHealthTimeline, useRecoveryStatus } from '@/hooks/useHealth';
+import { getLocale } from '@/i18n';
+import { healthMessages } from '@/pages/HealthPage.messages';
 import { getAppThemeTokens } from '@/theme/theme';
 import { EmptyState, Page, SkeletonCard, Widget } from '@/ui';
 import { CHART_ACTIVE_DOT, getChartVisuals } from '@/utils/chartStyles';
@@ -61,6 +63,7 @@ function TrendIcon({ direction }: { direction: string }) {
 }
 
 function RecoveryGauge({ score }: { score: number }) {
+  const t = healthMessages.useT();
   const color =
     score >= 80
       ? STATUS_COLORS.success
@@ -98,7 +101,7 @@ function RecoveryGauge({ score }: { score: number }) {
             color: "text.secondary",
             mt: 0.5
           }}>
-          Poziom regeneracji
+          {t('recoveryLevel')}
         </Typography>
       </Box>
     </Box>
@@ -107,7 +110,7 @@ function RecoveryGauge({ score }: { score: number }) {
 
 function formatDate(dateStr: string): string {
   const date = new Date(`${dateStr}T00:00:00`);
-  return date.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' });
+  return date.toLocaleDateString(getLocale(), { day: '2-digit', month: '2-digit' });
 }
 
 function formatSleepHours(seconds: number | null): string {
@@ -170,6 +173,7 @@ function MetricSummary({
 }
 
 export default function HealthPage() {
+  const t = healthMessages.useT();
   const chart = getChartVisuals(useTheme());
   const queryClient = useQueryClient();
   const [tab, setTab] = useState(0);
@@ -228,22 +232,22 @@ export default function HealthPage() {
   const groupCards = overview
     ? [
         {
-          title: 'Serce',
+          title: t('groups.heart'),
           accentColor: STATUS_COLORS.success,
           items: (
             <Stack spacing={1.5}>
               <MetricSummary
                 title="HRV (RMSSD)"
                 primary={overview.hrvTrend.current != null ? `${Math.round(overview.hrvTrend.current)} ms` : '—'}
-                secondary="Dzienna gotowość układu nerwowego"
+                secondary={t('metrics.hrvSecondary')}
                 icon={<MonitorHeartIcon />}
                 trend={overview.hrvTrend.direction}
                 color={STATUS_COLORS.successLight}
               />
               <MetricSummary
-                title="Tętno spoczynkowe"
+                title={t('metrics.restingHr')}
                 primary={overview.restingHrTrend.current != null ? `${overview.restingHrTrend.current} bpm` : '—'}
-                secondary="Najbardziej czytelny wskaźnik zmęczenia ogólnego"
+                secondary={t('metrics.restingHrSecondary')}
                 icon={<FavoriteIcon />}
                 trend={overview.restingHrTrend.direction}
                 color={STATUS_COLORS.error}
@@ -252,21 +256,21 @@ export default function HealthPage() {
           ),
         },
         {
-          title: 'Sen',
+          title: t('groups.sleep'),
           accentColor: STATUS_COLORS.info,
           items: (
             <Stack spacing={1.5}>
               <MetricSummary
-                title="Wynik snu"
+                title={t('metrics.sleepScore')}
                 primary={overview.sleepTrend.latestScore != null ? `${overview.sleepTrend.latestScore}` : '—'}
-                secondary="Jakość nocnej regeneracji"
+                secondary={t('metrics.sleepScoreSecondary')}
                 icon={<HotelIcon />}
                 color={STATUS_COLORS.info}
               />
               <MetricSummary
-                title="Czas snu"
+                title={t('metrics.sleepDuration')}
                 primary={formatSleepHours(overview.sleepTrend.avgDurationSeconds)}
-                secondary="Średnia z ostatnich dni"
+                secondary={t('metrics.sleepDurationSecondary')}
                 icon={<HotelIcon />}
                 color={STATUS_COLORS.highlight}
               />
@@ -274,21 +278,21 @@ export default function HealthPage() {
           ),
         },
         {
-          title: 'Energia',
+          title: t('groups.energy'),
           accentColor: STATUS_COLORS.warning,
           items: (
             <Stack spacing={1.5}>
               <MetricSummary
                 title="Body Battery"
                 primary={overview.latest?.bodyBattery != null ? `${overview.latest.bodyBattery}` : '—'}
-                secondary="Ile energii masz na dziś"
+                secondary={t('metrics.bodyBatterySecondary')}
                 icon={<BatteryChargingFullIcon />}
                 color={STATUS_COLORS.warningStrong}
               />
               <MetricSummary
-                title="Stres"
+                title={t('metrics.stress')}
                 primary={overview.stressTrend.current != null ? `${overview.stressTrend.current}` : '—'}
-                secondary="Średnie obciążenie autonomiczne"
+                secondary={t('metrics.stressSecondary')}
                 icon={<SelfImprovementIcon />}
                 color={STATUS_COLORS.warning}
               />
@@ -299,9 +303,9 @@ export default function HealthPage() {
     : [];
 
   const tabs = [
-    { label: 'Serce', value: 0, icon: <FavoriteIcon fontSize="small" /> },
-    { label: 'Sen', value: 1, icon: <HotelIcon fontSize="small" /> },
-    { label: 'Energia', value: 2, icon: <BatteryChargingFullIcon fontSize="small" /> },
+    { label: t('groups.heart'), value: 0, icon: <FavoriteIcon fontSize="small" /> },
+    { label: t('groups.sleep'), value: 1, icon: <HotelIcon fontSize="small" /> },
+    { label: t('groups.energy'), value: 2, icon: <BatteryChargingFullIcon fontSize="small" /> },
   ];
 
   const nextTab = () => setTab((current) => Math.min(current + 1, tabs.length - 1));
@@ -328,7 +332,7 @@ export default function HealthPage() {
       try {
         await apiClient.put('/health/metrics', body);
       } catch (error) {
-        setSaveError(error instanceof Error ? error.message : 'Nie udało się zapisać danych zdrowotnych.');
+        setSaveError(error instanceof Error ? error.message : t('saveError'));
       }
     }
     setSaving(false);
@@ -338,7 +342,7 @@ export default function HealthPage() {
 
   if (isLoading) {
     return (
-      <Page title="Zdrowie">
+      <Page title={t('title')}>
         <Stack spacing={2.5}>
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
             <CircularProgress />
@@ -379,8 +383,8 @@ export default function HealthPage() {
 
   return (
     <Page
-      title="Zdrowie"
-      subtitle="Regeneracja, sen i energia są rozdzielone na krótsze sekcje z szybszym odczytem trendów."
+      title={t('title')}
+      subtitle={t('subtitle')}
     >
       <PullToRefreshPanel
         onRefresh={async () => {
@@ -389,8 +393,8 @@ export default function HealthPage() {
       >
         <Stack spacing={2.5}>
           <Widget
-            title="Regeneracja dziś"
-            subtitle="Najważniejsza odpowiedź brzmi: czy dziś dowieźć jakość, czy chronić zasoby."
+            title={t('recovery.title')}
+            subtitle={t('recovery.subtitle')}
           >
             <Box
               sx={{
@@ -406,26 +410,26 @@ export default function HealthPage() {
                   <RecoveryGauge score={recovery.score} />
                 ) : (
                   <Box sx={{ minWidth: 150, textAlign: 'center', p: 2 }}>
-                    <Typography variant="h6">Brak danych do oceny</Typography>
+                    <Typography variant="h6">{t('recovery.noScoreTitle')}</Typography>
                     <Typography variant="body2" sx={{
                       color: "text.secondary"
-                    }}>Dodaj check-in, aby obliczyć regenerację.</Typography>
+                    }}>{t('recovery.noScoreDescription')}</Typography>
                   </Box>
                 )}
               </Box>
               <Stack spacing={1.25} sx={{ flex: 1, minWidth: 240 }}>
                 <Typography variant="h5">
-                  {recovery?.level ?? 'Brak danych'}
+                  {recovery?.level ?? t('recovery.noLevel')}
                 </Typography>
                 <Typography variant="body1" sx={{
                   color: "text.secondary"
                 }}>
-                  {recovery?.description ?? 'Brak opisu regeneracji.'}
+                  {recovery?.description ?? t('recovery.noDescription')}
                 </Typography>
                 <Typography variant="caption" sx={{
                   color: "text.secondary"
                 }}>
-                  Przeciągnij w dół na telefonie, aby szybko odświeżyć stan zdrowia z ostatniej synchronizacji.
+                  {t('recovery.pullHint')}
                 </Typography>
               </Stack>
             </Box>
@@ -442,19 +446,19 @@ export default function HealthPage() {
             </Stack>
           ) : null}
 
-          <Widget title="Wprowadź metryki" subtitle="Ręczne uzupełnienie dzisiejszych danych zdrowotnych">
+          <Widget title={t('form.title')} subtitle={t('form.subtitle')}>
             <Stack spacing={1.5}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                <TextField label="HRV (ms)" size="small" type="number" value={hrvVal} onChange={e => setHrvVal(e.target.value)} sx={{ flex: 1 }} />
-                <TextField label="HR spocz. (bpm)" size="small" type="number" value={rhrVal} onChange={e => setRhrVal(e.target.value)} sx={{ flex: 1 }} />
-                <TextField label="Sen (0-100)" size="small" type="number" value={sleepVal} onChange={e => setSleepVal(e.target.value)} sx={{ flex: 1 }} />
+                <TextField label={t('form.hrv')} size="small" type="number" value={hrvVal} onChange={e => setHrvVal(e.target.value)} sx={{ flex: 1 }} />
+                <TextField label={t('form.restingHr')} size="small" type="number" value={rhrVal} onChange={e => setRhrVal(e.target.value)} sx={{ flex: 1 }} />
+                <TextField label={t('form.sleep')} size="small" type="number" value={sleepVal} onChange={e => setSleepVal(e.target.value)} sx={{ flex: 1 }} />
               </Stack>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                 <TextField label="Body Battery" size="small" type="number" value={bodyBatteryVal} onChange={e => setBodyBatteryVal(e.target.value)} sx={{ flex: 1 }} />
-                <TextField label="Stres (0-100)" size="small" type="number" value={stressVal} onChange={e => setStressVal(e.target.value)} sx={{ flex: 1 }} />
+                <TextField label={t('form.stress')} size="small" type="number" value={stressVal} onChange={e => setStressVal(e.target.value)} sx={{ flex: 1 }} />
                 <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
                   <Button variant="outlined" disabled={saving} onClick={handleSaveMetrics} fullWidth size="small">
-                    {saving ? <CircularProgress size={14} /> : 'Zapisz'}
+                    {saving ? <CircularProgress size={14} /> : t('form.save')}
                   </Button>
                 </Box>
               </Stack>
@@ -479,10 +483,10 @@ export default function HealthPage() {
           <TabsNav tabs={tabs} value={tab} onChange={setTab} />
 
           {!selectedTabHasData ? (
-            <Widget title="Brak danych trendu" subtitle="Wykres pojawi się, gdy dostępne będą pomiary z co najmniej jednego dnia.">
+            <Widget title={t('empty.widgetTitle')} subtitle={t('empty.widgetSubtitle')}>
               <EmptyState
-                title="Uzupełnij pierwsze pomiary"
-                description="Dodaj dane ręcznie powyżej albo podłącz źródło zdrowotne. Obsługiwane są HRV, tętno spoczynkowe, sen, Body Battery i stres."
+                title={t('empty.title')}
+                description={t('empty.description')}
               />
             </Widget>
           ) : (
@@ -494,7 +498,7 @@ export default function HealthPage() {
                     xs: 12,
                     md: 6
                   }}>
-                  <Widget title="HRV (RMSSD) — 30 dni">
+                  <Widget title={t('charts.hrv')}>
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
@@ -531,7 +535,7 @@ export default function HealthPage() {
                     xs: 12,
                     md: 6
                   }}>
-                  <Widget title="Tętno spoczynkowe — 30 dni">
+                  <Widget title={t('charts.restingHr')}>
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
@@ -573,7 +577,7 @@ export default function HealthPage() {
                     xs: 12,
                     md: 6
                   }}>
-                  <Widget title="Wynik snu — 30 dni">
+                  <Widget title={t('charts.sleepScore')}>
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
@@ -594,7 +598,7 @@ export default function HealthPage() {
                             stroke={STATUS_COLORS.info}
                             strokeWidth={2.5}
                             fill="url(#sleepGrad)"
-                            name="Wynik snu"
+                            name={t('metrics.sleepScore')}
                             connectNulls
                             activeDot={CHART_ACTIVE_DOT}
                           />
@@ -608,7 +612,7 @@ export default function HealthPage() {
                     xs: 12,
                     md: 6
                   }}>
-                  <Widget title="Fazy snu — 30 dni">
+                  <Widget title={t('charts.sleepStages')}>
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={sleepStageData}>
@@ -617,10 +621,10 @@ export default function HealthPage() {
                           <YAxis {...chart.axis} unit="h" />
                           <RechartsTooltip {...chart.tooltip} />
                           <Legend {...chart.legend} />
-                          <Bar dataKey="deep" stackId="sleep" fill={STATUS_COLORS.highlight} radius={[0, 0, 0, 0]} name="Deep" />
-                          <Bar dataKey="light" stackId="sleep" fill={STATUS_COLORS.info} radius={[0, 0, 0, 0]} name="Light" />
-                          <Bar dataKey="rem" stackId="sleep" fill={STATUS_COLORS.secondary} radius={[0, 0, 0, 0]} name="REM" />
-                          <Bar dataKey="awake" stackId="sleep" fill={STATUS_COLORS.warning} radius={chart.barRadius} name="Awake" />
+                          <Bar dataKey="deep" stackId="sleep" fill={STATUS_COLORS.highlight} radius={[0, 0, 0, 0]} name={t('stages.deep')} />
+                          <Bar dataKey="light" stackId="sleep" fill={STATUS_COLORS.info} radius={[0, 0, 0, 0]} name={t('stages.light')} />
+                          <Bar dataKey="rem" stackId="sleep" fill={STATUS_COLORS.secondary} radius={[0, 0, 0, 0]} name={t('stages.rem')} />
+                          <Bar dataKey="awake" stackId="sleep" fill={STATUS_COLORS.warning} radius={chart.barRadius} name={t('stages.awake')} />
                         </BarChart>
                       </ResponsiveContainer>
                     </Box>
@@ -636,7 +640,7 @@ export default function HealthPage() {
                     xs: 12,
                     md: 6
                   }}>
-                  <Widget title="Body Battery — 30 dni">
+                  <Widget title={t('charts.bodyBattery')}>
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
@@ -671,7 +675,7 @@ export default function HealthPage() {
                     xs: 12,
                     md: 6
                   }}>
-                  <Widget title="Stres — 30 dni">
+                  <Widget title={t('charts.stress')}>
                     <Box sx={{ width: '100%', height: 280 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
@@ -692,7 +696,7 @@ export default function HealthPage() {
                             stroke={STATUS_COLORS.warning}
                             strokeWidth={2.5}
                             fill="url(#stressGrad)"
-                            name="Stres"
+                            name={t('metrics.stress')}
                             connectNulls
                             activeDot={CHART_ACTIVE_DOT}
                           />

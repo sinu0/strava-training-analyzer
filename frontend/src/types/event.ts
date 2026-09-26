@@ -1,3 +1,4 @@
+import { localized } from '@/i18n';
 export interface TrainingEvent {
   id: string;
   name: string;
@@ -8,20 +9,29 @@ export interface TrainingEvent {
   createdAt: string;
 }
 
-export const EVENT_TYPE_LABELS: Record<string, string> = {
-  ROAD_RACE: 'Wyścig szosowy',
-  TT: 'Time Trial',
-  GRAN_FONDO: 'Gran Fondo',
-  CRIT: 'Kryterium',
-  TRIATHLON: 'Triathlon',
-  OTHER: 'Inny',
-};
+export const EVENT_TYPE_LABELS: Record<string, string> = localized<Record<string, string>>({
+  pl: {
+    ROAD_RACE: 'Wyścig szosowy',
+    TT: 'Time Trial',
+    GRAN_FONDO: 'Gran Fondo',
+    CRIT: 'Kryterium',
+    TRIATHLON: 'Triathlon',
+    OTHER: 'Inny',
+  },
+  en: {
+    ROAD_RACE: 'Road race',
+    TT: 'Time Trial',
+    GRAN_FONDO: 'Gran Fondo',
+    CRIT: 'Criterium',
+    TRIATHLON: 'Triathlon',
+    OTHER: 'Other',
+  },
+});
 
-export const EVENT_PRIORITY_LABELS: Record<string, string> = {
-  A: 'A — kluczowy',
-  B: 'B — ważny',
-  C: 'C — uzupełniający',
-};
+export const EVENT_PRIORITY_LABELS: Record<string, string> = localized<Record<string, string>>({
+  pl: { A: 'A — kluczowy', B: 'B — ważny', C: 'C — uzupełniający' },
+  en: { A: 'A — key', B: 'B — important', C: 'C — supporting' },
+});
 
 export interface EventProjection {
   eventName: string;

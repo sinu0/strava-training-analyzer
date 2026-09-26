@@ -1,6 +1,8 @@
 import { Box, Grid, Pagination, Stack, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 
+import { weightMessages } from '@/components/weight/messages';
+import { getLocale } from '@/i18n';
 import type { WeightRecord } from '@/types/weight';
 import { Widget } from '@/ui';
 import { getPolishPaginationAriaLabel } from '@/utils/accessibility';
@@ -12,6 +14,7 @@ interface WeightHistoryTableProps {
 export default function WeightHistoryTable({
   history,
 }: WeightHistoryTableProps) {
+  const t = weightMessages.useT();
   const [page, setPage] = useState(1);
 
   const reversedHistory = useMemo(() => [...history].reverse(), [history]);
@@ -26,7 +29,7 @@ export default function WeightHistoryTable({
 
   return (
     <Grid size={12}>
-      <Widget title="Pomiary">
+      <Widget title={t('history.title')}>
         <Stack spacing={2}>
           <Box sx={{ maxHeight: 360, overflowY: 'auto' }}>
             {pageItems.map((record) => (
@@ -50,7 +53,7 @@ export default function WeightHistoryTable({
                   <Typography variant="caption" sx={{
                     color: "text.secondary"
                   }}>
-                    {new Date(record.recordedDate).toLocaleDateString('pl-PL', {
+                    {new Date(record.recordedDate).toLocaleDateString(getLocale(), {
                       weekday: 'short',
                       year: 'numeric',
                       month: 'short',
@@ -75,7 +78,7 @@ export default function WeightHistoryTable({
               <Typography variant="caption" sx={{
                 color: "text.secondary"
               }}>
-                Strona {page} z {pageCount}
+                {t('history.page', { page, count: pageCount })}
               </Typography>
               <Pagination
                 count={pageCount}

@@ -11,6 +11,7 @@ import { Surface } from '@/ui';
 import { formatDuration, formatDistance, formatPower } from '@/utils/formatters';
 
 import LapCard from './LapCard';
+import { activityMessages } from './messages';
 
 import type { BrushRange } from './InteractiveStreamsChart';
 
@@ -37,6 +38,7 @@ export default function LapsTab({
   onHoverIndex,
   onSelectRange,
 }: LapsTabProps) {
+  const t = activityMessages.useT();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [compareMode, setCompareMode] = useState(false);
   const [compareLaps, setCompareLaps] = useState<number[]>([]);
@@ -131,7 +133,7 @@ export default function LapsTab({
   if (!laps.length) {
     return (
       <Box sx={{ textAlign: 'center', py: 6 }}>
-        <Typography sx={{ color: 'text.secondary' }}>Brak danych okrążeń.</Typography>
+        <Typography sx={{ color: 'text.secondary' }}>{t('lapsTab.noLaps')}</Typography>
       </Box>
     );
   }
@@ -141,7 +143,7 @@ export default function LapsTab({
       {/* Controls */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-          {resolvedLaps.length} okrąż{ resolvedLaps.length === 1 ? 'enie' : resolvedLaps.length >= 5 ? 'eń' : 'enia'}
+          {t('lapsTab.lapsCount', { count: resolvedLaps.length })}
         </Typography>
         <ToggleButtonGroup
           size="small"
@@ -154,8 +156,8 @@ export default function LapsTab({
             }
           }}
         >
-          <ToggleButton value="view">Przegląd</ToggleButton>
-          <ToggleButton value="compare">Porównaj</ToggleButton>
+          <ToggleButton value="view">{t('lapsTab.viewMode')}</ToggleButton>
+          <ToggleButton value="compare">{t('lapsTab.compareMode')}</ToggleButton>
         </ToggleButtonGroup>
       </Box>
 
@@ -163,7 +165,7 @@ export default function LapsTab({
       {!!compareMode && compareLaps.length > 0 && (
         <Surface variant="muted" padding="sm" radius="panel" sx={{ mb: 2 }}>
           <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block' }}>
-            Porównanie okrążeń {compareLaps.map((i) => `#${i + 1}`).join(' vs ')}
+            {t('lapsTab.comparisonTitle')} {compareLaps.map((i) => `#${i + 1}`).join(' vs ')}
           </Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 2 }}>
             {compareLaps.map((idx) => {
@@ -172,7 +174,7 @@ export default function LapsTab({
               return (
                 <Surface key={idx} padding="none" radius="panel" sx={{ p: 1.5 }}>
                   <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0.5, display: 'block' }}>
-                    Okr. {idx + 1}
+                    {t('lapsTab.lapShort', { index: idx + 1 })}
                   </Typography>
                   <Typography variant="body2" sx={{ fontWeight: 700 }}>
                     {formatDuration(lap.movingTimeSec)}

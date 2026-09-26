@@ -1,5 +1,6 @@
 import { useTheme } from '@mui/material/styles';
 
+import { useI18n } from '@/i18n';
 import { getChartVisuals } from '@/utils/chartStyles';
 
 import EmptyState from './feedback/EmptyState';
@@ -33,14 +34,15 @@ export function useChartVisuals() {
 
 /** Widget with the shared loading, error and empty states for charts. */
 export default function ChartFrame({
-  title, subtitle, icon, action, legend, loading = false, loadingMessage = 'Ładowanie wykresu…', error = null,
-  empty = false, emptyTitle = 'Brak danych', emptyDescription, emptyIllustration, onRetry, children,
+  title, subtitle, icon, action, legend, loading = false, loadingMessage, error = null,
+  empty = false, emptyTitle, emptyDescription, emptyIllustration, onRetry, children,
 }: ChartFrameProps) {
+  const { t } = useI18n();
   return (
     <Widget title={title} subtitle={subtitle} icon={icon} action={action ?? legend}>
-      {loading ? <LoadingState message={loadingMessage} />
+      {loading ? <LoadingState message={loadingMessage ?? t('common.loadingChart')} />
         : error ? <ErrorState message={error} onRetry={onRetry} />
-          : empty ? <EmptyState title={emptyTitle} description={emptyDescription} illustration={emptyIllustration} />
+          : empty ? <EmptyState title={emptyTitle ?? t('common.noData')} description={emptyDescription} illustration={emptyIllustration} />
             : children}
     </Widget>
   );

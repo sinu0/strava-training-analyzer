@@ -13,9 +13,11 @@ import {
   CartesianGrid,
 } from 'recharts';
 
+import { getLocale } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 import { StatusPill, Widget } from '@/ui';
 
+import { trainingMessages } from './messages';
 import { getChartVisuals } from '../../utils/chartStyles';
 import { PMC_COLORS } from '../../utils/colors';
 
@@ -27,12 +29,13 @@ interface TrainingProjectionChartProps {
 
 function formatDateTick(dateStr: string): string {
   const date = new Date(`${dateStr}T00:00:00`);
-  return date.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
+  return date.toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' });
 }
 
 export default function TrainingProjectionChart({ days }: TrainingProjectionChartProps) {
   const theme = useTheme();
   const chart = getChartVisuals(theme);
+  const t = trainingMessages.useT();
   const futureDays = useMemo(
     () => days.filter((day) => day.projection),
     [days],
@@ -61,13 +64,13 @@ export default function TrainingProjectionChart({ days }: TrainingProjectionChar
   return (
     <Widget
       sx={{ mb: 2, height: 'auto' }}
-      title="Projekcja PMC planu"
-      subtitle="Jak obecny plan przesuwa CTL, ATL i świeżość w widocznym zakresie kalendarza."
+      title={t('trainingProjectionChart.widgetTitle')}
+      subtitle={t('trainingProjectionChart.widgetSubtitle')}
       icon={<TimelineOutlinedIcon />}
     >
         <Stack direction="row" spacing={1} useFlexGap sx={{ mb: 1.5, flexWrap: 'wrap' }}>
-          <StatusPill size="sm" tone={minTsb < -20 ? 'warning' : 'neutral'} label={`Najniższy TSB: ${minTsb > 0 ? '+' : ''}${minTsb.toFixed(1)}`} />
-          <StatusPill size="sm" label={`Dni z taperem: ${futureDays.filter((day) => day.projection?.taperDay).length}`} />
+          <StatusPill size="sm" tone={minTsb < -20 ? 'warning' : 'neutral'} label={t('trainingProjectionChart.lowestTsb', { value: `${minTsb > 0 ? '+' : ''}${minTsb.toFixed(1)}` })} />
+          <StatusPill size="sm" label={t('trainingProjectionChart.taperDaysCount', { count: futureDays.filter((day) => day.projection?.taperDay).length })} />
         </Stack>
 
         <Box sx={{ width: '100%', height: 240, mb: adjustments.length ? 1.5 : 0 }}>
@@ -77,7 +80,7 @@ export default function TrainingProjectionChart({ days }: TrainingProjectionChar
               <XAxis dataKey="date" tickFormatter={formatDateTick} {...chart.axis} />
               <YAxis {...chart.axis} />
               <Tooltip {...chart.tooltip} />
-              <Bar dataKey="plannedTss" fill={getAppThemeTokens(theme).chart.tertiary} radius={chart.barRadius} name="Plan TSS" />
+              <Bar dataKey="plannedTss" fill={getAppThemeTokens(theme).chart.tertiary} radius={chart.barRadius} name={t('trainingProjectionChart.planTssLegend')} />
               <Line type="monotone" dataKey="ctl" stroke={PMC_COLORS.CTL} strokeWidth={2.5} dot={false} name="CTL" />
               <Line type="monotone" dataKey="atl" stroke={PMC_COLORS.ATL} strokeWidth={2.5} dot={false} name="ATL" />
               <Line type="monotone" dataKey="tsb" stroke={PMC_COLORS.TSB} strokeWidth={2.5} dot={false} name="TSB" />

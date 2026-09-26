@@ -1,11 +1,14 @@
 import { Box, Button, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
+import { useI18n } from '@/i18n';
+
 /**
  * Friendly 404 page shown when a route is not found.
  */
 export default function NotFoundPage() {
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   return (
     <Box
@@ -27,7 +30,7 @@ export default function NotFoundPage() {
         sx={{ width: 200, height: 200, objectFit: 'contain', opacity: 0.9 }}
       />
       <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary' }}>
-        Strona nie znaleziona
+        {t('common.notFoundTitle')}
       </Typography>
       <Typography
         variant="body1"
@@ -35,10 +38,10 @@ export default function NotFoundPage() {
           color: "text.secondary",
           maxWidth: 400
         }}>
-        Wygląda na to, że ta trasa prowadzi donikąd. Sprawdź adres URL lub wróć na dashboard.
+        {t('common.notFoundDescription')}
       </Typography>
       <Button variant="contained" onClick={() => navigate('/')} sx={{ mt: 1 }}>
-        Wróć na dashboard
+        {t('common.backToDashboard')}
       </Button>
     </Box>
   );

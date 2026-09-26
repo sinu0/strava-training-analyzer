@@ -4,19 +4,22 @@ import { useTheme } from '@mui/material/styles';
 
 import { getAppThemeTokens } from '@/theme/theme';
 
+import { segmentComponentsMessages } from './messages';
+
 const podium = {
-  1: { name: 'Złoty', color: 'gold' },
-  2: { name: 'Srebrny', color: 'silver' },
-  3: { name: 'Brązowy', color: 'bronze' },
+  1: { nameKey: 'gold', color: 'gold' },
+  2: { nameKey: 'silver', color: 'silver' },
+  3: { nameKey: 'bronze', color: 'bronze' },
 } as const;
 
 export default function SegmentRankTrophy({ rank }: { rank?: number | null }) {
+  const t = segmentComponentsMessages.useT();
   const theme = useTheme();
   const tokens = getAppThemeTokens(theme);
   if (rank !== 1 && rank !== 2 && rank !== 3) return null;
   const placement = podium[rank];
   const color = tokens.podium[placement.color];
-  const label = `${placement.name} puchar — ${rank}. wynik w dostępnych danych`;
+  const label = t('trophy.label', { name: t(`trophy.${placement.nameKey}`), rank });
 
   return (
     <Tooltip title={label} arrow>

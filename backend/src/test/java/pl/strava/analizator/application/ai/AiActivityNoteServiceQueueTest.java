@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import pl.strava.analizator.application.JournalService;
+import pl.strava.analizator.application.dto.AiNoteAskRequest;
 import pl.strava.analizator.domain.ai.AiNoteJob;
 import pl.strava.analizator.domain.model.Activity;
 import pl.strava.analizator.domain.port.ActivityMetricRepository;
@@ -40,6 +41,8 @@ class AiActivityNoteServiceQueueTest {
     @Mock private LlmProviderRegistry providerRegistry;
     @Mock private ToolCallingLoop toolCallingLoop;
     @Mock private JournalService journalService;
+    @Mock private AiPromptDirectives aiPromptDirectives;
+    @Mock private pl.strava.analizator.domain.ai.LlmPort provider;
 
     private AiActivityNoteService service;
 
@@ -47,7 +50,8 @@ class AiActivityNoteServiceQueueTest {
     void setUp() {
         service = new AiActivityNoteService(activityRepository, activityMetricRepository,
                 athleteProfileRepository, dailyMetricRepository, noteRepository, jobRepository,
-                providerRegistry, toolCallingLoop, journalService, "ollama", "model", true);
+                providerRegistry, toolCallingLoop, journalService, aiPromptDirectives, "ollama", "model", true);
+        org.mockito.Mockito.lenient().when(aiPromptDirectives.systemSuffix()).thenReturn("SUFFIX-PL");
     }
 
     @Test
@@ -98,5 +102,40 @@ class AiActivityNoteServiceQueueTest {
         assertThat(job.getValue().getStatus()).isEqualTo(AiNoteJob.STATUS_PENDING);
         assertThat(job.getValue().getRetryCount()).isEqualTo(1);
         assertThat(job.getValue().getNextAttemptAt()).isNotNull();
+    }
+
+    @Test
+    void generatedNoteUsesConfiguredLanguageDirective() {
+        UUID activityId = UUID.randomUUID();
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(
+                Activity.builder().id(activityId).name("Ride").build()));
+        when(toolCallingLoop.run(any(), any(), any(), any(), any())).thenReturn("Podsumowanie\n\nSzczegóły");
+        when(noteRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.generateNote(activityId);
+
+        ArgumentCaptor<String> systemPrompt = ArgumentCaptor.forClass(String.class);
+        verify(toolCallingLoop).run(systemPrompt.capture(), any(), any(), any(), any());
+        assertThat(systemPrompt.getValue())
+                .endsWith("SUFFIX-PL")
+                .doesNotContain("any language other than English");
+    }
+
+    @Test
+    void followUpAnswerUsesConfiguredLanguageDirective() {
+        UUID activityId = UUID.randomUUID();
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(
+                Activity.builder().id(activityId).name("Ride").build()));
+        when(aiPromptDirectives.systemSuffix()).thenReturn("SUFFIX-EN");
+        when(providerRegistry.getProvider("ollama")).thenReturn(provider);
+        when(provider.chat(any(), any(), any())).thenReturn("answer");
+
+        service.askQuestion(activityId, new AiNoteAskRequest("Why?"));
+
+        ArgumentCaptor<String> systemPrompt = ArgumentCaptor.forClass(String.class);
+        verify(provider).chat(systemPrompt.capture(), any(), any());
+        assertThat(systemPrompt.getValue())
+                .endsWith("SUFFIX-EN")
+                .doesNotContain("Respond in English only");
     }
 }

@@ -7,6 +7,7 @@ import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
+import { weatherMessages } from '@/components/weather/messages';
 import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
 import type { CyclistType } from '@/components/weather/weatherWidgetUtils';
 import {
@@ -43,12 +44,13 @@ export default function WeatherWidgetHeader({
   onOpenSettings,
 }: WeatherWidgetHeaderProps) {
   const theme = useTheme();
+  const t = weatherMessages.useT();
   return (
     <>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-        <Tooltip title="Zarządzaj lokalizacjami">
+        <Tooltip title={t('widgetHeader.manageLocations')}>
           <IconButton
-            aria-label="Zarządzaj lokalizacjami"
+            aria-label={t('widgetHeader.manageLocations')}
             size="small"
             onClick={onOpenSettings}
             sx={{
@@ -107,7 +109,7 @@ export default function WeatherWidgetHeader({
           <Box
             component="img"
             src={getWeatherIllustrationPath(cyclistType)}
-            alt={`Pogoda: ${cyclistType}`}
+            alt={t('widgetHeader.weatherAlt', { cyclist: cyclistType })}
             sx={{
               width: '100%',
               height: '100%',

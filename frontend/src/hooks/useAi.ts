@@ -12,6 +12,8 @@ import type {
   AiActivityNote,
   AiModuleStatus,
   AiNoteAskResponse,
+  AiSettings,
+  AiSettingsUpdate,
   AiValidationReport,
   PredictionRequest,
   PredictionResponse,
@@ -214,6 +216,34 @@ export function useAskAiNote() {
         { question }
       );
       return data;
+    },
+  });
+}
+
+// --- AI settings (preferred language of generated text) ---
+
+const AI_SETTINGS_KEY = ['v2', 'ai-settings'] as const;
+
+export function useAiSettings() {
+  return useQuery<AiSettings>({
+    queryKey: AI_SETTINGS_KEY,
+    queryFn: async () => {
+      const { data } = await apiClient.get<AiSettings>('/v2/ai/settings');
+      return data;
+    },
+    staleTime: STALE_STANDARD,
+  });
+}
+
+export function useUpdateAiSettings() {
+  const queryClient = useQueryClient();
+  return useMutation<AiSettings, Error, AiSettingsUpdate>({
+    mutationFn: async (update) => {
+      const { data } = await apiClient.put<AiSettings>('/v2/ai/settings', update);
+      return data;
+    },
+    onSuccess: (settings) => {
+      queryClient.setQueryData(AI_SETTINGS_KEY, settings);
     },
   });
 }

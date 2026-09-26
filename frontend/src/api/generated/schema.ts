@@ -2207,6 +2207,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/ai/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getSettings"];
+        put: operations["updateSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/analysis-data/backfill/{type}": {
         parameters: {
             query?: never;
@@ -3479,6 +3495,12 @@ export interface components {
             answer?: string;
             modelId?: string;
             providerName?: string;
+        };
+        AiSettingsDto: {
+            availableCoachingStyles?: string[];
+            availableLanguages?: string[];
+            coachingStyle?: string;
+            language?: string;
         };
         AiValidationReportDto: {
             /** Format: double */
@@ -9528,6 +9550,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ActivityStreamsDto"];
+                };
+            };
+        };
+    };
+    getSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AiSettingsDto"];
+                };
+            };
+        };
+    };
+    updateSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AiSettingsDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AiSettingsDto"];
                 };
             };
         };

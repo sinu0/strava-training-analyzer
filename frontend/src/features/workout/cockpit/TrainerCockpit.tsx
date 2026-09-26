@@ -16,6 +16,7 @@ import DeviceBar from './DeviceBar';
 import DeviceSheet from './DeviceSheet';
 import IntervalList from './IntervalList';
 import LiveMetricCluster from './LiveMetricCluster';
+import { cockpitMessages } from './messages';
 import SessionStats from './SessionStats';
 import StepCard from './StepCard';
 import { totalWorkoutDurationMs } from '../workoutRunner';
@@ -46,6 +47,7 @@ function isTyping(target: EventTarget | null) {
 export default function TrainerCockpit({
   execution, api, online, saving, wakeMode, actualPower, recording, recordingLocked, onRecordingChange, onAction, onAbort, onBack,
 }: TrainerCockpitProps) {
+  const t = cockpitMessages.useT();
   const [sheetOpen, setSheetOpen] = useState(false);
   const { snapshot } = api;
   const step = execution.stepsSnapshot[execution.currentStepIndex];
@@ -78,19 +80,19 @@ export default function TrainerCockpit({
     <Box sx={{ minHeight: '100dvh', bgcolor: 'background.default', px: { xs: 2, sm: 3 }, pt: { xs: 1.5, sm: 2 }, display: 'flex', flexDirection: 'column' }}>
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: { md: 'center' }, mb: 2 }}>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minWidth: 0 }}>
-          <Button startIcon={<ArrowBackIcon />} onClick={onBack} sx={{ flexShrink: 0 }}>Trening</Button>
+          <Button startIcon={<ArrowBackIcon />} onClick={onBack} sx={{ flexShrink: 0 }}>{t('trainerCockpit.workoutButton')}</Button>
           <Typography variant="overline" noWrap sx={{ color: 'text.secondary' }}>{execution.workoutNameSnapshot}</Typography>
         </Stack>
         <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
           <DeviceBar devices={snapshot.devices} recording={recording} onOpen={() => setSheetOpen(true)} />
-          {!online ? <StatusPill size="sm" tone="warning" icon={<WifiOffIcon />} label="Offline — zmiany w kolejce" /> : null}
-          {saving ? <StatusPill size="sm" label="Zapisywanie…" /> : null}
+          {!online ? <StatusPill size="sm" tone="warning" icon={<WifiOffIcon />} label={t('trainerCockpit.offline')} /> : null}
+          {saving ? <StatusPill size="sm" label={t('trainerCockpit.saving')} /> : null}
           <StatusPill
             size="sm"
             variant="outline"
             tone={wakeMode === 'ACTIVE' ? 'success' : 'neutral'}
-            label={wakeMode === 'ACTIVE' ? 'Ekran aktywny' : wakeMode === 'FALLBACK' ? 'Wake Lock niedostępny' : 'Wake Lock wyłączony'}
-            title={wakeMode === 'FALLBACK' ? 'Przeglądarka nie trzyma ekranu włączonego — ustaw dłuższą blokadę ekranu ręcznie.' : undefined}
+            label={wakeMode === 'ACTIVE' ? t('trainerCockpit.wakeActive') : wakeMode === 'FALLBACK' ? t('trainerCockpit.wakeFallback') : t('trainerCockpit.wakeOff')}
+            title={wakeMode === 'FALLBACK' ? t('trainerCockpit.wakeFallbackHint') : undefined}
           />
         </Stack>
       </Stack>
@@ -99,9 +101,9 @@ export default function TrainerCockpit({
         <Alert
           severity="info"
           sx={{ mb: 2 }}
-          action={<Button color="inherit" size="small" onClick={() => setSheetOpen(true)}>Połącz</Button>}
+          action={<Button color="inherit" size="small" onClick={() => setSheetOpen(true)}>{t('trainerCockpit.connect')}</Button>}
         >
-          Połącz Suito i pasek tętna, aby widzieć dane na żywo i jechać w trybie ERG.
+          {t('trainerCockpit.noDevices')}
         </Alert>
       ) : null}
       {snapshot.controlError ? <Alert severity="warning" sx={{ mb: 2 }}>{snapshot.controlError}</Alert> : null}
@@ -139,7 +141,7 @@ export default function TrainerCockpit({
           />
         </Box>
         <Box sx={{ gridArea: 'chart', minWidth: 0 }}>
-          <Widget title="Profil treningu" icon={<ShowChartIcon />} action={<StatusPill size="sm" label={`${Math.round((execution.workoutElapsedMs / Math.max(totalMs, 1)) * 100)}%`} />}>
+          <Widget title={t('trainerCockpit.trainingProfile')} icon={<ShowChartIcon />} action={<StatusPill size="sm" label={`${Math.round((execution.workoutElapsedMs / Math.max(totalMs, 1)) * 100)}%`} />}>
             <WorkoutPowerChart steps={execution.stepsSnapshot} actual={actualPower} playheadSec={execution.workoutElapsedMs / 1000} height={200} />
           </Widget>
         </Box>

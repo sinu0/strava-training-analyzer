@@ -1,5 +1,8 @@
 import { ButtonBase, Chip, Typography } from '@mui/material';
 
+import { getLocale } from '@/i18n';
+
+import { trainingMessages } from './messages';
 import { CATEGORY_LABELS, type WorkoutCategory } from '../../types/training';
 
 import type { CalendarDay } from '../../types/training';
@@ -22,13 +25,15 @@ function statusBorderColor(day: CalendarDay): string {
 }
 
 export default function CalendarDayCell({ day, date, dateNum, isCurrentMonth, isToday, onClick }: CalendarDayCellProps) {
+  const t = trainingMessages.useT();
   const border = day ? statusBorderColor(day) : 'transparent';
   const hasBorder = border !== 'transparent';
   const plans = day?.sessions?.map((session) => session.planned) ?? (day?.planned ? [day.planned] : []);
+  const formattedDate = new Date(`${date}T12:00:00`).toLocaleDateString(getLocale(), { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <ButtonBase
-      aria-label={`Otwórz ${new Date(`${date}T12:00:00`).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+      aria-label={t('calendarDayCell.openAria', { date: formattedDate })}
       onClick={onClick}
       sx={{
         display: 'block',
@@ -60,10 +65,10 @@ export default function CalendarDayCell({ day, date, dateNum, isCurrentMonth, is
           color="warning"
         />
       ))}
-      {plans.length > 2 && <Typography variant="caption">+{plans.length - 2} sesje</Typography>}
+      {plans.length > 2 && <Typography variant="caption">{t('calendarDayCell.moreSessions', { count: plans.length - 2 })}</Typography>}
       {(day?.activities?.length ?? 0) > 1 && <Typography variant="caption" sx={{
         display: "block"
-      }}>Aktywności: {day?.activities?.length}</Typography>}
+      }}>{t('calendarDayCell.activitiesLabel', { count: day?.activities?.length ?? 0 })}</Typography>}
 
       {!!day?.projection && (
         <Typography

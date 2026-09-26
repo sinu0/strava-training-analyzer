@@ -9,6 +9,7 @@ import { Box, Button, Chip, Divider, LinearProgress, Popover, Stack, Tooltip, Ty
 import { alpha } from '@mui/material/styles';
 import { useState, type MouseEvent } from 'react';
 
+import { weatherMessages } from '@/components/weather/messages';
 import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
 import {
   WEATHER_SCORE_LEGEND,
@@ -41,6 +42,7 @@ interface GradientStripProps {
 }
 
 function GradientStrip({ hours, bestStart, bestEnd }: GradientStripProps) {
+  const t = weatherMessages.useT();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedHour, setSelectedHour] = useState<HourScore | null>(null);
 
@@ -108,11 +110,11 @@ function GradientStrip({ hours, bestStart, bestEnd }: GradientStripProps) {
         }}
       >
         {hours.map((hour) => (
-          <Tooltip key={hour.hour} title={`${hour.hour} — ${hour.score}/100`}>
+          <Tooltip key={hour.hour} title={t('forecastViews.hourTooltip', { hour: hour.hour, score: hour.score })}>
             <Box
               component="button"
               type="button"
-              aria-label={`Pogoda dla ${hour.hour}`}
+              aria-label={t('forecastViews.hourAria', { hour: hour.hour })}
               sx={{
                 flex: 1,
                 minWidth: 0,
@@ -164,14 +166,14 @@ function GradientStrip({ hours, bestStart, bestEnd }: GradientStripProps) {
               alignItems: "center"
             }}>
               <WeatherConditionIcon kind="sunny" size={16} alt="" />
-              <Typography variant="body2">Wynik: {selectedHour.score}/100</Typography>
+              <Typography variant="body2">{t('forecastViews.score', { score: selectedHour.score })}</Typography>
             </Stack>
             {!!selectedHour.sunrise && (
               <Stack direction="row" spacing={1} sx={{
                 alignItems: "center"
               }}>
                 <LightModeIcon fontSize="small" sx={{ color: WEATHER_METRIC_COLORS.sun }} />
-                <Typography variant="body2">Wschód słońca</Typography>
+                <Typography variant="body2">{t('forecastViews.sunrise')}</Typography>
                 <Typography variant="body2" sx={{ ml: 'auto', fontWeight: 600 }}>
                   {selectedHour.sunrise}
                 </Typography>
@@ -182,7 +184,7 @@ function GradientStrip({ hours, bestStart, bestEnd }: GradientStripProps) {
                 alignItems: "center"
               }}>
                 <BedtimeIcon fontSize="small" sx={{ color: WEATHER_METRIC_COLORS.wind }} />
-                <Typography variant="body2">Zachód słońca</Typography>
+                <Typography variant="body2">{t('forecastViews.sunset')}</Typography>
                 <Typography variant="body2" sx={{ ml: 'auto', fontWeight: 600 }}>
                   {selectedHour.sunset}
                 </Typography>
@@ -196,6 +198,7 @@ function GradientStrip({ hours, bestStart, bestEnd }: GradientStripProps) {
 }
 
 function DayGradientRow({ day }: { day: GradientDay }) {
+  const t = weatherMessages.useT();
   const today = isToday(day.date);
   const dayCyclist = getCyclistForDay(day.weatherCode, day.windSpeedMax, day.tempMax);
 
@@ -221,13 +224,13 @@ function DayGradientRow({ day }: { day: GradientDay }) {
           fontSize: '0.85rem',
         }}
       >
-        {today ? 'Dziś' : formatDayName(day.date)}
+        {today ? t('forecastViews.today') : formatDayName(day.date)}
       </Typography>
 
       <Box
         component="img"
         src={getWeatherIllustrationPath(dayCyclist)}
-        alt={`Warunki: ${dayCyclist}`}
+        alt={t('forecastViews.dayConditions', { cyclist: dayCyclist })}
         sx={{
           width: 36,
           height: 30,
@@ -272,7 +275,11 @@ function DayGradientRow({ day }: { day: GradientDay }) {
 
       {!!day.bestWindowStart && (
         <Tooltip
-          title={`Najlepsze 2h: ${day.bestWindowStart}–${day.bestWindowEnd} (${day.bestWindowScore}/100)`}
+          title={t('forecastViews.bestWindowTooltip', {
+            start: day.bestWindowStart,
+            end: day.bestWindowEnd ?? '',
+            score: day.bestWindowScore,
+          })}
         >
           <Chip
             icon={<DirectionsBikeIcon sx={{ fontSize: 14 }} />}
@@ -298,6 +305,7 @@ export default function WeatherForecastViews({
   view,
   onViewChange,
 }: WeatherForecastViewsProps) {
+  const t = weatherMessages.useT();
   const current = gradient.current;
   const todayData = getTodayData(gradient.days);
   const scoreColor = getScoreColor(current.outdoorScore);
@@ -312,7 +320,7 @@ export default function WeatherForecastViews({
               color: "text.secondary",
               fontWeight: 500
             }}>
-            Ocena outdoor
+            {t('forecastViews.outdoorScore')}
           </Typography>
           <Typography variant="body2" sx={{ color: scoreColor, fontWeight: 700 }}>
             {getScoreLabel(current.outdoorScore)}
@@ -346,7 +354,7 @@ export default function WeatherForecastViews({
           <DirectionsBikeIcon sx={{ color: CHART_COLORS.secondary, fontSize: 28 }} />
           <Box>
             <Typography variant="body2" sx={{ fontWeight: 700, color: CHART_COLORS.secondary }}>
-              Najlepsza pora na rower dziś
+              {t('forecastViews.bestRideToday')}
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 600 }}>
               {todayData.bestWindowStart} – {todayData.bestWindowEnd}
@@ -374,7 +382,7 @@ export default function WeatherForecastViews({
             '&:hover': { bgcolor: alphaColor(CHART_COLORS.primary, 0.1) },
           }}
         >
-          Dziś
+          {t('forecastViews.today')}
         </Button>
         <Button
           size="medium"
@@ -391,7 +399,7 @@ export default function WeatherForecastViews({
             '&:hover': { bgcolor: alphaColor(CHART_COLORS.primary, 0.1) },
           }}
         >
-          Tydzień
+          {t('forecastViews.week')}
         </Button>
       </Box>
 

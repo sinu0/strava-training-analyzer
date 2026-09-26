@@ -14,6 +14,9 @@ import {
 import { useMemo, lazy, Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { profileMessages } from '@/components/profile/messages';
+import { PROFILE_LIMITS } from '@/features/settings/athleteProfileForm';
+import { useI18n } from '@/i18n';
 import { Page, Widget } from '@/ui';
 import { localDate } from '@/utils/localDate';
 
@@ -88,6 +91,8 @@ function StatPill({
 }
 
 export default function ProfilePage() {
+  const t = profileMessages.useT();
+  const { t: tc } = useI18n();
   const { data: profile } = useProfile();
   const { data: ftpProgress } = useFtpProgress();
   const { data: weekly = [] } = useWeeklySummaries(12);
@@ -128,11 +133,11 @@ export default function ProfilePage() {
 
   return (
     <Page
-      title="Profil"
-      subtitle="Kluczowe statystyki są uproszczone, a podsumowanie treningowe wychodzi nad galerię i dodatki."
+      title={t('page.title')}
+      subtitle={t('page.subtitle')}
       breadcrumbs={[
-        { label: 'Dashboard', href: '/' },
-        { label: 'Profil' },
+        { label: t('page.breadcrumbDashboard'), href: '/' },
+        { label: t('page.title') },
       ]}
       maxWidth={900}
     >
@@ -200,12 +205,12 @@ export default function ProfilePage() {
                   variant="h5"
                   sx={{ color: 'white', lineHeight: 1.2, mb: 0.5 }}
                 >
-                  {profile?.name ?? 'Kolarz'}
+                  {profile?.name ?? t('page.defaultName')}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center', mt: 0.5 }}>
                   <Chip
                     size="small"
-                    label={profile?.stravaConnected ? 'Strava połączona' : 'Brak Strava'}
+                    label={profile?.stravaConnected ? t('page.stravaConnected') : t('page.stravaDisconnected')}
                     sx={{
                       bgcolor: profile?.stravaConnected
                         ? alphaColor(STATUS_COLORS.success, 0.15)
@@ -223,7 +228,7 @@ export default function ProfilePage() {
                   {!!profile?.createdAt && (
                     <Chip
                       size="small"
-                      label={`od ${new Date(profile.createdAt).getFullYear()}`}
+                      label={t('page.since', { year: new Date(profile.createdAt).getFullYear() })}
                       sx={{
                         bgcolor: SURFACE_COLORS.subtle,
                         color: CHART_COLORS.tickText,
@@ -239,7 +244,7 @@ export default function ProfilePage() {
 
             <Box
               role="group"
-              aria-label="Akcje profilu"
+              aria-label={t('page.actionsLabel')}
               sx={{
                 display: 'flex',
                 alignItems: 'flex-start',
@@ -256,7 +261,7 @@ export default function ProfilePage() {
                 onClick={() => navigate('/analytics')}
                 sx={{ flexShrink: 0 }}
               >
-                Pełna analiza
+                {t('page.fullAnalysis')}
               </Button>
               <Button
                 variant="contained"
@@ -264,7 +269,7 @@ export default function ProfilePage() {
                 onClick={() => setStoryOpen(true)}
                 sx={{ flexShrink: 0 }}
               >
-                Podsumowanie tygodnia
+                {t('page.weekSummary')}
               </Button>
               <Button
                 variant="outlined"
@@ -272,7 +277,7 @@ export default function ProfilePage() {
                 onClick={() => setWrappedYear(new Date().getFullYear())}
                 sx={{ flexShrink: 0 }}
               >
-                Season Wrapped
+                {t('page.seasonWrapped')}
               </Button>
             </Box>
           </Box>
@@ -287,7 +292,7 @@ export default function ProfilePage() {
               <StatPill
                 icon={<BoltIcon fontSize="small" />}
                 label="FTP"
-                tooltip="Kliknij, aby edytować"
+                tooltip={t('stats.clickToEdit')}
                 value={
                   profile?.ftpWatts != null
                     ? `${profile.ftpWatts} W`
@@ -300,7 +305,7 @@ export default function ProfilePage() {
             <Divider orientation="vertical" flexItem sx={{ borderColor: alphaColor(CHART_COLORS.tooltipText, 0.08) }} />
             <StatPill
               icon={<FitnessCenterIcon fontSize="small" />}
-              label="Waga"
+              label={t('stats.weight')}
               value={profile?.weightKg ? `${profile.weightKg} kg` : '—'}
             />
             <Divider orientation="vertical" flexItem sx={{ borderColor: alphaColor(CHART_COLORS.tooltipText, 0.08) }} />
@@ -311,7 +316,7 @@ export default function ProfilePage() {
               <StatPill
                 icon={<MonitorHeartIcon fontSize="small" />}
                 label="LTHR"
-                tooltip="Lactate Threshold HR — próg mleczanowy. Kliknij, aby edytować"
+                tooltip={t('stats.lthrTooltip')}
                 value={profile?.lthrBpm != null ? `${profile.lthrBpm} bpm` : '—'}
               />
             </Box>
@@ -323,7 +328,7 @@ export default function ProfilePage() {
               <StatPill
                 icon={<FavoriteIcon fontSize="small" />}
                 label="HRmax"
-                tooltip="Maksymalne tętno. Kliknij, aby edytować"
+                tooltip={t('stats.hrMaxTooltip')}
                 value={profile?.maxHrBpm != null ? `${profile.maxHrBpm} bpm` : '—'}
                 color={STATUS_COLORS.error}
               />
@@ -333,7 +338,7 @@ export default function ProfilePage() {
               <StatPill
                 icon={<TrendingUpIcon fontSize="small" />}
                 label="CTL"
-                tooltip="Chronic Training Load – kondycja długoterminowa"
+                tooltip={t('stats.ctlTooltip')}
                 value={Math.round(readiness.ctl)}
                 color={STATUS_COLORS.info}
               />
@@ -342,7 +347,7 @@ export default function ProfilePage() {
                 <Divider orientation="vertical" flexItem sx={{ borderColor: alphaColor(CHART_COLORS.tooltipText, 0.08) }} />
                 <StatPill
                   icon={<DirectionsBikeIcon fontSize="small" />}
-                  label="Dystans (tydz.)"
+                  label={t('stats.weekDistance')}
                   value={formatDistance(latestWeek.totalDistanceM)}
                 />
               </>}
@@ -351,8 +356,8 @@ export default function ProfilePage() {
                 <Divider orientation="vertical" flexItem sx={{ borderColor: alphaColor(CHART_COLORS.tooltipText, 0.08) }} />
                 <StatPill
                   icon={<WhatshotIcon fontSize="small" />}
-                  label="Seria (tygodnie)"
-                  tooltip="Ile tygodni z rzędu masz aktywności?"
+                  label={t('stats.streak')}
+                  tooltip={t('stats.streakTooltip')}
                   value={`${streak} 🔥`}
                   color={STATUS_COLORS.accent}
                 />
@@ -363,40 +368,40 @@ export default function ProfilePage() {
       </Box>
 
       {/* ── 4-week cycling summary ────────────────────── */}
-      <Widget title="Podsumowanie treningowe" subtitle="Najważniejsze liczby i kontekst z ostatnich czterech tygodni.">
+      <Widget title={t('widgets.trainingSummary')} subtitle={t('widgets.trainingSummarySubtitle')}>
         <FourWeekCyclingSummary />
       </Widget>
 
       {/* ── Streak heatmap ──────────────────────────────── */}
-      <Widget title="Kalendarz aktywności" subtitle="Historia Twoich dni na rowerze">
+      <Widget title={t('widgets.activityCalendar')} subtitle={t('widgets.activityCalendarSubtitle')}>
         <StreakHeatmap />
       </Widget>
 
       {/* ── Gallery ──────────────────────────────────── */}
-      <Widget title="Galeria zdjęć">
+      <Widget title={t('widgets.gallery')}>
         <ProfileGallery />
       </Widget>
 
       {/* ── Weekly km bar chart ──────────────────────── */}
-      <Widget title="Tygodniowe wolumeny">
+      <Widget title={t('widgets.weeklyVolume')}>
         <WeeklyKmBarChart />
       </Widget>
 
       {/* ── MMP Trend ─────────────────────────────────── */}
-      <Widget title="Krzywa mocy – trend">
+      <Widget title={t('widgets.mmpTrend')}>
         <ErrorBoundary>
-          <Suspense fallback={<Box sx={{ color: 'text.secondary', py: 2, textAlign: 'center' }}>Ładowanie wykresu…</Box>}>
+          <Suspense fallback={<Box sx={{ color: 'text.secondary', py: 2, textAlign: 'center' }}>{t('page.loadingChart')}</Box>}>
             <MmpTrendChart from={fromTo.from} to={fromTo.to} />
           </Suspense>
         </ErrorBoundary>
       </Widget>
 
       {/* ── Achievements ─────────────────────────── */}
-      <Widget title="Odznaki i osiągnięcia">
+      <Widget title={t('widgets.achievements')}>
         <AchievementsSection />
       </Widget>
 
-      <Widget title="Rekordy osobiste" subtitle="Twoje najlepsze wyniki">
+      <Widget title={t('widgets.records')} subtitle={t('widgets.recordsSubtitle')}>
         <PersonalRecordWall />
       </Widget>
 
@@ -413,7 +418,7 @@ export default function ProfilePage() {
       )}
 
       <Dialog open={ftpDialogOpen} onClose={() => setFtpDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Edytuj FTP</DialogTitle>
+        <DialogTitle>{t('dialogs.editFtp')}</DialogTitle>
         <DialogContent>
           <TextField
             label="FTP (W)"
@@ -421,18 +426,18 @@ export default function ProfilePage() {
             fullWidth
             value={ftpInput}
             onChange={(e) => setFtpInput(e.target.value)}
-            slotProps={{ htmlInput: { min: 50, max: 600 } }}
+            slotProps={{ htmlInput: PROFILE_LIMITS.ftpWatts }}
             sx={{ mt: 1 }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFtpDialogOpen(false)}>Anuluj</Button>
+          <Button onClick={() => setFtpDialogOpen(false)}>{tc('common.cancel')}</Button>
           <Button
             variant="contained"
             disabled={updateProfile.isPending}
             onClick={() => {
               const val = parseInt(ftpInput, 10);
-              if (val > 0) {
+              if (val >= PROFILE_LIMITS.ftpWatts.min && val <= PROFILE_LIMITS.ftpWatts.max) {
                 updateProfile.mutate(
                   { ftpWatts: val },
                   { onSuccess: () => setFtpDialogOpen(false) },
@@ -440,13 +445,13 @@ export default function ProfilePage() {
               }
             }}
           >
-            {updateProfile.isPending ? <CircularProgress size={18} /> : 'Zapisz'}
+            {updateProfile.isPending ? <CircularProgress size={18} /> : t('dialogs.save')}
           </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={lthrDialogOpen} onClose={() => setLthrDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Edytuj LTHR</DialogTitle>
+        <DialogTitle>{t('dialogs.editLthr')}</DialogTitle>
         <DialogContent>
           <TextField
             label="LTHR (bpm)"
@@ -454,19 +459,19 @@ export default function ProfilePage() {
             fullWidth
             value={lthrInput}
             onChange={(e) => setLthrInput(e.target.value)}
-            slotProps={{ htmlInput: { min: 80, max: 220 } }}
-            helperText="Próg mleczanowy — tętno przy FTP. Kluczowe dla klasyfikacji stref."
+            slotProps={{ htmlInput: PROFILE_LIMITS.lthrBpm }}
+            helperText={t('dialogs.lthrHelper')}
             sx={{ mt: 1 }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setLthrDialogOpen(false)}>Anuluj</Button>
+          <Button onClick={() => setLthrDialogOpen(false)}>{tc('common.cancel')}</Button>
           <Button
             variant="contained"
             disabled={updateProfile.isPending}
             onClick={() => {
               const val = parseInt(lthrInput, 10);
-              if (val > 0) {
+              if (val >= PROFILE_LIMITS.lthrBpm.min && val <= PROFILE_LIMITS.lthrBpm.max) {
                 updateProfile.mutate(
                   { lthrBpm: val },
                   { onSuccess: () => setLthrDialogOpen(false) },
@@ -474,13 +479,13 @@ export default function ProfilePage() {
               }
             }}
           >
-            {updateProfile.isPending ? <CircularProgress size={18} /> : 'Zapisz'}
+            {updateProfile.isPending ? <CircularProgress size={18} /> : t('dialogs.save')}
           </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={hrMaxDialogOpen} onClose={() => setHrMaxDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Edytuj HRmax</DialogTitle>
+        <DialogTitle>{t('dialogs.editHrMax')}</DialogTitle>
         <DialogContent>
           <TextField
             label="HRmax (bpm)"
@@ -488,19 +493,19 @@ export default function ProfilePage() {
             fullWidth
             value={hrMaxInput}
             onChange={(e) => setHrMaxInput(e.target.value)}
-            slotProps={{ htmlInput: { min: 100, max: 230 } }}
-            helperText="Maksymalne tętno. Używane gdy LTHR nie jest ustawiony."
+            slotProps={{ htmlInput: PROFILE_LIMITS.maxHrBpm }}
+            helperText={t('dialogs.hrMaxHelper')}
             sx={{ mt: 1 }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setHrMaxDialogOpen(false)}>Anuluj</Button>
+          <Button onClick={() => setHrMaxDialogOpen(false)}>{tc('common.cancel')}</Button>
           <Button
             variant="contained"
             disabled={updateProfile.isPending}
             onClick={() => {
               const val = parseInt(hrMaxInput, 10);
-              if (val > 0) {
+              if (val >= PROFILE_LIMITS.maxHrBpm.min && val <= PROFILE_LIMITS.maxHrBpm.max) {
                 updateProfile.mutate(
                   { maxHrBpm: val },
                   { onSuccess: () => setHrMaxDialogOpen(false) },
@@ -508,7 +513,7 @@ export default function ProfilePage() {
               }
             }}
           >
-            {updateProfile.isPending ? <CircularProgress size={18} /> : 'Zapisz'}
+            {updateProfile.isPending ? <CircularProgress size={18} /> : t('dialogs.save')}
           </Button>
         </DialogActions>
       </Dialog>

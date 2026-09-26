@@ -3,6 +3,8 @@ import { useTheme } from '@mui/material/styles';
 import { memo } from 'react';
 import { ResponsiveContainer, ComposedChart, Line, Area, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine } from 'recharts';
 
+import { pmChartMessages } from '@/components/PMChart.messages';
+import { getLocale } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 
 import { getChartVisuals } from '../utils/chartStyles';
@@ -29,20 +31,21 @@ function formatDelta(value: number | null): string {
 
 function PmcTooltipContent({ active, payload, label }: { active?: boolean; payload?: TooltipEntry[]; label?: string }) {
   const theme = useTheme();
+  const t = pmChartMessages.useT();
   if (!active || !payload?.length) return null;
   const row = payload[0]?.payload;
   if (!row) return null;
 
   const metrics = [
-    { key: 'ctl', label: 'CTL (Fitness)', color: PMC_COLORS.CTL, value: row.ctl, delta: row.ctlDelta },
-    { key: 'atl', label: 'ATL (Fatigue)', color: PMC_COLORS.ATL, value: row.atl, delta: row.atlDelta },
-    { key: 'tsb', label: 'TSB (Form)', color: PMC_COLORS.TSB, value: row.tsb, delta: row.tsbDelta },
+    { key: 'ctl', label: t('seriesCtl'), color: PMC_COLORS.CTL, value: row.ctl, delta: row.ctlDelta },
+    { key: 'atl', label: t('seriesAtl'), color: PMC_COLORS.ATL, value: row.atl, delta: row.atlDelta },
+    { key: 'tsb', label: t('seriesTsb'), color: PMC_COLORS.TSB, value: row.tsb, delta: row.tsbDelta },
   ];
 
   return (
     <Box sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: getAppThemeTokens(theme).cardShadow, p: 1.5, borderRadius: 2, minWidth: 180 }}>
       <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0.5, display: 'block' }}>
-        {label ? new Date(label).toLocaleDateString('pl-PL') : ''}
+        {label ? new Date(label).toLocaleDateString(getLocale()) : ''}
       </Typography>
       {metrics.map((m) => (
         <Box key={m.key} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, py: 0.25 }}>
@@ -74,6 +77,7 @@ function PmcTooltipContent({ active, payload, label }: { active?: boolean; paylo
 const PMChart = memo(function PMChart({ data }: PMChartProps) {
   const theme = useTheme();
   const chart = getChartVisuals(theme);
+  const t = pmChartMessages.useT();
   if (!data.length) {
     return (
       <Typography
@@ -81,7 +85,7 @@ const PMChart = memo(function PMChart({ data }: PMChartProps) {
           color: "text.secondary",
           py: 4,
           textAlign: 'center'
-        }}>Brak danych PMC dla wybranego zakresu.
+        }}>{t('noData')}
               </Typography>
     );
   }
@@ -96,13 +100,13 @@ const PMChart = memo(function PMChart({ data }: PMChartProps) {
           color: "text.secondary",
           mb: 1
         }}>
-        CTL pokazuje trend około 42 dni, ATL krótkie zmęczenie około 7 dni, a TSB różnicę między nimi.
+        {t('description')}
       </Typography>
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 1.25 }}>
         {[
-          ['Kondycja długoterminowa (CTL)', PMC_COLORS.CTL, 'solid'],
-          ['Zmęczenie krótkoterminowe (ATL)', PMC_COLORS.ATL, 'solid'],
-          ['Forma treningowa (TSB)', PMC_COLORS.TSB, 'dashed'],
+          [t('legendCtl'), PMC_COLORS.CTL, 'solid'],
+          [t('legendAtl'), PMC_COLORS.ATL, 'solid'],
+          [t('legendTsb'), PMC_COLORS.TSB, 'dashed'],
         ].map(([label, color, style]) => (
           <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
             <Box sx={{ width: 24, borderTop: `3px ${style} ${color}` }} />
@@ -114,7 +118,7 @@ const PMChart = memo(function PMChart({ data }: PMChartProps) {
       </Box>
       <Box
         role="img"
-        aria-label={`Wykres obciążenia PMC. ${data.length} punktów od ${data[0]!.date} do ${latest.date}. Ostatnie wartości: CTL ${latest.ctl}, ATL ${latest.atl}, forma ${latest.tsb}.`}
+        aria-label={t('ariaLabel', { count: data.length, from: data[0]!.date, to: latest.date, ctl: latest.ctl ?? '—', atl: latest.atl ?? '—', tsb: latest.tsb ?? '—' })}
         sx={{ width: '100%', height: 350 }}
       >
         <ResponsiveContainer width="100%" height="100%">
@@ -123,7 +127,7 @@ const PMChart = memo(function PMChart({ data }: PMChartProps) {
             <XAxis
               dataKey="date"
               {...chart.axis}
-              tickFormatter={(v) => new Date(v).toLocaleDateString('pl-PL', { month: 'short', day: 'numeric' })}
+              tickFormatter={(v) => new Date(v).toLocaleDateString(getLocale(), { month: 'short', day: 'numeric' })}
             />
             <YAxis {...chart.axis} />
             <Tooltip content={<PmcTooltipContent />} cursor={chart.tooltip.cursor} />
@@ -135,9 +139,9 @@ const PMChart = memo(function PMChart({ data }: PMChartProps) {
             fillOpacity={0.1}
             stroke="none"
           />
-          <Line type="monotone" dataKey="ctl" stroke={PMC_COLORS.CTL} strokeWidth={2.5} dot={false} name="CTL (Fitness)" />
-          <Line type="monotone" dataKey="atl" stroke={PMC_COLORS.ATL} strokeWidth={2.5} dot={false} name="ATL (Fatigue)" />
-          <Line type="monotone" dataKey="tsb" stroke={PMC_COLORS.TSB} strokeWidth={2.5} strokeDasharray="5 5" dot={false} name="TSB (Form)" />
+          <Line type="monotone" dataKey="ctl" stroke={PMC_COLORS.CTL} strokeWidth={2.5} dot={false} name={t('seriesCtl')} />
+          <Line type="monotone" dataKey="atl" stroke={PMC_COLORS.ATL} strokeWidth={2.5} dot={false} name={t('seriesAtl')} />
+          <Line type="monotone" dataKey="tsb" stroke={PMC_COLORS.TSB} strokeWidth={2.5} strokeDasharray="5 5" dot={false} name={t('seriesTsb')} />
         </ComposedChart>
         </ResponsiveContainer>
       </Box>

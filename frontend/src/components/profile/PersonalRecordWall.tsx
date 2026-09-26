@@ -2,15 +2,16 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { Box, Grid, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
+import { profileMessages, type ProfileMessageKey } from '@/components/profile/messages';
 import { usePersonalRecords, type PersonalRecord } from '@/hooks/usePersonalRecords';
 import { StatusPill, Surface } from '@/ui';
 
-const GROUPED: Record<string, { icon: string; label: string }> = {
-  BEST: { icon: '⚡', label: 'Power' },
-  LONGEST: { icon: '🛣️', label: 'Dystans' },
-  MOST: { icon: '⛰️', label: 'Przewyższenie' },
-  FASTEST: { icon: '💨', label: 'Prędkość' },
-  HIGHEST: { icon: '🔥', label: 'TSS' },
+const GROUPED: Record<string, { icon: string; labelKey: ProfileMessageKey }> = {
+  BEST: { icon: '⚡', labelKey: 'records.power' },
+  LONGEST: { icon: '🛣️', labelKey: 'records.distance' },
+  MOST: { icon: '⛰️', labelKey: 'records.elevation' },
+  FASTEST: { icon: '💨', labelKey: 'records.speed' },
+  HIGHEST: { icon: '🔥', labelKey: 'records.tss' },
 };
 
 function getGroup(rec: PersonalRecord): string {
@@ -24,6 +25,7 @@ function getGroup(rec: PersonalRecord): string {
 
 export default function PersonalRecordWall() {
   const navigate = useNavigate();
+  const t = profileMessages.useT();
   const { data: records, isLoading } = usePersonalRecords();
 
   if (isLoading) return null;
@@ -39,7 +41,8 @@ export default function PersonalRecordWall() {
   return (
     <Grid container spacing={1.5}>
       {[...byGroup.entries()].map(([group, items]) => {
-        const info = GROUPED[group] ?? { icon: '🏆', label: group };
+        const grouped = GROUPED[group];
+        const info = grouped ? { icon: grouped.icon, label: t(grouped.labelKey) } : { icon: '🏆', label: group };
         return (
           <Grid size={{ xs: 6, sm: 4, md: 3 }} key={group}>
             <Surface

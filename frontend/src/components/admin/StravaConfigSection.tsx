@@ -15,6 +15,7 @@ import {
   Tooltip,
 } from '@mui/material';
 
+import { adminMessages } from '@/components/admin/messages';
 import { Widget } from '@/ui';
 import {
   CHART_COLORS,
@@ -26,9 +27,10 @@ import {
 
 
 function SourceChip({ source }: { source: string }) {
+  const t = adminMessages.t;
   return (
     <Chip
-      label={source === 'db' ? 'z bazy' : 'z env'}
+      label={source === 'db' ? t('stravaConfig.sourceDb') : t('stravaConfig.sourceEnv')}
       size="small"
       sx={{
         height: 18,
@@ -88,8 +90,9 @@ export default function StravaConfigSection({
   onConnectStrava,
   onResetConfig,
 }: StravaConfigSectionProps) {
+  const t = adminMessages.useT();
   return (
-    <Widget title="Konfiguracja Strava">
+    <Widget title={t('stravaConfig.title')}>
       <Box sx={{ py: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
         <VpnKeyIcon sx={{ color: CHART_COLORS.primary, fontSize: 28 }} />
@@ -97,12 +100,12 @@ export default function StravaConfigSection({
           <Typography variant="body2" sx={{
             color: "text.secondary"
           }}>
-            Dane autoryzacji OAuth2
+            {t('stravaConfig.subtitle')}
           </Typography>
           <Typography variant="caption" sx={{
             color: "text.secondary"
           }}>
-            Puste pola = wartości z env
+            {t('stravaConfig.caption')}
           </Typography>
         </Box>
       </Box>
@@ -125,17 +128,17 @@ export default function StravaConfigSection({
                 mb: 1,
                 display: 'block'
               }}>
-              AKTUALNY STATUS
+              {t('stravaConfig.currentStatus')}
             </Typography>
             <Stack spacing={0.5}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="caption" sx={{
                   color: "text.secondary"
-                }}>Konto Strava:</Typography>
+                }}>{t('stravaConfig.account')}</Typography>
                 <Chip
                   size="small"
                   icon={profileConnected ? <CheckCircleIcon sx={{ fontSize: 15 }} /> : <ErrorIcon sx={{ fontSize: 15 }} />}
-                  label={profileConnected ? 'Połączone' : 'Niepołączone'}
+                  label={profileConnected ? t('stravaConfig.accountConnected') : t('stravaConfig.accountDisconnected')}
                   sx={{
                     height: 22,
                     fontSize: '0.7rem',
@@ -149,7 +152,7 @@ export default function StravaConfigSection({
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="caption" sx={{
                   color: "text.secondary"
-                }}>Client ID:</Typography>
+                }}>{t('stravaConfig.clientId')}</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <Typography variant="caption" sx={{ fontWeight: 600 }}>
                     {stravaConfig?.clientId ? (stravaConfig.clientId.slice(0, 4) + '...') : '—'}
@@ -160,10 +163,10 @@ export default function StravaConfigSection({
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="caption" sx={{
                   color: "text.secondary"
-                }}>Client Secret:</Typography>
+                }}>{t('stravaConfig.clientSecret')}</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <Typography variant="caption" sx={{ fontWeight: 600, color: stravaConfig?.hasClientSecret ? STATUS_COLORS.success : STATUS_COLORS.error }}>
-                    {stravaConfig?.hasClientSecret ? 'Ustawiony' : 'Brak'}
+                    {stravaConfig?.hasClientSecret ? t('stravaConfig.valueSet') : t('stravaConfig.valueMissing')}
                   </Typography>
                   {!!stravaConfig && <SourceChip source={stravaConfig.clientSecretSource} />}
                 </Box>
@@ -171,10 +174,10 @@ export default function StravaConfigSection({
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="caption" sx={{
                   color: "text.secondary"
-                }}>Webhook Token:</Typography>
+                }}>{t('stravaConfig.webhookToken')}</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <Typography variant="caption" sx={{ fontWeight: 600, color: stravaConfig?.hasWebhookToken ? STATUS_COLORS.success : STATUS_COLORS.warning }}>
-                    {stravaConfig?.hasWebhookToken ? 'Ustawiony' : 'Brak'}
+                    {stravaConfig?.hasWebhookToken ? t('stravaConfig.valueSet') : t('stravaConfig.valueMissing')}
                   </Typography>
                   {!!stravaConfig && <SourceChip source={stravaConfig.webhookTokenSource} />}
                 </Box>
@@ -200,21 +203,21 @@ export default function StravaConfigSection({
                   mb: 0.75,
                   fontWeight: 700
                 }}>
-                POŁĄCZENIE KONTA
+                {t('stravaConfig.connectSection')}
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                Rozpocznij OAuth2 bezpośrednio z panelu admina
+                {t('stravaConfig.connectTitle')}
               </Typography>
               <Typography variant="caption" sx={{
                 color: "text.secondary"
               }}>
-                Przycisk otwiera ekran autoryzacji Stravy i wraca do aplikacji po udanym połączeniu.
+                {t('stravaConfig.connectCaption')}
               </Typography>
             </Box>
             <TextField
               size="small"
-              label="Client ID"
-              placeholder="Wpisz nowy Client ID..."
+              label={t('stravaConfig.fields.clientIdLabel')}
+              placeholder={t('stravaConfig.fields.clientIdPlaceholder')}
               value={clientId}
               onChange={(e) => onClientIdChange(e.target.value)}
               fullWidth
@@ -222,8 +225,8 @@ export default function StravaConfigSection({
             />
             <TextField
               size="small"
-              label="Client Secret"
-              placeholder="Wpisz nowy Client Secret..."
+              label={t('stravaConfig.fields.clientSecretLabel')}
+              placeholder={t('stravaConfig.fields.clientSecretPlaceholder')}
               type="password"
               value={clientSecret}
               onChange={(e) => onClientSecretChange(e.target.value)}
@@ -232,8 +235,8 @@ export default function StravaConfigSection({
             />
             <TextField
               size="small"
-              label="Webhook Verify Token"
-              placeholder="Wpisz nowy Webhook Token..."
+              label={t('stravaConfig.fields.webhookTokenLabel')}
+              placeholder={t('stravaConfig.fields.webhookTokenPlaceholder')}
               type="password"
               value={webhookToken}
               onChange={(e) => onWebhookTokenChange(e.target.value)}
@@ -243,7 +246,7 @@ export default function StravaConfigSection({
           </Stack>
 
           <Stack direction="row" spacing={1}>
-            <Tooltip title={canStartStravaConnect ? 'Przejdź do autoryzacji Strava' : 'Najpierw ustaw Client ID i Client Secret'}>
+            <Tooltip title={canStartStravaConnect ? t('stravaConfig.connectTooltipReady') : t('stravaConfig.connectTooltipMissing')}>
               <Box component="span" sx={{ display: 'flex', flex: 1 }}>
                 <Button
                   variant="contained"
@@ -266,7 +269,7 @@ export default function StravaConfigSection({
                     },
                   }}
                 >
-                  Połącz ze Stravą
+                  {t('stravaConfig.connect')}
                 </Button>
               </Box>
             </Tooltip>
@@ -281,9 +284,9 @@ export default function StravaConfigSection({
                 '&:hover': { bgcolor: alphaColor(CHART_COLORS.primary, 0.85) },
               }}
             >
-              Zapisz
+              {t('stravaConfig.save')}
             </Button>
-            <Tooltip title="Przywróć wartości z env (usuń z bazy)">
+            <Tooltip title={t('stravaConfig.resetTooltip')}>
               <Button
                 variant="outlined"
                 startIcon={resetPending ? <CircularProgress size={16} color="inherit" /> : <RestoreIcon />}
@@ -295,7 +298,7 @@ export default function StravaConfigSection({
                   '&:hover': { bgcolor: alphaColor(STATUS_COLORS.warning, 0.1), borderColor: STATUS_COLORS.warning },
                 }}
               >
-                Reset
+                {t('stravaConfig.reset')}
               </Button>
             </Tooltip>
           </Stack>

@@ -12,6 +12,8 @@ import {
   CartesianGrid,
 } from 'recharts';
 
+import { activityMessages } from '@/components/activity/messages';
+
 import { getChartVisuals } from '../utils/chartStyles';
 import { STATUS_COLORS } from '../utils/colors';
 
@@ -31,6 +33,7 @@ export default function ActivityStreamsChart({
   altitudeStream,
 }: StreamsChartProps) {
   const theme = useTheme();
+  const t = activityMessages.useT();
   const chart = getChartVisuals(theme);
   const data = useMemo(() => {
     const length = timeStream?.length ?? powerStream?.length ?? heartrateStream?.length ?? 0;
@@ -60,10 +63,10 @@ export default function ActivityStreamsChart({
   };
 
   const legend: Array<{ label: string; color: string; style: 'solid' | 'dashed' | 'area' }> = [];
-  if (powerStream) legend.push({ label: 'Moc (W)', color: theme.tokens?.chart.primary ?? theme.palette.primary.main, style: 'solid' });
-  if (heartrateStream) legend.push({ label: 'Tętno (bpm)', color: STATUS_COLORS.error, style: 'solid' });
-  if (cadenceStream) legend.push({ label: 'Kadencja (rpm)', color: theme.tokens?.chart.secondary ?? theme.palette.secondary.main, style: 'dashed' });
-  if (altitudeStream) legend.push({ label: 'Wysokość (m)', color: theme.tokens?.chart.grid ?? theme.palette.divider, style: 'area' });
+  if (powerStream) legend.push({ label: t('interactiveChart.power'), color: theme.tokens?.chart.primary ?? theme.palette.primary.main, style: 'solid' });
+  if (heartrateStream) legend.push({ label: t('interactiveChart.heartRate'), color: STATUS_COLORS.error, style: 'solid' });
+  if (cadenceStream) legend.push({ label: t('interactiveChart.cadence'), color: theme.tokens?.chart.secondary ?? theme.palette.secondary.main, style: 'dashed' });
+  if (altitudeStream) legend.push({ label: t('interactiveChart.altitude'), color: theme.tokens?.chart.grid ?? theme.palette.divider, style: 'area' });
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -111,7 +114,7 @@ export default function ActivityStreamsChart({
               stroke="none"
               fill={theme.tokens?.chart.grid ?? theme.palette.divider}
               fillOpacity={0.5}
-              name="Altitude (m)"
+              name={t('interactiveChart.altitude')}
             />
           )}
 
@@ -123,7 +126,7 @@ export default function ActivityStreamsChart({
               stroke={theme.tokens?.chart.primary ?? theme.palette.primary.main}
               dot={false}
               strokeWidth={1.5}
-              name="Power (W)"
+              name={t('interactiveChart.power')}
             />
           )}
 
@@ -135,7 +138,7 @@ export default function ActivityStreamsChart({
               stroke={STATUS_COLORS.error}
               dot={false}
               strokeWidth={1.5}
-              name="HR (bpm)"
+              name={t('interactiveChart.heartRate')}
             />
           )}
 
@@ -147,7 +150,7 @@ export default function ActivityStreamsChart({
               stroke={theme.tokens?.chart.secondary ?? theme.palette.secondary.main}
               dot={false}
               strokeWidth={1}
-              name="Cadence (rpm)"
+              name={t('interactiveChart.cadence')}
             />
           )}
         </ComposedChart>

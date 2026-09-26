@@ -1,6 +1,8 @@
 import { Box, Typography, Button } from '@mui/material';
 import React from 'react';
 
+import { createCoreTranslator } from '@/i18n';
+
 interface Props {
   children: React.ReactNode;
 }
@@ -35,6 +37,8 @@ export default class ErrorBoundary extends React.Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      // Class component: read the language directly; the fallback renders once per error.
+      const t = createCoreTranslator();
       return (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 6, px: 3, textAlign: 'center', gap: 2 }}>
           <Box
@@ -43,17 +47,17 @@ export default class ErrorBoundary extends React.Component<Props, State> {
             alt=""
             sx={{ width: 160, height: 160, objectFit: 'contain', opacity: 0.9 }}
           />
-          <Typography variant="h6">Wystąpił nieoczekiwany błąd</Typography>
+          <Typography variant="h6">{t('common.unexpectedError')}</Typography>
           <Typography
             variant="body2"
             sx={{
               color: "text.secondary",
               maxWidth: 400
             }}>
-            {this.state.error?.message ?? 'Coś poszło nie tak. Spróbuj odświeżyć stronę.'}
+            {this.state.error?.message ?? t('common.somethingWentWrong')}
           </Typography>
           <Button variant="outlined" size="small" onClick={this.handleReload} sx={{ mt: 1 }}>
-            Odśwież stronę
+            {t('common.reloadPage')}
           </Button>
         </Box>
       );

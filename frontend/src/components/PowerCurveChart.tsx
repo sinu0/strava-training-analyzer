@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { memo, useMemo } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
 
+import { powerCurveChartMessages } from '@/components/PowerCurveChart.messages';
 import { getAppThemeTokens } from '@/theme/theme';
 
 import { CHART_ACTIVE_DOT, getChartVisuals } from '../utils/chartStyles';
@@ -44,12 +45,13 @@ const PowerCurveChart = memo(function PowerCurveChart({
 }: PowerCurveProps) {
   const theme = useTheme();
   const chart = getChartVisuals(theme);
+  const t = powerCurveChartMessages.useT();
   const series = useMemo(
     () => [
-      { key: 'current', label: 'Aktualny zakres', data, color: getAppThemeTokens(theme).chart.primary, dashed: false },
+      { key: 'current', label: t('currentRange'), data, color: getAppThemeTokens(theme).chart.primary, dashed: false },
       ...comparisonSeries.filter((item) => item.data?.efforts && Object.keys(item.data.efforts).length > 0),
     ],
-    [comparisonSeries, data, theme],
+    [comparisonSeries, data, theme, t],
   );
 
   const chartData = useMemo(() => {
@@ -88,7 +90,7 @@ const PowerCurveChart = memo(function PowerCurveChart({
           color: "text.secondary",
           py: 4,
           textAlign: 'center'
-        }}>Brak danych krzywej mocy.
+        }}>{t('noData')}
               </Typography>
     );
   }
@@ -101,7 +103,7 @@ const PowerCurveChart = memo(function PowerCurveChart({
   return (
     <Box
       role="img"
-      aria-label={`Krzywa mocy. ${chartData.length} punkty pomiarowe.${peakPower != null ? ` Najwyższa wartość aktualnego zakresu: ${peakPower} W.` : ''}`}
+      aria-label={`${t('ariaLabel', { count: chartData.length })}${peakPower != null ? t('ariaLabelPeak', { peak: peakPower }) : ''}`}
       sx={{ width: '100%', height: 400 }}
     >
       <ResponsiveContainer width="100%" height="100%">
@@ -121,7 +123,7 @@ const PowerCurveChart = memo(function PowerCurveChart({
           />
            <YAxis
              {...chart.axis}
-             label={{ value: 'Moc (W)', angle: -90, position: 'insideLeft', fill: getAppThemeTokens(theme).chart.tick, fontSize: 11, fontWeight: 700 }}
+             label={{ value: t('yAxisLabel'), angle: -90, position: 'insideLeft', fill: getAppThemeTokens(theme).chart.tick, fontSize: 11, fontWeight: 700 }}
            />
            <Tooltip
              {...chart.tooltip}

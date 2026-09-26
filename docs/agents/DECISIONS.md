@@ -6,7 +6,10 @@ Every item is binding until the user changes it. A new decision = a new item (1�
 
 - **Decision-first**: the `Today` screen answers "what should I do today?"; history, analysis and planning come second. Navigation: Today · History · Analysis · Plan · More.
 - **Local-only, single-user**: ports bound to `127.0.0.1` only; LAN only via the HTTPS variant + password. No account system.
-- **UI**: dark theme by default (light exists too), mobile-first, UI text in Polish. Code, docs and commits in English.
+- **UI**: dark theme by default (light exists too), mobile-first, UI in Polish (default) and English via the in-house `src/i18n` engine (no i18n library). Core catalog `locales/pl.ts` (entry chunk) + `en.ts` (lazy) only for shell/common text; feature text lives in colocated `messages.ts` via `defineMessages` so both languages ship with the lazy page chunk and the entry bundle budget holds. Polish is the key source, English is type-checked against it. Language stored in `localStorage`, toggle in TopBar and Settings. Backend-generated text (recommendations, AI, server errors) stays Polish. Code, docs and commits in English.
+- **AI language**: prompts stay in English; the preferred language (`ai_settings`, default Polish, chosen in Settings) only appends a language + style directive (`AiLanguage.promptDirective()`) to the system prompt. Deterministic text injected into AI results (e.g. the rest-day guardrail) must exist in both languages. Already stored notes/predictions are not re-translated.
+- **AI coaching style**: the default persona (`BALANCED_ADVISOR` / `CONSERVATIVE_SCIENTIST` / `AGGRESSIVE_COACH`) is a user setting in `ai_settings`; a request may still override it (V2 `persona`).
+- **Settings screen**: one page `/settings` with tabs addressed by `?tab=`; each tab is its own component that owns its queries. New settings go into the matching tab (or a new tab in `settingsTabs.tsx`), never as another accordion/section on a flat page.
 - **AI never computes metrics or confidence** — it only explains verified results. Every AI feature sits behind the master flag and a provider flag; the app works fully without AI.
 
 ## Data and metrics

@@ -3,6 +3,8 @@ import { useTheme } from '@mui/material/styles';
 import { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
+import { routePlannerControlsMessages } from '@/components/route-planner/messages';
+
 import { getChartVisuals } from '../../utils/chartStyles';
 import { ROUTE_COLORS } from '../../utils/colors';
 
@@ -21,6 +23,7 @@ function formatDistance(meters: number): string {
 
 export default function ElevationProfile({ points, onHover }: ElevationProfileProps) {
   const theme = useTheme();
+  const t = routePlannerControlsMessages.useT();
   const chart = getChartVisuals(theme);
   const data = useMemo(
     () =>
@@ -37,7 +40,7 @@ export default function ElevationProfile({ points, onHover }: ElevationProfilePr
         <Typography variant="body2" sx={{
           color: "text.secondary"
         }}>
-          Dodaj punkty na mapie, aby zobaczyć profil wysokości
+          {t('elevationProfile.emptyHint')}
         </Typography>
       </Box>
     );
@@ -76,7 +79,7 @@ export default function ElevationProfile({ points, onHover }: ElevationProfilePr
             formatter={(value, name) => {
               const numericValue = Number(value ?? 0);
               const seriesName = String(name ?? '');
-              if (seriesName === 'elevation') return [`${Math.round(numericValue)} m`, 'Wysokość'];
+              if (seriesName === 'elevation') return [`${Math.round(numericValue)} m`, t('elevationProfile.elevation')];
               return [numericValue, seriesName];
             }}
           />

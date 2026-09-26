@@ -6,6 +6,8 @@ import { useMemo } from 'react';
 import { getAppThemeTokens } from '@/theme/theme';
 import { decodePolyline } from '@/utils/map';
 
+import { activityMessages } from './messages';
+
 interface LightweightRoutePreviewProps {
   activityName: string;
   summaryPolyline?: string | null;
@@ -51,6 +53,7 @@ export default function LightweightRoutePreview({
   height = 150,
 }: LightweightRoutePreviewProps) {
   const theme = useTheme();
+  const t = activityMessages.useT();
   const route = useMemo(() => {
     if (!summaryPolyline?.trim()) return null;
     try {
@@ -66,7 +69,7 @@ export default function LightweightRoutePreview({
   return (
     <Box
       role="img"
-      aria-label={`Ślad trasy: ${activityName}`}
+      aria-label={t('lightweightRoutePreview.traceAriaLabel', { name: activityName })}
       data-testid="lightweight-route-preview"
       sx={{
         height,
@@ -120,7 +123,7 @@ export default function LightweightRoutePreview({
             color: "text.secondary"
           }}>
           <RouteOutlinedIcon />
-          <Typography variant="caption">Brak zapisu trasy</Typography>
+          <Typography variant="caption">{t('noRoute')}</Typography>
         </Stack>
       )}
     </Box>

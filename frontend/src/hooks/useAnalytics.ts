@@ -635,10 +635,21 @@ export function useProfile() {
   });
 }
 
+/** Partial profile update — the backend keeps fields that are omitted. */
+export interface UpdateProfileParams {
+  name?: string;
+  ftpWatts?: number | null;
+  weightKg?: number | null;
+  lthrBpm?: number | null;
+  maxHrBpm?: number | null;
+  restingHrBpm?: number | null;
+  dateOfBirth?: string | null;
+}
+
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (params: { ftpWatts?: number | null; weightKg?: number | null; lthrBpm?: number | null; maxHrBpm?: number | null }) => {
+    mutationFn: async (params: UpdateProfileParams) => {
       const { data } = await apiClient.put<AthleteProfile>('/profile', params);
       return data;
     },

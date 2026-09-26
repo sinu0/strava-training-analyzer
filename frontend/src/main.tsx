@@ -9,6 +9,7 @@ import App from '@/App';
 import { STALE_STANDARD } from '@/constants/queryConfig';
 import { AppUiProvider } from '@/context/AppUiContext';
 import { ThemeModeProvider } from '@/context/ThemeModeContext';
+import { I18nProvider } from '@/i18n';
 import '@/styles/animations.css';
 import { registerPwa } from '@/pwa/registerPwa';
 
@@ -25,14 +26,16 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeModeProvider>
-        <AppUiProvider>
-          <CssBaseline />
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </AppUiProvider>
-      </ThemeModeProvider>
+      <I18nProvider>
+        <ThemeModeProvider>
+          <AppUiProvider>
+            <CssBaseline />
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </AppUiProvider>
+        </ThemeModeProvider>
+      </I18nProvider>
     </QueryClientProvider>
   </React.StrictMode>,
 );

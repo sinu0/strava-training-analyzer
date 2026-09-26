@@ -18,6 +18,7 @@ import type {
   SelectionStats,
   StreamDataPoint,
 } from '@/components/activity/interactiveStreams.types';
+import { activityMessages } from '@/components/activity/messages';
 import { useChartInteraction } from '@/components/activity/useChartInteraction';
 import { getChartVisuals } from '@/utils/chartStyles';
 import { CHART_COLORS, STATUS_COLORS, alphaColor } from '@/utils/colors';
@@ -56,6 +57,7 @@ export default function InteractiveStreamsChart({
   onSelectionChange,
 }: InteractiveStreamsChartProps) {
   const theme = useTheme();
+  const t = activityMessages.useT();
   const chart = getChartVisuals(theme);
   const data = useMemo(() => {
     const length = timeStream?.length ?? powerStream?.length ?? heartrateStream?.length ?? 0;
@@ -174,7 +176,7 @@ export default function InteractiveStreamsChart({
                 strokeWidth={1.5}
                 fill="url(#altitudeGradient)"
                 fillOpacity={1}
-                name="Wysokość (m)"
+                name={t('interactiveChart.altitude')}
                 isAnimationActive={false}
               />
             )}
@@ -187,7 +189,7 @@ export default function InteractiveStreamsChart({
                 stroke={theme.tokens?.chart.primary ?? theme.palette.primary.main}
                 dot={false}
                 strokeWidth={1.5}
-                name="Moc (W)"
+                name={t('interactiveChart.power')}
               />
             )}
 
@@ -199,7 +201,7 @@ export default function InteractiveStreamsChart({
                 stroke={STATUS_COLORS.error}
                 dot={false}
                 strokeWidth={1.5}
-                name="Tętno (bpm)"
+                name={t('interactiveChart.heartRate')}
               />
             )}
 
@@ -211,7 +213,7 @@ export default function InteractiveStreamsChart({
                 stroke={theme.tokens?.chart.secondary ?? theme.palette.secondary.main}
                 dot={false}
                 strokeWidth={1}
-                name="Kadencja (rpm)"
+                name={t('interactiveChart.cadence')}
               />
             )}
 
@@ -223,7 +225,7 @@ export default function InteractiveStreamsChart({
                 stroke={STATUS_COLORS.warning}
                 dot={false}
                 strokeWidth={1}
-                name="Prędkość (m/s)"
+                name={t('interactiveChart.velocity')}
               />
             )}
 
@@ -261,7 +263,7 @@ export default function InteractiveStreamsChart({
           textAlign: 'center',
           mt: 0.5
         }}>
-        Najedź myszką, aby zobaczyć punkt na mapie • Kliknij i przeciągnij, aby wybrać odcinek
+        {t('interactiveChart.hint')}
       </Typography>
     </Box>
   );
@@ -276,6 +278,7 @@ function SelectionStatsBar({
   onClear: () => void;
   computeStats: (startTime: number, endTime: number) => { range: BrushRange; stats: SelectionStats } | null;
 }) {
+  const t = activityMessages.useT();
   const result = computeStats(range[0], range[1]);
   if (!result) return null;
   const { stats } = result;
@@ -296,7 +299,7 @@ function SelectionStatsBar({
       }}
     >
       <Typography sx={{ color: CHART_COLORS.primary, fontSize: '0.75rem', fontWeight: 700 }}>
-        Zaznaczony odcinek
+        {t('interactiveChart.selectedSegment')}
       </Typography>
       {stats.duration > 0 && (
         <Chip label={`${formatDuration(stats.duration)}`} size="small" variant="outlined"
@@ -323,7 +326,7 @@ function SelectionStatsBar({
           sx={{ borderColor: CHART_COLORS.grid, color: CHART_COLORS.tickText, fontSize: '0.7rem' }} />
       )}
       <Chip
-        label="✕ Wyczyść"
+        label={t('interactiveChart.clear')}
         size="small"
         onClick={onClear}
         sx={{

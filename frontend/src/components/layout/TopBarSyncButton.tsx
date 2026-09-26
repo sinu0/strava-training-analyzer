@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCreateImportJob, useProcessingJob } from '@/features/data/useDataJobs';
 import { invalidateAfterTrainingSync } from '@/hooks/queryInvalidation';
 import { useCheckNewActivities, useStravaConfig, useSyncStatus } from '@/hooks/useAnalytics';
+import { useI18n } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 
 import type { Theme } from '@mui/material/styles';
@@ -44,6 +45,7 @@ interface TopBarSyncButtonProps {
  */
 export default function TopBarSyncButton({ onSyncComplete }: TopBarSyncButtonProps) {
   const queryClient = useQueryClient();
+  const { t } = useI18n();
   const { data: stravaConfig, isLoading: isStravaConfigLoading, isError: isStravaConfigError } = useStravaConfig();
   const isStravaConfigured = Boolean(stravaConfig?.clientId && stravaConfig.hasClientSecret);
   const isStravaUnavailable = !isStravaConfigLoading && (isStravaConfigError || !isStravaConfigured);
@@ -84,16 +86,16 @@ export default function TopBarSyncButton({ onSyncComplete }: TopBarSyncButtonPro
   }, [job.data, onSyncComplete, queryClient]);
 
   const tooltip = isSyncing
-    ? 'Synchronizacja w toku...'
+    ? t('sync.inProgress')
     : isStravaUnavailable
-      ? 'Połącz Stravę w ustawieniach, aby synchronizować treningi'
+      ? t('sync.connectInSettings')
     : isRateLimited
-      ? 'API Strava zablokowane'
+      ? t('sync.rateLimited')
       : hasFailed
-        ? 'Synchronizacja nie powiodła się — sprawdź Dane i zadania'
+        ? t('sync.failed')
       : hasNew
-        ? `Sync: ${newCount} nowych aktywności`
-        : 'Sync ostatnich treningów';
+        ? t('sync.newActivities', { count: newCount })
+        : t('sync.recent');
 
   return (
     <Tooltip title={tooltip} arrow>
@@ -114,8 +116,8 @@ export default function TopBarSyncButton({ onSyncComplete }: TopBarSyncButtonPro
           onClick={handleSync}
           disabled={isStravaConfigLoading || isSyncing || isRateLimited || isStravaUnavailable}
           aria-label={isStravaUnavailable
-            ? 'Połącz Stravę, aby synchronizować treningi'
-            : 'Synchronizuj ostatnie treningi'}
+            ? t('sync.connectAction')
+            : t('sync.syncAction')}
           sx={[
             roundButtonSx,
             {

@@ -3,6 +3,8 @@ import { useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Polyline, useMap } from 'react-leaflet';
 
 
+import { useI18n } from '@/i18n';
+
 import { MAP_TILE_CONFIG, DEFAULT_MAP_TILE_VARIANT } from '../constants/mapTiles';
 import { ROUTE_COLORS } from '../utils/colors';
 import {
@@ -79,6 +81,7 @@ export default function ActivityMap({
   showAttribution = interactive,
   preview = false,
 }: ActivityMapProps) {
+  const { t } = useI18n();
   const positions = useMemo(
     () => extractActivityRoutePositions({ geoJson, latStream, lngStream, summaryPolyline }),
     [geoJson, latStream, lngStream, summaryPolyline],
@@ -96,7 +99,7 @@ export default function ActivityMap({
       >
         <Typography sx={{
           color: "text.secondary"
-        }}>Brak danych mapy</Typography>
+        }}>{t('common.noMapData')}</Typography>
       </Box>
     );
   }

@@ -2,6 +2,7 @@
 import { Stack, TextField } from '@mui/material';
 
 import FormDialog from '@/components/common/FormDialog';
+import { weightMessages } from '@/components/weight/messages';
 import type { UseFormDialogResult } from '@/hooks/useFormDialog';
 
 import type { FormEvent } from 'react';
@@ -25,12 +26,13 @@ export default function AddWeightDialog({
   onSubmit,
 }: AddWeightDialogProps) {
   const { open, values, closeDialog, setValue } = dialog;
+  const t = weightMessages.useT();
 
   return (
     <FormDialog
       open={open}
-      title="Dodaj pomiar wagi"
-      submitLabel="Zapisz"
+      title={t('addDialog.title')}
+      submitLabel={t('addDialog.submit')}
       maxWidth="xs"
       disableSubmit={pending || !values.weightKg.trim() || !values.recordedDate}
       onSubmit={onSubmit}
@@ -38,7 +40,7 @@ export default function AddWeightDialog({
     >
       <Stack spacing={2} sx={{ mt: 1 }}>
         <TextField
-          label="Waga (kg)"
+          label={t('addDialog.weightLabel')}
           type="number"
           value={values.weightKg}
           onChange={(event) => setValue('weightKg', event.target.value)}
@@ -48,7 +50,7 @@ export default function AddWeightDialog({
           }}
         />
         <TextField
-          label="Data"
+          label={t('addDialog.dateLabel')}
           type="date"
           value={values.recordedDate}
           onChange={(event) => setValue('recordedDate', event.target.value)}
@@ -56,7 +58,7 @@ export default function AddWeightDialog({
           slotProps={{ inputLabel: { shrink: true } }}
         />
         <TextField
-          label="Notatki (opcjonalnie)"
+          label={t('addDialog.notesLabel')}
           value={values.notes}
           onChange={(event) => setValue('notes', event.target.value)}
           fullWidth

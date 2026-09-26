@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 
+import { routePlannerControlsMessages } from '@/components/route-planner/messages';
 import {
   fetchElevation,
   fetchRoute,
@@ -134,7 +135,7 @@ function getDefaultShowWeather(): boolean {
 
 function getRouteProviderLabel(routePreview: RoutePreview | null): string | null {
   if (routePreview?.provider === 'saved') {
-    return 'Zapisana trasa';
+    return routePlannerControlsMessages.t('routingProfile.savedRoute');
   }
 
   if (routePreview?.provider) {
@@ -537,7 +538,7 @@ export function useRoutePlannerState() {
       if (!primarySuggestion) {
         dispatch({
           type: 'set-generation-error',
-          generationError: 'Generator nie zwrócił żadnej propozycji.',
+          generationError: routePlannerControlsMessages.t('state.noSuggestions'),
         });
         return;
       }
@@ -553,7 +554,7 @@ export function useRoutePlannerState() {
         generationError:
           error instanceof Error
             ? error.message
-            : 'Nie udało się wygenerować trasy z historii.',
+            : routePlannerControlsMessages.t('state.generationFailed'),
       });
     } finally {
       dispatch({ type: 'set-generating', isGenerating: false });

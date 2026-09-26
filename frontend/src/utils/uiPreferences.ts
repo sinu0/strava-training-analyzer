@@ -1,3 +1,4 @@
+import { defineMessages } from '@/i18n';
 import {
   DASHBOARD_WIDGET_TYPES,
   type DashboardWidget,
@@ -40,6 +41,21 @@ function isWidgetType(value: unknown): value is DashboardWidgetType {
     && DASHBOARD_WIDGET_TYPES.includes(value as DashboardWidgetType);
 }
 
+const { t } = defineMessages({
+  pl: {
+    restoredDefault: 'Przywrócono domyślny układ po wykryciu nieprawidłowych preferencji.',
+    unknown: 'nieznany',
+    skippedUnknown: 'Pominięto nieznany widget: {type}',
+    skippedDuplicate: 'Pominięto zduplikowany widget: {id}',
+  },
+  en: {
+    restoredDefault: 'Restored the default layout after detecting invalid preferences.',
+    unknown: 'unknown',
+    skippedUnknown: 'Skipped unknown widget: {type}',
+    skippedDuplicate: 'Skipped duplicate widget: {id}',
+  },
+});
+
 export function migrateUiPreferences(raw: unknown): {
   preferences: UiPreferences;
   warnings: string[];
@@ -47,7 +63,7 @@ export function migrateUiPreferences(raw: unknown): {
   if (!isRecord(raw) || !isRecord(raw.dashboard) || !Array.isArray(raw.dashboard.widgets)) {
     return {
       preferences: structuredClone(DEFAULT_UI_PREFERENCES),
-      warnings: ['Przywrócono domyślny układ po wykryciu nieprawidłowych preferencji.'],
+      warnings: [t('restoredDefault')],
     };
   }
 
@@ -61,15 +77,15 @@ export function migrateUiPreferences(raw: unknown): {
     if (!isRecord(candidate) || !isWidgetType(candidate.type)) {
       const unknownType = isRecord(candidate) && typeof candidate.type === 'string'
         ? candidate.type
-        : 'nieznany';
-      warnings.push(`Pominięto nieznany widget: ${unknownType}`);
+        : t('unknown');
+      warnings.push(t('skippedUnknown', { type: unknownType }));
       continue;
     }
     const id = typeof candidate.id === 'string' && candidate.id.trim()
       ? candidate.id
       : `${candidate.type}-${widgets.length + 1}`;
     if (ids.has(id)) {
-      warnings.push(`Pominięto zduplikowany widget: ${id}`);
+      warnings.push(t('skippedDuplicate', { id }));
       continue;
     }
     ids.add(id);

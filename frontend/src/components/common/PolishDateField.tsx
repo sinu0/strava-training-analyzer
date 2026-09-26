@@ -1,6 +1,8 @@
 import { TextField, type TextFieldProps } from '@mui/material';
 import { useEffect, useState } from 'react';
 
+import { useI18n } from '@/i18n';
+
 type PolishDateFieldProps = Omit<TextFieldProps, 'type' | 'value' | 'onChange'> & {
   value: string;
   onChange: (isoDate: string) => void;
@@ -25,6 +27,7 @@ function parsePolishDate(value: string) {
 }
 
 export default function PolishDateField({ value, onChange, slotProps, ...props }: PolishDateFieldProps) {
+  const { t } = useI18n();
   const [displayValue, setDisplayValue] = useState(() => formatIsoDate(value));
   const htmlInputSlotProps = slotProps?.htmlInput;
 
@@ -51,7 +54,7 @@ export default function PolishDateField({ value, onChange, slotProps, ...props }
       {...props}
       type="text"
       value={displayValue}
-      placeholder="DD.MM.RRRR"
+      placeholder={t('common.datePlaceholder')}
       onChange={(event) => setDisplayValue(event.target.value)}
       onBlur={commit}
       onKeyDown={(event) => {

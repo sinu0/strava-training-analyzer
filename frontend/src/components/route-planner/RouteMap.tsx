@@ -6,6 +6,7 @@ import { alpha } from '@mui/material/styles';
 
 import { Surface } from '@/ui';
 
+import { routePlannerControlsMessages } from './messages';
 import { getAppThemeTokens } from '../../theme/theme';
 import {
   COMMON_COLORS,
@@ -14,37 +15,40 @@ import {
 } from '../../utils/colors';
 import RouteDrawingMap, { type RouteWeatherMarker } from '../route/RouteDrawingMap';
 
+
 import type { MapTileVariant } from '../../constants/mapTiles';
 import type { GeneratedRouteSuggestion, GeneratedRouteStyle } from '../../types/route';
 
-function formatGeneratedStyle(style: GeneratedRouteStyle): string {
+type Translator = ReturnType<typeof routePlannerControlsMessages.useT>;
+
+function formatGeneratedStyle(style: GeneratedRouteStyle, t: Translator): string {
   switch (style) {
     case 'easier':
-      return 'Łagodniejsza';
+      return t('generatedStyle.easier');
     case 'harder':
-      return 'Trudniejsza';
+      return t('generatedStyle.harder');
     case 'longer':
-      return 'Dłuższa';
+      return t('generatedStyle.longer');
     case 'balanced':
     default:
-      return 'Bazowa';
+      return t('generatedStyle.balanced');
   }
 }
 
-function formatRoutingProfile(profile: string): string {
+function formatRoutingProfile(profile: string, t: Translator): string {
   switch (profile) {
     case 'safety':
-      return 'Spokojniej / ścieżki';
+      return t('routingProfile.safety');
     case 'shortest':
-      return 'Najkrócej';
+      return t('routingProfile.shortest');
     case 'gravel':
-      return 'Szuter';
+      return t('routingProfile.gravel');
     case 'trekking':
-      return 'Uniwersalnie';
+      return t('routingProfile.trekking');
     case 'hillclimb':
-      return 'Więcej przewyższeń';
+      return t('routingProfile.hillclimb');
     case 'saved-route':
-      return 'Zapisana trasa';
+      return t('routingProfile.savedRoute');
     default:
       return profile;
   }
@@ -85,6 +89,7 @@ export default function RouteMap({
   onSelectAlternative,
   onSaveAlternative,
 }: RouteMapProps) {
+  const t = routePlannerControlsMessages.useT();
   return (
     <Surface padding="none" sx={{ height: '100%' }}>
       <RouteDrawingMap
@@ -134,7 +139,7 @@ export default function RouteMap({
                 }}>
                 <Chip
                   size="small"
-                  label={formatGeneratedStyle(generatedAlternatives[selectedAlternativeIndex]?.style ?? 'balanced')}
+                  label={formatGeneratedStyle(generatedAlternatives[selectedAlternativeIndex]?.style ?? 'balanced', t)}
                   color="primary"
                   variant="outlined"
                 />
@@ -147,7 +152,7 @@ export default function RouteMap({
               }}>
                 <IconButton
                   size="small"
-                  aria-label="Poprzednia propozycja"
+                  aria-label={t('map.previousSuggestion')}
                   onClick={() => onCycleAlternative(-1)}
                   sx={{ color: 'text.primary' }}
                 >
@@ -155,7 +160,7 @@ export default function RouteMap({
                 </IconButton>
                 <IconButton
                   size="small"
-                  aria-label="Następna propozycja"
+                  aria-label={t('map.nextSuggestion')}
                   onClick={() => onCycleAlternative(1)}
                   sx={{ color: 'text.primary' }}
                 >
@@ -183,7 +188,7 @@ export default function RouteMap({
               />
               <Chip
                 size="small"
-                label={formatRoutingProfile(generatedAlternatives[selectedAlternativeIndex]?.preview.profile ?? 'safety')}
+                label={formatRoutingProfile(generatedAlternatives[selectedAlternativeIndex]?.preview.profile ?? 'safety', t)}
                 variant="outlined"
               />
             </Stack>
@@ -195,7 +200,7 @@ export default function RouteMap({
                   key={`${suggestion.seed}-${suggestion.style}-dot`}
                   component="button"
                   type="button"
-                  aria-label={`Pokaż propozycję ${index + 1}`}
+                  aria-label={t('map.showSuggestion', { index: index + 1 })}
                   onClick={() => onSelectAlternative(index)}
                   sx={{
                     width: 8,
@@ -229,7 +234,7 @@ export default function RouteMap({
                 }}
                 disabled={createRoutePending}
               >
-                Zapisz sugestię
+                {t('map.saveSuggestion')}
               </Button>
             </Stack>
           </Stack>

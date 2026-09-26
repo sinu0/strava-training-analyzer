@@ -2,9 +2,13 @@ import { Box, Typography, Stack, Chip, Alert } from '@mui/material';
 
 import { Surface } from '@/ui';
 
+import { routePlannerControlsMessages } from './messages';
 import { getAppThemeTokens } from '../../theme/theme';
 
+
 import type { RoutePreview } from '../../types/route';
+
+type Translator = ReturnType<typeof routePlannerControlsMessages.useT>;
 
 function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -20,20 +24,20 @@ function formatCoverage(distance: number | null | undefined, totalDistance: numb
   return `${Math.round((distance / totalDistance) * 100)}%`;
 }
 
-function formatRoutingProfile(profile: string): string {
+function formatRoutingProfile(profile: string, t: Translator): string {
   switch (profile) {
     case 'safety':
-      return 'Spokojniej / ścieżki';
+      return t('routingProfile.safety');
     case 'shortest':
-      return 'Najkrócej';
+      return t('routingProfile.shortest');
     case 'gravel':
-      return 'Szuter';
+      return t('routingProfile.gravel');
     case 'trekking':
-      return 'Uniwersalnie';
+      return t('routingProfile.trekking');
     case 'hillclimb':
-      return 'Więcej przewyższeń';
+      return t('routingProfile.hillclimb');
     case 'saved-route':
-      return 'Zapisana trasa';
+      return t('routingProfile.savedRoute');
     default:
       return profile;
   }
@@ -79,18 +83,19 @@ export default function RouteStats({
   weatherStopCount,
   isRouting,
 }: RouteStatsProps) {
+  const t = routePlannerControlsMessages.useT();
   return (
     <Surface>
       <Typography variant="subtitle2" gutterBottom>
-        Statystyki
+        {t('stats.title')}
       </Typography>
       <Stack direction="row" spacing={2} sx={{
         flexWrap: "wrap"
       }}>
-        <StatBox label="Dystans" value={`${(totalDistance / 1000).toFixed(1)} km`} />
-        <StatBox label="Przewyższenie" value={`${Math.round(totalGain)} m`} />
-        <StatBox label="Czas (est.)" value={formatDuration(estimatedTimeSec)} />
-        <StatBox label="TSS (est.)" value={estimatedTss > 0 ? estimatedTss.toString() : '—'} />
+        <StatBox label={t('stats.distance')} value={`${(totalDistance / 1000).toFixed(1)} km`} />
+        <StatBox label={t('stats.elevationGain')} value={`${Math.round(totalGain)} m`} />
+        <StatBox label={t('stats.estimatedTime')} value={formatDuration(estimatedTimeSec)} />
+        <StatBox label={t('stats.estimatedTss')} value={estimatedTss > 0 ? estimatedTss.toString() : '—'} />
       </Stack>
       {routePreview ? (
         <Stack
@@ -102,39 +107,39 @@ export default function RouteStats({
             mt: 1.5
           }}>
           {routeProviderLabel ? (
-            <Chip size="small" label={`Routing: ${routeProviderLabel}`} variant="outlined" />
+            <Chip size="small" label={t('stats.routingChip', { label: routeProviderLabel })} variant="outlined" />
           ) : null}
           {routePreview.profile ? (
             <Chip
               size="small"
-              label={`Profil: ${formatRoutingProfile(routePreview.profile)}`}
+              label={t('stats.profileChip', { label: formatRoutingProfile(routePreview.profile, t) })}
               variant="outlined"
             />
           ) : null}
           <Chip
             size="small"
-            label={`Asfalt ${formatCoverage(routePreview.pavedDistanceM, totalDistance)}`}
+            label={t('stats.pavedChip', { value: formatCoverage(routePreview.pavedDistanceM, totalDistance) })}
             variant="outlined"
           />
           <Chip
             size="small"
-            label={`Szuter ${formatCoverage(routePreview.unpavedDistanceM, totalDistance)}`}
+            label={t('stats.unpavedChip', { value: formatCoverage(routePreview.unpavedDistanceM, totalDistance) })}
             variant="outlined"
           />
           <Chip
             size="small"
-            label={`Infrastruktura rowerowa ${formatCoverage(routePreview.cyclewayDistanceM, totalDistance)}`}
+            label={t('stats.cyclewayChip', { value: formatCoverage(routePreview.cyclewayDistanceM, totalDistance) })}
             variant="outlined"
           />
           <Chip
             size="small"
-            label={`Spokojne odcinki ${formatCoverage(routePreview.quietDistanceM, totalDistance)}`}
+            label={t('stats.quietChip', { value: formatCoverage(routePreview.quietDistanceM, totalDistance) })}
             variant="outlined"
           />
           {generationInfo ? (
             <Chip
               size="small"
-              label={`Inspiracja: ${generationInfo.sourceName}`}
+              label={t('stats.inspirationChip', { name: generationInfo.sourceName })}
               variant="outlined"
             />
           ) : null}
@@ -148,7 +153,7 @@ export default function RouteStats({
             mt: 1,
             display: 'block'
           }}>
-          Dymki pogodowe pokazują bieżące warunki dla kluczowych punktów trasy.
+          {t('stats.weatherHint')}
         </Typography>
       )}
       {routePreview?.notices?.map((notice) => (
@@ -158,7 +163,7 @@ export default function RouteStats({
       ))}
       {!!isRouting && (
         <Alert severity="info" sx={{ mt: 1 }} icon={false}>
-          Obliczanie trasy…
+          {t('stats.calculating')}
         </Alert>
       )}
     </Surface>

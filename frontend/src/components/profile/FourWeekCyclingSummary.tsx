@@ -1,12 +1,16 @@
 import { Box, Typography } from '@mui/material';
 import { useMemo } from 'react';
 
+import { getLocale, localized } from '@/i18n';
 import type { ActivitySummary } from '@/types/activity';
 import { STATUS_COLORS, alphaColor } from '@/utils/colors';
 
 import { useRecentActivities } from '../../hooks/useAnalytics';
 
-const DAY_LABELS = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
+const DAY_LABELS = localized({
+  pl: ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'],
+  en: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
+});
 // Backend maps all bike activities to "cycling"
 const CYCLING_TYPES = new Set(['cycling', 'Ride', 'VirtualRide', 'EBikeRide', 'MountainBikeRide', 'GravelRide']);
 
@@ -52,7 +56,7 @@ function buildWeeks(activities: ActivitySummary[]): WeekData[] {
       }
     }
 
-    const fmt = weekStart.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
+    const fmt = weekStart.toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' });
     return { weekLabel: fmt, days, totalTimeSec };
   });
 }

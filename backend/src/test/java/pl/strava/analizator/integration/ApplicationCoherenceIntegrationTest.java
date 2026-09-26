@@ -78,11 +78,25 @@ class ApplicationCoherenceIntegrationTest {
     private final RideRecordingRepository rideRecordings;
 
     @Test void migratesAndExportsRealOpenApi() throws Exception {
-        assertThat(jdbc.queryForObject("SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1", String.class)).isEqualTo("62");
+        assertThat(jdbc.queryForObject("SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1", String.class)).isEqualTo("64");
         String schema = mvc.perform(get("/api-docs")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(json.readTree(schema).at("/paths/~1api~1v2~1training~1context").isMissingNode()).isFalse();
         Files.createDirectories(Path.of("build"));
         Files.writeString(Path.of("build/openapi.json"), schema);
+    }
+
+    @Test void aiLanguagePreferencePersistsAndRejectsUnsupportedValue() throws Exception {
+        mvc.perform(get("/api/v2/ai/settings")).andExpect(status().isOk()).andExpect(jsonPath("$.language").value("pl"));
+        mvc.perform(put("/api/v2/ai/settings").contentType(MediaType.APPLICATION_JSON).content("{\"language\":\"en\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.language").value("en"));
+        assertThat(jdbc.queryForObject("SELECT language FROM ai_settings WHERE id = 1", String.class)).isEqualTo("en");
+        mvc.perform(put("/api/v2/ai/settings").contentType(MediaType.APPLICATION_JSON).content("{\"coachingStyle\":\"AGGRESSIVE_COACH\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.language").value("en"))
+                .andExpect(jsonPath("$.coachingStyle").value("AGGRESSIVE_COACH"));
+        mvc.perform(put("/api/v2/ai/settings").contentType(MediaType.APPLICATION_JSON).content("{\"language\":\"de\"}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(put("/api/v2/ai/settings").contentType(MediaType.APPLICATION_JSON).content("{\"language\":\"pl\"}"))
+                .andExpect(status().isOk());
     }
 
     @Test void contextPersistsAcrossRequestsAndRejectsStaleRevision() throws Exception {

@@ -1,3 +1,7 @@
+import { localized } from '@/i18n';
+
+const STOP_LABELS = localized({ pl: { start: 'Start', finish: 'Meta' }, en: { start: 'Start', finish: 'Finish' } });
+
 export interface RouteWeatherStop {
   id: string;
   label: string;
@@ -126,9 +130,9 @@ export function buildRouteWeatherStops(
       const progress = indexes.length === 1 ? 0 : index / (indexes.length - 1);
       const label =
         index === 0
-          ? 'Start'
+          ? STOP_LABELS.start
           : index === indexes.length - 1
-            ? 'Meta'
+            ? STOP_LABELS.finish
             : `${Math.round(progress * 100)}%`;
 
       return {

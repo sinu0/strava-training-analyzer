@@ -1,12 +1,20 @@
 import { Box, Stack, Typography } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 
+import { profileMessages } from '@/components/profile/messages';
 import { useStreakCalendar, useStreakStats } from '@/hooks/useStreak';
+import { localized } from '@/i18n';
 import { useTokens } from '@/ui';
 
 
-const MONTH_LABELS = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
-const DAY_LABELS_SHORT = ['Pon', '', 'Śro', '', 'Pią', '', 'Nie'];
+const MONTH_LABELS = localized({
+  pl: ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'],
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+});
+const DAY_LABELS_SHORT = localized({
+  pl: ['Pon', '', 'Śro', '', 'Pią', '', 'Nie'],
+  en: ['Mon', '', 'Wed', '', 'Fri', '', 'Sun'],
+});
 
 const CELL_SIZE = 13;
 const CELL_GAP = 3;
@@ -21,6 +29,7 @@ export default function StreakHeatmap() {
   const { data: stats } = useStreakStats();
   const tokens = useTokens();
   const theme = useTheme();
+  const t = profileMessages.useT();
   const LEVEL_COLORS = tokens.chart.heatmap;
   const ink = { label: tokens.chart.tick, quiet: alpha(tokens.chart.tick, 0.6), cellEdge: tokens.surfaceBorder };
 
@@ -45,7 +54,7 @@ export default function StreakHeatmap() {
           </Typography>
           <Typography variant="caption" sx={{
             color: "text.secondary"
-          }}>obecna seria (dni)</Typography>
+          }}>{t('streak.current')}</Typography>
         </Box>
         <Box>
           <Typography
@@ -58,7 +67,7 @@ export default function StreakHeatmap() {
           </Typography>
           <Typography variant="caption" sx={{
             color: "text.secondary"
-          }}>najdłuższa seria</Typography>
+          }}>{t('streak.longest')}</Typography>
         </Box>
         <Box>
           <Typography
@@ -71,7 +80,7 @@ export default function StreakHeatmap() {
           </Typography>
           <Typography variant="caption" sx={{
             color: "text.secondary"
-          }}>aktywnych dni</Typography>
+          }}>{t('streak.activeDays')}</Typography>
         </Box>
       </Stack>
 
@@ -122,7 +131,7 @@ export default function StreakHeatmap() {
           {calendar.weeks.map((week, wi) =>
             week.days.map((day, di) => (
               <g key={day.date}>
-                <title>{`${day.date} — ${day.level > 0 ? day.level : 0} jazd`}</title>
+                <title>{t('streak.cellTitle', { date: day.date, count: day.level > 0 ? day.level : 0 })}</title>
                 <rect
                   x={LEFT_PAD + wi * step}
                   y={TOP_PAD + di * step}
@@ -139,11 +148,11 @@ export default function StreakHeatmap() {
 
           {/* Legend */}
           <g transform={`translate(${LEFT_PAD}, ${svgHeight - BOTTOM_PAD})`}>
-            <text x={0} y={-6} fill={ink.label} fontSize={10}>Mniej</text>
+            <text x={0} y={-6} fill={ink.label} fontSize={10}>{t('streak.less')}</text>
             {LEVEL_COLORS.map((color, i) => (
               <rect key={color} x={28 + i * (CELL_SIZE + 2)} y={-CELL_SIZE} width={CELL_SIZE} height={CELL_SIZE} rx={2} fill={color} stroke={ink.cellEdge} strokeWidth={1} />
             ))}
-            <text x={28 + LEVEL_COLORS.length * (CELL_SIZE + 2) + 4} y={-6} fill={ink.label} fontSize={10}>Więcej</text>
+            <text x={28 + LEVEL_COLORS.length * (CELL_SIZE + 2) + 4} y={-6} fill={ink.label} fontSize={10}>{t('streak.more')}</text>
           </g>
         </svg>
       </Box>

@@ -82,13 +82,13 @@ export function workoutReducer(state: WorkoutExecution, action: RunnerAction): W
       return reconciled;
     case 'PAUSE':
       if (reconciled.status === 'COMPLETED') return reconciled;
-      if (reconciled.status !== 'RUNNING') throw new Error('Pauza jest dostępna tylko podczas treningu');
+      if (reconciled.status !== 'RUNNING') throw new Error('Pause is only available while the workout is running');
       return versioned({ ...reconciled, status: 'PAUSED', runningSince: null }, action.nowMs);
     case 'RESUME':
-      if (state.status !== 'PAUSED') throw new Error('Można wznowić tylko wstrzymany trening');
+      if (state.status !== 'PAUSED') throw new Error('Only a paused workout can be resumed');
       return versioned({ ...state, status: 'RUNNING', runningSince: now }, action.nowMs);
     case 'SKIP': {
-      if (reconciled.status !== 'RUNNING' && reconciled.status !== 'PAUSED') throw new Error('Trening nie jest aktywny');
+      if (reconciled.status !== 'RUNNING' && reconciled.status !== 'PAUSED') throw new Error('Workout is not active');
       const skipped = [...reconciled.skippedStepIndexes, reconciled.currentStepIndex];
       if (reconciled.currentStepIndex + 1 >= reconciled.stepsSnapshot.length) {
         return versioned({ ...reconciled, status: 'COMPLETED', finishedAt: now, runningSince: null, skippedStepIndexes: skipped }, action.nowMs);
@@ -96,7 +96,7 @@ export function workoutReducer(state: WorkoutExecution, action: RunnerAction): W
       return versioned({ ...reconciled, currentStepIndex: reconciled.currentStepIndex + 1, stepElapsedMs: 0, skippedStepIndexes: skipped, runningSince: reconciled.status === 'RUNNING' ? now : null }, action.nowMs);
     }
     case 'PREVIOUS': {
-      if (reconciled.status !== 'RUNNING' && reconciled.status !== 'PAUSED') throw new Error('Trening nie jest aktywny');
+      if (reconciled.status !== 'RUNNING' && reconciled.status !== 'PAUSED') throw new Error('Workout is not active');
       const previous = Math.max(0, reconciled.currentStepIndex - 1);
       return versioned({ ...reconciled, currentStepIndex: previous, stepElapsedMs: 0, repeatedStepIndexes: [...reconciled.repeatedStepIndexes, previous], runningSince: reconciled.status === 'RUNNING' ? now : null }, action.nowMs);
     }
@@ -105,7 +105,7 @@ export function workoutReducer(state: WorkoutExecution, action: RunnerAction): W
     case 'COMPLETE':
       return versioned({ ...reconciled, status: 'COMPLETED', finishedAt: now, runningSince: null }, action.nowMs);
     case 'ABORT':
-      if (reconciled.status === 'COMPLETED') throw new Error('Ukończonego treningu nie można przerwać');
+      if (reconciled.status === 'COMPLETED') throw new Error('A completed workout cannot be aborted');
       return versioned({ ...reconciled, status: 'ABORTED', finishedAt: now, runningSince: null }, action.nowMs);
   }
 }

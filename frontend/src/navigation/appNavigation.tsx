@@ -11,28 +11,32 @@ import TodayIcon from '@mui/icons-material/Today';
 
 import type { ReactElement } from 'react';
 
+export type AppNavigationKey =
+  | 'today' | 'history' | 'analysis' | 'plan' | 'routes'
+  | 'segments' | 'weather' | 'health' | 'profile' | 'data' | 'settings';
+
+/** Label and description come from `nav.<key>.label|description` translations. */
 export interface AppNavigationItem {
-  label: string;
+  key: AppNavigationKey;
   path: string;
   icon: ReactElement;
-  description: string;
 }
 
 export const PRIMARY_NAVIGATION: AppNavigationItem[] = [
-  { label: 'Dzisiaj', path: '/', icon: <TodayIcon />, description: 'Decyzja i kontekst dnia' },
-  { label: 'Historia', path: '/activities', icon: <DirectionsBikeIcon />, description: 'Wykonane aktywności' },
-  { label: 'Analiza', path: '/analytics', icon: <BarChartIcon />, description: 'Trendy i obciążenie' },
-  { label: 'Plan', path: '/training', icon: <FitnessCenterIcon />, description: 'Kalendarz i scenariusze' },
-  { label: 'Trasy', path: '/routes', icon: <RouteOutlinedIcon />, description: 'Planowanie przejazdu' },
+  { key: 'today', path: '/', icon: <TodayIcon /> },
+  { key: 'history', path: '/activities', icon: <DirectionsBikeIcon /> },
+  { key: 'analysis', path: '/analytics', icon: <BarChartIcon /> },
+  { key: 'plan', path: '/training', icon: <FitnessCenterIcon /> },
+  { key: 'routes', path: '/routes', icon: <RouteOutlinedIcon /> },
 ];
 
 export const SECONDARY_NAVIGATION: AppNavigationItem[] = [
-  { label: 'Segmenty', path: '/segments', icon: <RouteOutlinedIcon />, description: 'Własne próby i rekordy' },
-  { label: 'Pogoda', path: '/weather', icon: <CloudOutlinedIcon />, description: 'Warunki dla treningu' },
-  { label: 'Zdrowie', path: '/health', icon: <MonitorHeartOutlinedIcon />, description: 'Regeneracja i masa ciała' },
-  { label: 'Profil', path: '/profile', icon: <PersonOutlineIcon />, description: 'Strefy i dane sportowe' },
-  { label: 'Dane', path: '/data', icon: <DataObjectOutlinedIcon />, description: 'Import i jakość danych' },
-  { label: 'Ustawienia', path: '/settings', icon: <SettingsOutlinedIcon />, description: 'Integracje i konfiguracja' },
+  { key: 'segments', path: '/segments', icon: <RouteOutlinedIcon /> },
+  { key: 'weather', path: '/weather', icon: <CloudOutlinedIcon /> },
+  { key: 'health', path: '/health', icon: <MonitorHeartOutlinedIcon /> },
+  { key: 'profile', path: '/profile', icon: <PersonOutlineIcon /> },
+  { key: 'data', path: '/data', icon: <DataObjectOutlinedIcon /> },
+  { key: 'settings', path: '/settings', icon: <SettingsOutlinedIcon /> },
 ];
 
 export const PRIMARY_NAVIGATION_BY_PATH = new Map(

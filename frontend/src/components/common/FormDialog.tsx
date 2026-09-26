@@ -8,6 +8,8 @@ import {
   type DialogProps,
 } from '@mui/material';
 
+import { useI18n } from '@/i18n';
+
 import type { FormEvent, ReactNode } from 'react';
 
 interface FormDialogProps extends Pick<DialogProps, 'maxWidth' | 'fullWidth'> {
@@ -28,7 +30,7 @@ export default function FormDialog({
   open,
   title,
   submitLabel,
-  cancelLabel = 'Anuluj',
+  cancelLabel,
   disableSubmit = false,
   maxWidth = 'sm',
   fullWidth = true,
@@ -36,13 +38,14 @@ export default function FormDialog({
   onClose,
   children,
 }: FormDialogProps) {
+  const { t } = useI18n();
   return (
     <Dialog open={open} onClose={onClose} maxWidth={maxWidth} fullWidth={fullWidth}>
       <Box component="form" onSubmit={onSubmit}>
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>{children}</DialogContent>
         <DialogActions>
-          <Button onClick={onClose}>{cancelLabel}</Button>
+          <Button onClick={onClose}>{cancelLabel ?? t('common.cancel')}</Button>
           <Button type="submit" variant="contained" disabled={disableSubmit}>
             {submitLabel}
           </Button>

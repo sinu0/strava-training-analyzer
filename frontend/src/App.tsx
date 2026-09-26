@@ -2,6 +2,7 @@ import { lazy, Suspense, type ComponentType, type LazyExoticComponent } from 're
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import AppLayout from '@/components/layout/AppLayout';
+import { useI18n } from '@/i18n';
 import LoadingState from '@/ui/feedback/LoadingState';
 
 const TodayPage = lazy(() => import('@/features/today/TodayPage'));
@@ -16,7 +17,7 @@ const WeightPage = lazy(() => import('@/pages/WeightPage'));
 const WeatherPage = lazy(() => import('@/pages/WeatherPage'));
 const DataJobsPage = lazy(() => import('@/features/data/DataJobsPage'));
 const RoutePlannerPage = lazy(() => import('@/pages/RoutePlannerPage'));
-const SettingsPage = lazy(() => import('@/pages/AdminPage'));
+const SettingsPage = lazy(() => import('@/features/settings/SettingsPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const SegmentsPage = lazy(() => import('@/features/segments/SegmentsPage'));
 const SegmentDetailPage = lazy(() => import('@/features/segments/SegmentDetailPage'));
@@ -27,9 +28,14 @@ const DesignSystemPage = lazy(() => import('@/features/design-system/DesignSyste
 
 type LazyPageComponent = LazyExoticComponent<ComponentType>;
 
+function PageLoading() {
+  const { t } = useI18n();
+  return <LoadingState message={t('common.loadingPage')} />;
+}
+
 function renderLazyPage(Page: LazyPageComponent) {
   return (
-    <Suspense fallback={<LoadingState message="Ładowanie strony…" />}>
+    <Suspense fallback={<PageLoading />}>
       <Page />
     </Suspense>
   );

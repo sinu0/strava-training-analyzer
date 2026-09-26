@@ -30,7 +30,7 @@
 ## Frontend recipes
 
 - **New area**: `features/<name>/` — `<Name>Page.tsx`, `use<Name>.ts` (TanStack Query + `apiClient`), `types.ts`, `__tests__/`. Lazy route in `App.tsx`; navigation entry (`components/layout/`) only if the user wants it.
-- **UI**: only `@/ui` + `Box/Stack/Grid/Typography/Button`. Missing component → add to `src/ui`, export in `index.ts`, show in `DesignSystemPage`, test in `src/ui/__tests__` (rules: `docs/DESIGN_SYSTEM.md`). UI text in Polish.
+- **UI**: only `@/ui` + `Box/Stack/Grid/Typography/Button`. Missing component → add to `src/ui`, export in `index.ts`, show in `DesignSystemPage`, test in `src/ui/__tests__` (rules: `docs/DESIGN_SYSTEM.md`). UI text through the feature's `messages.ts` (`defineMessages({ pl, en })`) or `localized()` for constant maps; core `locales/{pl,en}.ts` only for shell/common strings.
 - **Data**: types from `api/generated/schema.ts` or `types/`; query keys consistent with existing ones (`['v2', ...]`); invalidation in `hooks/queryInvalidation.ts`.
 - **Images**: `image-gen/` or `tools/llm-svg-studio/` (needs GPU — tell the user before running).
 

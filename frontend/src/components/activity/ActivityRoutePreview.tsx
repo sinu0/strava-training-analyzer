@@ -3,6 +3,7 @@ import RouteOutlinedIcon from '@mui/icons-material/RouteOutlined';
 import { Box, Skeleton, Stack, Typography } from '@mui/material';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 
+import { activityMessages } from '@/components/activity/messages';
 import { getAppThemeTokens } from '@/theme/theme';
 
 const ActivityMap = lazy(() => import('@/components/ActivityMap'));
@@ -22,6 +23,7 @@ export default function ActivityRoutePreview({
   priority = false,
   showEmptyState = true,
 }: ActivityRoutePreviewProps) {
+  const t = activityMessages.useT();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [visible, setVisible] = useState(
     priority || typeof IntersectionObserver === 'undefined',
@@ -52,7 +54,7 @@ export default function ActivityRoutePreview({
     <Box
       ref={rootRef}
       role="img"
-      aria-label={`Mapa trasy: ${activityName}`}
+      aria-label={t('routePreview.mapAriaLabel', { name: activityName })}
       data-map-overlay="none"
       sx={{
         position: 'relative',
@@ -87,7 +89,7 @@ export default function ActivityRoutePreview({
             color: 'text.secondary'
           }}>
           <RouteOutlinedIcon sx={{ fontSize: 34, opacity: 0.5 }} />
-          <Typography variant="caption">Brak zapisu trasy</Typography>
+          <Typography variant="caption">{t('noRoute')}</Typography>
         </Stack>
       )}
 

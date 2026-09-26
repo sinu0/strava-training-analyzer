@@ -21,9 +21,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import ActivityListCardV2 from '@/components/activity/ActivityListCardV2';
 import PolishDateField from '@/components/common/PolishDateField';
+import { getLocale } from '@/i18n';
 import { EmptyState, ErrorState, LoadingState, Page, Surface } from '@/ui';
 import { getPolishPaginationAriaLabel } from '@/utils/accessibility';
 
+import { historyMessages } from './messages';
 import { useHistoryActivities } from './useHistory';
 
 const RouteHeatmap = lazy(() => import('@/components/RouteHeatmap'));
@@ -36,6 +38,7 @@ function dateBoundary(value: string | null, end = false) {
 
 export default function HistoryPage() {
   const navigate = useNavigate();
+  const t = historyMessages.useT();
   const [params, setParams] = useSearchParams();
   const rawView = params.get('view');
   const view: HistoryView = rawView === 'calendar' || rawView === 'map' ? rawView : 'list';
@@ -63,14 +66,14 @@ export default function HistoryPage() {
   const content = () => {
     if (view === 'map') {
       return (
-        <Suspense fallback={<LoadingState message="Ładowanie mapy historii…" />}>
+        <Suspense fallback={<LoadingState message={t('page.loadingMap')} />}>
           <RouteHeatmap />
         </Suspense>
       );
     }
-    if (activities.isLoading) return <LoadingState message="Ładowanie historii…" />;
-    if (activities.isError) return <ErrorState message="Nie udało się pobrać aktywności." onRetry={() => void activities.refetch()} />;
-    if (!activities.data?.items.length) return <EmptyState title="Brak aktywności" description="Zmień filtry albo uruchom synchronizację Stravy." />;
+    if (activities.isLoading) return <LoadingState message={t('page.loading')} />;
+    if (activities.isError) return <ErrorState message={t('page.fetchError')} onRetry={() => void activities.refetch()} />;
+    if (!activities.data?.items.length) return <EmptyState title={t('page.emptyTitle')} description={t('page.emptyDescription')} />;
 
     if (view === 'calendar') {
       const grouped = activities.data.items.reduce((result, item) => {
@@ -93,7 +96,7 @@ export default function HistoryPage() {
               <Surface padding="sm" sx={{ height: '100%' }}>
                 <Typography variant="overline" sx={{
                   color: "text.secondary"
-                }}>{new Date(date).toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}</Typography>
+                }}>{new Date(date).toLocaleDateString(getLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}</Typography>
                 <Stack spacing={1} sx={{ mt: 1 }}>
                   {items.map(item => (
                     <Button key={item.id} variant="text" onClick={() => navigate(`/activities/${item.id}`)} sx={{ justifyContent: 'flex-start' }}>
@@ -120,11 +123,11 @@ export default function HistoryPage() {
           <Typography variant="body2" sx={{
             color: "text.secondary"
           }}>
-            {activities.data.total} aktywności · mapy wykorzystują lekką geometrię podsumowania
+            {t('page.activitiesTotal', { count: activities.data.total })} · {t('page.summaryNote')}
           </Typography>
           <Typography variant="caption" sx={{
             color: "text.secondary"
-          }}>Strona {page + 1} z {activities.data.totalPages}</Typography>
+          }}>{t('page.pageOf', { page: page + 1, total: activities.data.totalPages })}</Typography>
         </Stack>
         {activities.data.items.map((activity, index) => (
           <ActivityListCardV2
@@ -149,14 +152,14 @@ export default function HistoryPage() {
 
   return (
     <Page
-      title="Historia treningów"
-      subtitle="Trasy, liczby i kontekst każdej sesji. Mapa jest widoczna od razu, strumienie dopiero w szczególe."
+      title={t('page.title')}
+      subtitle={t('page.subtitle')}
       maxWidth={1320}
     >
       <Surface sx={{ mb: 2.5 }}>
         {query ? (
           <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 700 }}>
-            Wyniki dla „{query}”
+            {t('page.resultsFor', { query })}
           </Typography>
         ) : null}
         <Stack
@@ -167,7 +170,7 @@ export default function HistoryPage() {
             mb: 1.5
           }}>
           <TuneOutlinedIcon color="primary" fontSize="small" />
-          <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>Widok i filtry</Typography>
+          <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t('page.viewAndFilters')}</Typography>
         </Stack>
         <Stack direction={{ xs: 'column', lg: 'row' }} spacing={1.5}>
           <ToggleButtonGroup
@@ -175,29 +178,29 @@ export default function HistoryPage() {
             value={view}
             onChange={(_, value: HistoryView | null) => value && updateParam('view', value)}
             size="small"
-            aria-label="Sposób prezentacji historii"
+            aria-label={t('page.presentationAriaLabel')}
           >
-            <ToggleButton value="list"><ListAltOutlinedIcon sx={{ mr: 0.75 }} />Lista</ToggleButton>
-            <ToggleButton value="calendar"><CalendarMonthOutlinedIcon sx={{ mr: 0.75 }} />Kalendarz</ToggleButton>
-            <ToggleButton value="map"><MapOutlinedIcon sx={{ mr: 0.75 }} />Mapa</ToggleButton>
+            <ToggleButton value="list"><ListAltOutlinedIcon sx={{ mr: 0.75 }} />{t('page.viewList')}</ToggleButton>
+            <ToggleButton value="calendar"><CalendarMonthOutlinedIcon sx={{ mr: 0.75 }} />{t('page.viewCalendar')}</ToggleButton>
+            <ToggleButton value="map"><MapOutlinedIcon sx={{ mr: 0.75 }} />{t('page.viewMap')}</ToggleButton>
           </ToggleButtonGroup>
           <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel id="sport-filter-label">Sport</InputLabel>
-            <Select labelId="sport-filter-label" label="Sport" value={sportType} onChange={event => updateParam('sportType', event.target.value)}>
-              <MenuItem value="">Wszystkie</MenuItem>
-              <MenuItem value="cycling">Rower</MenuItem>
-              <MenuItem value="virtual_ride">Wirtualna jazda</MenuItem>
+            <InputLabel id="sport-filter-label">{t('page.sport')}</InputLabel>
+            <Select labelId="sport-filter-label" label={t('page.sport')} value={sportType} onChange={event => updateParam('sportType', event.target.value)}>
+              <MenuItem value="">{t('page.sportAll')}</MenuItem>
+              <MenuItem value="cycling">{t('page.sportCycling')}</MenuItem>
+              <MenuItem value="virtual_ride">{t('page.sportVirtualRide')}</MenuItem>
             </Select>
           </FormControl>
-          <PolishDateField size="small" label="Od" value={from} onChange={value => updateParam('from', value)} slotProps={{ inputLabel: { shrink: true } }} />
-          <PolishDateField size="small" label="Do" value={to} onChange={value => updateParam('to', value)} slotProps={{ inputLabel: { shrink: true } }} />
+          <PolishDateField size="small" label={t('page.from')} value={from} onChange={value => updateParam('from', value)} slotProps={{ inputLabel: { shrink: true } }} />
+          <PolishDateField size="small" label={t('page.to')} value={to} onChange={value => updateParam('to', value)} slotProps={{ inputLabel: { shrink: true } }} />
           {(sportType || from || to) ? (
             <Button
               startIcon={<RestartAltOutlinedIcon />}
               onClick={() => setParams(view === 'list' ? {} : { view })}
               sx={{ ml: { lg: 'auto' } }}
             >
-              Wyczyść filtry
+              {t('page.clearFilters')}
             </Button>
           ) : null}
         </Stack>

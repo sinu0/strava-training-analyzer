@@ -1,9 +1,10 @@
 import { ThemeProvider } from '@mui/material/styles';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterEach } from 'vitest';
 
 import PMChart from '../components/PMChart';
 import PowerCurveChart from '../components/PowerCurveChart';
+import { I18nProvider } from '../i18n';
 import theme from '../theme/theme';
 
 beforeAll(() => {
@@ -40,6 +41,20 @@ describe('PMChart', () => {
     renderWithTheme(<PMChart data={[]} />);
     expect(screen.getByText('Brak danych PMC dla wybranego zakresu.')).toBeDefined();
   });
+
+  afterEach(() => window.localStorage.clear());
+
+  it('renders English labels when the language is switched', async () => {
+    window.localStorage.setItem('strava-analizator.language', 'en');
+    render(
+      <I18nProvider>
+        <ThemeProvider theme={theme}>
+          <PMChart data={[{ date: '2024-06-01', ctl: 55, atl: 70, tsb: -15, ctlDelta: 1.2, atlDelta: -0.8, tsbDelta: 2.0 }]} />
+        </ThemeProvider>
+      </I18nProvider>,
+    );
+    expect(await screen.findByText('Long-term fitness (CTL)')).toBeDefined();
+  });
 });
 
 describe('PowerCurveChart', () => {
@@ -54,5 +69,19 @@ describe('PowerCurveChart', () => {
   it('shows empty state when no data', () => {
     renderWithTheme(<PowerCurveChart data={undefined} />);
     expect(screen.getByText('Brak danych krzywej mocy.')).toBeDefined();
+  });
+
+  afterEach(() => window.localStorage.clear());
+
+  it('renders the English empty state when the language is switched', async () => {
+    window.localStorage.setItem('strava-analizator.language', 'en');
+    render(
+      <I18nProvider>
+        <ThemeProvider theme={theme}>
+          <PowerCurveChart data={undefined} />
+        </ThemeProvider>
+      </I18nProvider>,
+    );
+    expect(await screen.findByText('No power curve data.')).toBeDefined();
   });
 });

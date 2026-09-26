@@ -23,7 +23,7 @@ Tests sit alongside: FE `__tests__/<Name>.test.tsx`, BE `backend/src/test/java/.
 | Health `/health` | `FE pages/HealthPage` | `useHealth` → `/health/*` | `HealthController` → `HealthService` |
 | Weight `/weight` | `FE pages/WeightPage`, `components/weight/` | `useWeight` → `/weight/*` | `WeightController` → `WeightService` |
 | Profile `/profile` | `FE pages/ProfilePage`, `components/profile/` (gallery, records, streak, summaries) | `useAnalytics` → `/profile`; `usePersonalRecords`, `useStreak`, `useGamification`, `useSeasonWrapped` | `AthleteProfileController`, `PersonalRecordController`, `StreakController`, `GamificationController`, `SeasonWrappedController` |
-| Settings `/settings` | `FE pages/AdminPage`, `components/admin/`, `components/settings/` | `useAnalytics` → `/admin/*`, `/sync/*`; `useUiPreferences` → `/v2/ui-preferences`; `useEquipment` | `AdminController`, `SyncController`, `UiPreferencesController`, `EquipmentController` |
+| Settings `/settings?tab=` | `FE features/settings/` — `SettingsPage` (vertical tabs on desktop, scrollable tabs on phones; only the active tab mounts), `settingsTabs.tsx` (ids/icons), `tabs/*Tab.tsx` (general, athlete, integrations, sync, ai, weather, equipment, maintenance), `athleteProfileForm.ts` (limits + partial update); sections in `components/admin/` and `components/settings/` | `useAnalytics` → `/admin/*`, `/sync/*`, `PUT /profile`; `useUiPreferences` → `/v2/ui-preferences`; `useAi` → `/v2/ai/settings`; `useEquipment` | `AdminController`, `SyncController`, `AthleteProfileController`, `UiPreferencesController`, `AiSettingsController`, `EquipmentController` |
 | UI catalogue `/design-system` | `FE features/design-system/`, `FE ui/` | — | — (snapshots: `e2e/tests/design-system.spec.ts`) |
 | Layout / navigation | `FE components/layout/` (AppLayout, Sidebar, TopBar, TopBarSyncButton, MobileBottomNav) | — | — |
 
@@ -36,6 +36,8 @@ Tests sit alongside: FE `__tests__/<Name>.test.tsx`, BE `backend/src/test/java/.
 | Events / goals | `EventController` → `EventService`; FE `useAnalytics` → `/events/*` |
 | Fatigue / energy | `FatigueAndEnergyController` → `FatigueAndEnergyService` |
 | AI predictions, notes, tips | `AiPredictionController`, `AiActivityNoteController`, `AiV2Controller`, `OllamaManagementController` → `app/ai/*`; FE `hooks/useAi`; prompts `backend/src/main/resources/ai/prompts/` |
+| AI language + coaching style | FE `components/settings/AiLanguageSettings`, `AiCoachingStyleSettings` (Settings → AI) → `useAiSettings` → `/v2/ai/settings` → `web/AiSettingsController` → `app/ai/AiSettingsService` (table `ai_settings`); `domain/ai/AiLanguage` holds the language directive; `app/ai/AiPromptDirectives` appends persona + language to V1 predictions and notes, `PromptEngine` gets both for V2 |
+| i18n (PL/EN) | `FE i18n/` — `I18nContext` (`useI18n`: core `t`, `language`, `locale`, `setLanguage`), `defineMessages` (feature namespaces, `messages.ts` next to each feature), `localized` (label maps), `runtime` (`getLocale`), `translate.ts` (dotted keys, `{param}`, plurals via `Intl.PluralRules`), core `locales/pl.ts` + lazy `en.ts`; toggle in `components/layout/TopBar`, `components/settings/LanguageSettings` |
 | Security | `BE infrastructure/config/SecurityConfig` — `permitAll` (protection only via loopback / nginx basic auth in the HTTPS variant) |
 | Backup | `scripts/backup.sh`, `scripts/verify-backup.sh`, doc `docs/BACKUP_AND_RECOVERY.md` |
 

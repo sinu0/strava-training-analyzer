@@ -3,6 +3,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import { List, ListItemButton, ListItemText, IconButton, Chip, Stack } from '@mui/material';
 
 
+import { routePlannerControlsMessages } from '@/components/route-planner/messages';
 import { EmptyState } from '@/ui';
 
 import { STATUS_COLORS, alphaColor } from '../../utils/colors';
@@ -35,11 +36,12 @@ export default function SavedRoutesList({
   onDelete,
   onExportGpx,
 }: SavedRoutesListProps) {
+  const t = routePlannerControlsMessages.useT();
   if (routes.length === 0) {
     return (
       <EmptyState
-        title="Brak zapisanych tras"
-        description="Zaplanuj trasę, aby ją tu zobaczyć."
+        title={t('savedRoutes.emptyTitle')}
+        description={t('savedRoutes.emptyDescription')}
       />
     );
   }
@@ -71,10 +73,10 @@ export default function SavedRoutesList({
               secondary: { component: 'div' }
             }}
           />
-          <IconButton size="small" onClick={(e) => { e.stopPropagation(); onExportGpx(route.id); }} title="Pobierz GPX">
+          <IconButton size="small" onClick={(e) => { e.stopPropagation(); onExportGpx(route.id); }} title={t('savedRoutes.downloadGpx')}>
             <DownloadIcon fontSize="small" />
           </IconButton>
-          <IconButton size="small" onClick={(e) => { e.stopPropagation(); onDelete(route.id); }} title="Usuń">
+          <IconButton size="small" onClick={(e) => { e.stopPropagation(); onDelete(route.id); }} title={t('savedRoutes.delete')}>
             <DeleteIcon fontSize="small" />
           </IconButton>
         </ListItemButton>

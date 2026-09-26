@@ -2,6 +2,7 @@ import { Chip, Typography, Box, CardActions, Button } from '@mui/material';
 
 import { Widget } from '@/ui';
 
+import { trainingMessages } from './messages';
 import WorkoutPowerChart from './WorkoutPowerChart';
 import { CATEGORY_LABELS } from '../../types/training';
 
@@ -13,6 +14,7 @@ interface WorkoutTemplateCardProps {
 }
 
 export default function WorkoutTemplateCard({ template, onDetails }: WorkoutTemplateCardProps) {
+  const t = trainingMessages.useT();
   return (
     <Widget
       title={template.name}
@@ -34,7 +36,7 @@ export default function WorkoutTemplateCard({ template, onDetails }: WorkoutTemp
       </Box>
       <CardActions sx={{ px: 0, pt: 1.5 }}>
         <Button size="small" variant="text" onClick={() => onDetails(template)}>
-          Szczegóły
+          {t('workoutTemplateCard.detailsButton')}
         </Button>
       </CardActions>
     </Widget>
