@@ -5,19 +5,29 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Grid, LinearProgress, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 
+import { adminMessages } from '@/components/admin/messages';
 import { useCreateEquipment, useDeleteEquipment, useEquipment, type Equipment } from '@/hooks/useEquipment';
+import { localized } from '@/i18n';
 import { Surface } from '@/ui';
 import { STATUS_COLORS } from '@/utils/colors';
 
-const TYPE_LABELS: Record<string, string> = {
-  BIKE: 'Rower', CHAIN: 'Łańcuch', CASSETTE: 'Kaseta',
-  TIRE: 'Opona', BRAKE_PAD: 'Klocki', CHAINRING: 'Tarcza',
-  PEDAL: 'Pedały', BOTTOM_BRACKET: 'Suport', OTHER: 'Inne',
-};
+const TYPE_LABELS = localized({
+  pl: {
+    BIKE: 'Rower', CHAIN: 'Łańcuch', CASSETTE: 'Kaseta',
+    TIRE: 'Opona', BRAKE_PAD: 'Klocki', CHAINRING: 'Tarcza',
+    PEDAL: 'Pedały', BOTTOM_BRACKET: 'Suport', OTHER: 'Inne',
+  },
+  en: {
+    BIKE: 'Bike', CHAIN: 'Chain', CASSETTE: 'Cassette',
+    TIRE: 'Tyre', BRAKE_PAD: 'Brake pads', CHAINRING: 'Chainring',
+    PEDAL: 'Pedals', BOTTOM_BRACKET: 'Bottom bracket', OTHER: 'Other',
+  },
+}) as Record<string, string>;
 
 const EQUIP_TYPES = Object.keys(TYPE_LABELS);
 
 export default function EquipmentList() {
+  const t = adminMessages.useT();
   const { data: equipment, isLoading } = useEquipment();
   const createMutation = useCreateEquipment();
   const deleteMutation = useDeleteEquipment();
@@ -49,9 +59,9 @@ export default function EquipmentList() {
         }}>
         <Typography variant="subtitle2" sx={{
           fontWeight: 700
-        }}>Wyposażenie</Typography>
+        }}>{t('equipment.title')}</Typography>
         <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={() => setDialogOpen(true)}>
-          Dodaj
+          {t('equipment.add')}
         </Button>
       </Stack>
 
@@ -66,25 +76,25 @@ export default function EquipmentList() {
       {(!equipment || equipment.length === 0) && (
         <Typography variant="body2" sx={{
           color: "text.secondary"
-        }}>Brak wyposażenia. Dodaj swój pierwszy sprzęt.</Typography>
+        }}>{t('equipment.empty')}</Typography>
       )}
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Nowy sprzęt</DialogTitle>
+        <DialogTitle>{t('equipment.dialogTitle')}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField label="Nazwa" size="small" fullWidth value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-            <TextField select label="Typ" size="small" fullWidth value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
-              {EQUIP_TYPES.map((t) => <MenuItem key={t} value={t}>{TYPE_LABELS[t]}</MenuItem>)}
+            <TextField label={t('equipment.fields.name')} size="small" fullWidth value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <TextField select label={t('equipment.fields.type')} size="small" fullWidth value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+              {EQUIP_TYPES.map((type) => <MenuItem key={type} value={type}>{TYPE_LABELS[type]}</MenuItem>)}
             </TextField>
-            <TextField label="Marka" size="small" fullWidth value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} />
-            <TextField label="Model" size="small" fullWidth value={form.model} onChange={(e) => setForm({ ...form, model: e.target.value })} />
-            <TextField label="Limit przebiegu (km)" size="small" type="number" fullWidth value={form.replacementIntervalKm} onChange={(e) => setForm({ ...form, replacementIntervalKm: e.target.value })} placeholder="np. 3000" />
+            <TextField label={t('equipment.fields.brand')} size="small" fullWidth value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} />
+            <TextField label={t('equipment.fields.model')} size="small" fullWidth value={form.model} onChange={(e) => setForm({ ...form, model: e.target.value })} />
+            <TextField label={t('equipment.fields.limit')} size="small" type="number" fullWidth value={form.replacementIntervalKm} onChange={(e) => setForm({ ...form, replacementIntervalKm: e.target.value })} placeholder={t('equipment.fields.limitPlaceholder')} />
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Anuluj</Button>
-          <Button onClick={handleCreate} variant="contained" disabled={!form.name}>Dodaj</Button>
+          <Button onClick={() => setDialogOpen(false)}>{t('equipment.cancel')}</Button>
+          <Button onClick={handleCreate} variant="contained" disabled={!form.name}>{t('equipment.add')}</Button>
         </DialogActions>
       </Dialog>
     </Box>
@@ -92,6 +102,7 @@ export default function EquipmentList() {
 }
 
 function EquipmentCard({ item, onDelete }: { item: Equipment; onDelete: () => void }) {
+  const t = adminMessages.useT();
   const pct = item.usagePercent;
   const needsReplace = pct > 80;
 
@@ -139,7 +150,7 @@ function EquipmentCard({ item, onDelete }: { item: Equipment; onDelete: () => vo
             </Typography>
             {!!item.replacementIntervalKm && (
               <Typography variant="caption" color={needsReplace ? 'error.main' : 'text.secondary'}>
-                Limit: {item.replacementIntervalKm} km
+                {t('equipment.limitLabel', { km: item.replacementIntervalKm })}
               </Typography>
             )}
           </Stack>
@@ -157,7 +168,7 @@ function EquipmentCard({ item, onDelete }: { item: Equipment; onDelete: () => vo
 
         {!!needsReplace && (
           <Alert severity="warning" icon={<WarningAmberIcon />} sx={{ mt: 1, py: 0.5, '& .MuiAlert-message': { py: 0 } }}>
-            <Typography variant="caption">Czas na wymianę ({pct.toFixed(0)}% zużycia)</Typography>
+            <Typography variant="caption">{t('equipment.needsReplace', { percent: pct.toFixed(0) })}</Typography>
           </Alert>
         )}
     </Surface>

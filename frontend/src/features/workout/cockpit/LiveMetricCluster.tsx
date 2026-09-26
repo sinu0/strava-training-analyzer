@@ -2,17 +2,23 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import LoopIcon from '@mui/icons-material/Loop';
 import { Box, Stack, Typography } from '@mui/material';
 
+import { localized } from '@/i18n';
 import { Metric, StatusPill, Surface, type Tone } from '@/ui';
+
+import { cockpitMessages } from './messages';
 
 import type { ErgTarget } from '../devices/ergController';
 import type { Compliance, MetricsWindow, SessionMetrics } from '../devices/liveMetrics';
 import type { LiveValues } from '../devices/trainerSession';
 
 const COMPLIANCE_TONE: Record<Compliance, Tone> = { in: 'success', below: 'warning', above: 'error', unknown: 'neutral' };
-const COMPLIANCE_LABEL: Record<Compliance, string> = { in: 'w celu', below: 'poniżej celu', above: 'powyżej celu', unknown: 'brak celu' };
+const COMPLIANCE_LABEL: Record<Compliance, string> = localized({
+  pl: { in: 'w celu', below: 'poniżej celu', above: 'powyżej celu', unknown: 'brak celu' },
+  en: { in: 'on target', below: 'below target', above: 'above target', unknown: 'no target' },
+});
 
 function summary(avg: number | null, max: number | null) {
-  return `śr. ${avg ?? '—'} · maks ${max ?? '—'}`;
+  return cockpitMessages.t('liveMetrics.avgMax', { avg: avg ?? '—', max: max ?? '—' });
 }
 
 interface LiveMetricClusterProps {
@@ -25,17 +31,18 @@ interface LiveMetricClusterProps {
 
 /** Cadence | power | heart rate — the three numbers read from the saddle. */
 export default function LiveMetricCluster({ live, step, session, target, compliance }: LiveMetricClusterProps) {
+  const t = cockpitMessages.useT();
   return (
-    <Surface variant="accent" radius="hero" padding="sm" aria-label="Dane na żywo" component="section">
+    <Surface variant="accent" radius="hero" padding="sm" aria-label={t('liveMetrics.ariaLabel')} component="section">
       <Box sx={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: { xs: 1, sm: 3 } }}>
         <Metric
           align="center"
           size="lg"
           icon={<LoopIcon />}
-          label="Kadencja"
+          label={t('liveMetrics.cadence')}
           value={live.cadenceRpm ?? '—'}
           unit="rpm"
-          hint={`śr. ${step.avgCadence ?? '—'}`}
+          hint={t('liveMetrics.avg', { value: step.avgCadence ?? '—' })}
         />
         <Stack spacing={0.75} sx={{ alignItems: 'center', minWidth: { xs: 120, sm: 200 } }}>
           <Box aria-live="off" sx={{ lineHeight: 1 }}>
@@ -43,17 +50,17 @@ export default function LiveMetricCluster({ live, step, session, target, complia
               variant="hero"
               size="display"
               align="center"
-              label="Moc (3 s)"
+              label={t('liveMetrics.power')}
               value={live.powerWatts ?? '—'}
               unit="W"
               tone={live.powerWatts == null ? undefined : COMPLIANCE_TONE[compliance]}
             />
           </Box>
           <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap', justifyContent: 'center' }}>
-            {target ? <StatusPill size="sm" dot tone={COMPLIANCE_TONE[compliance]} label={`cel ${target.watts} W · ${COMPLIANCE_LABEL[compliance]}`} /> : null}
+            {target ? <StatusPill size="sm" dot tone={COMPLIANCE_TONE[compliance]} label={t('liveMetrics.targetCompliance', { watts: target.watts, compliance: COMPLIANCE_LABEL[compliance] })} /> : null}
           </Stack>
           <Typography variant="caption" sx={{ color: 'text.secondary', textAlign: 'center' }}>
-            krok {summary(step.avgPower, step.maxPower)} · NP {session.normalizedPower ?? '—'}
+            {t('liveMetrics.stepSummary', { summary: summary(step.avgPower, step.maxPower), np: session.normalizedPower ?? '—' })}
           </Typography>
         </Stack>
         <Metric
@@ -61,7 +68,7 @@ export default function LiveMetricCluster({ live, step, session, target, complia
           size="lg"
           icon={<FavoriteIcon />}
           tone={live.heartRateBpm == null ? undefined : 'error'}
-          label="Tętno"
+          label={t('liveMetrics.heartRate')}
           value={live.heartRateBpm ?? '—'}
           unit="bpm"
           hint={summary(step.avgHeartRate, session.maxHeartRate)}

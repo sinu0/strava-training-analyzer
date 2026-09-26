@@ -14,6 +14,7 @@ import {
 } from 'react-leaflet';
 
 import 'leaflet/dist/leaflet.css';
+import { routePlannerControlsMessages } from '@/components/route-planner/messages';
 import { tokens } from '@/theme/theme';
 
 import { MAP_TILE_CONFIG, type MapTileVariant } from '../../constants/mapTiles';
@@ -94,7 +95,7 @@ function createWeatherBubbleIcon(
   theme?: Theme,
 ): L.DivIcon {
   const temperature = weather ? `${Math.round(weather.temperature)}°` : '...';
-  const wind = weather ? `${Math.round(weather.windSpeed)} km/h` : 'Ładowanie';
+  const wind = weather ? `${Math.round(weather.windSpeed)} km/h` : routePlannerControlsMessages.t('drawingMap.weatherLoadingShort');
   const icon = isLoading
     ? '<span style="display:block;font-size:16px;line-height:1;">⋯</span>'
     : `<img src="${getWeatherIconPath(weather?.weatherCode)}" alt="" style="width:18px;height:18px;display:block;filter:${tokens.iconShadow};" />`;
@@ -218,6 +219,7 @@ function WeatherPopup({
   weather?: WeatherData | null;
   isLoading?: boolean;
 }) {
+  const t = routePlannerControlsMessages.useT();
   if (isLoading) {
     return (
       <Box sx={{ minWidth: 180 }}>
@@ -229,7 +231,7 @@ function WeatherPopup({
         <Typography variant="body2" sx={{
           color: "text.secondary"
         }}>
-          Ładowanie warunków pogodowych…
+          {t('drawingMap.weatherLoading')}
         </Typography>
       </Box>
     );
@@ -246,7 +248,7 @@ function WeatherPopup({
         <Typography variant="body2" sx={{
           color: "text.secondary"
         }}>
-          Brak danych pogodowych dla tego punktu.
+          {t('drawingMap.weatherMissing')}
         </Typography>
       </Box>
     );
@@ -280,11 +282,11 @@ function WeatherPopup({
           />
           <Typography variant="body2">{weather.weatherDescription}</Typography>
         </Stack>
-        <Typography variant="body2">Temperatura: {Math.round(weather.temperature)}°C</Typography>
-        <Typography variant="body2">Wiatr: {Math.round(weather.windSpeed)} km/h</Typography>
-        <Typography variant="body2">Opady: {weather.precipitation.toFixed(1)} mm</Typography>
+        <Typography variant="body2">{t('drawingMap.temperature', { value: Math.round(weather.temperature) })}</Typography>
+        <Typography variant="body2">{t('drawingMap.wind', { value: Math.round(weather.windSpeed) })}</Typography>
+        <Typography variant="body2">{t('drawingMap.precipitation', { value: weather.precipitation.toFixed(1) })}</Typography>
         <Typography variant="body2">
-          Ocena outdoor: {Math.round(weather.outdoorScore)}/100
+          {t('drawingMap.outdoorScore', { value: Math.round(weather.outdoorScore) })}
         </Typography>
         {weather.warnings.length > 0 && (
           <Typography variant="caption" sx={{
@@ -310,6 +312,7 @@ export default function RouteDrawingMap({
   highlightIndex,
 }: RouteDrawingMapProps) {
   const theme = useTheme();
+  const t = routePlannerControlsMessages.useT();
   const displayedPositions = polyline.length > 1 ? polyline : waypoints;
   const skipNextMapClickRef = useRef(false);
 
@@ -419,17 +422,17 @@ export default function RouteDrawingMap({
                     fontWeight: 700,
                     mb: 0.5
                   }}>
-                  Punkt {index + 1}
+                  {t('drawingMap.waypointTitle', { index: index + 1 })}
                 </Typography>
                 <Typography variant="body2" sx={{
                   color: "text.secondary"
                 }}>
-                  Przeciągnij marker, aby zmienić przebieg trasy.
+                  {t('drawingMap.waypointDragHint')}
                 </Typography>
                 <Typography variant="body2" sx={{
                   color: "text.secondary"
                 }}>
-                  Dwuklik usuwa punkt pośredni.
+                  {t('drawingMap.waypointRemoveHint')}
                 </Typography>
               </Box>
             </Popup>
@@ -454,7 +457,7 @@ export default function RouteDrawingMap({
         }}
       >
         <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: (currentTheme) => getAppThemeTokens(currentTheme).type.weight.label }}>
-          Profil rowerowy · {MAP_TILE_CONFIG[mapVariant].label}
+          {t('drawingMap.cyclingProfile', { layer: MAP_TILE_CONFIG[mapVariant].label })}
         </Typography>
       </Box>
     </div>

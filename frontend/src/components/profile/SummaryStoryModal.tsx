@@ -4,6 +4,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { Box, Dialog, Fade, IconButton } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 
+import { profileMessages } from '@/components/profile/messages';
 import { getAppThemeTokens } from '@/theme/theme';
 
 import StoryProgressBar from './StoryProgressBar';
@@ -25,6 +26,7 @@ export interface SummaryStoryModalProps {
 }
 
 export default function SummaryStoryModal({ open, onClose, weeklySummaries, readiness, streak }: SummaryStoryModalProps) {
+  const t = profileMessages.useT();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -114,7 +116,7 @@ export default function SummaryStoryModal({ open, onClose, weeklySummaries, read
           />
         </Box>
 
-        <IconButton aria-label="Zamknij" onClick={onClose} size="small" sx={{ position: 'absolute', top: 10, right: 10, zIndex: 20, color: 'white', bgcolor: (t) => getAppThemeTokens(t).media.control, '&:hover': { bgcolor: (t) => getAppThemeTokens(t).media.controlHover } }}>
+        <IconButton aria-label={t('story.close')} onClick={onClose} size="small" sx={{ position: 'absolute', top: 10, right: 10, zIndex: 20, color: 'white', bgcolor: (t) => getAppThemeTokens(t).media.control, '&:hover': { bgcolor: (t) => getAppThemeTokens(t).media.controlHover } }}>
           <CloseIcon fontSize="small" />
         </IconButton>
 
@@ -129,10 +131,10 @@ export default function SummaryStoryModal({ open, onClose, weeklySummaries, read
           </Box>
         </Fade>
 
-        <IconButton aria-label="Wstecz" onClick={goPrev} size="small" sx={{ ...btnSx, left: 8 }}>
+        <IconButton aria-label={t('story.back')} onClick={goPrev} size="small" sx={{ ...btnSx, left: 8 }}>
           <ArrowBackIosNewIcon fontSize="small" />
         </IconButton>
-        <IconButton aria-label="Dalej" onClick={goNext} size="small" sx={{ ...btnSx, right: 8 }}>
+        <IconButton aria-label={t('story.next')} onClick={goNext} size="small" sx={{ ...btnSx, right: 8 }}>
           <ArrowForwardIosIcon fontSize="small" />
         </IconButton>
       </Box>

@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid';
 
+import { routePlannerControlsMessages } from '@/components/route-planner/messages';
 import RouteElevationChart from '@/components/route-planner/RouteElevationChart';
 import RouteMap from '@/components/route-planner/RouteMap';
 import MobileShortcutPinButton from '@/components/settings/MobileShortcutPinButton';
@@ -17,6 +18,7 @@ export default function RoutePlannerPage() {
   const preferences = useUiPreferences();
   const savePreferences = useSaveUiPreferences();
   const { t } = useI18n();
+  const tr = routePlannerControlsMessages.useT();
 
   return (
     <Page
@@ -24,11 +26,11 @@ export default function RoutePlannerPage() {
     >
       <Box sx={{ mb: 2.5 }}>
         <HeroCard
-          image={{ src: getCyclingHeroIllustrationPath('routes'), alt: 'Górska droga z zakrętami' }}
-          eyebrow="Trasy · planowanie"
-          title="Trasy"
+          image={{ src: getCyclingHeroIllustrationPath('routes'), alt: tr('page.heroAlt') }}
+          eyebrow={tr('page.eyebrow')}
+          title={tr('page.title')}
           headingComponent="h1"
-          description="Zaprojektuj kolejny przejazd: ułóż trasę, porównaj warianty i sprawdź pogodę zanim rozpoczniesz jazdę."
+          description={tr('page.description')}
           minHeight={{ xs: 260, md: 290 }}
         >
           {preferences.data ? (

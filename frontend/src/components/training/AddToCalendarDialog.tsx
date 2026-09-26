@@ -16,8 +16,10 @@ import {
 } from '@mui/material';
 import { useState, useMemo } from 'react';
 
+import { useI18n } from '@/i18n';
 import { localDate } from '@/utils/localDate';
 
+import { trainingMessages } from './messages';
 import WorkoutPowerChart from './WorkoutPowerChart';
 import { useCreateWorkoutEntry } from '../../hooks/useTrainingPlan';
 
@@ -77,6 +79,8 @@ function tomorrow(): string {
 }
 
 export default function AddToCalendarDialog({ template, open, onClose }: Props) {
+  const t = trainingMessages.useT();
+  const { t: common } = useI18n();
   const [date, setDate] = useState<string>(tomorrow());
   const [targetMin, setTargetMin] = useState<number>(template?.targetDurationMin ?? 60);
   const [scaleMode, setScaleMode] = useState<ScaleMode>('PROPORTIONAL');
@@ -102,7 +106,7 @@ export default function AddToCalendarDialog({ template, open, onClose }: Props) 
         date,
         durationMin: targetMin,
         scaledSteps,
-        notes: `Skalowanie: ${scaleMode}`,
+        notes: `${t('addToCalendar.notesPrefix')}: ${scaleMode}`,
       },
       { onSuccess: onClose },
     );
@@ -110,14 +114,14 @@ export default function AddToCalendarDialog({ template, open, onClose }: Props) 
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ pb: 1 }}>Dodaj do kalendarza: {template.name}</DialogTitle>
+      <DialogTitle sx={{ pb: 1 }}>{t('addToCalendar.title', { name: template.name })}</DialogTitle>
       <DialogContent>
         <Stack spacing={3} sx={{ mt: 1 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{
             alignItems: "flex-start"
           }}>
             <TextField
-              label="Data treningu"
+              label={t('addToCalendar.dateLabel')}
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
@@ -127,7 +131,7 @@ export default function AddToCalendarDialog({ template, open, onClose }: Props) 
               }}
             />
             <TextField
-              label="Czas docelowy (min)"
+              label={t('addToCalendar.durationLabel')}
               type="number"
               value={targetMin}
               onChange={(e) => setTargetMin(Math.max(1, Number(e.target.value)))}
@@ -146,7 +150,7 @@ export default function AddToCalendarDialog({ template, open, onClose }: Props) 
                 mb: 0.5,
                 display: 'block'
               }}>
-              Tryb skalowania
+              {t('addToCalendar.scaleModeLabel')}
             </Typography>
             <ToggleButtonGroup
               value={scaleMode}
@@ -154,9 +158,9 @@ export default function AddToCalendarDialog({ template, open, onClose }: Props) 
               onChange={(_, v) => v && setScaleMode(v)}
               size="small"
             >
-              <ToggleButton value="PROPORTIONAL">Proporcjonalne</ToggleButton>
-              <ToggleButton value="EXTEND_RECOVERY">Wydłuż odpoczynek</ToggleButton>
-              <ToggleButton value="ADD_INTERVALS">Dodaj interwały</ToggleButton>
+              <ToggleButton value="PROPORTIONAL">{t('addToCalendar.scaleModes.proportional')}</ToggleButton>
+              <ToggleButton value="EXTEND_RECOVERY">{t('addToCalendar.scaleModes.extendRecovery')}</ToggleButton>
+              <ToggleButton value="ADD_INTERVALS">{t('addToCalendar.scaleModes.addIntervals')}</ToggleButton>
             </ToggleButtonGroup>
           </Box>
 
@@ -169,24 +173,24 @@ export default function AddToCalendarDialog({ template, open, onClose }: Props) 
                 color: "text.secondary",
                 mb: 1
               }}>
-              Podgląd po skalowaniu – {scaledTotalMin} min
+              {t('addToCalendar.previewLabel', { minutes: scaledTotalMin })}
             </Typography>
             <WorkoutPowerChart steps={scaledSteps} />
           </Box>
 
-          {!!createEntry.isError && <Alert severity="error">Błąd podczas dodawania treningu do kalendarza.</Alert>}
+          {!!createEntry.isError && <Alert severity="error">{t('addToCalendar.error')}</Alert>}
         </Stack>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="inherit">
-          Anuluj
+          {common('common.cancel')}
         </Button>
         <Button
           onClick={handleSubmit}
           variant="contained"
           disabled={!date || createEntry.isPending}
         >
-          {createEntry.isPending ? 'Dodawanie…' : 'Dodaj do kalendarza'}
+          {createEntry.isPending ? t('addToCalendar.submitting') : t('addToCalendar.submit')}
         </Button>
       </DialogActions>
     </Dialog>

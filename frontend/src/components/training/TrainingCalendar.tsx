@@ -4,18 +4,22 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Box, IconButton, Typography, Grid } from '@mui/material';
 import { useState, useMemo } from 'react';
 
-import { getLocale } from '@/i18n';
+import { getLocale, localized } from '@/i18n';
 import { LoadingState } from '@/ui';
 import { localDate } from '@/utils/localDate';
 
 import CalendarDayCell from './CalendarDayCell';
 import CalendarDayDialog from './CalendarDayDialog';
+import { trainingMessages } from './messages';
 import TrainingProjectionChart from './TrainingProjectionChart';
 import { useCalendarView } from '../../hooks/useTrainingPlan';
 
 import type { CalendarDay } from '../../types/training';
 
-const DAY_HEADERS = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
+const DAY_HEADERS = localized<string[]>({
+  pl: ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'],
+  en: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+});
 
 function formatMonth(d: Date): string {
   return d.toLocaleString(getLocale(), { month: 'long', year: 'numeric' });
@@ -32,6 +36,7 @@ function fmt(d: Date): string {
 }
 
 export default function TrainingCalendar() {
+  const t = trainingMessages.useT();
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
@@ -52,18 +57,18 @@ export default function TrainingCalendar() {
   const next = () => { if (month === 11) { setYear(year + 1); setMonth(0); } else setMonth(month + 1); };
   const todayStr = fmt(today);
 
-  if (isLoading) return <LoadingState message="Ładowanie kalendarza..." />;
+  if (isLoading) return <LoadingState message={t('trainingCalendar.loadingCalendar')} />;
 
   return (
     <Box>
       <TrainingProjectionChart days={days ?? []} />
 
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <IconButton onClick={prev} size="small" aria-label="Poprzedni miesiąc"><ChevronLeftIcon /></IconButton>
+        <IconButton onClick={prev} size="small" aria-label={t('trainingCalendar.prevMonthAria')}><ChevronLeftIcon /></IconButton>
         <Typography variant="h6" sx={{ mx: 2, textTransform: 'capitalize', minWidth: 180, textAlign: 'center' }}>
           {formatMonth(new Date(year, month))}
         </Typography>
-        <IconButton onClick={next} size="small" aria-label="Następny miesiąc"><ChevronRightIcon /></IconButton>
+        <IconButton onClick={next} size="small" aria-label={t('trainingCalendar.nextMonthAria')}><ChevronRightIcon /></IconButton>
       </Box>
 
       <Grid container columns={7} spacing={0.5} sx={{ mb: 1 }}>

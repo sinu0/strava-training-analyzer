@@ -14,6 +14,7 @@ import {
 import { useState } from 'react';
 
 import AddToCalendarDialog from './AddToCalendarDialog';
+import { trainingMessages } from './messages';
 import WorkoutPowerChart from './WorkoutPowerChart';
 import { CATEGORY_LABELS } from '../../types/training';
 
@@ -28,6 +29,7 @@ interface WorkoutDetailDialogProps {
 }
 
 export default function WorkoutDetailDialog({ template, open, onClose, onDelete }: WorkoutDetailDialogProps) {
+  const t = trainingMessages.useT();
   const [calendarOpen, setCalendarOpen] = useState(false);
   if (!template) return null;
 
@@ -48,7 +50,7 @@ export default function WorkoutDetailDialog({ template, open, onClose, onDelete 
           <WorkoutPowerChart steps={template.steps} />
 
           <Box sx={{ display: 'flex', gap: 3, mt: 2 }}>
-            <StatBlock label="Czas" value={`${template.targetDurationMin} min`} />
+            <StatBlock label={t('workoutDetailDialog.durationStat')} value={`${template.targetDurationMin} min`} />
             <StatBlock label="TSS" value={String(template.targetTss)} />
             <StatBlock label="RPE" value={template.relativeEffort.toFixed(1)} />
             <StatBlock label="IF" value={template.intensityFactor.toFixed(2)} />
@@ -69,7 +71,7 @@ export default function WorkoutDetailDialog({ template, open, onClose, onDelete 
         <DialogActions>
           {!!onDelete && (
             <Button color="error" onClick={() => onDelete(template.id)}>
-              Usuń
+              {t('workoutDetailDialog.deleteButton')}
             </Button>
           )}
           <Box sx={{ flex: 1 }} />
@@ -78,9 +80,9 @@ export default function WorkoutDetailDialog({ template, open, onClose, onDelete 
             startIcon={<CalendarMonthIcon />}
             onClick={() => setCalendarOpen(true)}
           >
-            Dodaj do kalendarza
+            {t('workoutDetailDialog.addToCalendarButton')}
           </Button>
-          <Button onClick={onClose}>Zamknij</Button>
+          <Button onClick={onClose}>{t('workoutDetailDialog.closeButton')}</Button>
         </DialogActions>
       </Dialog>
 

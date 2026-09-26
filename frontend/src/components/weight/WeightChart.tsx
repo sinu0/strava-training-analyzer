@@ -11,6 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import { weightMessages } from '@/components/weight/messages';
 import { getLocale } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 import type { WeightGoal, WeightRecord } from '@/types/weight';
@@ -29,6 +30,7 @@ export default function WeightChart({
   goal,
 }: WeightChartProps) {
   const theme = useTheme();
+  const t = weightMessages.useT();
   const chart = getChartVisuals(theme);
   const chartData = history.map((record) => ({
     date: record.recordedDate,
@@ -38,10 +40,10 @@ export default function WeightChart({
   return (
     <Grid size={12}>
       <ChartFrame
-        title="Historia wagi"
+        title={t('chart.title')}
         empty={chartData.length === 0}
-        emptyTitle="Brak danych o wadze"
-        emptyDescription="Dodaj pierwszy pomiar wagi, aby zobaczyć trend zmian."
+        emptyTitle={t('chart.emptyTitle')}
+        emptyDescription={t('chart.emptyDescription')}
       >
         <Box sx={{ width: '100%', height: 300 }}>
           <ResponsiveContainer width="100%" height="100%">
@@ -69,7 +71,7 @@ export default function WeightChart({
               />
               <RechartsTooltip
                 {...chart.tooltip}
-                formatter={(value) => [`${Number(value ?? 0).toFixed(1)} kg`, 'Waga']}
+                formatter={(value) => [`${Number(value ?? 0).toFixed(1)} kg`, t('chart.tooltipLabel')]}
                 labelFormatter={(value) => new Date(String(value)).toLocaleDateString(getLocale())}
               />
               {!!goal && (
@@ -78,7 +80,7 @@ export default function WeightChart({
                   stroke={getAppThemeTokens(theme).chart.primary}
                   strokeDasharray="5 5"
                   label={{
-                    value: `Cel: ${Number(goal.targetWeightKg).toFixed(1)} kg`,
+                    value: t('chart.goalLabel', { weight: Number(goal.targetWeightKg).toFixed(1) }),
                     fill: getAppThemeTokens(theme).chart.primary,
                     fontSize: 11,
                     position: 'right',

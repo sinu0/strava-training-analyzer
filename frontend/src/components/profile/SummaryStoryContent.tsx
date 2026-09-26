@@ -4,6 +4,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import { Box, Typography } from '@mui/material';
 
+import { profileMessages } from '@/components/profile/messages';
 import { getLocale } from '@/i18n';
 import { getAppThemeTokens, tokens } from '@/theme/theme';
 
@@ -52,11 +53,12 @@ function formatWeekRange(weekStart: string): string {
 }
 
 function Slide1({ week }: { week: WeeklySummary | undefined }) {
+  const t = profileMessages.useT();
   return (
     <SlideWrapper gradient={GRADIENTS[0] ?? ''}>
       <DirectionsBikeIcon sx={{ fontSize: 52, color: (t) => getAppThemeTokens(t).media.inkMuted }} />
       <Typography variant="overline" sx={{ color: (t) => getAppThemeTokens(t).media.inkMuted, letterSpacing: 4, fontSize: '0.78rem' }}>
-        Twój tydzień
+        {t('story.yourWeek')}
       </Typography>
       {!!week && (
         <Typography sx={{ color: (t) => getAppThemeTokens(t).media.inkQuiet, fontSize: '0.85rem', mt: -1 }}>
@@ -67,20 +69,21 @@ function Slide1({ week }: { week: WeeklySummary | undefined }) {
         {week ? formatDistance(week.totalDistanceM) : '—'}
       </Typography>
       <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
-        <StatBlock label="Czas" value={week ? formatDuration(week.totalTimeSec) : '—'} />
-        <StatBlock label="Wzniesienie" value={week ? `${Math.round(week.totalElevationM)} m` : '—'} />
-        <StatBlock label="Aktywności" value={week?.activityCount ?? '—'} />
+        <StatBlock label={t('story.time')} value={week ? formatDuration(week.totalTimeSec) : '—'} />
+        <StatBlock label={t('story.elevation')} value={week ? `${Math.round(week.totalElevationM)} m` : '—'} />
+        <StatBlock label={t('story.activities')} value={week?.activityCount ?? '—'} />
       </Box>
     </SlideWrapper>
   );
 }
 
 function Slide2({ week, readiness }: { week: WeeklySummary | undefined; readiness: ReadinessData | undefined }) {
+  const t = profileMessages.useT();
   return (
     <SlideWrapper gradient={GRADIENTS[1] ?? ''}>
       <TrendingUpIcon sx={{ fontSize: 52, color: (t) => getAppThemeTokens(t).media.inkMuted }} />
       <Typography variant="overline" sx={{ color: (t) => getAppThemeTokens(t).media.inkMuted, letterSpacing: 4, fontSize: '0.78rem' }}>
-        Wysiłek
+        {t('story.effort')}
       </Typography>
       {!!week && (
         <Box sx={{ textAlign: 'center' }}>
@@ -88,7 +91,7 @@ function Slide2({ week, readiness }: { week: WeeklySummary | undefined; readines
             {Math.round(week.totalTss)}
           </Typography>
           <Typography sx={{ color: (t) => getAppThemeTokens(t).media.inkQuiet, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: 1 }}>
-            TSS tygodnia
+            {t('story.weekTss')}
           </Typography>
         </Box>
       )}
@@ -97,7 +100,7 @@ function Slide2({ week, readiness }: { week: WeeklySummary | undefined; readines
           <StatBlock label="CTL" value={readiness.ctl == null ? '—' : Math.round(readiness.ctl)} />
           <StatBlock label="ATL" value={readiness.atl == null ? '—' : Math.round(readiness.atl)} />
           <StatBlock label="TSB" value={readiness.tsb == null ? '—' : Math.round(readiness.tsb)} />
-          <StatBlock label="Gotowość" value={readiness.score == null ? '—' : `${readiness.score}%`} />
+          <StatBlock label={t('story.readiness')} value={readiness.score == null ? '—' : `${readiness.score}%`} />
         </Box>
       )}
     </SlideWrapper>
@@ -105,21 +108,22 @@ function Slide2({ week, readiness }: { week: WeeklySummary | undefined; readines
 }
 
 function Slide3({ weeklySummaries }: { weeklySummaries: WeeklySummary[] }) {
+  const t = profileMessages.useT();
   const best = [...weeklySummaries].sort((a, b) => b.totalTss - a.totalTss)[0];
   return (
     <SlideWrapper gradient={GRADIENTS[2] ?? ''}>
       <EmojiEventsIcon sx={{ fontSize: 52, color: (t) => getAppThemeTokens(t).media.inkMuted }} />
       <Typography variant="overline" sx={{ color: (t) => getAppThemeTokens(t).media.inkMuted, letterSpacing: 4, fontSize: '0.78rem' }}>
-        Najlepsze osiągnięcie
+        {t('story.bestAchievement')}
       </Typography>
       {!!best && <>
           <Typography sx={{ color: (t) => getAppThemeTokens(t).media.inkQuiet, fontSize: '0.85rem', mt: -1 }}>
             {formatWeekRange(best.weekStart)}
           </Typography>
           <Box sx={{ display: 'flex', gap: 1.5, mt: 0.5 }}>
-            <StatBlock label="Dystans" value={formatDistance(best.totalDistanceM)} />
+            <StatBlock label={t('story.distance')} value={formatDistance(best.totalDistanceM)} />
             <StatBlock label="TSS" value={Math.round(best.totalTss)} />
-            <StatBlock label="Aktywności" value={best.activityCount} />
+            <StatBlock label={t('story.activities')} value={best.activityCount} />
           </Box>
         </>}
     </SlideWrapper>
@@ -127,23 +131,23 @@ function Slide3({ weeklySummaries }: { weeklySummaries: WeeklySummary[] }) {
 }
 
 function Slide4({ streak }: { streak: number }) {
-  const plural = streak === 1 ? 'tydzień' : streak < 5 ? 'tygodnie' : 'tygodni';
+  const t = profileMessages.useT();
   const msg =
     streak >= 4
-      ? 'Niesamowita seria! Jesteś w świetnej formie!'
+      ? t('story.streakGreat')
       : streak >= 2
-        ? 'Brawo! Trzymaj się tej regularności!'
-        : 'Każdy trening się liczy. Do przodu!';
+        ? t('story.streakGood')
+        : t('story.streakStart');
   return (
     <SlideWrapper gradient={GRADIENTS[3] ?? ''}>
       <WhatshotIcon sx={{ fontSize: 68, color: (t) => getAppThemeTokens(t).status.sunny }} />
       <Typography variant="overline" sx={{ color: (t) => getAppThemeTokens(t).media.inkMuted, letterSpacing: 4, fontSize: '0.78rem' }}>
-        Tak trzymaj!
+        {t('story.keepItUp')}
       </Typography>
       <Typography sx={{ fontSize: '3.5rem', fontWeight: 900, color: 'white', lineHeight: 1 }}>
-        {streak} {plural}
+        {t('story.weeks', { count: streak })}
       </Typography>
-      <Typography sx={{ color: (t) => getAppThemeTokens(t).media.inkMuted, fontSize: '1rem', mt: -1 }}>z rzędu 🔥</Typography>
+      <Typography sx={{ color: (t) => getAppThemeTokens(t).media.inkMuted, fontSize: '1rem', mt: -1 }}>{t('story.inARow')}</Typography>
       <Typography sx={{ color: (t) => getAppThemeTokens(t).media.inkQuiet, fontSize: '0.9rem', textAlign: 'center', mt: 1, maxWidth: 260 }}>
         {msg}
       </Typography>

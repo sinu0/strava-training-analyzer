@@ -19,6 +19,7 @@ import { PMC_COLORS } from '@/utils/colors';
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
 import { localDate } from '@/utils/localDate';
 
+import { planMessages } from './messages';
 import { useLoadScenario } from './useLoadScenario';
 
 type PlanTab = 'calendar' | 'library' | 'scenario' | 'context' | 'review';
@@ -26,6 +27,7 @@ type PlanTab = 'calendar' | 'library' | 'scenario' | 'context' | 'review';
 export default function PlanPage() {
   const theme = useTheme();
   const chart = getChartVisuals(theme);
+  const t = planMessages.useT();
   const [params, setParams] = useSearchParams();
   const requestedTab = params.get('tab');
   const tab: PlanTab = requestedTab === 'library' || requestedTab === 'scenario' || requestedTab === 'context' || requestedTab === 'review' ? requestedTab : 'calendar';
@@ -50,23 +52,23 @@ export default function PlanPage() {
   };
 
   return (
-    <Page title="Plan treningowy" subtitle="Zbuduj tydzień, wybierz jednostkę i zobacz matematyczny scenariusz obciążenia." maxWidth={1320}>
+    <Page title={t('pageTitle')} subtitle={t('pageSubtitle')} maxWidth={1320}>
       <HeroCard
         layout="split"
-        eyebrow="Kierunek sezonu"
-        title="Trening, który ma swoje miejsce w planie"
-        description="Zbuduj tydzień, wybierz sesję i sprawdź konsekwencje dla obciążenia, zanim wsiądziesz na rower."
-        image={{ src: getCyclingHeroIllustrationPath('training'), alt: 'Przygotowane akcesoria kolarskie i mapa trasy' }}
-        tags={['Kalendarz', 'Biblioteka sesji', 'Scenariusz CTL / ATL']}
+        eyebrow={t('heroEyebrow')}
+        title={t('heroTitle')}
+        description={t('heroDescription')}
+        image={{ src: getCyclingHeroIllustrationPath('training'), alt: t('heroImageAlt') }}
+        tags={[t('heroTags.calendar'), t('heroTags.library'), t('heroTags.scenario')]}
         headingComponent="h2"
       />
       <Surface padding="none" sx={{ mb: 2.5 }}>
         <Tabs value={tab} onChange={(_, value: PlanTab) => changeTab(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile>
-          <Tab value="calendar" icon={<CalendarMonthOutlinedIcon />} iconPosition="start" label="Kalendarz" />
-          <Tab value="library" icon={<FitnessCenterOutlinedIcon />} iconPosition="start" label="Biblioteka" />
-          <Tab value="scenario" icon={<AutoGraphOutlinedIcon />} iconPosition="start" label="Scenariusz obciążenia" />
-          <Tab value="context" label="Cel i dostępność" />
-          <Tab value="review" label="Przegląd tygodnia" />
+          <Tab value="calendar" icon={<CalendarMonthOutlinedIcon />} iconPosition="start" label={t('tabs.calendar')} />
+          <Tab value="library" icon={<FitnessCenterOutlinedIcon />} iconPosition="start" label={t('tabs.library')} />
+          <Tab value="scenario" icon={<AutoGraphOutlinedIcon />} iconPosition="start" label={t('tabs.scenario')} />
+          <Tab value="context" label={t('tabs.context')} />
+          <Tab value="review" label={t('tabs.review')} />
         </Tabs>
       </Surface>
       {tab === 'calendar' && <TrainingCalendar />}
@@ -83,40 +85,40 @@ export default function PlanPage() {
               mb: 2.5
             }}>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h6">Scenariusz przyszłego obciążenia</Typography>
+              <Typography variant="h6">{t('scenarioTitle')}</Typography>
               <Typography variant="body2" sx={{
                 color: "text.secondary"
-              }}>Zakres pozostaje w URL i może zostać odtworzony po powrocie.</Typography>
+              }}>{t('scenarioUrlHint')}</Typography>
             </Box>
-            <PolishDateField size="small" label="Od" value={from} onChange={value => changeRange('from', value)} slotProps={{ inputLabel: { shrink: true } }} />
-            <PolishDateField size="small" label="Do" value={to} onChange={value => changeRange('to', value)} slotProps={{ inputLabel: { shrink: true } }} />
+            <PolishDateField size="small" label={t('fromLabel')} value={from} onChange={value => changeRange('from', value)} slotProps={{ inputLabel: { shrink: true } }} />
+            <PolishDateField size="small" label={t('toLabel')} value={to} onChange={value => changeRange('to', value)} slotProps={{ inputLabel: { shrink: true } }} />
           </Stack>
-          {scenario.isLoading ? <LoadingState message="Liczenie scenariusza…" /> : null}
-          {scenario.isError ? <ErrorState message="Nie udało się policzyć scenariusza." onRetry={() => void scenario.refetch()} /> : null}
+          {scenario.isLoading ? <LoadingState message={t('loadingScenario')} /> : null}
+          {scenario.isError ? <ErrorState message={t('scenarioError')} onRetry={() => void scenario.refetch()} /> : null}
           {scenario.data?.availability === 'UNKNOWN' ? (
-            <EmptyState title="Brak punktu początkowego" description={scenario.data.assumptions[0]} />
+            <EmptyState title={t('noStartingPoint')} description={scenario.data.assumptions[0]} />
           ) : null}
           {scenario.data?.availability === 'AVAILABLE' ? (
             <>
-              <Typography variant="h6">Jeśli wykonasz obecny plan</Typography>
+              <Typography variant="h6">{t('ifCurrentPlanTitle')}</Typography>
               <Typography
                 variant="body2"
                 sx={{
                   color: "text.secondary",
                   mt: 0.5
                 }}>
-                To scenariusz matematyczny CTL/ATL, a nie obietnica wyniku sportowego.
+                {t('ifCurrentPlanSubtitle')}
               </Typography>
               {lastPoint ? (
                 <Grid container spacing={2} sx={{ mt: 1 }}>
-                  <Grid size={4}><Metric label="CTL na końcu" value={lastPoint.ctl.toFixed(1)} tone="primary" /></Grid>
-                  <Grid size={4}><Metric label="ATL na końcu" value={lastPoint.atl.toFixed(1)} tone="warning" /></Grid>
-                  <Grid size={4}><Metric label="Forma" value={lastPoint.form.toFixed(1)} tone={lastPoint.form < -10 ? 'warning' : 'success'} /></Grid>
+                  <Grid size={4}><Metric label={t('ctlFinal')} value={lastPoint.ctl.toFixed(1)} tone="primary" /></Grid>
+                  <Grid size={4}><Metric label={t('atlFinal')} value={lastPoint.atl.toFixed(1)} tone="warning" /></Grid>
+                  <Grid size={4}><Metric label={t('formFinal')} value={lastPoint.form.toFixed(1)} tone={lastPoint.form < -10 ? 'warning' : 'success'} /></Grid>
                 </Grid>
               ) : null}
               <Box
                 role="img"
-                aria-label={`Scenariusz obciążenia od ${from} do ${to}.${lastPoint ? ` Wartości końcowe: CTL ${lastPoint.ctl.toFixed(1)}, ATL ${lastPoint.atl.toFixed(1)}, forma ${lastPoint.form.toFixed(1)}.` : ''}`}
+                aria-label={`${t('chartAriaLabelBase', { from, to })}${lastPoint ? t('chartAriaLabelValues', { ctl: lastPoint.ctl.toFixed(1), atl: lastPoint.atl.toFixed(1), form: lastPoint.form.toFixed(1) }) : ''}`}
                 sx={{ height: 400, mt: 2 }}
               >
                 <ResponsiveContainer width="100%" height="100%">
@@ -126,9 +128,9 @@ export default function PlanPage() {
                     <YAxis {...chart.axis} />
                     <Tooltip {...chart.tooltip} />
                     <Legend {...chart.legend} />
-                    <Line type="monotone" dataKey="ctl" name="CTL 42 dni" stroke={PMC_COLORS.CTL} dot={false} strokeWidth={2.5} />
-                    <Line type="monotone" dataKey="atl" name="ATL 7 dni" stroke={PMC_COLORS.ATL} dot={false} strokeWidth={2.5} />
-                    <Line type="monotone" dataKey="form" name="Forma" stroke={PMC_COLORS.TSB} dot={false} strokeWidth={2.25} strokeDasharray="5 4" />
+                    <Line type="monotone" dataKey="ctl" name={t('ctlLegend')} stroke={PMC_COLORS.CTL} dot={false} strokeWidth={2.5} />
+                    <Line type="monotone" dataKey="atl" name={t('atlLegend')} stroke={PMC_COLORS.ATL} dot={false} strokeWidth={2.5} />
+                    <Line type="monotone" dataKey="form" name={t('formLegend')} stroke={PMC_COLORS.TSB} dot={false} strokeWidth={2.25} strokeDasharray="5 4" />
                   </LineChart>
                 </ResponsiveContainer>
               </Box>

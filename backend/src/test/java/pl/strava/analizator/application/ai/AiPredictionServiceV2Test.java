@@ -48,6 +48,7 @@ class AiPredictionServiceV2Test {
     @Mock private ResponseValidator responseValidator;
     @Mock private KnowledgeBaseBuilder knowledgeBaseBuilder;
     @Mock private AiPredictionRepository predictionRepository;
+    @Mock private AiSettingsService aiSettingsService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private AiPredictionServiceV2 service;
@@ -58,7 +59,7 @@ class AiPredictionServiceV2Test {
                 promptEngine, trainingDataAdapter, modelCapabilityMatrix,
                 providerRegistry, toolCallingLoopV2, java.util.Optional.of(ragServiceV2),
                 responseValidator, knowledgeBaseBuilder, predictionRepository,
-                objectMapper);
+                objectMapper, aiSettingsService);
         ReflectionTestUtils.setField(service, "enabled", true);
         ReflectionTestUtils.setField(service, "knowledgeEnabled", true);
         ReflectionTestUtils.setField(service, "knowledgeCron", "0 15 2 * * 0");
@@ -66,6 +67,8 @@ class AiPredictionServiceV2Test {
         ReflectionTestUtils.setField(service, "defaultModel", "qwen3.6:27b");
 
         lenient().when(trainingDataAdapter.getDaysBack(any())).thenReturn(30);
+        lenient().when(aiSettingsService.currentLanguage()).thenReturn(pl.strava.analizator.domain.ai.AiLanguage.EN);
+        lenient().when(aiSettingsService.currentCoachingStyle()).thenReturn(pl.strava.analizator.domain.ai.Persona.CONSERVATIVE_SCIENTIST);
         lenient().when(responseValidator.validate(anyString()))
                 .thenReturn(new ResponseValidator.ValidationResult(true, false, ""));
     }
@@ -84,7 +87,9 @@ class AiPredictionServiceV2Test {
     void predict_validRequest_returnsPrediction() {
         TrainingContext ctx = buildMockContext();
         when(trainingDataAdapter.buildContext(PredictionType.FTP_PREDICTION)).thenReturn(ctx);
-        when(promptEngine.buildPrompt(eq(PredictionType.FTP_PREDICTION), any(), any(), any()))
+        when(promptEngine.buildPrompt(eq(PredictionType.FTP_PREDICTION), any(),
+                eq(pl.strava.analizator.domain.ai.Persona.CONSERVATIVE_SCIENTIST), any(),
+                eq(pl.strava.analizator.domain.ai.AiLanguage.EN)))
                 .thenReturn(new PromptResult("sys prompt", "user prompt", PredictionType.FTP_PREDICTION));
         when(providerRegistry.hasProvider("ollama-v2")).thenReturn(true);
         when(modelCapabilityMatrix.resolve("qwen3.6:27b"))
@@ -109,7 +114,9 @@ class AiPredictionServiceV2Test {
     void predict_withPersona_passesToPromptEngine() {
         TrainingContext ctx = buildMockContext();
         when(trainingDataAdapter.buildContext(PredictionType.FTP_PREDICTION)).thenReturn(ctx);
-        when(promptEngine.buildPrompt(eq(PredictionType.FTP_PREDICTION), any(), any(), any()))
+        when(promptEngine.buildPrompt(eq(PredictionType.FTP_PREDICTION), any(),
+                eq(pl.strava.analizator.domain.ai.Persona.AGGRESSIVE_COACH), any(),
+                eq(pl.strava.analizator.domain.ai.AiLanguage.EN)))
                 .thenReturn(new PromptResult("sys", "user", PredictionType.FTP_PREDICTION));
         when(providerRegistry.hasProvider("ollama-v2")).thenReturn(true);
         when(modelCapabilityMatrix.resolve("qwen3.6:27b"))
@@ -132,7 +139,8 @@ class AiPredictionServiceV2Test {
     void compare_multipleModels_returnsList() {
         TrainingContext ctx = buildMockContext();
         when(trainingDataAdapter.buildContext(PredictionType.FTP_PREDICTION)).thenReturn(ctx);
-        when(promptEngine.buildPrompt(eq(PredictionType.FTP_PREDICTION), any(), any(), any()))
+        when(promptEngine.buildPrompt(eq(PredictionType.FTP_PREDICTION), any(), any(), any(),
+                eq(pl.strava.analizator.domain.ai.AiLanguage.EN)))
                 .thenReturn(new PromptResult("sys", "user", PredictionType.FTP_PREDICTION));
         when(providerRegistry.hasProvider("ollama-v2")).thenReturn(true);
         when(modelCapabilityMatrix.resolve(anyString()))

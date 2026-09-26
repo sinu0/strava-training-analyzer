@@ -1,9 +1,10 @@
 import { ThemeProvider } from '@mui/material/styles';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import MatchedRideCard from '@/components/matched-rides/MatchedRideCard';
+import { I18nProvider } from '@/i18n';
 import theme from '@/theme/theme';
 
 const { useMatchedRideMock } = vi.hoisted(() => ({
@@ -56,5 +57,22 @@ describe('MatchedRideCard', () => {
     )).not.toThrow();
 
     expect(screen.queryByText('Dopasowane przejazdy')).toBeNull();
+  });
+
+  afterEach(() => window.localStorage.clear());
+
+  it('renders English text when the language is switched', async () => {
+    window.localStorage.setItem('strava-analizator.language', 'en');
+    render(
+      <I18nProvider>
+        <ThemeProvider theme={theme}>
+          <MemoryRouter>
+            <MatchedRideCard activityId="activity-1" />
+          </MemoryRouter>
+        </ThemeProvider>
+      </I18nProvider>,
+    );
+    expect(await screen.findByText('Matched rides')).toBeDefined();
+    expect(screen.getByText('route 95% similar')).toBeDefined();
   });
 });

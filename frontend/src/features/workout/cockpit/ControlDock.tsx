@@ -10,6 +10,8 @@ import { Box, Button, Stack, Tooltip } from '@mui/material';
 import { getAppThemeTokens } from '@/theme/theme';
 import { RoundAction, StatusPill } from '@/ui';
 
+import { cockpitMessages } from './messages';
+
 interface ControlDockProps {
   paused: boolean;
   lapStep: boolean;
@@ -23,10 +25,11 @@ interface ControlDockProps {
 
 /** Thumb-reachable controls, sticky at the bottom of the screen. */
 export default function ControlDock({ paused, lapStep, intensityPct, onTogglePause, onPrevious, onSkip, onIntensity, onAbort }: ControlDockProps) {
+  const t = cockpitMessages.useT();
   return (
     <Box
       component="nav"
-      aria-label="Sterowanie treningiem"
+      aria-label={t('controlDock.nav')}
       sx={(theme) => {
         const tokens = getAppThemeTokens(theme);
         return {
@@ -47,16 +50,16 @@ export default function ControlDock({ paused, lapStep, intensityPct, onTogglePau
     >
       <Stack direction="row" spacing={{ xs: 1, sm: 2 }} sx={{ alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', rowGap: 1 }}>
         <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
-          <RoundAction aria-label="Intensywność -5%" variant="bubble" size="md" icon={<RemoveIcon />} onClick={() => onIntensity(-5)} />
+          <RoundAction aria-label={t('controlDock.intensityDown')} variant="bubble" size="md" icon={<RemoveIcon />} onClick={() => onIntensity(-5)} />
           <StatusPill label={`${intensityPct >= 0 ? '+' : ''}${intensityPct}%`} tone={intensityPct === 0 ? 'neutral' : 'primary'} />
-          <RoundAction aria-label="Intensywność +5%" variant="bubble" size="md" icon={<AddIcon />} onClick={() => onIntensity(5)} />
+          <RoundAction aria-label={t('controlDock.intensityUp')} variant="bubble" size="md" icon={<AddIcon />} onClick={() => onIntensity(5)} />
         </Stack>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <Tooltip title="Powtórz krok (←)"><span><RoundAction aria-label="Powtórz" variant="bubble" size="lg" icon={<ReplayIcon />} onClick={onPrevious} /></span></Tooltip>
-          <Tooltip title="Spacja"><span><RoundAction aria-label={paused ? 'Wznów' : 'Pauza'} variant="accent" size="xl" icon={paused ? <PlayArrowIcon /> : <PauseIcon />} onClick={onTogglePause} /></span></Tooltip>
-          <Tooltip title={lapStep ? 'LAP — następny krok (→)' : 'Pomiń krok (→)'}><span><RoundAction aria-label={lapStep ? 'LAP / dalej' : 'Pomiń'} variant="bubble" size="lg" icon={<SkipNextIcon />} onClick={onSkip} /></span></Tooltip>
+          <Tooltip title={t('controlDock.repeatTooltip')}><span><RoundAction aria-label={t('controlDock.repeat')} variant="bubble" size="lg" icon={<ReplayIcon />} onClick={onPrevious} /></span></Tooltip>
+          <Tooltip title={t('controlDock.spaceTooltip')}><span><RoundAction aria-label={paused ? t('controlDock.resume') : t('controlDock.pause')} variant="accent" size="xl" icon={paused ? <PlayArrowIcon /> : <PauseIcon />} onClick={onTogglePause} /></span></Tooltip>
+          <Tooltip title={lapStep ? t('controlDock.lapTooltip') : t('controlDock.skipTooltip')}><span><RoundAction aria-label={lapStep ? t('controlDock.lapNext') : t('controlDock.skip')} variant="bubble" size="lg" icon={<SkipNextIcon />} onClick={onSkip} /></span></Tooltip>
         </Stack>
-        <Button color="error" size="small" startIcon={<StopIcon />} onClick={onAbort}>Zakończ</Button>
+        <Button color="error" size="small" startIcon={<StopIcon />} onClick={onAbort}>{t('controlDock.finish')}</Button>
       </Stack>
     </Box>
   );

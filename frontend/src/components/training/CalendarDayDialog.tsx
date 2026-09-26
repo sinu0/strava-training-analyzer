@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { scheduledExportUrl } from '@/features/workout/workoutApi';
 
+import { trainingMessages } from './messages';
 import WorkoutPowerChart from './WorkoutPowerChart';
 import {
   useUpdatePlanStatus,
@@ -23,6 +24,7 @@ interface CalendarDayDialogProps {
 }
 
 export default function CalendarDayDialog({ day: originalDay, open, onClose }: CalendarDayDialogProps) {
+  const t = trainingMessages.useT();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const updateStatus = useUpdatePlanStatus();
   const navigate = useNavigate();
@@ -59,13 +61,13 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         {day.date}
-        <IconButton onClick={onClose} size="small" aria-label="Zamknij szczegóły dnia"><CloseIcon /></IconButton>
+        <IconButton onClick={onClose} size="small" aria-label={t('calendarDayDialog.closeAria')}><CloseIcon /></IconButton>
       </DialogTitle>
       <DialogContent dividers>
         {sessions.length > 1 && (
           <Stack
             direction="row"
-            aria-label="Sesje tego dnia"
+            aria-label={t('calendarDayDialog.sessionsAria')}
             sx={{
               gap: 1,
               mb: 2,
@@ -75,14 +77,17 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
               <Button key={session.planned.id} size="small"
                 variant={session.planned.id === planned?.id ? 'contained' : 'outlined'}
                 onClick={() => setSelectedId(session.planned.id)}>
-                Sesja {index + 1}: {session.planned.plannedDescription || session.planned.plannedType || 'Trening'}
+                {t('calendarDayDialog.sessionButton', {
+                  index: index + 1,
+                  description: session.planned.plannedDescription || session.planned.plannedType || t('calendarDayDialog.defaultWorkoutName'),
+                })}
               </Button>
             ))}
           </Stack>
         )}
         {!!planned && (
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle2" gutterBottom>Zaplanowany trening</Typography>
+            <Typography variant="subtitle2" gutterBottom>{t('calendarDayDialog.plannedTitle')}</Typography>
             <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
               {!!planned.plannedType && <Chip label={CATEGORY_LABELS[planned.plannedType as WorkoutCategory] ?? planned.plannedType} size="small" color="warning" />}
               {planned.plannedTss != null && <Chip label={`${planned.plannedTss} TSS`} size="small" variant="outlined" />}
@@ -94,29 +99,32 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
                 color: "text.secondary",
                 mb: 1
               }}>{planned.plannedDescription}</Typography>}
-            {!!planned.workoutTemplateName && <Typography variant="body2" sx={{ mb: 1 }}>Szablon: {planned.workoutTemplateName}</Typography>}
+            {!!planned.workoutTemplateName && <Typography variant="body2" sx={{ mb: 1 }}>{t('calendarDayDialog.templateLabel', { name: planned.workoutTemplateName })}</Typography>}
             {!!planned.workoutStepsSnapshot?.length && <Box sx={{ mt: 1 }}><WorkoutPowerChart steps={planned.workoutStepsSnapshot} /></Box>}
             <Typography variant="caption" sx={{
               color: "text.secondary"
             }}>
-              Snapshot v{planned.workoutTemplateRevision ?? 'legacy'} · FTP {planned.ftpWatts ?? 'nieznane'}{planned.ftpWatts ? ' W' : ''}
+              {t('calendarDayDialog.snapshotCaption', {
+                revision: planned.workoutTemplateRevision ?? 'legacy',
+                ftp: `${planned.ftpWatts ?? t('calendarDayDialog.ftpUnknown')}${planned.ftpWatts ? ' W' : ''}`,
+              })}
             </Typography>
           </Box>
         )}
 
         {!!day.projection && (
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle2" gutterBottom>Projekcja PMC</Typography>
+            <Typography variant="subtitle2" gutterBottom>{t('calendarDayDialog.projectionTitle')}</Typography>
             <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
               <Chip label={`CTL ${day.projection.projectedCtl.toFixed(1)}`} size="small" variant="outlined" />
               <Chip label={`ATL ${day.projection.projectedAtl.toFixed(1)}`} size="small" variant="outlined" />
               <Chip label={`TSB ${day.projection.projectedTsb > 0 ? '+' : ''}${day.projection.projectedTsb.toFixed(1)}`} size="small" variant="outlined" />
-              <Chip label={`Gotowość ${day.projection.projectedReadiness}/100`} size="small" variant="outlined" />
+              <Chip label={t('calendarDayDialog.readinessChip', { value: day.projection.projectedReadiness })} size="small" variant="outlined" />
               <Chip label={day.projection.dayLabel} size="small" color="primary" />
             </Stack>
             {day.projection.taperDay ? (
               <Alert severity="info" sx={{ mb: 1 }}>
-                Ten dzień wpada już w taper — pilnuj świeżości i nie dokładaj zbędnej objętości.
+                {t('calendarDayDialog.taperAlert')}
               </Alert>
             ) : null}
           </Box>
@@ -143,7 +151,7 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
                 onClick={() => handleAdjustmentFeedback('ACCEPTED')}
                 disabled={recordAdjustmentFeedback.isPending}
               >
-                Trafna sugestia
+                {t('calendarDayDialog.acceptSuggestion')}
               </Button>
               <Button
                 size="small"
@@ -151,7 +159,7 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
                 onClick={() => handleAdjustmentFeedback('REJECTED')}
                 disabled={recordAdjustmentFeedback.isPending}
               >
-                Nie ta korekta
+                {t('calendarDayDialog.rejectSuggestion')}
               </Button>
             </Stack>
           </Alert>
@@ -159,11 +167,11 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
 
         {!!planned && !!day.projection && (
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle2" gutterBottom>Symulator decyzji</Typography>
+            <Typography variant="subtitle2" gutterBottom>{t('calendarDayDialog.decisionSimulatorTitle')}</Typography>
             <Alert severity="info" sx={{ mb: 1.5 }}>
-              <Typography variant="subtitle2">Dlaczego aplikacja to sugeruje</Typography>
+              <Typography variant="subtitle2">{t('calendarDayDialog.whyTitle')}</Typography>
               <Typography variant="body2">
-                {day.adjustment?.description ?? `Projekcja wskazuje dzień typu ${day.projection.dayLabel} przy gotowości ${day.projection.projectedReadiness}/100.`}
+                {day.adjustment?.description ?? t('calendarDayDialog.whyFallback', { dayLabel: day.projection.dayLabel, readiness: day.projection.projectedReadiness })}
               </Typography>
             </Alert>
             <Stack spacing={1}>
@@ -171,8 +179,8 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
                 <Box key={scenario.title} sx={{ border: 1, borderColor: 'divider', borderRadius: 2, p: 1.5 }}>
                   <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
                     <Chip label={scenario.title} size="small" color={scenario.color} />
-                    <Chip label={`Gotowość ~${scenario.readiness}/100`} size="small" variant="outlined" />
-                    <Chip label={`Obciążenie ${scenario.tssLabel}`} size="small" variant="outlined" />
+                    <Chip label={t('calendarDayDialog.readinessScenario', { value: scenario.readiness })} size="small" variant="outlined" />
+                    <Chip label={t('calendarDayDialog.loadScenario', { value: scenario.tssLabel })} size="small" variant="outlined" />
                   </Stack>
                   <Typography variant="body2">{scenario.description}</Typography>
                 </Box>
@@ -185,21 +193,21 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
           <Alert severity={executionSeverity(day.execution.outcome)} sx={{ mb: 2 }}>
             <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
               <Chip label={day.execution.label} size="small" color={executionChipColor(day.execution.outcome)} />
-              <Chip label={day.execution.score != null ? `Score ${day.execution.score}/100` : 'Ocena niedostępna'} size="small" variant="outlined" />
+              <Chip label={day.execution.score != null ? t('calendarDayDialog.executionScore', { value: day.execution.score }) : t('calendarDayDialog.executionScoreUnavailable')} size="small" variant="outlined" />
               {day.execution.tssCompliance != null && (
                 <Chip label={`TSS ${Math.round(day.execution.tssCompliance)}%`} size="small" variant="outlined" />
               )}
               {day.execution.durationCompliance != null && (
-                <Chip label={`Czas ${Math.round(day.execution.durationCompliance)}%`} size="small" variant="outlined" />
+                <Chip label={t('calendarDayDialog.durationCompliance', { value: Math.round(day.execution.durationCompliance) })} size="small" variant="outlined" />
               )}
               {day.execution.intervalCompliance != null && (
-                <Chip label={`Interwały ${Math.round(day.execution.intervalCompliance)}%`} size="small" variant="outlined" />
+                <Chip label={t('calendarDayDialog.intervalCompliance', { value: Math.round(day.execution.intervalCompliance) })} size="small" variant="outlined" />
               )}
               {day.execution.zoneCompliance != null && (
-                <Chip label={`Strefa ${Math.round(day.execution.zoneCompliance)}%`} size="small" variant="outlined" />
+                <Chip label={t('calendarDayDialog.zoneCompliance', { value: Math.round(day.execution.zoneCompliance) })} size="small" variant="outlined" />
               )}
               {day.execution.primaryLimiter ? (
-                <Chip label={`Limiter: ${executionLimiterLabel(day.execution.primaryLimiter)}`} size="small" variant="outlined" />
+                <Chip label={t('calendarDayDialog.limiterChip', { value: executionLimiterLabel(day.execution.primaryLimiter) })} size="small" variant="outlined" />
               ) : null}
             </Stack>
             <Typography variant="body2">{day.execution.description}</Typography>
@@ -210,7 +218,7 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
                   color: "text.secondary",
                   mt: 1
                 }}>
-                Jutro: {day.execution.nextDayAdvice}
+                {t('calendarDayDialog.nextDayAdvice', { advice: day.execution.nextDayAdvice })}
               </Typography>
             ) : null}
           </Alert>
@@ -218,12 +226,12 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
 
         {!!actual && (
           <Box>
-            <Typography variant="subtitle2" gutterBottom>Zrealizowana aktywność</Typography>
+            <Typography variant="subtitle2" gutterBottom>{t('calendarDayDialog.completedActivityTitle')}</Typography>
             <Typography variant="body2">{actual.name}</Typography>
             <Typography variant="body2" sx={{
               color: "text.secondary"
             }}>
-              {actual.durationMin != null ? `${actual.durationMin} min` : 'Czas nieznany'} · {actual.distanceKm != null ? `${actual.distanceKm.toFixed(1)} km` : 'Dystans nieznany'}
+              {actual.durationMin != null ? `${actual.durationMin} min` : t('calendarDayDialog.durationUnknown')} · {actual.distanceKm != null ? `${actual.distanceKm.toFixed(1)} km` : t('calendarDayDialog.distanceUnknown')}
               {actual.tss != null ? ` · ${actual.tss} TSS` : ''}
             </Typography>
           </Box>
@@ -234,30 +242,30 @@ export default function CalendarDayDialog({ day: originalDay, open, onClose }: C
             <Button size="small" onClick={() => navigate(`/activities/${activity.id}`)}>{activity.name}</Button>
             <Typography variant="caption" sx={{
               color: "text.secondary"
-            }}>Pozostała aktywność z tego dnia</Typography>
+            }}>{t('calendarDayDialog.remainingActivity')}</Typography>
           </Box>
         ))}
 
         {!planned && !actual && (
           <Typography variant="body2" sx={{
             color: "text.secondary"
-          }}>Brak zaplanowanych treningów i aktywności</Typography>
+          }}>{t('calendarDayDialog.noPlanNoActual')}</Typography>
         )}
       </DialogContent>
       <DialogActions sx={{ justifyContent: 'space-between', px: 2 }}>
         <Box>
           {!!planned && <>
-              <Button size="small" component="a" href={scheduledExportUrl(planned.id, 'fit')}>Pobierz FIT</Button>
-              <Button size="small" component="a" href={scheduledExportUrl(planned.id, 'zwo')}>Pobierz ZWO</Button>
+              <Button size="small" component="a" href={scheduledExportUrl(planned.id, 'fit')}>{t('calendarDayDialog.downloadFit')}</Button>
+              <Button size="small" component="a" href={scheduledExportUrl(planned.id, 'zwo')}>{t('calendarDayDialog.downloadZwo')}</Button>
             </>}
         </Box>
         <Box>
           {!!planned && planned.status === 'PLANNED' && <>
-              <Button size="small" variant="contained" startIcon={<PlayArrowIcon />} onClick={() => { onClose(); navigate(`/training/workouts/${planned.id}`); }}>Rozpocznij</Button>
-              <Button size="small" color="success" onClick={() => handleStatus('COMPLETED')}>Oznacz jako zrealizowany</Button>
-              <Button size="small" color="warning" onClick={() => handleStatus('SKIPPED')}>Pomiń</Button>
+              <Button size="small" variant="contained" startIcon={<PlayArrowIcon />} onClick={() => { onClose(); navigate(`/training/workouts/${planned.id}`); }}>{t('calendarDayDialog.start')}</Button>
+              <Button size="small" color="success" onClick={() => handleStatus('COMPLETED')}>{t('calendarDayDialog.markCompleted')}</Button>
+              <Button size="small" color="warning" onClick={() => handleStatus('SKIPPED')}>{t('calendarDayDialog.skip')}</Button>
             </>}
-          {!!planned && <Button size="small" color="error" onClick={handleDelete}>Usuń</Button>}
+          {!!planned && <Button size="small" color="error" onClick={handleDelete}>{t('calendarDayDialog.delete')}</Button>}
         </Box>
       </DialogActions>
     </Dialog>
@@ -295,54 +303,55 @@ function executionSeverity(outcome: string): 'success' | 'warning' | 'error' | '
 function executionLimiterLabel(limiter: string) {
   switch (limiter) {
     case 'ON_TARGET':
-      return 'Na celu';
+      return trainingMessages.t('calendarDayDialog.limiterLabels.onTarget');
     case 'INTERVAL_QUALITY':
-      return 'Jakość interwałów';
+      return trainingMessages.t('calendarDayDialog.limiterLabels.intervalQuality');
     case 'PACE_CONTROL':
-      return 'Kontrola tempa';
+      return trainingMessages.t('calendarDayDialog.limiterLabels.paceControl');
     case 'VOLUME_SHORTFALL':
-      return 'Za mało czasu';
+      return trainingMessages.t('calendarDayDialog.limiterLabels.volumeShortfall');
     case 'LOAD_SHORTFALL':
-      return 'Za mały koszt';
+      return trainingMessages.t('calendarDayDialog.limiterLabels.loadShortfall');
     case 'TOO_HARD':
-      return 'Za mocno';
+      return trainingMessages.t('calendarDayDialog.limiterLabels.tooHard');
     default:
-      return 'Wykonanie';
+      return trainingMessages.t('calendarDayDialog.limiterLabels.executionDefault');
   }
 }
 
 function buildDecisionScenarios(day: CalendarDay) {
   const projectedReadiness = day.projection?.projectedReadiness ?? 50;
   const plannedTss = day.planned?.plannedTss ?? 0;
+  const t = trainingMessages.t;
 
   return [
     {
-      title: 'Zostaw jak jest',
+      title: t('calendarDayDialog.scenarios.keepTitle'),
       readiness: projectedReadiness,
       tssLabel: `${plannedTss} TSS`,
       color: 'primary' as const,
-      description: `Trzymasz oryginalny bodziec i strukturę tygodnia. To najlepsza opcja, jeśli czujesz się zgodnie z projekcją dnia ${day.projection?.dayLabel ?? ''}.`,
+      description: t('calendarDayDialog.scenarios.keepDescription', { dayLabel: day.projection?.dayLabel ?? '' }),
     },
     {
-      title: 'Odchudź o 20-25%',
+      title: t('calendarDayDialog.scenarios.reduceTitle'),
       readiness: Math.min(100, projectedReadiness + 8),
       tssLabel: `${Math.max(0, Math.round(plannedTss * 0.75))} TSS`,
       color: 'warning' as const,
-      description: 'Zostawiasz rolę treningu, ale obcinasz objętość lub jedną serię. To zwykle najlepszy kompromis przy narastającym zmęczeniu.',
+      description: t('calendarDayDialog.scenarios.reduceDescription'),
     },
     {
-      title: 'Przenieś na jutro',
+      title: t('calendarDayDialog.scenarios.moveTitle'),
       readiness: Math.min(100, projectedReadiness + 12),
-      tssLabel: `${plannedTss} TSS później`,
+      tssLabel: t('calendarDayDialog.scenarios.laterTssLabel', { tss: plannedTss }),
       color: 'info' as const,
-      description: 'Chronisz świeżość dziś, ale dalej bronisz tygodniowego celu. Dobra opcja, jeśli problemem jest konkretny dzień, a nie cały tydzień.',
+      description: t('calendarDayDialog.scenarios.moveDescription'),
     },
     {
-      title: 'Odpuść bodziec',
+      title: t('calendarDayDialog.scenarios.dropTitle'),
       readiness: Math.min(100, projectedReadiness + 18),
       tssLabel: '0 TSS',
       color: 'success' as const,
-      description: 'Najmocniej odzyskujesz świeżość, ale tracisz zaplanowany bodziec. Wybieraj to głównie wtedy, gdy korekta lub readiness są już czerwone.',
+      description: t('calendarDayDialog.scenarios.dropDescription'),
     },
   ];
 }

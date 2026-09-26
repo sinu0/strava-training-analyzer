@@ -18,6 +18,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { weatherMessages } from '@/components/weather/messages';
 import WeatherAlgorithmPanel from '@/components/weather/WeatherAlgorithmPanel';
 import WeatherForecastViews from '@/components/weather/WeatherForecastViews';
 import WeatherLocationMenu from '@/components/weather/WeatherLocationMenu';
@@ -46,6 +47,7 @@ import {
 } from '@/utils/weatherScoring';
 
 export default function WeatherPage() {
+  const t = weatherMessages.useT();
   const theme = useTheme();
   const themeTokens = getAppThemeTokens(theme);
   const navigate = useNavigate();
@@ -60,7 +62,7 @@ export default function WeatherPage() {
   const [selectedPoint, setSelectedPoint] = useLocalStorage('weather-studio-point-v1', {
     lat: activeLocation?.latitude ?? 50.0614,
     lon: activeLocation?.longitude ?? 19.9366,
-    label: activeLocation?.name ?? 'Punkt fokusowy',
+    label: activeLocation?.name ?? t('page.defaultPointLabel'),
   });
   const [profile, setProfile] = useLocalStorage(
     'weather-studio-profile-v1',
@@ -109,7 +111,7 @@ export default function WeatherPage() {
     if (activeLocation?.name) {
       refreshCache.mutate(activeLocation.name);
     }
-    // Invaliduj dane punktu — pobierze na nowo z backendu
+    // Invalidate the point data — it will be refetched from the backend
     queryClient.invalidateQueries({ queryKey: ['weatherPointGradient', selectedPoint.lat, selectedPoint.lon, selectedPoint.label] });
   };
 
@@ -127,12 +129,12 @@ export default function WeatherPage() {
 
   return (
     <Page
-      title="Studio pogody"
-      subtitle="Pełny widok pogody dla decyzji treningowej i eksploracji punktów na mapie."
-      breadcrumbs={[{ label: 'Home' }, { label: 'Studio pogody' }]}
+      title={t('page.title')}
+      subtitle={t('page.subtitle')}
+      breadcrumbs={[{ label: t('page.breadcrumbHome') }, { label: t('page.title') }]}
     >
       <Stack spacing={2.5}>
-        {/* Kompaktowy nagłówek — zamiast pełnego EditorialHero */}
+        {/* Compact header — instead of the full EditorialHero */}
         <Box
           sx={{
             display: 'flex',
@@ -150,10 +152,10 @@ export default function WeatherPage() {
               variant="overline"
               sx={{ color: 'text.secondary', fontSize: '0.68rem' }}
             >
-              Pogoda
+              {t('page.overline')}
             </Typography>
             <Typography variant="h6" sx={{ lineHeight: 1.15, mt: 0.25 }}>
-              Studio pogody dla decyzji treningowych
+              {t('page.heroTitle')}
             </Typography>
             <Typography
               variant="caption"
@@ -162,7 +164,7 @@ export default function WeatherPage() {
                 mt: 0.5,
                 display: 'block'
               }}>
-              Kliknij punkt na mapie, zobacz dzień i tydzień, dostroj algorytm.
+              {t('page.heroSubtitle')}
             </Typography>
             <Stack
               direction="row"
@@ -172,7 +174,7 @@ export default function WeatherPage() {
                 flexWrap: "wrap",
                 mt: 0.75
               }}>
-              {['Mapa klików', 'Live scoring', 'Decyzja'].map((tag) => (
+              {[t('page.tagMap'), t('page.tagLiveScoring'), t('page.tagDecision')].map((tag) => (
                 <Box
                   key={tag}
                   sx={{
@@ -194,7 +196,7 @@ export default function WeatherPage() {
           <Box
             component="img"
             src={getWeatherIllustrationPath(cyclistType)}
-            alt="Studio pogody"
+            alt={t('page.heroAlt')}
             sx={{
               width: { xs: 72, md: 90 },
               height: { xs: 54, md: 68 },
@@ -209,7 +211,7 @@ export default function WeatherPage() {
         </Box>
 
         <Grid container spacing={2.5}>
-          {/* Główna kolumna — mapa i forecast */}
+          {/* Main column — map and forecast */}
           <Grid
             size={{
               xs: 12,
@@ -217,8 +219,8 @@ export default function WeatherPage() {
             }}>
             <Stack spacing={2.5}>
               <Widget
-                title="Punkt fokusowy"
-                subtitle="Kliknij na mapie lub wybierz zapisane miejsce, aby przebudować całą analizę."
+                title={t('page.focusPointTitle')}
+                subtitle={t('page.focusPointSubtitle')}
               >
                 <Stack spacing={1.5}>
                   <WeatherStudioMap
@@ -237,8 +239,8 @@ export default function WeatherPage() {
               </Widget>
 
               <Widget
-                title="Dzień i tydzień"
-                subtitle="Histogram i forecast przeliczone dokładnie według Twoich ustawień."
+                title={t('page.dayWeekTitle')}
+                subtitle={t('page.dayWeekSubtitle')}
               >
                 {pointGradient ? (
                   <WeatherForecastViews
@@ -249,13 +251,13 @@ export default function WeatherPage() {
                 ) : (
                   <Typography sx={{
                     color: "text.secondary"
-                  }}>Ładowanie widoku forecastu…</Typography>
+                  }}>{t('page.loadingForecast')}</Typography>
                 )}
               </Widget>
             </Stack>
           </Grid>
 
-          {/* Boczna szyna — decyzja, algorytm, akcje */}
+          {/* Side rail — decision, algorithm, actions */}
           <Grid
             size={{
               xs: 12,
@@ -270,10 +272,10 @@ export default function WeatherPage() {
               }}
             >
               <Widget
-                title="Decyzja treningowa"
-                subtitle="Ta sama logika forecastu, ale z pełną kontrolą nad interpretacją."
+                title={t('page.decisionTitle')}
+                subtitle={t('page.decisionSubtitle')}
                 action={
-                  <Tooltip title="Odśwież dane pogodowe">
+                  <Tooltip title={t('page.refreshTooltip')}>
                     <IconButton
                       size="small"
                       onClick={handleRefresh}
@@ -339,7 +341,7 @@ export default function WeatherPage() {
                           }}
                         >
                           <Typography variant="body2" sx={{ fontWeight: (currentTheme) => getAppThemeTokens(currentTheme).type.weight.label }}>
-                            Najlepsze okno dziś
+                            {t('page.bestWindowToday')}
                           </Typography>
                           <Typography variant="h5" sx={{ mt: 0.5 }}>
                             {today?.bestWindowStart ?? '—'} — {today?.bestWindowEnd ?? '—'}
@@ -347,7 +349,7 @@ export default function WeatherPage() {
                           <Typography variant="body2" sx={{
                             color: "text.secondary"
                           }}>
-                            Score {today?.bestWindowScore ?? 0}/100
+                            {t('page.score', { score: today?.bestWindowScore ?? 0 })}
                           </Typography>
                         </Box>
                       </Grid>
@@ -366,7 +368,7 @@ export default function WeatherPage() {
                           }}
                         >
                           <Typography variant="body2" sx={{ fontWeight: (currentTheme) => getAppThemeTokens(currentTheme).type.weight.label }}>
-                            Jutro
+                            {t('page.bestWindowTomorrow')}
                           </Typography>
                           <Typography variant="h5" sx={{ mt: 0.5 }}>
                             {tomorrow?.bestWindowStart ?? '—'} — {tomorrow?.bestWindowEnd ?? '—'}
@@ -374,7 +376,7 @@ export default function WeatherPage() {
                           <Typography variant="body2" sx={{
                             color: "text.secondary"
                           }}>
-                            Score {tomorrow?.bestWindowScore ?? 0}/100
+                            {t('page.score', { score: tomorrow?.bestWindowScore ?? 0 })}
                           </Typography>
                         </Box>
                       </Grid>
@@ -383,20 +385,20 @@ export default function WeatherPage() {
                 ) : (
                   <Typography sx={{
                     color: "text.secondary"
-                  }}>Ładowanie pełnej analizy punktu…</Typography>
+                  }}>{t('page.loadingFullAnalysis')}</Typography>
                 )}
               </Widget>
 
               <Widget
-                title="Sterowanie algorytmem"
-                subtitle="Parametry są stale pod ręką i od razu wpływają na histogram oraz rekomendacje."
+                title={t('page.algorithmTitle')}
+                subtitle={t('page.algorithmSubtitle')}
               >
                 <WeatherAlgorithmPanel profile={profile} onChange={handleProfileChange} />
               </Widget>
 
               <Widget
-                title="Szybkie akcje"
-                subtitle="Najkrótsza droga z explorera pogody do dalszych działań."
+                title={t('page.quickActionsTitle')}
+                subtitle={t('page.quickActionsSubtitle')}
               >
                 <Stack spacing={1.2}>
                   <Button
@@ -410,14 +412,14 @@ export default function WeatherPage() {
                       })
                     }
                   >
-                    Zapisz punkt jako lokalizację
+                    {t('page.saveAsLocation')}
                   </Button>
                   <Button
                     variant="outlined"
                     startIcon={<AutoAwesomeIcon />}
                     onClick={() => navigate('/routes?showWeather=1')}
                   >
-                    Otwórz planer z pogodą
+                    {t('page.openPlannerWithWeather')}
                   </Button>
                 </Stack>
               </Widget>

@@ -7,6 +7,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 
+import { adminMessages } from '@/components/admin/messages';
 import WeatherConditionIcon from '@/components/weather/WeatherConditionIcon';
 import { Widget } from '@/ui';
 import {
@@ -49,8 +50,9 @@ export default function WeatherJobSection({
   onRefreshWeather,
   onRefreshAllWeather,
 }: WeatherJobSectionProps) {
+  const t = adminMessages.useT();
   return (
-    <Widget title="Cache pogody">
+    <Widget title={t('weatherJob.title')}>
       <Box sx={{ py: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
           <WeatherConditionIcon kind="sunny" size={28} alt="" />
@@ -58,10 +60,10 @@ export default function WeatherJobSection({
             <Typography variant="body2" sx={{
               color: "text.secondary"
             }}>
-              Automatyczne odświeżanie
+              {t('weatherJob.autoRefresh')}
             </Typography>
             <Typography variant="caption" sx={{ color: STATUS_COLORS.success, fontWeight: 600 }}>
-              Codziennie o 06:00 i 18:00
+              {t('weatherJob.schedule')}
             </Typography>
           </Box>
         </Box>
@@ -80,19 +82,19 @@ export default function WeatherJobSection({
               mb: 1,
               display: 'block'
             }}>
-            OSTATNIE WYKONANIE
+            {t('weatherJob.lastRun')}
           </Typography>
           <Stack spacing={0.5}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="caption" sx={{
                 color: "text.secondary"
-              }}>Status:</Typography>
+              }}>{t('weatherJob.status')}</Typography>
               <StatusChip status={weatherJobStatus?.status ?? 'idle'} />
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography variant="caption" sx={{
                 color: "text.secondary"
-              }}>Czas wykonania:</Typography>
+              }}>{t('weatherJob.executionTime')}</Typography>
               <Typography variant="caption" sx={{ fontWeight: 600 }}>
                 {formatTimestamp(weatherJobStatus?.lastRunAt ?? null)}
               </Typography>
@@ -100,7 +102,7 @@ export default function WeatherJobSection({
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography variant="caption" sx={{
                 color: "text.secondary"
-              }}>Lokalizacje przetworzone:</Typography>
+              }}>{t('weatherJob.locationsProcessed')}</Typography>
               <Typography variant="caption" sx={{ fontWeight: 600, color: STATUS_COLORS.success }}>
                 {weatherJobStatus?.locationsProcessed ?? 0}
               </Typography>
@@ -109,7 +111,7 @@ export default function WeatherJobSection({
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="caption" sx={{
                   color: "text.secondary"
-                }}>Błędy:</Typography>
+                }}>{t('weatherJob.errors')}</Typography>
                 <Typography variant="caption" sx={{ fontWeight: 600, color: STATUS_COLORS.error }}>
                   {weatherJobStatus?.locationsFailed}
                 </Typography>
@@ -137,7 +139,7 @@ export default function WeatherJobSection({
               mb: 1,
               display: 'block'
             }}>
-            LOKALIZACJE ({weatherLocations?.length ?? 0})
+            {t('weatherJob.locations', { count: weatherLocations?.length ?? 0 })}
           </Typography>
           <Stack spacing={0.5}>
             {weatherLocations?.map((loc) => (
@@ -158,7 +160,7 @@ export default function WeatherJobSection({
                   disabled={refreshWeatherPending || refreshAllWeatherPending}
                   sx={{ textTransform: 'none', fontSize: '0.7rem', minWidth: 'auto', color: STATUS_COLORS.info }}
                 >
-                  Odśwież
+                  {t('weatherJob.refreshOne')}
                 </Button>
               </Box>
             ))}
@@ -166,7 +168,7 @@ export default function WeatherJobSection({
               <Typography variant="caption" sx={{
                 color: "text.secondary"
               }}>
-                Brak lokalizacji — dodaj w widżecie pogody na dashboardzie.
+                {t('weatherJob.noLocations')}
               </Typography>
             )}
           </Stack>
@@ -193,7 +195,7 @@ export default function WeatherJobSection({
             color: 'background.default',
           }}
         >
-          Odśwież cache wszystkich lokalizacji
+          {t('weatherJob.refreshAll')}
         </Button>
       </Box>
     </Widget>

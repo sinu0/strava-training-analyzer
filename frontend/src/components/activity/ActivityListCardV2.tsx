@@ -8,6 +8,7 @@ import StraightenOutlinedIcon from '@mui/icons-material/StraightenOutlined';
 import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined';
 import { Box, Button, Stack, Typography } from '@mui/material';
 
+import { activityMessages } from '@/components/activity/messages';
 import { getLocale } from '@/i18n';
 import type { ActivitySummary } from '@/types/activity';
 import { StatusPill, Surface } from '@/ui';
@@ -19,11 +20,6 @@ interface ActivityListCardV2Props {
   onOpen: (id: string) => void;
   priority?: boolean;
 }
-
-const decimal = new Intl.NumberFormat(getLocale(), {
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1,
-});
 
 function durationLabel(seconds: number) {
   const hours = Math.floor(seconds / 3600);
@@ -55,6 +51,11 @@ function Stat({ icon, value, label }: { icon: React.ReactNode; value: string; la
 }
 
 export default function ActivityListCardV2({ activity, onOpen, priority = false }: ActivityListCardV2Props) {
+  const t = activityMessages.useT();
+  const decimal = new Intl.NumberFormat(getLocale(), {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
   const date = new Date(activity.startedAt);
   const dateLabel = date.toLocaleDateString(getLocale(), {
     weekday: 'long',
@@ -127,12 +128,12 @@ export default function ActivityListCardV2({ activity, onOpen, priority = false 
             flexWrap: "wrap",
             mt: 2.2
           }}>
-          <Stat icon={<StraightenOutlinedIcon />} value={`${decimal.format(activity.distanceM / 1000)} km`} label="dystans" />
-          <Stat icon={<TimerOutlinedIcon />} value={durationLabel(activity.movingTimeSec)} label="czas ruchu" />
-          {activity.avgPowerW != null ? <Stat icon={<BoltOutlinedIcon />} value={`${activity.avgPowerW} W`} label="śr. moc" /> : null}
-          {activity.avgHeartrate != null ? <Stat icon={<FavoriteBorderOutlinedIcon />} value={`${activity.avgHeartrate} bpm`} label="śr. tętno" /> : null}
-          {activity.avgSpeedMs != null ? <Stat icon={<SpeedOutlinedIcon />} value={`${decimal.format(activity.avgSpeedMs * 3.6)} km/h`} label="śr. prędkość" /> : null}
-          {activity.elevationGainM != null ? <Stat icon={<LandscapeOutlinedIcon />} value={`${Math.round(activity.elevationGainM)} m`} label="przewyższenie" /> : null}
+          <Stat icon={<StraightenOutlinedIcon />} value={`${decimal.format(activity.distanceM / 1000)} km`} label={t('listCard.distance')} />
+          <Stat icon={<TimerOutlinedIcon />} value={durationLabel(activity.movingTimeSec)} label={t('listCard.movingTime')} />
+          {activity.avgPowerW != null ? <Stat icon={<BoltOutlinedIcon />} value={`${activity.avgPowerW} W`} label={t('listCard.avgPower')} /> : null}
+          {activity.avgHeartrate != null ? <Stat icon={<FavoriteBorderOutlinedIcon />} value={`${activity.avgHeartrate} bpm`} label={t('listCard.avgHeartRate')} /> : null}
+          {activity.avgSpeedMs != null ? <Stat icon={<SpeedOutlinedIcon />} value={`${decimal.format(activity.avgSpeedMs * 3.6)} km/h`} label={t('listCard.avgSpeed')} /> : null}
+          {activity.elevationGainM != null ? <Stat icon={<LandscapeOutlinedIcon />} value={`${Math.round(activity.elevationGainM)} m`} label={t('listCard.elevationGain')} /> : null}
         </Stack>
 
         <Stack
@@ -144,10 +145,17 @@ export default function ActivityListCardV2({ activity, onOpen, priority = false 
             pt: 2.2
           }}>
           {activity.primaryBenefit ? <StatusPill size="sm" variant="outline" tone="neutral" label={activity.primaryBenefit} /> : null}
-          {(activity.segmentCount ?? 0) > 0 ? <StatusPill size="sm" variant="outline" tone="neutral" label={`${activity.segmentCount} segmentów · ${activity.newRecordCount ?? 0} nowe rekordy`} /> : null}
+          {(activity.segmentCount ?? 0) > 0 ? (
+            <StatusPill
+              size="sm"
+              variant="outline"
+              tone="neutral"
+              label={`${t('listCard.segmentsCount', { count: activity.segmentCount ?? 0 })} · ${t('listCard.newRecordsCount', { count: activity.newRecordCount ?? 0 })}`}
+            />
+          ) : null}
           <Box sx={{ flex: 1 }} />
           <Button endIcon={<ArrowForwardRoundedIcon />} onClick={() => onOpen(activity.id)}>
-            Otwórz analizę
+            {t('listCard.openAnalysis')}
           </Button>
         </Stack>
       </Box>

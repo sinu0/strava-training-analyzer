@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { getLocale } from '@/i18n';
 import { EmptyState, ErrorState, LoadingState, Metric, Page, Surface } from '@/ui';
 
+import { dataJobsMessages } from './messages';
 import {
   useCreateImportJob,
   useCreateRecalculationJob,
@@ -28,6 +29,7 @@ import {
 const stages = ['FETCH_SUMMARY', 'FETCH_DETAIL', 'REFRESH_PROVENANCE', 'STORE_ACTIVITY', 'CALCULATE_METRICS', 'UPDATE_DAILY', 'DERIVE_INSIGHTS', 'COMPLETE'];
 
 export default function DataJobsPage() {
+  const t = dataJobsMessages.useT();
   const quality = useDataQualitySummary();
   const refetchQuality = quality.refetch;
   const [jobId, setJobId] = useState<string>();
@@ -59,7 +61,7 @@ export default function DataJobsPage() {
   }, [activeJob?.status, activeJob?.updatedAt, refetchQuality]);
 
   return (
-    <Page title="Dane i zadania" subtitle="Kontroluj kompletność danych, import oraz bezpieczne przeliczanie metryk." maxWidth={1180}>
+    <Page title={t('title')} subtitle={t('subtitle')} maxWidth={1180}>
       <Grid container spacing={2.5}>
         <Grid
           size={{
@@ -69,21 +71,21 @@ export default function DataJobsPage() {
           <Surface variant="accent" sx={{ height: '100%' }}>
             <Stack direction="row" spacing={1} sx={{
               alignItems: "center"
-            }}><DataObjectOutlinedIcon color="primary" /><Typography variant="h6">Jakość danych</Typography></Stack>
-            {quality.isLoading ? <LoadingState message="Sprawdzanie jakości…" /> : null}
-            {quality.isError ? <ErrorState message="Nie udało się pobrać jakości danych." onRetry={() => void quality.refetch()} /> : null}
+            }}><DataObjectOutlinedIcon color="primary" /><Typography variant="h6">{t('quality.title')}</Typography></Stack>
+            {quality.isLoading ? <LoadingState message={t('quality.loading')} /> : null}
+            {quality.isError ? <ErrorState message={t('quality.error')} onRetry={() => void quality.refetch()} /> : null}
             {quality.data ? (
               <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                <Grid size={6}><Metric label="Ocenionych" value={`${quality.data.assessedActivities}/${quality.data.totalActivities}`} tone="primary" /></Grid>
-                <Grid size={6}><Metric label="Dostępnych" value={quality.data.available} tone="success" /></Grid>
-                <Grid size={6}><Metric label="Częściowych" value={quality.data.partial} tone="warning" /></Grid>
-                <Grid size={6}><Metric label="Nieznanych" value={quality.data.unknown} /></Grid>
-                <Grid size={4}><Metric label="Moc zmierzona" value={quality.data.measuredPowerActivities} tone="success" /></Grid>
-                <Grid size={4}><Metric label="Moc szacowana" value={quality.data.estimatedPowerActivities} tone="warning" /></Grid>
-                <Grid size={4}><Metric label="Nieznane źródło mocy" value={quality.data.unknownPowerProvenanceActivities} /></Grid>
+                <Grid size={6}><Metric label={t('quality.assessed')} value={`${quality.data.assessedActivities}/${quality.data.totalActivities}`} tone="primary" /></Grid>
+                <Grid size={6}><Metric label={t('quality.available')} value={quality.data.available} tone="success" /></Grid>
+                <Grid size={6}><Metric label={t('quality.partial')} value={quality.data.partial} tone="warning" /></Grid>
+                <Grid size={6}><Metric label={t('quality.unknown')} value={quality.data.unknown} /></Grid>
+                <Grid size={4}><Metric label={t('quality.measuredPower')} value={quality.data.measuredPowerActivities} tone="success" /></Grid>
+                <Grid size={4}><Metric label={t('quality.estimatedPower')} value={quality.data.estimatedPowerActivities} tone="warning" /></Grid>
+                <Grid size={4}><Metric label={t('quality.unknownPowerProvenance')} value={quality.data.unknownPowerProvenanceActivities} /></Grid>
                 {quality.data.unassessed > 0 ? (
                   <Grid size={12}>
-                    <Alert severity="info">Nieocenionych: {quality.data.unassessed}. Uruchom „Przelicz metryki”, aby wykonać backfill ocen.</Alert>
+                    <Alert severity="info">{t('quality.unassessed', { count: quality.data.unassessed })}</Alert>
                   </Grid>
                 ) : null}
               </Grid>
@@ -99,18 +101,18 @@ export default function DataJobsPage() {
           <Surface sx={{ height: '100%' }}>
             <Stack direction="row" spacing={1} sx={{
               alignItems: "center"
-            }}><SyncOutlinedIcon color="primary" /><Typography variant="h6">Uruchom zadanie</Typography></Stack>
+            }}><SyncOutlinedIcon color="primary" /><Typography variant="h6">{t('run.title')}</Typography></Stack>
             <Typography
               variant="body2"
               sx={{
                 color: "text.secondary",
                 mt: 1
-              }}>Każde zadanie zapisuje etap, próbę i błąd. Import nie uruchomi się równolegle drugi raz.</Typography>
+              }}>{t('run.description')}</Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} sx={{ mt: 2.5 }}>
-              <Button variant="contained" disabled={busy} onClick={() => startImport('RECENT')}>Import ostatnich</Button>
-              <Button variant="outlined" disabled={busy} onClick={() => startImport('FULL')}>Pełny import</Button>
-              <Button variant="outlined" disabled={busy} onClick={() => startImport('POWER_PROVENANCE')}>Uzupełnij źródło mocy</Button>
-              <Button variant="outlined" startIcon={<RefreshOutlinedIcon />} disabled={busy} onClick={startRecalculation}>Przelicz metryki</Button>
+              <Button variant="contained" disabled={busy} onClick={() => startImport('RECENT')}>{t('run.importRecent')}</Button>
+              <Button variant="outlined" disabled={busy} onClick={() => startImport('FULL')}>{t('run.importFull')}</Button>
+              <Button variant="outlined" disabled={busy} onClick={() => startImport('POWER_PROVENANCE')}>{t('run.importPowerProvenance')}</Button>
+              <Button variant="outlined" startIcon={<RefreshOutlinedIcon />} disabled={busy} onClick={startRecalculation}>{t('run.recalculate')}</Button>
             </Stack>
             <Typography
               variant="caption"
@@ -119,7 +121,7 @@ export default function DataJobsPage() {
                 display: 'block',
                 mt: 1.5
               }}>
-              Uzupełnienie źródła mocy pobiera ze Stravy wyłącznie jawne metadane pomiaru. Brakująca flaga pozostaje nieznana — aplikacja nie zgaduje jej na podstawie watów.
+              {t('run.powerProvenanceCaption')}
             </Typography>
           </Surface>
         </Grid>
@@ -136,18 +138,18 @@ export default function DataJobsPage() {
                 }}>
                 <Box><Typography variant="overline" sx={{
                   color: "text.secondary"
-                }}>{activeJob.jobType} · próba {activeJob.attempt}</Typography><Typography variant="h6">{activeJob.stage}</Typography></Box>
+                }}>{t('job.attempt', { jobType: activeJob.jobType, attempt: activeJob.attempt })}</Typography><Typography variant="h6">{activeJob.stage}</Typography></Box>
                 <Chip label={activeJob.status} color={activeJob.status === 'COMPLETED' ? 'success' : activeJob.status === 'FAILED' ? 'error' : 'primary'} variant="outlined" />
               </Stack>
               <LinearProgress variant="determinate" value={progress} sx={{ mt: 2, height: 8, borderRadius: 4 }} />
               {activeJob.status === 'RETRYABLE' && activeJob.retryAt ? (
                 <Alert severity="info" sx={{ mt: 2 }}>
-                  Limit API. Zadanie wznowi się automatycznie {new Date(activeJob.retryAt).toLocaleString(getLocale())}.
+                  {t('job.retryInfo', { time: new Date(activeJob.retryAt).toLocaleString(getLocale()) })}
                 </Alert>
               ) : null}
               {activeJob.errorMessage ? <Alert severity="error" sx={{ mt: 2 }}>{activeJob.errorMessage}</Alert> : null}
               {activeJob.status === 'FAILED' || activeJob.status === 'RETRYABLE' ? (
-                <Button sx={{ mt: 2 }} disabled={retry.isPending || waitingForAutomaticRetry} onClick={() => retry.mutate(activeJob.id, { onSuccess: updated => setJobId(updated.id) })}>Wznów od niezakończonego etapu</Button>
+                <Button sx={{ mt: 2 }} disabled={retry.isPending || waitingForAutomaticRetry} onClick={() => retry.mutate(activeJob.id, { onSuccess: updated => setJobId(updated.id) })}>{t('job.retry')}</Button>
               ) : null}
             </Surface>
           </Grid>
@@ -156,8 +158,8 @@ export default function DataJobsPage() {
             <Surface padding="none">
               <EmptyState
                 icon={<DataObjectOutlinedIcon />}
-                title="Brak aktywnego zadania"
-                description="Uruchom import lub przeliczenie metryk. Postęp i ewentualne błędy pojawią się w tym miejscu."
+                title={t('empty.title')}
+                description={t('empty.description')}
               />
             </Surface>
           </Grid>

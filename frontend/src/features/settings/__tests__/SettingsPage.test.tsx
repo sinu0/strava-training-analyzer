@@ -1,17 +1,19 @@
 import { ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AxiosError } from 'axios';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import AdminPage from '@/pages/AdminPage';
+import SettingsPage from '@/features/settings/SettingsPage';
 import theme from '@/theme/theme';
 import type { AiModuleStatus } from '@/types/ai';
 
 const mutateConnect = vi.fn();
 const mutateSyncRecent = vi.fn();
 const mutateSyncPhotos = vi.fn();
+const mutateUpdateProfile = vi.fn();
+const mutateAiSettings = vi.fn();
 let syncRecentState: { isPending: boolean; isError: boolean; error: unknown };
 let mockProfileConnected = true;
 let mockAiStatus: AiModuleStatus = {
@@ -51,6 +53,8 @@ beforeEach(() => {
   mutateConnect.mockReset();
   mutateSyncRecent.mockReset();
   mutateSyncPhotos.mockReset();
+  mutateUpdateProfile.mockReset();
+  mutateAiSettings.mockReset();
   syncRecentState = { isPending: false, isError: false, error: null };
   mockProfileConnected = true;
   mockAiStatus = {
@@ -86,6 +90,17 @@ beforeEach(() => {
 });
 
 vi.mock('@/hooks/useAi', () => ({
+  useAiSettings: () => ({
+    data: {
+      language: 'pl',
+      availableLanguages: ['pl', 'en'],
+      coachingStyle: 'BALANCED_ADVISOR',
+      availableCoachingStyles: ['BALANCED_ADVISOR', 'CONSERVATIVE_SCIENTIST', 'AGGRESSIVE_COACH'],
+    },
+    isLoading: false,
+    isError: false,
+  }),
+  useUpdateAiSettings: () => ({ mutate: mutateAiSettings, isPending: false, isError: false }),
   useAiStatus: () => ({
     data: mockAiStatus,
     isLoading: false,
@@ -167,9 +182,21 @@ vi.mock('@/hooks/useAnalytics', () => ({
   useRebuildFtpHistory: () => ({ mutate: vi.fn(), isPending: false, isSuccess: false }),
   useAutoSyncConfig: () => ({ data: { intervalMinutes: 30 }, isLoading: false }),
   useUpdateAutoSyncConfig: () => ({ mutate: vi.fn(), isPending: false }),
+  useUpdateProfile: () => ({ mutate: mutateUpdateProfile, isPending: false, isError: false }),
 }));
 
-function renderWithProviders(ui: React.ReactElement) {
+vi.mock('@/hooks/useUiPreferences', () => ({
+  useUiPreferences: () => ({ data: undefined, isError: true }),
+  useSaveUiPreferences: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}));
+
+vi.mock('@/components/admin/EquipmentSection', () => ({ default: () => <div>equipment-section</div> }));
+
+function renderSettings(tab?: string) {
+  return renderWithProviders(<SettingsPage />, tab ? `/settings?tab=${tab}` : '/settings');
+}
+
+function renderWithProviders(ui: React.ReactElement, path = '/settings') {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -177,20 +204,35 @@ function renderWithProviders(ui: React.ReactElement) {
   return render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
-        <MemoryRouter>{ui}</MemoryRouter>
+        <MemoryRouter initialEntries={[path]}>{ui}</MemoryRouter>
       </ThemeProvider>
     </QueryClientProvider>,
   );
 }
 
-describe('AdminPage', () => {
-  it('renders connected Strava account status', () => {
-    renderWithProviders(<AdminPage />);
+describe('SettingsPage', () => {
+  it('opens on the general tab and switches sections from the navigation', async () => {
+    renderSettings();
 
-    expect(screen.getByText('Integracje')).toBeDefined();
-    expect(screen.getByText('Sync i dane')).toBeDefined();
-    expect(screen.getByText('Wygląd')).toBeDefined();
-    expect(screen.getByText('Przetwarzanie')).toBeDefined();
+    expect(screen.getByRole('tab', { name: 'Ogólne' }).getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByRole('tabpanel')).toBeDefined();
+    expect(screen.getByRole('heading', { name: 'Język / Language' })).toBeDefined();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Integracje' }));
+
+    await waitFor(() => expect(screen.getByText('Konto Strava:')).toBeDefined());
+    expect(screen.getByRole('tab', { name: 'Integracje' }).getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('falls back to the general tab for an unknown tab id', () => {
+    renderSettings('nope');
+
+    expect(screen.getByRole('tab', { name: 'Ogólne' }).getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('renders connected Strava account status', () => {
+    renderSettings('integrations');
+
     expect(screen.getByText('Połączone')).toBeDefined();
     expect(screen.getByText('Konto Strava:')).toBeDefined();
   });
@@ -198,7 +240,7 @@ describe('AdminPage', () => {
   it('renders disconnected Strava account status', () => {
     mockProfileConnected = false;
 
-    renderWithProviders(<AdminPage />);
+    renderSettings('integrations');
 
     expect(screen.getByText('Niepołączone')).toBeDefined();
   });
@@ -213,7 +255,7 @@ describe('AdminPage', () => {
       webhookTokenSource: 'env',
     };
 
-    renderWithProviders(<AdminPage />);
+    renderSettings('integrations');
 
     expect((screen.getByRole('button', { name: 'Połącz ze Stravą' }) as HTMLButtonElement).disabled).toBe(true);
   });
@@ -223,7 +265,7 @@ describe('AdminPage', () => {
       options?.onSuccess?.({ url: 'https://www.strava.com/oauth/authorize?client_id=12345' });
     });
 
-    renderWithProviders(<AdminPage />);
+    renderSettings('integrations');
 
     fireEvent.click(screen.getByRole('button', { name: 'Połącz ze Stravą' }));
 
@@ -244,13 +286,13 @@ describe('AdminPage', () => {
       } as never),
     };
 
-    renderWithProviders(<AdminPage />);
+    renderSettings('sync');
 
     expect(screen.getByText('No athlete profile found. Connect Strava first.')).toBeDefined();
   });
 
   it('starts photo backfill from the admin panel', () => {
-    renderWithProviders(<AdminPage />);
+    renderSettings('sync');
 
     fireEvent.click(screen.getByRole('button', { name: /Pobierz zdjęcia/i }));
 
@@ -258,7 +300,7 @@ describe('AdminPage', () => {
   });
 
   it('explains unavailable AI capabilities and blocks batch actions', () => {
-    renderWithProviders(<AdminPage />);
+    renderSettings('ai');
 
     expect(screen.getByText('AI wyłączone')).toBeDefined();
     expect(screen.getByText('Baza wiedzy: wyłączona')).toBeDefined();
@@ -278,8 +320,42 @@ describe('AdminPage', () => {
       knowledgeCorpusVersion: '0123456789abcdef',
     };
 
-    renderWithProviders(<AdminPage />);
+    renderSettings('ai');
 
     expect(screen.getByText('Baza wiedzy: gotowa (27, v 01234567)')).toBeDefined();
+  });
+
+  it('saves the AI coaching style', () => {
+    renderSettings('ai');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ostrożny naukowiec' }));
+
+    expect(mutateAiSettings).toHaveBeenCalledWith({ coachingStyle: 'CONSERVATIVE_SCIENTIST' });
+  });
+
+  it('edits athlete thresholds including resting heart rate', () => {
+    renderSettings('athlete');
+
+    fireEvent.change(screen.getByLabelText('FTP (W)'), { target: { value: '295' } });
+    fireEvent.change(screen.getByLabelText('Tętno spoczynkowe (bpm)'), { target: { value: '48' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Zapisz profil' }));
+
+    expect(mutateUpdateProfile).toHaveBeenCalledWith({ ftpWatts: 295, restingHrBpm: 48 }, expect.anything());
+  });
+
+  it('blocks saving an out-of-range threshold', () => {
+    renderSettings('athlete');
+
+    fireEvent.change(screen.getByLabelText('HRmax (bpm)'), { target: { value: '300' } });
+
+    expect(screen.getByText('Poza zakresem 120–250')).toBeDefined();
+    expect((screen.getByRole('button', { name: 'Zapisz profil' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('groups rebuild actions under data maintenance', () => {
+    renderSettings('maintenance');
+
+    expect(screen.getByRole('button', { name: 'Przebuduj heatmapę' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Odbuduj historię FTP' })).toBeDefined();
   });
 });

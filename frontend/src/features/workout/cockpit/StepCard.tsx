@@ -5,11 +5,13 @@ import { getZoneForPower } from '@/types/training';
 import { Metric, ProgressTrack, StatusPill, Surface, useTokens } from '@/ui';
 
 import { formatClock, formatDurationShort, stepLabel, stepTargetText } from './format';
+import { cockpitMessages } from './messages';
 
 import type { MetricsWindow } from '../devices/liveMetrics';
 
 /** Current step: name, countdown, target, progress and step averages. */
 export default function StepCard({ execution, stepMetrics }: { execution: WorkoutExecution; stepMetrics: MetricsWindow }) {
+  const t = cockpitMessages.useT();
   const tokens = useTokens();
   const index = execution.currentStepIndex;
   const step = execution.stepsSnapshot[index];
@@ -23,9 +25,9 @@ export default function StepCard({ execution, stepMetrics }: { execution: Workou
   const zoneColor = zone ? tokens.chart.zone[zone as keyof typeof tokens.chart.zone] : tokens.chart.secondary;
 
   return (
-    <Surface component="section" aria-label="Bieżący krok">
+    <Surface component="section" aria-label={t('stepCard.ariaLabel')}>
       <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
-        <StatusPill size="sm" eyebrow label={`Krok ${Math.min(index + 1, execution.stepsSnapshot.length)}/${execution.stepsSnapshot.length}`} />
+        <StatusPill size="sm" eyebrow label={t('stepCard.stepCount', { current: Math.min(index + 1, execution.stepsSnapshot.length), total: execution.stepsSnapshot.length })} />
         {zone ? <StatusPill size="sm" color={zoneColor} label={zone} /> : null}
         <StatusPill size="sm" variant="outline" label={target.pct} />
       </Stack>
@@ -40,7 +42,7 @@ export default function StepCard({ execution, stepMetrics }: { execution: Workou
           variant="hero"
           size="xl"
           align="center"
-          label={durationMs ? 'do końca kroku' : 'czas kroku'}
+          label={durationMs ? t('stepCard.untilStepEnd') : t('stepCard.stepTime')}
           value={formatClock(durationMs ? durationMs - execution.stepElapsedMs : execution.stepElapsedMs)}
         />
       </Stack>
@@ -49,17 +51,17 @@ export default function StepCard({ execution, stepMetrics }: { execution: Workou
           size="md"
           value={progress}
           color={zoneColor}
-          ariaLabel="Postęp kroku"
+          ariaLabel={t('stepCard.progressAria')}
           scale={[formatClock(execution.stepElapsedMs), durationMs ? formatClock(durationMs) : 'LAP']}
         />
       </Box>
       <Stack direction="row" useFlexGap sx={{ flexWrap: 'wrap', gap: 3, mt: 2 }}>
-        <Metric variant="stat" label="śr. moc kroku" value={stepMetrics.avgPower ?? '—'} unit="W" />
-        <Metric variant="stat" label="śr. tętno kroku" value={stepMetrics.avgHeartRate ?? '—'} unit="bpm" />
-        <Metric variant="stat" label="śr. kadencja" value={stepMetrics.avgCadence ?? '—'} unit="rpm" />
+        <Metric variant="stat" label={t('stepCard.avgStepPower')} value={stepMetrics.avgPower ?? '—'} unit="W" />
+        <Metric variant="stat" label={t('stepCard.avgStepHeartRate')} value={stepMetrics.avgHeartRate ?? '—'} unit="bpm" />
+        <Metric variant="stat" label={t('stepCard.avgStepCadence')} value={stepMetrics.avgCadence ?? '—'} unit="rpm" />
       </Stack>
       <Typography variant="body2" sx={{ color: 'text.secondary', mt: 2 }}>
-        Następny: {stepLabel(next, index + 1)}{next ? ` · ${formatDurationShort(next.durationSec)}${nextTarget.watts !== '—' ? ` @ ${nextTarget.watts} W` : ''}` : ''}
+        {t('stepCard.next', { label: `${stepLabel(next, index + 1)}${next ? ` · ${formatDurationShort(next.durationSec)}${nextTarget.watts !== '—' ? ` @ ${nextTarget.watts} W` : ''}` : ''}` })}
       </Typography>
       {step?.instructions ? <Alert severity="info" sx={{ mt: 2 }}>{step.instructions}</Alert> : null}
     </Surface>

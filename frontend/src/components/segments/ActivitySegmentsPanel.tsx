@@ -8,6 +8,7 @@ import { useActivitySegments } from '@/hooks/useSegments';
 import { tokens } from '@/theme/theme';
 import { EmptyState, ErrorState, LoadingState, Surface } from '@/ui';
 
+import { segmentComponentsMessages } from './messages';
 import SegmentRankTrophy from './SegmentRankTrophy';
 import SegmentRouteMap from './SegmentRouteMap';
 
@@ -20,17 +21,18 @@ function duration(seconds?: number | null) {
 }
 
 export default function ActivitySegmentsPanel({ activityId }: ActivitySegmentsPanelProps) {
+  const t = segmentComponentsMessages.useT();
   const query = useActivitySegments(activityId);
   const navigate = useNavigate();
   const [highlighted, setHighlighted] = useState<string | null>(null);
   const [previewed, setPreviewed] = useState<string | null>(null);
-  if (query.isLoading) return <LoadingState message="Ładowanie segmentów aktywności…" />;
-  if (query.isError) return <ErrorState message="Nie udało się pobrać segmentów." onRetry={() => void query.refetch()} />;
+  if (query.isLoading) return <LoadingState message={t('activityPanel.loading')} />;
+  if (query.isError) return <ErrorState message={t('activityPanel.loadError')} onRetry={() => void query.refetch()} />;
   const data = query.data;
   if (!data || data.efforts.length === 0) {
-    return <EmptyState title="Brak segmentów" description={data?.availability === 'PENDING'
-      ? 'Ta aktywność czeka na historyczny backfill segmentów.'
-      : 'Strava nie udostępniła prób segmentowych dla tej aktywności.'} />;
+    return <EmptyState title={t('activityPanel.emptyTitle')} description={data?.availability === 'PENDING'
+      ? t('activityPanel.emptyPending')
+      : t('activityPanel.emptyUnavailable')} />;
   }
   const openEffort = (effortId: string) => {
     const effort = data.efforts.find(item => item.id === effortId);
@@ -38,16 +40,16 @@ export default function ActivitySegmentsPanel({ activityId }: ActivitySegmentsPa
   };
   return (
     <Stack spacing={2}>
-      {!data.personalBestConfirmed && <Chip color="warning" variant="outlined" label="Rekordy: najlepsze w dostępnych danych — backfill trwa" sx={{ alignSelf: 'flex-start' }} />}
+      {!data.personalBestConfirmed && <Chip color="warning" variant="outlined" label={t('activityPanel.partialPbChip')} sx={{ alignSelf: 'flex-start' }} />}
       <Surface padding="none" sx={{ overflow: 'hidden' }}>
         <SegmentRouteMap
           routes={[
-            ...(data.routePolyline ? [{ id: 'activity-route', label: 'Pełna trasa aktywności', polyline: data.routePolyline, color: tokens.map.context, weight: 4, interactive: false }] : []),
+            ...(data.routePolyline ? [{ id: 'activity-route', label: t('activityPanel.fullRouteLabel'), polyline: data.routePolyline, color: tokens.map.context, weight: 4, interactive: false }] : []),
             ...data.efforts.map(item => ({ id: item.id, label: item.segmentName, polyline: item.routePolyline })),
           ]}
           highlightedId={highlighted}
           onOpen={id => openEffort(String(id))}
-          ariaLabel="Segmenty na trasie aktywności"
+          ariaLabel={t('activityPanel.mapAriaLabel')}
         />
       </Surface>
       <Stack spacing={1} component="ol" sx={{ listStyle: 'none', m: 0, p: 0 }}>
@@ -79,8 +81,8 @@ export default function ActivitySegmentsPanel({ activityId }: ActivitySegmentsPa
                 <Typography variant="body2" sx={{
                   color: "text.secondary"
                 }}>
-                  {duration(effort.elapsedTimeSec)} · {effort.personalRank ? `${effort.personalRank}. wśród własnych prób` : 'pozycja nieznana'}
-                  {effort.differenceToBestSec != null ? ` · +${effort.differenceToBestSec} s do najlepszego` : ''}
+                  {duration(effort.elapsedTimeSec)} · {effort.personalRank ? t('activityPanel.rankPosition', { rank: effort.personalRank }) : t('activityPanel.rankUnknown')}
+                  {effort.differenceToBestSec != null ? t('activityPanel.differenceToBest', { seconds: effort.differenceToBestSec }) : ''}
                 </Typography>
               </Box>
               <Stack direction="row" spacing={2} useFlexGap sx={{
@@ -93,23 +95,23 @@ export default function ActivitySegmentsPanel({ activityId }: ActivitySegmentsPa
               </Stack>
               <Stack direction="row" spacing={0.5}>
                 <Button
-                  aria-label={`${previewed === effort.id ? 'Ukryj' : 'Pokaż'} szybki podgląd segmentu ${effort.segmentName}`}
+                  aria-label={previewed === effort.id ? t('activityPanel.hidePreview', { name: effort.segmentName }) : t('activityPanel.showPreview', { name: effort.segmentName })}
                   aria-expanded={previewed === effort.id}
                   aria-controls={`segment-preview-${effort.id}`}
                   endIcon={<ExpandMoreRoundedIcon sx={{ transform: previewed === effort.id ? 'rotate(180deg)' : 'none', transition: 'transform 160ms' }} />}
                   onClick={() => setPreviewed(current => current === effort.id ? null : effort.id)}
-                >Podgląd</Button>
-                <Button aria-label={`Otwórz segment ${effort.segmentName}`} endIcon={<ArrowForwardRoundedIcon />} onClick={() => openEffort(effort.id)}>Analizuj</Button>
+                >{t('activityPanel.previewButton')}</Button>
+                <Button aria-label={t('activityPanel.openSegment', { name: effort.segmentName })} endIcon={<ArrowForwardRoundedIcon />} onClick={() => openEffort(effort.id)}>{t('activityPanel.analyzeButton')}</Button>
               </Stack>
             </Stack>
             <Collapse in={previewed === effort.id} unmountOnExit>
               <Box id={`segment-preview-${effort.id}`} sx={{ pt: 2, mt: 2, borderTop: 1, borderColor: 'divider' }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>Szybki podgląd odcinka</Typography>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('activityPanel.previewTitle')}</Typography>
                 <SegmentRouteMap
                   routes={[{ id: effort.id, label: effort.segmentName, polyline: effort.routePolyline }]}
                   onOpen={() => openEffort(effort.id)}
                   height={220}
-                  ariaLabel={`Podgląd mapy segmentu ${effort.segmentName}`}
+                  ariaLabel={t('activityPanel.previewMapAriaLabel', { name: effort.segmentName })}
                 />
               </Box>
             </Collapse>

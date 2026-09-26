@@ -12,6 +12,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
+import pl.strava.analizator.domain.ai.AiLanguage;
 import pl.strava.analizator.domain.ai.Persona;
 import pl.strava.analizator.domain.ai.PredictionType;
 import pl.strava.analizator.domain.ai.PromptSet;
@@ -52,13 +53,19 @@ public class PromptEngine {
 
     public PromptResult buildPrompt(PredictionType type, Map<String, String> variables,
                                      Persona persona, DataQuality quality) {
+        return buildPrompt(type, variables, persona, quality, AiLanguage.DEFAULT);
+    }
+
+    public PromptResult buildPrompt(PredictionType type, Map<String, String> variables,
+                                     Persona persona, DataQuality quality, AiLanguage language) {
         PromptSet set = cache.get(type);
         if (set == null) {
             throw new IllegalArgumentException("No prompt set registered for: " + type);
         }
 
-        String personaPrompt = loadPersona(persona);
-        String systemPrompt = assembleSystem(set.systemPrompt(), personaPrompt, quality, type);
+        String personaPrompt = personaPrompt(persona);
+        String systemPrompt = assembleSystem(set.systemPrompt(), personaPrompt, quality, type)
+                + "\n\n" + language.promptDirective();
         String userPrompt = assembleUser(set, variables, quality);
 
         return new PromptResult(systemPrompt, userPrompt, type);
@@ -124,7 +131,8 @@ public class PromptEngine {
         return sb.toString();
     }
 
-    private String loadPersona(Persona persona) {
+    /** Persona instructions from `ai/prompts/personas/` (also appended to non-template prompts). */
+    public String personaPrompt(Persona persona) {
         if (persona == null) persona = Persona.BALANCED_ADVISOR;
         String filename = switch (persona) {
             case AGGRESSIVE_COACH -> "personas/aggressive_coach.md";

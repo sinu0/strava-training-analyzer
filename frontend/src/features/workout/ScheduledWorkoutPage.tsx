@@ -10,9 +10,11 @@ import PwaCapabilityBanner from '@/components/PwaCapabilityBanner';
 import WorkoutPowerChart from '@/components/training/WorkoutPowerChart';
 import { ErrorState, LoadingState, Metric, Page, Surface } from '@/ui';
 
+import { workoutMessages } from './messages';
 import { deliveryCapabilities, getActiveExecution, getScheduledWorkout, scheduledExportUrl, startExecution } from './workoutApi';
 
 export default function ScheduledWorkoutPage() {
+  const t = workoutMessages.useT();
   const { id = '' } = useParams();
   const navigate = useNavigate();
   const workout = useQuery({ queryKey: ['scheduled-workout', id], queryFn: () => getScheduledWorkout(id), enabled: !!id });
@@ -29,9 +31,9 @@ export default function ScheduledWorkoutPage() {
     onError: () => void active.refetch(),
   });
 
-  if (workout.isLoading) return <LoadingState message="Wczytuję zaplanowany trening…" />;
+  if (workout.isLoading) return <LoadingState message={t('scheduled.loading')} />;
   if (workout.isError || !workout.data) {
-    return <ErrorState title="Nie udało się wczytać treningu" message="Sprawdź połączenie i spróbuj ponownie." onRetry={() => void workout.refetch()} />;
+    return <ErrorState title={t('scheduled.loadErrorTitle')} message={t('scheduled.loadErrorMessage')} onRetry={() => void workout.refetch()} />;
   }
   const plan = workout.data;
   const activeExecution = active.data;
@@ -42,13 +44,13 @@ export default function ScheduledWorkoutPage() {
 
   return (
     <Page
-      title={plan.workoutTemplateName ?? plan.plannedDescription ?? 'Zaplanowany trening'}
-      subtitle={`${plan.date} · wersja ${plan.workoutTemplateRevision ?? 'legacy'}`}
+      title={plan.workoutTemplateName ?? plan.plannedDescription ?? t('scheduled.untitled')}
+      subtitle={t('scheduled.subtitle', { date: plan.date, revision: plan.workoutTemplateRevision ?? 'legacy' })}
       maxWidth={1100}
     >
       <PwaCapabilityBanner />
-      {!!start.isError && <Alert severity="error" sx={{ mb: 2 }}>Nie udało się rozpocząć treningu. Sprawdź, czy inne wykonanie nie jest aktywne.</Alert>}
-      {!!anotherActive && <Alert severity="warning" sx={{ mb: 2 }}>Inny trening jest aktywny. Najpierw go wznów lub zakończ.</Alert>}
+      {!!start.isError && <Alert severity="error" sx={{ mb: 2 }}>{t('scheduled.startError')}</Alert>}
+      {!!anotherActive && <Alert severity="warning" sx={{ mb: 2 }}>{t('scheduled.anotherActive')}</Alert>}
       <Stack spacing={2.5}>
         <Surface variant="accent">
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{
@@ -57,7 +59,7 @@ export default function ScheduledWorkoutPage() {
             <Box>
               <Typography variant="overline" sx={{
                 color: "text.secondary"
-              }}>Niezmienny snapshot planu</Typography>
+              }}>{t('scheduled.immutableSnapshot')}</Typography>
               <Typography variant="h4">{plan.workoutTemplateName ?? plan.plannedType}</Typography>
               <Typography
                 sx={{
@@ -68,8 +70,8 @@ export default function ScheduledWorkoutPage() {
             <Stack direction="row" spacing={{ xs: 2, sm: 4 }} sx={{
               flexWrap: "wrap"
             }}>
-              <Metric label="Czas" value={plan.plannedDurationMin ?? '—'} unit="min" />
-              <Metric label="FTP wykonania" value={plan.ftpWatts ?? '—'} unit={plan.ftpWatts ? 'W' : undefined} hint="zapisane przy planowaniu" />
+              <Metric label={t('scheduled.time')} value={plan.plannedDurationMin ?? '—'} unit="min" />
+              <Metric label={t('scheduled.ftpAtExecution')} value={plan.ftpWatts ?? '—'} unit={plan.ftpWatts ? 'W' : undefined} hint={t('scheduled.ftpHint')} />
               <Metric label="TSS" value={plan.plannedTss ?? '—'} />
             </Stack>
           </Stack>
@@ -87,14 +89,14 @@ export default function ScheduledWorkoutPage() {
             onClick={() => canResume ? navigate(`/workout/${activeExecution.id}`) : start.mutate()}
             sx={{ minHeight: 48 }}
           >
-            {canResume ? 'Wznów trening' : 'Rozpocznij na tym urządzeniu'}
+            {canResume ? t('scheduled.resume') : t('scheduled.start')}
           </Button>
           <Stack direction="row" spacing={1}>
             <Button component="a" href={scheduledExportUrl(plan.id, 'fit')} startIcon={<DownloadIcon />} sx={{ minHeight: 48, flex: 1 }}>
-              Pobierz FIT
+              {t('scheduled.downloadFit')}
             </Button>
             <Button component="a" href={scheduledExportUrl(plan.id, 'zwo')} startIcon={<DownloadIcon />} sx={{ minHeight: 48, flex: 1 }}>
-              Pobierz ZWO
+              {t('scheduled.downloadZwo')}
             </Button>
           </Stack>
         </Stack>
@@ -108,7 +110,7 @@ export default function ScheduledWorkoutPage() {
               <Typography variant="subtitle1">Garmin Training API</Typography>
               <Typography variant="body2" sx={{
                 color: "text.secondary"
-              }}>{garmin?.reason ?? 'Sprawdzanie dostępności…'}</Typography>
+              }}>{garmin?.reason ?? t('scheduled.garminChecking')}</Typography>
             </Box>
             <Chip label={garmin?.status ?? '…'} size="small" color={garmin?.status === 'AVAILABLE' ? 'success' : 'default'} />
           </Stack>

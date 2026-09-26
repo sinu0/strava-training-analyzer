@@ -2,9 +2,9 @@ import { Box, Chip, Skeleton } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { useState } from 'react';
 
-
 import { EmptyState } from '@/ui';
 
+import { trainingMessages } from './messages';
 import WorkoutDetailDialog from './WorkoutDetailDialog';
 import WorkoutTemplateCard from './WorkoutTemplateCard';
 import { useWorkoutTemplates, useDeleteWorkoutTemplate } from '../../hooks/useTrainingPlan';
@@ -15,6 +15,7 @@ import type { WorkoutCategory, WorkoutTemplate } from '../../types/training';
 const CATEGORIES = Object.keys(CATEGORY_LABELS) as WorkoutCategory[];
 
 export default function WorkoutLibrary() {
+  const t = trainingMessages.useT();
   const [category, setCategory] = useState<WorkoutCategory | undefined>();
   const [selected, setSelected] = useState<WorkoutTemplate | null>(null);
   const { data: templates, isLoading } = useWorkoutTemplates(category);
@@ -33,17 +34,17 @@ export default function WorkoutLibrary() {
 
       {!isLoading && (!templates || templates.length === 0) && (
         <EmptyState
-          title="Brak szablonów treningowych"
-          description="Dodaj pierwszy szablon, aby go tu zobaczyć."
+          title={t('workoutLibrary.emptyTitle')}
+          description={t('workoutLibrary.emptyDescription')}
           illustration="/illustrations/empty-training.png"
         />
       )}
 
       {!isLoading && !!templates && templates.length > 0 && (
         <Grid container spacing={2}>
-          {templates.map((t) => (
-            <Grid key={t.id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-              <WorkoutTemplateCard template={t} onDetails={setSelected} />
+          {templates.map((template) => (
+            <Grid key={template.id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+              <WorkoutTemplateCard template={template} onDetails={setSelected} />
             </Grid>
           ))}
         </Grid>
@@ -60,10 +61,11 @@ export default function WorkoutLibrary() {
 }
 
 function CategoryFilters({ selected, onChange }: { selected?: WorkoutCategory; onChange: (c?: WorkoutCategory) => void }) {
+  const t = trainingMessages.useT();
   return (
     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
       <Chip
-        label="Wszystkie"
+        label={t('workoutLibrary.allFilter')}
         variant={selected === undefined ? 'filled' : 'outlined'}
         color="primary"
         onClick={() => onChange(undefined)}

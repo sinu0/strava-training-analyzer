@@ -4,6 +4,7 @@ import OpacityIcon from '@mui/icons-material/Opacity';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
 import { Box, Slider, Stack, TextField, Typography } from '@mui/material';
 
+import { weatherMessages } from '@/components/weather/messages';
 import { Surface } from '@/ui';
 import { alphaColor, CHART_COLORS, STATUS_COLORS, WEATHER_METRIC_COLORS } from '@/utils/colors';
 
@@ -175,15 +176,16 @@ function WeightSlider({
 }
 
 export default function WeatherAlgorithmPanel({ profile, onChange }: WeatherAlgorithmPanelProps) {
+  const t = weatherMessages.useT();
   return (
     <Stack spacing={1.5}>
-      <GroupCard title="Okno jazdy" accentColor={STATUS_COLORS.info}>
+      <GroupCard title={t('algorithmPanel.rideWindow')} accentColor={STATUS_COLORS.info}>
         <Stack direction="row" spacing={1} sx={{
           alignItems: "center"
         }}>
           <AccessTimeIcon sx={{ color: STATUS_COLORS.info, fontSize: 18 }} />
           <CompactNumberField
-            label="Start"
+            label={t('algorithmPanel.start')}
             value={profile.rideWindowStartHour}
             onChange={(v) => onChange('rideWindowStartHour', v)}
           />
@@ -196,27 +198,27 @@ export default function WeatherAlgorithmPanel({ profile, onChange }: WeatherAlgo
             –
           </Typography>
           <CompactNumberField
-            label="Koniec"
+            label={t('algorithmPanel.end')}
             value={profile.rideWindowEndHour}
             onChange={(v) => onChange('rideWindowEndHour', v)}
           />
         </Stack>
       </GroupCard>
 
-      <GroupCard title="Temperatura" accentColor={WEATHER_METRIC_COLORS.temperature}>
+      <GroupCard title={t('algorithmPanel.temperature')} accentColor={WEATHER_METRIC_COLORS.temperature}>
         <Stack spacing={1}>
           <Stack direction="row" spacing={1} sx={{
             alignItems: "center"
           }}>
             <ThermostatIcon sx={{ color: WEATHER_METRIC_COLORS.temperature, fontSize: 18 }} />
             <CompactNumberField
-              label="Idealne min"
+              label={t('algorithmPanel.idealMin')}
               value={profile.idealTemperatureMin}
               onChange={(v) => onChange('idealTemperatureMin', v)}
               adornment="°C"
             />
             <CompactNumberField
-              label="Idealne max"
+              label={t('algorithmPanel.idealMax')}
               value={profile.idealTemperatureMax}
               onChange={(v) => onChange('idealTemperatureMax', v)}
               adornment="°C"
@@ -227,13 +229,13 @@ export default function WeatherAlgorithmPanel({ profile, onChange }: WeatherAlgo
           }}>
             <Box sx={{ width: 18 }} />
             <CompactNumberField
-              label="Akcept. min"
+              label={t('algorithmPanel.acceptableMin')}
               value={profile.acceptableTemperatureMin}
               onChange={(v) => onChange('acceptableTemperatureMin', v)}
               adornment="°C"
             />
             <CompactNumberField
-              label="Akcept. max"
+              label={t('algorithmPanel.acceptableMax')}
               value={profile.acceptableTemperatureMax}
               onChange={(v) => onChange('acceptableTemperatureMax', v)}
               adornment="°C"
@@ -242,20 +244,20 @@ export default function WeatherAlgorithmPanel({ profile, onChange }: WeatherAlgo
         </Stack>
       </GroupCard>
 
-      <GroupCard title="Wiatr i opady" accentColor={WEATHER_METRIC_COLORS.wind}>
+      <GroupCard title={t('algorithmPanel.windAndPrecipitation')} accentColor={WEATHER_METRIC_COLORS.wind}>
         <Stack spacing={1}>
           <Stack direction="row" spacing={1} sx={{
             alignItems: "center"
           }}>
             <AirIcon sx={{ color: WEATHER_METRIC_COLORS.wind, fontSize: 18 }} />
             <CompactNumberField
-              label="Komfortowy"
+              label={t('algorithmPanel.comfortable')}
               value={profile.comfortableWindMax}
               onChange={(v) => onChange('comfortableWindMax', v)}
               adornment="km/h"
             />
             <CompactNumberField
-              label="Ryzykowny"
+              label={t('algorithmPanel.risky')}
               value={profile.riskyWindMax}
               onChange={(v) => onChange('riskyWindMax', v)}
               adornment="km/h"
@@ -266,13 +268,13 @@ export default function WeatherAlgorithmPanel({ profile, onChange }: WeatherAlgo
           }}>
             <OpacityIcon sx={{ color: WEATHER_METRIC_COLORS.precipitation, fontSize: 18 }} />
             <CompactNumberField
-              label="Maks. mżawka"
+              label={t('algorithmPanel.maxDrizzle')}
               value={profile.drizzleMmMax}
               onChange={(v) => onChange('drizzleMmMax', v)}
               adornment="mm"
             />
             <CompactNumberField
-              label="Maks. deszcz"
+              label={t('algorithmPanel.maxRain')}
               value={profile.rainMmMax}
               onChange={(v) => onChange('rainMmMax', v)}
               adornment="mm"
@@ -281,28 +283,28 @@ export default function WeatherAlgorithmPanel({ profile, onChange }: WeatherAlgo
         </Stack>
       </GroupCard>
 
-      <GroupCard title="Wagi algorytmu" accentColor={CHART_COLORS.primary}>
+      <GroupCard title={t('algorithmPanel.weightsTitle')} accentColor={CHART_COLORS.primary}>
         <Stack spacing={0.75}>
           <WeightSlider
-            label="Temperatura"
+            label={t('algorithmPanel.weightTemperature')}
             value={profile.temperatureWeight}
             color={WEATHER_METRIC_COLORS.temperature}
             onChange={(v) => onChange('temperatureWeight', v)}
           />
           <WeightSlider
-            label="Wiatr"
+            label={t('algorithmPanel.weightWind')}
             value={profile.windWeight}
             color={WEATHER_METRIC_COLORS.wind}
             onChange={(v) => onChange('windWeight', v)}
           />
           <WeightSlider
-            label="Opady"
+            label={t('algorithmPanel.weightPrecipitation')}
             value={profile.precipitationWeight}
             color={WEATHER_METRIC_COLORS.precipitation}
             onChange={(v) => onChange('precipitationWeight', v)}
           />
           <WeightSlider
-            label="Warunki"
+            label={t('algorithmPanel.weightCondition')}
             value={profile.conditionWeight}
             color={STATUS_COLORS.success}
             onChange={(v) => onChange('conditionWeight', v)}

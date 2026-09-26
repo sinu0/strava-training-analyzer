@@ -23,6 +23,8 @@ export const en: Messages = {
     notFoundDescription: 'This route seems to lead nowhere. Check the URL or go back to the dashboard.',
     backToDashboard: 'Back to dashboard',
     pwaHttpsRequired: 'Installable mode and safe offline execution require HTTPS. On your phone open the LAN address configured with a trusted certificate; a plain HTTP address does not provide a Service Worker.',
+    noMapData: 'No map data',
+    datePlaceholder: 'DD.MM.YYYY',
   },
   nav: {
     today: { label: 'Today', description: 'Daily decision and context' },

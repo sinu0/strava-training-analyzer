@@ -17,7 +17,7 @@ const WeightPage = lazy(() => import('@/pages/WeightPage'));
 const WeatherPage = lazy(() => import('@/pages/WeatherPage'));
 const DataJobsPage = lazy(() => import('@/features/data/DataJobsPage'));
 const RoutePlannerPage = lazy(() => import('@/pages/RoutePlannerPage'));
-const SettingsPage = lazy(() => import('@/pages/AdminPage'));
+const SettingsPage = lazy(() => import('@/features/settings/SettingsPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const SegmentsPage = lazy(() => import('@/features/segments/SegmentsPage'));
 const SegmentDetailPage = lazy(() => import('@/features/segments/SegmentDetailPage'));

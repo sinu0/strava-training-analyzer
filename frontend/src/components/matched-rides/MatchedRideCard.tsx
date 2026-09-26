@@ -4,6 +4,7 @@ import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { Line, LineChart, ResponsiveContainer, YAxis } from 'recharts';
 
+import { matchedRideCardMessages } from '@/components/matched-rides/messages';
 import { speedChartDomain } from '@/features/matched-rides/chartScale';
 import { useMatchedRide } from '@/hooks/useMatchedRides';
 import { getLocale } from '@/i18n';
@@ -33,8 +34,9 @@ export default function MatchedRideCard({ activityId }: MatchedRideCardProps) {
   const navigate = useNavigate();
   const theme = useTheme();
   const tokens = getAppThemeTokens(theme);
-  if (query.isLoading) return <LoadingState message="Sprawdzanie podobnych tras…" />;
-  if (query.isError) return <ErrorState message="Nie udało się sprawdzić dopasowanych przejazdów." onRetry={() => void query.refetch()} />;
+  const t = matchedRideCardMessages.useT();
+  if (query.isLoading) return <LoadingState message={t('loading')} />;
+  if (query.isError) return <ErrorState message={t('loadError')} onRetry={() => void query.refetch()} />;
   const data = query.data;
   if (!isRenderableSummary(data) || data.rideCount < 2) return null;
   const chartDomain = speedChartDomain(data.trend.map(point => point.averageSpeedKmh));
@@ -52,34 +54,34 @@ export default function MatchedRideCard({ activityId }: MatchedRideCardProps) {
               alignItems: "center",
               flexWrap: "wrap"
             }}>
-            <Typography variant="h6">Dopasowane przejazdy</Typography>
-            <Chip size="small" label={`trasa podobna w ${data.similarityPercent.toFixed(0)}%`} />
-            {data.directionVariant === 'REVERSE' && <Chip size="small" variant="outlined" label="przeciwny kierunek" />}
+            <Typography variant="h6">{t('title')}</Typography>
+            <Chip size="small" label={t('similarity', { percent: data.similarityPercent.toFixed(0) })} />
+            {data.directionVariant === 'REVERSE' && <Chip size="small" variant="outlined" label={t('reverseDirection')} />}
           </Stack>
           <Typography
             variant="body2"
             sx={{
               color: "text.secondary",
               mt: 0.5
-            }}>{data.rideCount} przejazdów na tej trasie · ten wynik: {data.currentRank}.</Typography>
+            }}>{t('summary', { count: data.rideCount, rank: data.currentRank })}</Typography>
           {data.newRecord && data.changeFromPreviousBestKmh != null
             ? <Typography
             sx={{
               color: "success.main",
               mt: 1,
               fontWeight: 800
-            }}>Nowy rekord — {signed(data.changeFromPreviousBestKmh)} względem poprzedniego najlepszego wyniku</Typography>
+            }}>{t('newRecord', { change: signed(data.changeFromPreviousBestKmh) })}</Typography>
             : null}
         </Box>
-        <Box sx={{ width: { xs: '100%', md: 220 }, height: 76 }} aria-label="Miniwykres trendu dopasowanych przejazdów">
+        <Box sx={{ width: { xs: '100%', md: 220 }, height: 76 }} aria-label={t('miniChartLabel')}>
           <ResponsiveContainer><LineChart data={data.trend}><YAxis hide domain={chartDomain} allowDataOverflow /><Line dataKey="averageSpeedKmh" stroke={tokens.chart.secondary} strokeWidth={3} dot={false} /></LineChart></ResponsiveContainer>
         </Box>
       </Stack>
       <Grid container spacing={2} sx={{ mt: 1 }}>
-        <Grid size={{ xs: 6, sm: 3 }}><Metric label="Ta jazda" value={data.currentSpeedKmh != null ? `${data.currentSpeedKmh.toFixed(1)} km/h` : '—'} tone="primary" /></Grid>
-        <Grid size={{ xs: 6, sm: 3 }}><Metric label="vs poprzednia" value={signed(data.changeFromPreviousKmh)} /></Grid>
-        <Grid size={{ xs: 6, sm: 3 }}><Metric label="vs średnia" value={signed(data.changeFromAverageKmh)} /></Grid>
-        <Grid size={{ xs: 6, sm: 3 }}><Metric label="vs rekord" value={signed(data.changeFromRecordKmh)} /></Grid>
+        <Grid size={{ xs: 6, sm: 3 }}><Metric label={t('metricCurrent')} value={data.currentSpeedKmh != null ? `${data.currentSpeedKmh.toFixed(1)} km/h` : '—'} tone="primary" /></Grid>
+        <Grid size={{ xs: 6, sm: 3 }}><Metric label={t('metricVsPrevious')} value={signed(data.changeFromPreviousKmh)} /></Grid>
+        <Grid size={{ xs: 6, sm: 3 }}><Metric label={t('metricVsAverage')} value={signed(data.changeFromAverageKmh)} /></Grid>
+        <Grid size={{ xs: 6, sm: 3 }}><Metric label={t('metricVsRecord')} value={signed(data.changeFromRecordKmh)} /></Grid>
       </Grid>
       <Stack
         direction="row"
@@ -87,7 +89,7 @@ export default function MatchedRideCard({ activityId }: MatchedRideCardProps) {
           justifyContent: "flex-end",
           mt: 2
         }}>
-        <Button endIcon={<ArrowForwardRoundedIcon />} onClick={() => navigate(`/matched-rides/${data.routeGroupId}`)}>Zobacz dopasowane przejazdy</Button>
+        <Button endIcon={<ArrowForwardRoundedIcon />} onClick={() => navigate(`/matched-rides/${data.routeGroupId}`)}>{t('viewMatched')}</Button>
       </Stack>
     </Surface>
   );

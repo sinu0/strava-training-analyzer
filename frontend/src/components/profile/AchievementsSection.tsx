@@ -5,18 +5,12 @@ import Grid from '@mui/material/Grid';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 
+import { profileMessages } from '@/components/profile/messages';
+
 import { useAchievements, useEvaluateAchievements } from '../../hooks/useGamification';
 import { COMMON_COLORS, STATUS_COLORS, alphaColor } from '../../utils/colors';
 
 import type { Achievement } from '../../types/analytics';
-
-const TYPE_LABEL: Record<string, string> = {
-  DISTANCE: 'Dystans',
-  STREAK: 'Seria',
-  FTP: 'FTP',
-  ELEVATION: 'Przewyższenie',
-  CONSISTENCY: 'Regularność',
-};
 
 const BADGE_IMAGE_MAP: Record<string, string> = {
   'weekly-100km': 'badge-100km',
@@ -47,6 +41,14 @@ function getBadgeSrc(achievement: Achievement): string | null {
 function AchievementBadge({ achievement }: { achievement: Achievement }) {
   const unlocked = achievement.unlocked;
   const badgeSrc = getBadgeSrc(achievement);
+  const t = profileMessages.useT();
+  const typeLabels: Record<string, string> = {
+    DISTANCE: t('achievements.types.DISTANCE'),
+    STREAK: t('achievements.types.STREAK'),
+    FTP: t('achievements.types.FTP'),
+    ELEVATION: t('achievements.types.ELEVATION'),
+    CONSISTENCY: t('achievements.types.CONSISTENCY'),
+  };
 
   return (
     <Tooltip
@@ -55,7 +57,7 @@ function AchievementBadge({ achievement }: { achievement: Achievement }) {
           <Typography variant="body2">{achievement.description}</Typography>
           {!!unlocked && !!achievement.unlockedAt && (
             <Typography variant="caption" sx={{ color: alphaColor(COMMON_COLORS.white, 0.6) }}>
-              Odblokowane: {achievement.unlockedAt}
+              {t('achievements.unlocked', { date: achievement.unlockedAt })}
             </Typography>
           )}
         </Box>
@@ -116,7 +118,7 @@ function AchievementBadge({ achievement }: { achievement: Achievement }) {
             color: "text.secondary",
             fontSize: 10
           }}>
-          {TYPE_LABEL[achievement.type] ?? achievement.type}
+          {typeLabels[achievement.type] ?? achievement.type}
         </Typography>
         {!!unlocked && !!achievement.unlockedAt && (
           <Typography variant="caption" color="primary" sx={{ fontSize: 9 }}>
@@ -131,6 +133,7 @@ function AchievementBadge({ achievement }: { achievement: Achievement }) {
 export default function AchievementsSection() {
   const { data: achievements, isLoading } = useAchievements();
   const { mutate: evaluate, isPending } = useEvaluateAchievements();
+  const t = profileMessages.useT();
 
   if (isLoading) return <CircularProgress size={24} />;
 
@@ -143,7 +146,7 @@ export default function AchievementsSection() {
           onClick={() => evaluate()}
           disabled={isPending}
         >
-          {isPending ? 'Ocenianie…' : 'Sprawdź osiągnięcia'}
+          {isPending ? t('achievements.evaluating') : t('achievements.evaluate')}
         </Button>
       </Box>
       <Grid container spacing={2}>

@@ -22,6 +22,7 @@ import pl.strava.analizator.application.dto.BatchRunResultDto;
 import pl.strava.analizator.application.dto.CustomPromptDto;
 import pl.strava.analizator.application.dto.PredictionRequestDto;
 import pl.strava.analizator.application.dto.PredictionResponseDto;
+import pl.strava.analizator.domain.ai.AiLanguage;
 import pl.strava.analizator.domain.ai.AiPrediction;
 import pl.strava.analizator.domain.ai.LlmPort;
 import pl.strava.analizator.domain.ai.PredictionType;
@@ -52,6 +53,7 @@ public class AiPredictionService {
     private final RagServiceV2 ragServiceV2;
     private final AiNoteQueueProcessor noteQueueProcessor;
     private final ToolCallingLoop toolCallingLoop;
+    private final AiPromptDirectives aiPromptDirectives;
     private final String defaultProvider;
     private final String defaultModel;
     private final boolean enabled;
@@ -69,6 +71,7 @@ public class AiPredictionService {
                                 @org.springframework.lang.Nullable RagServiceV2 ragServiceV2,
                                 @org.springframework.lang.Nullable AiNoteQueueProcessor noteQueueProcessor,
                                 ToolCallingLoop toolCallingLoop,
+                                AiPromptDirectives aiPromptDirectives,
                                 @Value("${ai.provider:ollama}") String defaultProvider,
                                 @Value("${ai.model:llama3}") String defaultModel,
                                 @Value("${ai.enabled:false}") boolean enabled,
@@ -85,6 +88,7 @@ public class AiPredictionService {
         this.ragServiceV2 = ragServiceV2;
         this.noteQueueProcessor = noteQueueProcessor;
         this.toolCallingLoop = toolCallingLoop;
+        this.aiPromptDirectives = aiPromptDirectives;
         this.defaultProvider = defaultProvider;
         this.defaultModel = defaultModel;
         this.enabled = enabled;
@@ -125,7 +129,7 @@ public class AiPredictionService {
             variables.putAll(request.getExtraParameters());
         }
 
-        String systemPrompt = template.getSystemPrompt();
+        String systemPrompt = template.getSystemPrompt() + "\n\n" + aiPromptDirectives.systemSuffix();
         String userPrompt = template.resolveUserPrompt(variables);
 
         String fullUserPrompt = userPrompt;
@@ -320,6 +324,28 @@ public class AiPredictionService {
         return trimmed.trim();
     }
 
+    /** Deterministic replacement text for a blanket-rest answer inside a productive fatigue window. */
+    private record GuardrailTexts(String summary, String insight, String action, String window, String warning) {
+        static GuardrailTexts of(AiLanguage language) {
+            return switch (language) {
+                case PL -> new GuardrailTexts(
+                        "Kontrolowany bodziec jest OK; nie potrzebujesz pełnego dnia wolnego.",
+                        "TSB jest ujemny, ale nadal mieści się w produktywnym oknie zmęczenia."
+                                + " Przy TSB %.0f i ATL/CTL %.2f warto zrobić kontrolowany bodziec zamiast pełnego rest day.",
+                        "60-90 min Z2 lub 2-3 x 8-12 min tempo/sweet spot; bez sprintów i VO2max.",
+                        "produktywne zmęczenie",
+                        "Jeśli noga jest pusta albo tętno nietypowo wysokie, skróć sesję i zejdź do Z2.");
+                case EN -> new GuardrailTexts(
+                        "A controlled stimulus is fine; you do not need a full day off.",
+                        "TSB is negative but still inside the productive fatigue window."
+                                + " At TSB %.0f and ATL/CTL %.2f a controlled stimulus beats a full rest day.",
+                        "60-90 min Z2 or 2-3 x 8-12 min tempo/sweet spot; no sprints or VO2max.",
+                        "productive fatigue",
+                        "If your legs feel empty or your heart rate is unusually high, shorten the session and drop to Z2.");
+            };
+        }
+    }
+
     private Map<String, Object> applyRecommendationGuardrails(PredictionType type,
                                                               TrainingContext context,
                                                               Map<String, Object> structured) {
@@ -332,22 +358,19 @@ public class AiPredictionService {
             return structured;
         }
 
+        GuardrailTexts texts = GuardrailTexts.of(aiPromptDirectives.language());
         Map<String, Object> normalized = new HashMap<>(structured);
-        normalized.put("summary", "Kontrolowany bodziec jest OK; nie potrzebujesz pełnego dnia wolnego.");
-        normalized.put("insight",
-                "TSB jest ujemny, ale nadal mieści się w produktywnym oknie zmęczenia."
-                        + " Przy TSB %.0f i ATL/CTL %.2f warto zrobić kontrolowany bodziec zamiast pełnego rest day."
-                        .formatted(loadSnapshot.tsb(), loadSnapshot.atlCtlRatio()));
-        normalized.put("action", "60-90 min Z2 lub 2-3 x 8-12 min tempo/sweet spot; bez sprintów i VO2max.");
+        normalized.put("summary", texts.summary());
+        normalized.put("insight", texts.insight().formatted(loadSnapshot.tsb(), loadSnapshot.atlCtlRatio()));
+        normalized.put("action", texts.action());
 
         Map<String, Object> metrics = copyMetrics(normalized.get("metrics"));
         metrics.put("TSB", formatMetric(loadSnapshot.tsb()));
         metrics.put("ATL/CTL", formatMetric(loadSnapshot.atlCtlRatio()));
-        metrics.put("window", "produktywne zmęczenie");
+        metrics.put("window", texts.window());
         normalized.put("metrics", metrics);
 
-        normalized.put("warnings", mergeWarnings(normalized.get("warnings"),
-                "Jeśli noga jest pusta albo tętno nietypowo wysokie, skróć sesję i zejdź do Z2."));
+        normalized.put("warnings", mergeWarnings(normalized.get("warnings"), texts.warning()));
 
         Map<String, Object> workout = copyNestedMap(normalized.get("todayWorkout"));
         workout.put("type", "tempo/endurance");
@@ -634,7 +657,7 @@ public class AiPredictionService {
         if (request.getExtraParameters() != null) {
             variables.putAll(request.getExtraParameters());
         }
-        String systemPrompt = template.getSystemPrompt();
+        String systemPrompt = template.getSystemPrompt() + "\n\n" + aiPromptDirectives.systemSuffix();
         String userPrompt = template.resolveUserPrompt(variables);
         String fullUserPrompt = userPrompt + "\n\nRespond ONLY with valid JSON in this format:\n" + template.getResponseFormat();
 

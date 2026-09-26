@@ -8,6 +8,7 @@ import { Box, Button, CircularProgress, Stack, TextField, Typography } from '@mu
 import { useState } from 'react';
 
 import { formatTimestamp, StatusChip } from '@/components/admin/adminUtils';
+import { adminMessages } from '@/components/admin/messages';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { Widget } from '@/ui';
 import {
@@ -76,6 +77,7 @@ export default function SyncStatusSection({
   onRecalculateActivityMetrics,
   onUpdateAutoSyncInterval,
 }: SyncStatusSectionProps) {
+  const t = adminMessages.useT();
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
   const [intervalInput, setIntervalInput] = useState(String(autoSyncIntervalMinutes ?? 30));
 
@@ -86,7 +88,7 @@ export default function SyncStatusSection({
 
   return (
     <>
-      <Widget title="Synchronizacja Strava">
+      <Widget title={t('syncStatus.title')}>
         <Box sx={{ py: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
             <SyncIcon sx={{ color: STATUS_COLORS.info, fontSize: 28 }} />
@@ -94,7 +96,7 @@ export default function SyncStatusSection({
               <Typography variant="body2" sx={{
                 color: "text.secondary"
               }}>
-                Status synchronizacji
+                {t('syncStatus.status')}
               </Typography>
               {syncLoading ? (
                 <CircularProgress size={16} />
@@ -118,7 +120,7 @@ export default function SyncStatusSection({
                 <Typography variant="caption" sx={{
                   color: "text.secondary"
                 }}>
-                  Ostatni sync:
+                  {t('syncStatus.lastSync')}
                 </Typography>
                 <Typography variant="caption" sx={{ fontWeight: 600 }}>
                   {formatTimestamp(syncStatus?.lastSyncAt ?? syncStatus?.timestamp ?? null)}
@@ -128,7 +130,7 @@ export default function SyncStatusSection({
                 <Typography variant="caption" sx={{
                   color: "text.secondary"
                 }}>
-                  Zaimportowane:
+                  {t('syncStatus.imported')}
                 </Typography>
                 <Typography variant="caption" sx={{ fontWeight: 600, color: STATUS_COLORS.success }}>
                   {syncStatus?.imported ?? 0}
@@ -138,7 +140,7 @@ export default function SyncStatusSection({
                 <Typography variant="caption" sx={{
                   color: "text.secondary"
                 }}>
-                  Pominięte:
+                  {t('syncStatus.skipped')}
                 </Typography>
                 <Typography variant="caption" sx={{ fontWeight: 600, color: STATUS_COLORS.warning }}>
                   {syncStatus?.skipped ?? 0}
@@ -163,14 +165,14 @@ export default function SyncStatusSection({
                 <TimerIcon sx={{ color: STATUS_COLORS.error, fontSize: 20 }} />
                 <Box>
                   <Typography variant="caption" sx={{ fontWeight: 700, color: STATUS_COLORS.error, display: 'block' }}>
-                    API zablokowane (rate limit)
+                    {t('syncStatus.rateLimitedTitle')}
                   </Typography>
                   <Typography variant="caption" sx={{
                     color: "text.secondary"
                   }}>
                     {rateLimitCountdown
-                      ? `Odblokowanie za: ${rateLimitCountdown}`
-                      : 'Limit wygasł — możesz kontynuować sync'}
+                      ? t('syncStatus.rateLimitCountdown', { countdown: rateLimitCountdown })
+                      : t('syncStatus.rateLimitExpired')}
                   </Typography>
                 </Box>
               </Stack>
@@ -191,7 +193,7 @@ export default function SyncStatusSection({
                 fontWeight: 600,
               }}
             >
-              Sync ostatnich (30 dni)
+              {t('syncStatus.syncRecent')}
             </Button>
             <Button
               variant="outlined"
@@ -207,7 +209,7 @@ export default function SyncStatusSection({
                 fontWeight: 600,
               }}
             >
-              {isRateLimited && !rateLimitCountdown ? 'Kontynuuj sync' : 'Pełny sync (cała historia)'}
+              {isRateLimited && !rateLimitCountdown ? t('syncStatus.syncContinue') : t('syncStatus.syncFull')}
             </Button>
             <Button
               variant="outlined"
@@ -223,7 +225,7 @@ export default function SyncStatusSection({
                 fontWeight: 600,
               }}
             >
-              Pobierz zdjęcia z istniejących aktywności
+              {t('syncStatus.syncPhotos')}
             </Button>
             <Button
               variant="outlined"
@@ -239,7 +241,7 @@ export default function SyncStatusSection({
                 fontWeight: 600,
               }}
             >
-              Resync strumieni (GPS, prędkość, dystans)
+              {t('syncStatus.resyncStreams')}
             </Button>
             <Button
               variant="outlined"
@@ -255,7 +257,7 @@ export default function SyncStatusSection({
                 fontWeight: 600,
               }}
             >
-              Wyczyść dane
+              {t('syncStatus.clearData')}
             </Button>
             <Button
               variant="outlined"
@@ -271,7 +273,7 @@ export default function SyncStatusSection({
                 fontWeight: 600,
               }}
             >
-              Przelicz metryki dzienne (CTL/ATL/TSB)
+              {t('syncStatus.recalculateMetrics')}
             </Button>
             <Button
               variant="outlined"
@@ -287,7 +289,7 @@ export default function SyncStatusSection({
                 fontWeight: 600,
               }}
             >
-              Przelicz metryki aktywności (TSS, strefy)
+              {t('syncStatus.recalculateActivityMetrics')}
             </Button>
           </Stack>
 
@@ -315,7 +317,7 @@ export default function SyncStatusSection({
               }}>
               <UpdateIcon sx={{ fontSize: 18, color: STATUS_COLORS.accent }} />
               <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                Auto-sync w tle
+                {t('syncStatus.autoSync.title')}
               </Typography>
             </Stack>
             <Typography
@@ -325,7 +327,7 @@ export default function SyncStatusSection({
                 display: 'block',
                 mb: 1
               }}>
-              Aplikacja automatycznie sprawdza nowe aktywności co X minut.
+              {t('syncStatus.autoSync.description')}
             </Typography>
             <Stack direction="row" spacing={1} sx={{
               alignItems: "center"
@@ -349,7 +351,7 @@ export default function SyncStatusSection({
               <Typography variant="caption" sx={{
                 color: "text.secondary"
               }}>
-                minut
+                {t('syncStatus.autoSync.unit')}
               </Typography>
               <Button
                 size="small"
@@ -369,7 +371,7 @@ export default function SyncStatusSection({
                   '&:hover': { bgcolor: alphaColor(STATUS_COLORS.accent, 0.1) },
                 }}
               >
-                {updateAutoSyncPending ? 'Zapisywanie...' : 'Zapisz'}
+                {updateAutoSyncPending ? t('syncStatus.autoSync.saving') : t('syncStatus.autoSync.save')}
               </Button>
             </Stack>
           </Box>
@@ -378,9 +380,9 @@ export default function SyncStatusSection({
 
       <ConfirmDialog
         open={clearDialogOpen}
-        title="Wyczyścić wszystkie dane?"
-        message="Ta operacja usunie wszystkie zsynchronizowane aktywności, metryki i dane dzienne. Aby ponownie pobrać dane, wykonaj pełny sync po wyczyszczeniu."
-        confirmLabel="Wyczyść"
+        title={t('syncStatus.clearDialog.title')}
+        message={t('syncStatus.clearDialog.message')}
+        confirmLabel={t('syncStatus.clearDialog.confirm')}
         onConfirm={handleConfirmClear}
         onClose={() => setClearDialogOpen(false)}
       />

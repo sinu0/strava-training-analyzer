@@ -1,8 +1,9 @@
 
+import { localized } from '@/i18n';
 import type { GradientDay } from '@/types/analytics';
 import { WEATHER_SCORE_COLORS } from '@/utils/colors';
 import { localDate } from '@/utils/localDate';
-import { getScoreColor } from '@/utils/scoreColor';
+import { getScoreColor, getScoreLabel } from '@/utils/scoreColor';
 
 export type CyclistType =
   | 'sunny'
@@ -16,11 +17,13 @@ export type CyclistType =
   | 'partly_cloudy'
   | 'hot';
 
+// Labels are pulled from the already-localized score scale (see utils/scoreColor.ts) so both
+// stay in sync without duplicating the translated strings here.
 export const WEATHER_SCORE_LEGEND = [
-  { color: WEATHER_SCORE_COLORS.excellent, label: 'Świetne' },
-  { color: WEATHER_SCORE_COLORS.good, label: 'Dobre' },
-  { color: WEATHER_SCORE_COLORS.poor, label: 'Słabe' },
-  { color: WEATHER_SCORE_COLORS.severe, label: 'Kiepskie' },
+  { color: WEATHER_SCORE_COLORS.excellent, get label() { return getScoreLabel(75); } },
+  { color: WEATHER_SCORE_COLORS.good, get label() { return getScoreLabel(50); } },
+  { color: WEATHER_SCORE_COLORS.poor, get label() { return getScoreLabel(25); } },
+  { color: WEATHER_SCORE_COLORS.severe, get label() { return getScoreLabel(0); } },
 ] as const;
 
 export function getCyclistType(weatherCode: number, windSpeed: number, temperature?: number): CyclistType {
@@ -114,12 +117,16 @@ export function getGradientColor(score: number): string {
   return getScoreColor(score);
 }
 
+const SHORT_WEEKDAYS = localized({
+  pl: ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So'],
+  en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+});
+
 export function formatDayName(dateStr: string): string {
   const date = new Date(`${dateStr}T00:00:00`);
-  const days = ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So'];
   const dayNum = date.getDate().toString().padStart(2, '0');
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  return `${days[date.getDay()]} ${dayNum}.${month}`;
+  return `${SHORT_WEEKDAYS[date.getDay()]} ${dayNum}.${month}`;
 }
 
 export function isToday(dateStr: string): boolean {

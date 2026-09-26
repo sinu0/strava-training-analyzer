@@ -47,6 +47,7 @@ public class AiPredictionServiceV2 {
     private final KnowledgeBaseBuilder knowledgeBaseBuilder;
     private final AiPredictionRepository predictionRepository;
     private final ObjectMapper objectMapper;
+    private final AiSettingsService aiSettingsService;
 
     @Value("${ai.provider:ollama}")
     private String defaultProvider;
@@ -71,7 +72,7 @@ public class AiPredictionServiceV2 {
         PredictionType type = PredictionType.valueOf(request.getPredictionType());
         Persona persona = request.getPersona() != null
                 ? Persona.valueOf(request.getPersona())
-                : Persona.BALANCED_ADVISOR;
+                : aiSettingsService.currentCoachingStyle();
         String modelId = request.getModelId() != null ? request.getModelId() : defaultModel;
 
         TrainingContext ctx = trainingDataAdapter.buildContext(type);
@@ -85,7 +86,8 @@ public class AiPredictionServiceV2 {
         }
 
         DataQuality quality = assessDataQuality(ctx, type);
-        PromptResult prompt = promptEngine.buildPrompt(type, variables, persona, quality);
+        PromptResult prompt = promptEngine.buildPrompt(type, variables, persona, quality,
+                aiSettingsService.currentLanguage());
 
         String providerName = resolveProvider(modelId);
         ToolCallingLoopV2.ToolLoopResult toolResult = toolCallingLoopV2.run(
@@ -129,7 +131,6 @@ public class AiPredictionServiceV2 {
             PredictionRequestV2Dto req = PredictionRequestV2Dto.builder()
                     .predictionType(request.getPredictionType())
                     .modelId(model)
-                    .persona("BALANCED_ADVISOR")
                     .build();
             try {
                 results.add(predict(req));

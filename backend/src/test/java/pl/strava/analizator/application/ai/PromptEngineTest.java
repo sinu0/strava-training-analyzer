@@ -34,6 +34,32 @@ class PromptEngineTest {
     }
 
     @Test
+    void buildPrompt_appendsLanguageDirectiveToSystemPrompt() {
+        PromptResult result = engine.buildPrompt(
+                PredictionType.FTP_PREDICTION,
+                Map.of(),
+                Persona.BALANCED_ADVISOR,
+                DataQuality.ADEQUATE,
+                pl.strava.analizator.domain.ai.AiLanguage.EN);
+
+        assertThat(result.systemPrompt()).endsWith(pl.strava.analizator.domain.ai.AiLanguage.EN.promptDirective());
+    }
+
+    @Test
+    void personaPrompt_isLoadedForEveryStyle() {
+        for (Persona persona : Persona.values()) {
+            assertThat(engine.personaPrompt(persona)).isNotBlank();
+        }
+    }
+
+    @Test
+    void buildPrompt_withoutLanguage_usesDefaultDirective() {
+        PromptResult result = engine.buildPrompt(PredictionType.FTP_PREDICTION, Map.of());
+
+        assertThat(result.systemPrompt()).endsWith(pl.strava.analizator.domain.ai.AiLanguage.DEFAULT.promptDirective());
+    }
+
+    @Test
     void buildPrompt_withPersona_includesPersonaInSystem() {
         PromptResult result = engine.buildPrompt(
                 PredictionType.FTP_PREDICTION,

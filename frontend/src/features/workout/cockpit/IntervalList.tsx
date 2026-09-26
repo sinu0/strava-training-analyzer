@@ -7,6 +7,7 @@ import { getZoneForPower } from '@/types/training';
 import { StatusPill, useTokens, Widget } from '@/ui';
 
 import { formatClock, formatDurationShort, stepLabel, stepTargetText } from './format';
+import { cockpitMessages } from './messages';
 
 function stepPct(step: WorkoutStep): number | null {
   const low = step.powerPctFtpLow ?? step.onPowerPctFtpLow;
@@ -21,17 +22,18 @@ function durationOf(step: WorkoutStep): number {
 
 /** Workout plan with zone colours, repeats and the current step highlighted. */
 export default function IntervalList({ execution }: { execution: WorkoutExecution }) {
+  const t = cockpitMessages.useT();
   const tokens = useTokens();
   const steps = execution.stepsSnapshot;
   const remainingMs = steps.slice(execution.currentStepIndex).reduce((total, step) => total + durationOf(step) * 1000, 0) - execution.stepElapsedMs;
 
   return (
     <Widget
-      title="Plan treningu"
+      title={t('intervalList.title')}
       icon={<FormatListBulletedIcon />}
-      action={<StatusPill size="sm" label={`zostało ${formatClock(Math.max(0, remainingMs))}`} />}
+      action={<StatusPill size="sm" label={t('intervalList.remaining', { time: formatClock(Math.max(0, remainingMs)) })} />}
     >
-      <Box component="ol" aria-label="Kroki treningu" sx={{ listStyle: 'none', p: 0, m: 0, display: 'grid', gap: 0.75, maxHeight: { md: 420 }, overflowY: 'auto' }}>
+      <Box component="ol" aria-label={t('intervalList.ariaLabel')} sx={{ listStyle: 'none', p: 0, m: 0, display: 'grid', gap: 0.75, maxHeight: { md: 420 }, overflowY: 'auto' }}>
         {steps.map((step, index) => {
           const pct = stepPct(step);
           const zone = pct != null ? getZoneForPower(pct) : null;

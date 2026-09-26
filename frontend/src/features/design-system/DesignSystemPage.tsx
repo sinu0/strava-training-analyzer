@@ -8,6 +8,7 @@ import { Box, Button, CssBaseline, Stack, Typography } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import { useMemo } from 'react';
 
+import { designSystemMessages } from '@/features/design-system/messages';
 import { createAppTheme, getThemeTokens, type AppColorMode } from '@/theme/theme';
 import {
   DotMatrixChart, DotMatrixRow, EmptyState, HeroCard, LegendStat, Metric, PageHeader, ProgressTrack, RoundAction,
@@ -20,37 +21,38 @@ const ZONES = getThemeTokens('dark').chart.zone;
 
 function Catalog({ mode }: { mode: AppColorMode }) {
   const tokens = getThemeTokens(mode);
+  const t = designSystemMessages.useT();
   return (
     <Box data-testid={`catalog-${mode}`} sx={{ bgcolor: 'background.default', color: 'text.primary', p: { xs: 2, md: 4 }, minWidth: 0 }}>
       <PageHeader
-        eyebrow={`Motyw ${mode === 'light' ? 'jasny' : 'ciemny'}`}
-        title="System komponentów"
-        description="Każdy ekran składa się z tych części. Wartości pochodzą z tokenów motywu."
-        meta={<><StatusPill label="Dane aktualne" tone="success" variant="outline" /><StatusPill label="LOCAL" tone="success" size="sm" /></>}
+        eyebrow={mode === 'light' ? t('themeLight') : t('themeDark')}
+        title={t('header.title')}
+        description={t('header.description')}
+        meta={<><StatusPill label={t('header.dataFresh')} tone="success" variant="outline" /><StatusPill label="LOCAL" tone="success" size="sm" /></>}
       />
 
-      <SectionHeader eyebrow="Powierzchnie" title="Hero i widgety" />
+      <SectionHeader eyebrow={t('sections.surfaces.eyebrow')} title={t('sections.surfaces.title')} />
       <WidgetGrid>
         <WidgetCell span={8}>
           <HeroCard
-            image={{ src: getCyclingHeroIllustrationPath('today'), alt: 'Kolarz na szosie' }}
-            eyebrow="Rekomendacja dnia"
+            image={{ src: getCyclingHeroIllustrationPath('today'), alt: t('hero.alt') }}
+            eyebrow={t('hero.eyebrow')}
             title="Threshold"
-            caption="Dzisiaj · środa, 24 września"
-            description="15 min rozgrzewki, 3×16 min Z4 z 5 min przerwy, 12 min schłodzenia."
-            stat={{ label: 'Czas sesji', value: '90', unit: 'min' }}
-            metrics={[{ id: 'tss', label: 'Cel obciążenia', value: '84 TSS' }]}
-            action={{ label: 'Otwórz plan', onClick: () => undefined }}
+            caption={t('hero.caption')}
+            description={t('hero.description')}
+            stat={{ label: t('hero.sessionTime'), value: '90', unit: 'min' }}
+            metrics={[{ id: 'tss', label: t('hero.loadTarget'), value: '84 TSS' }]}
+            action={{ label: t('hero.openPlan'), onClick: () => undefined }}
             minHeight={360}
           />
         </WidgetCell>
         <WidgetCell span={4}>
-          <Widget title="Ostatni trening" icon={<DirectionsBikeOutlinedIcon />}>
-            <Typography variant="h5">Morning Ride</Typography>
+          <Widget title={t('lastRide.title')} icon={<DirectionsBikeOutlinedIcon />}>
+            <Typography variant="h5">{t('lastRide.name')}</Typography>
             <Stack direction="row" useFlexGap sx={{ mt: 1.5, gap: 2.5, flexWrap: 'wrap' }}>
-              <Metric variant="stat" label="Dystans" value="57.5" unit="km" />
-              <Metric variant="stat" label="Przewyższenie" value="186" unit="m" />
-              <Metric variant="stat" label="Czas" value="2:06" unit="h" />
+              <Metric variant="stat" label={t('lastRide.distance')} value="57.5" unit="km" />
+              <Metric variant="stat" label={t('lastRide.elevation')} value="186" unit="m" />
+              <Metric variant="stat" label={t('lastRide.time')} value="2:06" unit="h" />
             </Stack>
             <Box sx={{ mt: 3 }}>
               <StatRow items={[
@@ -62,64 +64,64 @@ function Catalog({ mode }: { mode: AppColorMode }) {
           </Widget>
         </WidgetCell>
         <WidgetCell span={4}>
-          <Widget title="Aktywność" icon={<LocalFireDepartmentOutlinedIcon />} action={<StatusPill label="87%" tone="primary" variant="solid" dot />}>
-            <Metric variant="hero" label="Poprawiasz ogólną formę" value="2.780" unit="kcal" />
-            <Box sx={{ my: 2 }}><Sparkline values={[3, 4, 3, 6, 8, 5, 4, 6, 7, 5]} markerIndex={4} ariaLabel="Trend aktywności" /></Box>
+          <Widget title={t('activity.title')} icon={<LocalFireDepartmentOutlinedIcon />} action={<StatusPill label="87%" tone="primary" variant="solid" dot />}>
+            <Metric variant="hero" label={t('activity.hero')} value="2.780" unit="kcal" />
+            <Box sx={{ my: 2 }}><Sparkline values={[3, 4, 3, 6, 8, 5, 4, 6, 7, 5]} markerIndex={4} ariaLabel={t('activity.trend')} /></Box>
             <Stack direction="row" useFlexGap sx={{ justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
-              <LegendStat label="Szosa" value="127" unit="kcal" color={tokens.chart.primary} />
-              <LegendStat label="Trenażer" value="386" unit="kcal" color={tokens.chart.secondary} />
-              <LegendStat label="Siła" value="249" unit="kcal" color={tokens.chart.tertiary} />
+              <LegendStat label={t('activity.road')} value="127" unit="kcal" color={tokens.chart.primary} />
+              <LegendStat label={t('activity.trainer')} value="386" unit="kcal" color={tokens.chart.secondary} />
+              <LegendStat label={t('activity.strength')} value="249" unit="kcal" color={tokens.chart.tertiary} />
             </Stack>
           </Widget>
         </WidgetCell>
         <WidgetCell span={4}>
-          <Widget title="Trening" icon={<BoltIcon />} action={<Box sx={{ width: 110 }}><ProgressTrack value={24} size="xs" ariaLabel="Cel tygodnia" valueLabel="2.32 h" /></Box>}>
-            <Metric variant="hero" label="Utrzymaj regularność w tym tygodniu" value="142" unit="TSS" />
+          <Widget title={t('workout.title')} icon={<BoltIcon />} action={<Box sx={{ width: 110 }}><ProgressTrack value={24} size="xs" ariaLabel={t('workout.weekGoal')} valueLabel="2.32 h" /></Box>}>
+            <Metric variant="hero" label={t('workout.hero')} value="142" unit="TSS" />
             <Box sx={{ mt: 2 }}>
-              <DotMatrixChart columns={HOURLY} color={tokens.chart.secondary} activeId="h11" axis={['00:00', '12:00', '21:00']} ariaLabel="Obciążenie godzinowe" />
+              <DotMatrixChart columns={HOURLY} color={tokens.chart.secondary} activeId="h11" axis={['00:00', '12:00', '21:00']} ariaLabel={t('workout.hourlyLoad')} />
             </Box>
           </Widget>
         </WidgetCell>
         <WidgetCell span={4}>
-          <Widget title="Sen" icon={<BedtimeOutlinedIcon />} action={<StatusPill label="Bateria 75" icon={<BoltIcon />} variant="outline" tone="success" />}>
-            <Typography variant="h6">Regeneracja</Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Lepszy sen poprawia gotowość do jakości.</Typography>
+          <Widget title={t('sleep.title')} icon={<BedtimeOutlinedIcon />} action={<StatusPill label={t('sleep.battery')} icon={<BoltIcon />} variant="outline" tone="success" />}>
+            <Typography variant="h6">{t('sleep.heading')}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>{t('sleep.description')}</Typography>
             <Surface variant="muted" padding="sm" sx={{ mt: 2 }}>
               <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                <Metric variant="hero" size="lg" label="Jakość snu" value="89%" />
-                <Box sx={{ width: 120 }}><ProgressTrack value={70} ariaLabel="Sen" valueLabel="4.32 h" /></Box>
+                <Metric variant="hero" size="lg" label={t('sleep.quality')} value="89%" />
+                <Box sx={{ width: 120 }}><ProgressTrack value={70} ariaLabel={t('sleep.sleepLabel')} valueLabel="4.32 h" /></Box>
               </Stack>
             </Surface>
           </Widget>
         </WidgetCell>
       </WidgetGrid>
 
-      <SectionHeader eyebrow="Postęp i skale" title="Paski, markery, macierze" />
+      <SectionHeader eyebrow={t('sections.progress.eyebrow')} title={t('sections.progress.title')} />
       <WidgetGrid>
         <WidgetCell span={6}>
-          <Widget title="Obciążenie 7/42 dni" icon={<BoltIcon />}>
+          <Widget title={t('load.title')} icon={<BoltIcon />}>
             <Stack direction="row" spacing={3}>
               <Metric label="CTL" value="31.6" tone="primary" />
               <Metric label="ATL" value="40.0" tone="warning" />
-              <Metric label="Forma" value="-14.2" tone="warning" />
+              <Metric label={t('load.form')} value="-14.2" tone="warning" />
             </Stack>
             <Stack spacing={1} sx={{ mt: 2.5 }}>
               <DotMatrixRow label="CTL" valueLabel="31.6" filled={9} color={tokens.chart.secondary} />
               <DotMatrixRow label="ATL" valueLabel="40.0" filled={12} color={tokens.chart.primary} />
-              <DotMatrixRow label="FORMA" valueLabel="-14.2" filled={6} color={tokens.status.warning} />
+              <DotMatrixRow label={t('load.formCaps')} valueLabel="-14.2" filled={6} color={tokens.status.warning} />
             </Stack>
           </Widget>
         </WidgetCell>
         <WidgetCell span={6}>
-          <Widget title="Krok treningu" icon={<TimerOutlinedIcon />} action={<StatusPill label="ERG" tone="primary" dot />}>
-            <ProgressTrack value={62} label="30 min @ 105–140 W · Rozgrzewka" valueLabel="14:49 / 15:11" ariaLabel="Postęp kroku" size="md" />
+          <Widget title={t('step.title')} icon={<TimerOutlinedIcon />} action={<StatusPill label="ERG" tone="primary" dot />}>
+            <ProgressTrack value={62} label={t('step.label')} valueLabel="14:49 / 15:11" ariaLabel={t('step.progress')} size="md" />
             <Box sx={{ mt: 3 }}>
-              <ProgressTrack mode="marker" value={27} size="md" ariaLabel="Forma -14" scale={['Zmęczenie −30', 'Świeżość +30']} tone="warning" />
+              <ProgressTrack mode="marker" value={27} size="md" ariaLabel={t('step.form')} scale={[t('step.fatigue'), t('step.freshness')]} tone="warning" />
             </Box>
             <Box sx={{ mt: 3 }}>
               <ProgressTrack
                 value={40}
-                ariaLabel="Profil treningu"
+                ariaLabel={t('step.profile')}
                 segments={[
                   { weight: 15, color: ZONES.Z2, label: 'Z2' }, { weight: 16, color: ZONES.Z4, label: 'Z4' },
                   { weight: 5, color: ZONES.Z1, label: 'Z1' }, { weight: 16, color: ZONES.Z4, label: 'Z4' },
@@ -131,7 +133,7 @@ function Catalog({ mode }: { mode: AppColorMode }) {
         </WidgetCell>
       </WidgetGrid>
 
-      <SectionHeader eyebrow="Status i akcje" title="Pigułki, przyciski, stany" />
+      <SectionHeader eyebrow={t('sections.status.eyebrow')} title={t('sections.status.title')} />
       <Surface>
         <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
           {(['neutral', 'primary', 'secondary', 'success', 'warning', 'error', 'info'] as const).map((tone) => (
@@ -139,15 +141,15 @@ function Catalog({ mode }: { mode: AppColorMode }) {
           ))}
           <StatusPill label="solid" tone="primary" variant="solid" />
           <StatusPill label="outline" tone="success" variant="outline" />
-          <Button variant="contained">Główna akcja</Button>
-          <Button variant="outlined">Druga akcja</Button>
-          <Button>Tekstowa</Button>
-          <RoundAction aria-label="Start treningu" variant="accent" />
-          <RoundAction aria-label="Więcej" variant="bubble" size="md" />
+          <Button variant="contained">{t('actions.primary')}</Button>
+          <Button variant="outlined">{t('actions.secondary')}</Button>
+          <Button>{t('actions.text')}</Button>
+          <RoundAction aria-label={t('actions.start')} variant="accent" />
+          <RoundAction aria-label={t('actions.more')} variant="bubble" size="md" />
         </Stack>
       </Surface>
       <WidgetGrid sx={{ mt: 3 }}>
-        <WidgetCell span={6}><Surface><EmptyState title="Brak aktywności" description="Zsynchronizuj Stravę, aby zobaczyć historię." /></Surface></WidgetCell>
+        <WidgetCell span={6}><Surface><EmptyState title={t('empty.title')} description={t('empty.description')} /></Surface></WidgetCell>
         <WidgetCell span={6}><SkeletonCard height={200} /></WidgetCell>
       </WidgetGrid>
     </Box>

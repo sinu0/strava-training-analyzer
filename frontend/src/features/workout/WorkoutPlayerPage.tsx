@@ -6,6 +6,7 @@ import type { ActualPowerPoint } from '@/components/training/WorkoutPowerChart';
 
 import TrainerCockpit from './cockpit/TrainerCockpit';
 import { useTrainerSession } from './devices/useTrainerSession';
+import { workoutMessages } from './messages';
 import { clearActiveExecution } from './offlineStore';
 import { useRideRecording } from './recording/useRideRecording';
 import { useWorkoutExecution } from './useWorkoutExecution';
@@ -15,6 +16,7 @@ import WorkoutSummary from './WorkoutSummary';
 import type { RideSample } from './devices/trainerSession';
 
 export default function WorkoutPlayerPage() {
+  const t = workoutMessages.useT();
   const { executionId = '' } = useParams();
   const navigate = useNavigate();
   const player = useWorkoutExecution(executionId);
@@ -35,13 +37,13 @@ export default function WorkoutPlayerPage() {
   const trainer = useTrainerSession(execution, { onSample });
 
   if (player.loading) {
-    return <Box sx={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }}><CircularProgress aria-label="Wczytywanie treningu" /></Box>;
+    return <Box sx={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }}><CircularProgress aria-label={t('player.loading')} /></Box>;
   }
   if (player.loadError || !execution) {
-    return <Container sx={{ py: 6 }}><Alert severity="error">Nie udało się odtworzyć aktywnego treningu z serwera ani pamięci urządzenia.</Alert></Container>;
+    return <Container sx={{ py: 6 }}><Alert severity="error">{t('player.restoreFailed')}</Alert></Container>;
   }
   if (player.locked) {
-    return <Container sx={{ py: 6 }}><Alert severity="warning">Ten trening jest już otwarty w innej karcie lub oknie. Zamknij drugi odtwarzacz i odśwież stronę.</Alert></Container>;
+    return <Container sx={{ py: 6 }}><Alert severity="warning">{t('player.lockedByOther')}</Alert></Container>;
   }
 
   if (execution.status === 'COMPLETED' || execution.status === 'ABORTED') {
@@ -81,7 +83,7 @@ export default function WorkoutPlayerPage() {
       onRecordingChange={recording.setEnabled}
       onAction={player.sendAction}
       onAbort={() => {
-        if (window.confirm('Przerwać trening? Tego wykonania nie będzie można wznowić.')) player.abort();
+        if (window.confirm(t('player.confirmAbort'))) player.abort();
       }}
       onBack={() => navigate(`/training/workouts/${execution.scheduledWorkoutId}`)}
     />

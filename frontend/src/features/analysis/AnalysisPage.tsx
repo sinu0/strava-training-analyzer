@@ -16,6 +16,7 @@ import { EmptyState, ErrorState, HeroCard, LoadingState, Metric, Page, Surface }
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
 import { localDate } from '@/utils/localDate';
 
+import { analysisPageMessages } from './messages';
 import { useLoadAnalytics, usePeriodComparison, usePowerAnalytics } from './useV2Analytics';
 
 type AnalysisTab = 'compare' | 'load' | 'power';
@@ -36,13 +37,13 @@ function formatSummary(value: number, kind: 'distance' | 'time' | 'elevation') {
   return `${Math.round(value)} m`;
 }
 
-function changeLabel(current: number, previous: number) {
-  if (previous === 0) return 'brak porównywalnej bazy';
-  const change = ((current - previous) / previous) * 100;
-  return `${change >= 0 ? '+' : ''}${change.toFixed(0)}% vs poprzedni okres`;
-}
-
 export default function AnalysisPage() {
+  const t = analysisPageMessages.useT();
+  const changeLabel = (current: number, previous: number) => {
+    if (previous === 0) return t('noComparableBase');
+    const change = ((current - previous) / previous) * 100;
+    return t('vsPreviousPeriod', { value: `${change >= 0 ? '+' : ''}${change.toFixed(0)}` });
+  };
   const [params, setParams] = useSearchParams();
   const rawTab = params.get('tab');
   const tab: AnalysisTab = rawTab === 'load' || rawTab === 'power' ? rawTab : 'compare';
@@ -70,11 +71,11 @@ export default function AnalysisPage() {
 
   const renderContent = () => {
     const active = tab === 'compare' ? comparison : tab === 'load' ? load : power;
-    if (active.isLoading) return <LoadingState message="Ładowanie aktywnego widoku analizy…" />;
-    if (active.isError) return <ErrorState message="Nie udało się pobrać analizy." onRetry={() => void active.refetch()} />;
+    if (active.isLoading) return <LoadingState message={t('loadingView')} />;
+    if (active.isError) return <ErrorState message={t('loadError')} onRetry={() => void active.refetch()} />;
 
     if (tab === 'compare' && comparison.data) {
-      if (comparison.data.availability === 'UNKNOWN') return <EmptyState title="Brak okresów do porównania" />;
+      if (comparison.data.availability === 'UNKNOWN') return <EmptyState title={t('noComparablePeriods')} />;
       return (
         <Grid container spacing={2}>
           {[comparison.data.period1, comparison.data.period2].map((period, index) => (
@@ -87,13 +88,13 @@ export default function AnalysisPage() {
               <Surface variant={index === 0 ? 'accent' : 'default'} sx={{ height: '100%' }}>
                 <Typography variant="overline" sx={{
                   color: "text.secondary"
-                }}>{index === 0 ? 'Wybrany okres' : 'Poprzedni okres'}</Typography>
+                }}>{index === 0 ? t('selectedPeriod') : t('previousPeriod')}</Typography>
                 <Typography variant="h6">{period.from} — {period.to}</Typography>
                 <Grid container spacing={2.25} sx={{ mt: 0.75 }}>
                   <Grid size={6}>
                     <Metric
                       icon={<DirectionsBikeOutlinedIcon />}
-                      label="Aktywności"
+                      label={t('metricActivities')}
                       value={period.activityCount}
                       hint={index === 0 ? changeLabel(period.activityCount, comparison.data.period2.activityCount) : undefined}
                       tone={index === 0 ? 'primary' : undefined}
@@ -102,16 +103,16 @@ export default function AnalysisPage() {
                   <Grid size={6}>
                     <Metric
                       icon={<StraightenOutlinedIcon />}
-                      label="Dystans"
+                      label={t('metricDistance')}
                       value={formatSummary(period.totalDistanceM, 'distance')}
                       hint={index === 0 ? changeLabel(period.totalDistanceM, comparison.data.period2.totalDistanceM) : undefined}
                     />
                   </Grid>
                   <Grid size={6}>
-                    <Metric icon={<TimerOutlinedIcon />} label="Czas" value={formatSummary(period.totalTimeSec, 'time')} />
+                    <Metric icon={<TimerOutlinedIcon />} label={t('metricTime')} value={formatSummary(period.totalTimeSec, 'time')} />
                   </Grid>
                   <Grid size={6}>
-                    <Metric icon={<LandscapeOutlinedIcon />} label="Przewyższenie" value={formatSummary(period.totalElevationM, 'elevation')} />
+                    <Metric icon={<LandscapeOutlinedIcon />} label={t('metricElevation')} value={formatSummary(period.totalElevationM, 'elevation')} />
                   </Grid>
                 </Grid>
               </Surface>
@@ -123,12 +124,16 @@ export default function AnalysisPage() {
 
     if (tab === 'load' && load.data) {
       return load.data.availability === 'UNKNOWN'
-        ? <EmptyState title="Brak obciążenia" description="Brak danych nie jest prezentowany jako zerowa forma." />
+        ? <EmptyState title={t('noLoadTitle')} description={t('noLoadDescription')} />
         : (
           <Surface padding="sm">
             {load.data.availability === 'PARTIAL' ? (
               <Alert severity="warning" sx={{ mb: 2 }}>
-                Niepełne dane. Pokrycie obciążenia: {load.data.coverage == null ? 'nieznane' : `${Math.round(load.data.coverage * 100)}%`}. Dostępność dni: {load.data.temporalCoverage == null ? 'nieznana' : `${Math.round(load.data.temporalCoverage * 100)}%`}. Ostatnie obliczenie: {load.data.asOf ?? 'brak'}. Luki oznaczają brak danych.
+                {t('partialDataAlert', {
+                  coverage: load.data.coverage == null ? t('coverageUnknown') : `${Math.round(load.data.coverage * 100)}%`,
+                  temporalDays: load.data.temporalCoverage == null ? t('temporalUnknown') : `${Math.round(load.data.temporalCoverage * 100)}%`,
+                  asOf: load.data.asOf ?? t('asOfNone'),
+                })}
               </Alert>
             ) : null}
             <PMChart data={load.data.points} />
@@ -138,9 +143,13 @@ export default function AnalysisPage() {
 
     if (tab === 'power' && power.data) {
       return <Surface padding="sm">
-        <Alert severity={includeUnverified ? 'warning' : 'info'} sx={{ mb: 2 }}>{includeUnverified ? 'Widok mieszany: zawiera estymacje i źródła niepotwierdzone. Nie traktuj tej krzywej jako zweryfikowanego pomiaru ani podstawy do wyznaczania FTP.' : 'Krzywa obejmuje wyłącznie potwierdzony pomiar mocy.'} Aktywności z pomiarem: {power.data.curve.measuredActivities ?? 'brak informacji'}, z estymacją: {power.data.curve.estimatedActivities ?? 'brak informacji'}, bez potwierdzonego źródła: {power.data.curve.unknownSourceActivities ?? 'brak informacji'}.</Alert>
+        <Alert severity={includeUnverified ? 'warning' : 'info'} sx={{ mb: 2 }}>{includeUnverified ? t('powerMixedWarning') : t('powerVerifiedInfo')} {t('powerActivitiesSummary', {
+          measured: power.data.curve.measuredActivities ?? t('noInfo'),
+          estimated: power.data.curve.estimatedActivities ?? t('noInfo'),
+          unknown: power.data.curve.unknownSourceActivities ?? t('noInfo'),
+        })}</Alert>
         {power.data.availability === 'UNKNOWN'
-          ? <EmptyState title="Brak krzywej mocy" description="Wybierz okres z aktywnościami zawierającymi potwierdzony pomiar mocy." />
+          ? <EmptyState title={t('noPowerCurveTitle')} description={t('noPowerCurveDescription')} />
           : <PowerCurveChart data={power.data.curve} />}
       </Surface>;
     }
@@ -148,14 +157,14 @@ export default function AnalysisPage() {
   };
 
   return (
-    <Page title="Laboratorium wydolności" subtitle="Porównuj okresy, obserwuj obciążenie i analizuj moc bez ukrywania jakości danych." maxWidth={1320}>
+    <Page title={t('pageTitle')} subtitle={t('pageSubtitle')} maxWidth={1320}>
       <HeroCard
         layout="split"
-        eyebrow="Dane, nie hałas"
-        title="Zobacz, co zmienia Twój trening"
-        description="Porównuj bloki, obciążenie i moc w jednym spokojnym widoku analitycznym."
-        image={{ src: getCyclingHeroIllustrationPath('analytics'), alt: 'Kokpit roweru na górskiej drodze o świcie' }}
-        tags={[`${dayCount} dni`, 'Porównanie okresów', 'Moc i obciążenie']}
+        eyebrow={t('heroEyebrow')}
+        title={t('heroTitle')}
+        description={t('heroDescription')}
+        image={{ src: getCyclingHeroIllustrationPath('analytics'), alt: t('heroImageAlt') }}
+        tags={[t('tagDays', { count: dayCount }), t('tagCompare'), t('tagPower')]}
         headingComponent="h2"
       />
       <Surface padding="none" sx={{ mb: 2.5 }}>
@@ -163,7 +172,7 @@ export default function AnalysisPage() {
           value={tab}
           onChange={(_, value: AnalysisTab) => update('tab', value)}
           variant="fullWidth"
-          aria-label="Widoki analizy"
+          aria-label={t('tabsAriaLabel')}
           sx={{
             '& .MuiTab-root': {
               minWidth: 0,
@@ -176,21 +185,21 @@ export default function AnalysisPage() {
             "& .MuiTab-icon": { m: '0 !important' },
           }}
         >
-          <Tab value="compare" icon={<CompareArrowsOutlinedIcon />} iconPosition="start" label="Porównaj" />
-          <Tab value="load" icon={<TimelineOutlinedIcon />} iconPosition="start" label="Obciążenie i regeneracja" />
-          <Tab value="power" icon={<ShowChartOutlinedIcon />} iconPosition="start" label="Moc" />
+          <Tab value="compare" icon={<CompareArrowsOutlinedIcon />} iconPosition="start" label={t('tabCompare')} />
+          <Tab value="load" icon={<TimelineOutlinedIcon />} iconPosition="start" label={t('tabLoad')} />
+          <Tab value="power" icon={<ShowChartOutlinedIcon />} iconPosition="start" label={t('tabPower')} />
         </Tabs>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-          <PolishDateField size="small" label="Od" value={from} onChange={value => update('from', value)} slotProps={{ inputLabel: { shrink: true } }} />
-          <PolishDateField size="small" label="Do" value={to} onChange={value => update('to', value)} slotProps={{ inputLabel: { shrink: true } }} />
-          {tab === 'power' && <FormControlLabel control={<Checkbox checked={includeUnverified} onChange={(_, checked) => update('powerSources', checked ? 'all' : 'measured')} />} label="Pokaż także źródła niepotwierdzone" />}
+          <PolishDateField size="small" label={t('fromLabel')} value={from} onChange={value => update('from', value)} slotProps={{ inputLabel: { shrink: true } }} />
+          <PolishDateField size="small" label={t('toLabel')} value={to} onChange={value => update('to', value)} slotProps={{ inputLabel: { shrink: true } }} />
+          {tab === 'power' && <FormControlLabel control={<Checkbox checked={includeUnverified} onChange={(_, checked) => update('powerSources', checked ? 'all' : 'measured')} />} label={t('showUnverifiedSources')} />}
           <Box sx={{ flex: 1 }} />
           <Typography
             variant="caption"
             sx={{
               color: "text.secondary",
               alignSelf: "center"
-            }}>Zakres jest zapisany w URL</Typography>
+            }}>{t('rangeSavedNote')}</Typography>
         </Stack>
       </Surface>
       {renderContent()}

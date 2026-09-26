@@ -13,6 +13,7 @@ import { alpha } from '@mui/material/styles';
 import { forwardRef, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { profileMessages } from '@/components/profile/messages';
 import { useRecentActivities } from '@/hooks/useAnalytics';
 import { getLocale } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
@@ -89,6 +90,7 @@ function Stat({ label, value }: { label: string; value: string | null }) {
 export default function ProfileGallery() {
   const { data: activities = [] } = useRecentActivities(200);
   const navigate = useNavigate();
+  const t = profileMessages.useT();
   const [page, setPage] = useState(0);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -133,8 +135,8 @@ export default function ProfileGallery() {
   if (photos.length === 0) {
     return (
       <EmptyState
-        title="Brak zdjęć do wyświetlenia"
-        description="Dodaj zdjęcia do aktywności, aby je tu zobaczyć."
+        title={t('gallery.emptyTitle')}
+        description={t('gallery.emptyDescription')}
         illustration="/illustrations/empty-gallery.png"
       />
     );
@@ -144,7 +146,7 @@ export default function ProfileGallery() {
     <Box>
       <Box sx={{ position: 'relative', mb: 2 }}>
         <IconButton
-          aria-label="carousel-prev"
+          aria-label={t('gallery.previousPage')}
           disabled={currentPage === 0}
           onClick={() => setPage((value) => Math.max(0, value - 1))}
           sx={{
@@ -177,7 +179,7 @@ export default function ProfileGallery() {
                 component="button"
                 type="button"
                 data-testid={`profile-photo-${globalIndex}`}
-                aria-label={`Otwórz zdjęcie: ${photo.title}`}
+                aria-label={t('gallery.openPhoto', { title: photo.title })}
                 onClick={() => openLightbox(globalIndex)}
                 sx={{
                   position: 'relative',
@@ -245,7 +247,7 @@ export default function ProfileGallery() {
         </Box>
 
         <IconButton
-          aria-label="carousel-next"
+          aria-label={t('gallery.nextPage')}
           disabled={currentPage >= totalPages - 1}
           onClick={() => setPage((value) => Math.min(totalPages - 1, value + 1))}
           sx={{
@@ -286,13 +288,13 @@ export default function ProfileGallery() {
             alignItems: "center"
           }}>
             <Button disabled={currentPage === 0} onClick={() => setPage((value) => Math.max(0, value - 1))} size="small">
-              Poprzednia
+              {t('gallery.previous')}
             </Button>
             <Typography sx={{ color: 'text.secondary', fontVariantNumeric: 'tabular-nums' }}>
               {currentPage + 1} / {totalPages}
             </Typography>
             <Button disabled={currentPage >= totalPages - 1} onClick={() => setPage((value) => Math.min(totalPages - 1, value + 1))} size="small">
-              Następna
+              {t('gallery.next')}
             </Button>
           </Stack>
         </Box>
@@ -318,7 +320,7 @@ export default function ProfileGallery() {
         {!!currentPhoto && (
           <Box sx={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
             <IconButton
-              aria-label="close"
+              aria-label={t('gallery.close')}
               onClick={closeLightbox}
               sx={{ position: 'absolute', top: 12, right: 12, color: 'white', zIndex: 10 }}
             >
@@ -326,7 +328,7 @@ export default function ProfileGallery() {
             </IconButton>
 
             <IconButton
-              aria-label="prev"
+              aria-label={t('gallery.previousPhoto')}
               onClick={showPrevPhoto}
               sx={{
                 position: 'absolute',
@@ -342,7 +344,7 @@ export default function ProfileGallery() {
             </IconButton>
 
             <IconButton
-              aria-label="next"
+              aria-label={t('gallery.nextPhoto')}
               onClick={showNextPhoto}
               sx={{
                 position: 'absolute',
@@ -404,10 +406,10 @@ export default function ProfileGallery() {
                       flexWrap: "wrap",
                       mt: 1.5
                     }}>
-                    <Stat label="Dystans" value={currentPhoto.activity.distanceM ? formatDistance(currentPhoto.activity.distanceM) : null} />
-                    <Stat label="Czas" value={currentPhoto.activity.movingTimeSec ? formatDuration(currentPhoto.activity.movingTimeSec) : null} />
-                    <Stat label="Moc śr." value={currentPhoto.activity.avgPowerW ? `${Math.round(currentPhoto.activity.avgPowerW)} W` : null} />
-                    <Stat label="Tętno śr." value={currentPhoto.activity.avgHeartrate ? `${Math.round(currentPhoto.activity.avgHeartrate)} bpm` : null} />
+                    <Stat label={t('gallery.distance')} value={currentPhoto.activity.distanceM ? formatDistance(currentPhoto.activity.distanceM) : null} />
+                    <Stat label={t('gallery.time')} value={currentPhoto.activity.movingTimeSec ? formatDuration(currentPhoto.activity.movingTimeSec) : null} />
+                    <Stat label={t('gallery.avgPower')} value={currentPhoto.activity.avgPowerW ? `${Math.round(currentPhoto.activity.avgPowerW)} W` : null} />
+                    <Stat label={t('gallery.avgHr')} value={currentPhoto.activity.avgHeartrate ? `${Math.round(currentPhoto.activity.avgHeartrate)} bpm` : null} />
                   </Stack>
                 </Box>
 
@@ -416,7 +418,7 @@ export default function ProfileGallery() {
                   size="small"
                   onClick={() => goToActivity(currentPhoto.activityId)}
                 >
-                  Otwórz aktywność
+                  {t('gallery.openActivity')}
                 </Button>
               </Stack>
             </Box>

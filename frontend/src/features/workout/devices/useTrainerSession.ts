@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'r
 import type { WorkoutExecution } from '@/types/training';
 
 import { resolveDeviceSource, type DeviceSource } from './deviceSource';
+import { devicesMessages } from './messages';
 import { TrainerSession, type ControlMode, type RideSample, type SessionSnapshot } from './trainerSession';
 
 import type { DeviceKind } from './types';
@@ -24,7 +25,7 @@ export interface TrainerSessionApi {
 function describeError(error: unknown): string | null {
   if (error instanceof DOMException && error.name === 'NotFoundError') return null; // chooser dismissed
   if (error instanceof Error) return error.message;
-  return 'Nie udało się połączyć z urządzeniem';
+  return devicesMessages.t('connectFailed');
 }
 
 /**

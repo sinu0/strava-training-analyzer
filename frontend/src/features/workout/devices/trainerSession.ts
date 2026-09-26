@@ -2,6 +2,7 @@ import type { WorkoutStep } from '@/types/training';
 
 import { ergTarget, shouldSendErg, type ErgCommand, type ErgTarget } from './ergController';
 import { complianceOf, createLiveMetrics, smoothPower, type Compliance, type LiveMetrics, type PowerSample } from './liveMetrics';
+import { devicesMessages } from './messages';
 import { isTrainer } from './types';
 
 import type { DeviceKind, DeviceReading, DeviceStatus, FitnessDevice, Trainer } from './types';
@@ -176,7 +177,7 @@ export class TrainerSession {
       }
       this.setControlError(null);
     } catch (error) {
-      this.setControlError(error instanceof Error ? error.message : 'Nie udało się wysłać polecenia do trenażera');
+      this.setControlError(error instanceof Error ? error.message : devicesMessages.t('controlCommandFailed'));
     }
   }
 

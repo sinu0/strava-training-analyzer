@@ -8,24 +8,25 @@ import { Typography, Button, TextField, Stack, Divider, CircularProgress, Alert,
 
 import { Surface } from '@/ui';
 
+import { routePlannerControlsMessages } from './messages';
 
 import type { MapTileVariant } from '../../constants/mapTiles';
 import type { GeneratedRouteStyle, RoutePlanningPreferences, RoutePreview } from '../../types/route';
 
-function formatRoutingProfile(profile: string): string {
+function formatRoutingProfile(profile: string, t: ReturnType<typeof routePlannerControlsMessages.useT>): string {
   switch (profile) {
     case 'safety':
-      return 'Spokojniej / ścieżki';
+      return t('routingProfile.safety');
     case 'shortest':
-      return 'Najkrócej';
+      return t('routingProfile.shortest');
     case 'gravel':
-      return 'Szuter';
+      return t('routingProfile.gravel');
     case 'trekking':
-      return 'Uniwersalnie';
+      return t('routingProfile.trekking');
     case 'hillclimb':
-      return 'Więcej przewyższeń';
+      return t('routingProfile.hillclimb');
     case 'saved-route':
-      return 'Zapisana trasa';
+      return t('routingProfile.savedRoute');
     default:
       return profile;
   }
@@ -94,22 +95,23 @@ export default function RouteControls({
   onClear,
   onSave,
 }: RouteControlsProps) {
+  const t = routePlannerControlsMessages.useT();
   return (
     <Surface>
       <Typography variant="subtitle2" gutterBottom>
-        Nowa trasa
+        {t('controls.newRouteTitle')}
       </Typography>
       <Stack spacing={1.5}>
         <TextField
           size="small"
-          label="Nazwa trasy"
+          label={t('controls.routeNameLabel')}
           value={routeName}
           onChange={(e) => onRouteNameChange(e.target.value)}
           fullWidth
         />
         <TextField
           size="small"
-          label="Opis"
+          label={t('controls.routeDescLabel')}
           value={routeDesc}
           onChange={(e) => onRouteDescChange(e.target.value)}
           fullWidth
@@ -122,20 +124,20 @@ export default function RouteControls({
           <Chip
             size="small"
             icon={<DirectionsBikeOutlinedIcon />}
-            label="Planner rowerowy"
+            label={t('controls.cyclingPlannerChip')}
             color="success"
             variant="outlined"
           />
           <Chip
             size="small"
             icon={<LayersOutlinedIcon />}
-            label={mapVariant === 'cycling' ? 'Warstwa rowerowa (beta)' : 'OpenStreetMap'}
+            label={mapVariant === 'cycling' ? t('controls.cyclingLayerChip') : t('controls.osmLayerChip')}
             variant="outlined"
           />
           {routePreview?.profile ? (
             <Chip
               size="small"
-              label={formatRoutingProfile(routePreview.profile)}
+              label={formatRoutingProfile(routePreview.profile, t)}
               variant="outlined"
             />
           ) : null}
@@ -146,18 +148,18 @@ export default function RouteControls({
           <TextField
             select
             size="small"
-            label="Warstwa mapy"
+            label={t('controls.mapLayerLabel')}
             value={mapVariant}
             onChange={(event) => onMapVariantChange(event.target.value as MapTileVariant)}
             sx={{ minWidth: 160, flex: 1 }}
           >
-            <MenuItem value="standard">OSM Standard</MenuItem>
-            <MenuItem value="cycling">Rowerowa (best effort)</MenuItem>
+            <MenuItem value="standard">{t('controls.mapLayerStandard')}</MenuItem>
+            <MenuItem value="cycling">{t('controls.mapLayerCycling')}</MenuItem>
           </TextField>
           <TextField
             select
             size="small"
-            label="Ruch"
+            label={t('controls.trafficLabel')}
             value={routingPreferences.trafficPreference}
             onChange={(event) =>
               onRoutingPreferencesChange((current) => ({
@@ -167,14 +169,14 @@ export default function RouteControls({
             }
             sx={{ minWidth: 140, flex: 1 }}
           >
-            <MenuItem value="quieter">Spokojniej</MenuItem>
-            <MenuItem value="balanced">Balans</MenuItem>
-            <MenuItem value="direct">Bez objazdów</MenuItem>
+            <MenuItem value="quieter">{t('controls.trafficQuieter')}</MenuItem>
+            <MenuItem value="balanced">{t('controls.trafficBalanced')}</MenuItem>
+            <MenuItem value="direct">{t('controls.trafficDirect')}</MenuItem>
           </TextField>
           <TextField
             select
             size="small"
-            label="Nawierzchnia"
+            label={t('controls.surfaceLabel')}
             value={routingPreferences.surfacePreference}
             onChange={(event) =>
               onRoutingPreferencesChange((current) => ({
@@ -184,14 +186,14 @@ export default function RouteControls({
             }
             sx={{ minWidth: 150, flex: 1 }}
           >
-            <MenuItem value="asphalt">Asfalt</MenuItem>
-            <MenuItem value="balanced">Bez preferencji</MenuItem>
-            <MenuItem value="gravel">Szuter</MenuItem>
+            <MenuItem value="asphalt">{t('controls.surfaceAsphalt')}</MenuItem>
+            <MenuItem value="balanced">{t('controls.surfaceBalanced')}</MenuItem>
+            <MenuItem value="gravel">{t('controls.surfaceGravel')}</MenuItem>
           </TextField>
           <TextField
             select
             size="small"
-            label="Długość"
+            label={t('controls.distanceLabel')}
             value={routingPreferences.distancePreference}
             onChange={(event) =>
               onRoutingPreferencesChange((current) => ({
@@ -201,14 +203,14 @@ export default function RouteControls({
             }
             sx={{ minWidth: 150, flex: 1 }}
           >
-            <MenuItem value="shortest">Najkrócej</MenuItem>
-            <MenuItem value="balanced">Balans</MenuItem>
-            <MenuItem value="longer">Trochę dłużej</MenuItem>
+            <MenuItem value="shortest">{t('controls.distanceShortest')}</MenuItem>
+            <MenuItem value="balanced">{t('controls.distanceBalanced')}</MenuItem>
+            <MenuItem value="longer">{t('controls.distanceLonger')}</MenuItem>
           </TextField>
           <TextField
             select
             size="small"
-            label="Profil"
+            label={t('controls.climbLabel')}
             value={routingPreferences.climbPreference}
             onChange={(event) =>
               onRoutingPreferencesChange((current) => ({
@@ -218,9 +220,9 @@ export default function RouteControls({
             }
             sx={{ minWidth: 150, flex: 1 }}
           >
-            <MenuItem value="flatter">Mniej podjazdów</MenuItem>
-            <MenuItem value="balanced">Balans</MenuItem>
-            <MenuItem value="hillier">Więcej przewyższeń</MenuItem>
+            <MenuItem value="flatter">{t('controls.climbFlatter')}</MenuItem>
+            <MenuItem value="balanced">{t('controls.climbBalanced')}</MenuItem>
+            <MenuItem value="hillier">{t('controls.climbHillier')}</MenuItem>
           </TextField>
         </Stack>
         <FormControlLabel
@@ -236,20 +238,19 @@ export default function RouteControls({
               alignItems: "center"
             }}>
               <WbSunnyOutlinedIcon fontSize="small" />
-              <Typography variant="body2">Pokaż dymki pogodowe na trasie</Typography>
+              <Typography variant="body2">{t('controls.showWeatherLabel')}</Typography>
             </Stack>
           )}
         />
         <Typography variant="caption" sx={{
           color: "text.secondary"
         }}>
-          Kliknij trasę dokładnie tam, gdzie chcesz wstawić punkt pośredni — meta zostaje
-          ostatnim punktem. Potem przeciągnij numerowany marker, aby dopracować przebieg.
+          {t('controls.clickHint')}
         </Typography>
         <Divider />
         <Stack spacing={1.2}>
           <Typography variant="subtitle2">
-            Generator z historii
+            {t('controls.generatorTitle')}
           </Typography>
           <Stack direction="row" spacing={1} useFlexGap sx={{
             flexWrap: "wrap"
@@ -257,7 +258,7 @@ export default function RouteControls({
             <TextField
               size="small"
               type="number"
-              label="Cel dystansu (km)"
+              label={t('controls.generatorDistanceLabel')}
               value={generatorDistanceKm}
               onChange={(event) => onGeneratorDistanceKmChange(Number(event.target.value) || defaultGeneratorDistanceKm)}
               sx={{ minWidth: 150, flex: 1 }}
@@ -268,20 +269,20 @@ export default function RouteControls({
             <TextField
               select
               size="small"
-              label="Charakter"
+              label={t('controls.generatorStyleLabel')}
               value={generatorStyle}
               onChange={(event) => onGeneratorStyleChange(event.target.value as GeneratedRouteStyle)}
               sx={{ minWidth: 150, flex: 1 }}
             >
-              <MenuItem value="balanced">Podobna</MenuItem>
-              <MenuItem value="longer">Dłuższa</MenuItem>
-              <MenuItem value="harder">Trudniejsza</MenuItem>
-              <MenuItem value="easier">Łagodniejsza</MenuItem>
+              <MenuItem value="balanced">{t('controls.styleBalanced')}</MenuItem>
+              <MenuItem value="longer">{t('controls.styleLonger')}</MenuItem>
+              <MenuItem value="harder">{t('controls.styleHarder')}</MenuItem>
+              <MenuItem value="easier">{t('controls.styleEasier')}</MenuItem>
             </TextField>
             <TextField
               size="small"
               type="number"
-              label="Losowość (%)"
+              label={t('controls.generatorVariationLabel')}
               value={generatorVariationLevel}
               onChange={(event) => onGeneratorVariationLevelChange(Number(event.target.value) || defaultGeneratorVariation)}
               sx={{ minWidth: 140, flex: 1 }}
@@ -296,14 +297,12 @@ export default function RouteControls({
             onClick={onGenerateFromHistory}
             disabled={isGenerating}
           >
-            {isGenerating ? 'Generowanie…' : 'Generuj 3 warianty'}
+            {isGenerating ? t('controls.generating') : t('controls.generateButton')}
           </Button>
           <Typography variant="caption" sx={{
             color: "text.secondary"
           }}>
-            Generator bazuje na Twoich zapisanych trasach i wcześniejszych aktywnościach.
-            Jeśli ustawisz pierwszy punkt na mapie, potraktuje go jako preferowany start i przygotuje
-            kilka wariantów do porównania.
+            {t('controls.generatorHint')}
           </Typography>
           {generationInfo ? (
             <Alert severity="success" icon={false}>
@@ -318,10 +317,10 @@ export default function RouteControls({
         </Stack>
         <Stack direction="row" spacing={1}>
           <Button size="small" startIcon={<UndoIcon />} onClick={onUndo} disabled={waypointCount === 0}>
-            Cofnij
+            {t('controls.undo')}
           </Button>
           <Button size="small" startIcon={<DeleteSweepIcon />} onClick={onClear} disabled={waypointCount === 0}>
-            Wyczyść
+            {t('controls.clear')}
           </Button>
           <Button
             size="small"
@@ -330,7 +329,7 @@ export default function RouteControls({
             onClick={onSave}
             disabled={!routeName.trim() || waypointCount < 2 || createRoutePending}
           >
-            Zapisz
+            {t('controls.save')}
           </Button>
         </Stack>
       </Stack>

@@ -1,0 +1,148 @@
+import { defineMessages } from '@/i18n';
+
+export const activityMessages = defineMessages({
+  pl: {
+    noRoute: 'Brak zapisu trasy',
+    listCard: {
+      distance: 'dystans',
+      movingTime: 'czas ruchu',
+      avgPower: 'śr. moc',
+      avgHeartRate: 'śr. tętno',
+      avgSpeed: 'śr. prędkość',
+      elevationGain: 'przewyższenie',
+      segmentsCount: {
+        one: '{count} segment',
+        few: '{count} segmenty',
+        many: '{count} segmentów',
+        other: '{count} segmentów',
+      },
+      newRecordsCount: {
+        one: '{count} nowy rekord',
+        few: '{count} nowe rekordy',
+        many: '{count} nowych rekordów',
+        other: '{count} nowych rekordów',
+      },
+      openAnalysis: 'Otwórz analizę',
+    },
+    metricGrid: {
+      noMetrics: 'Brak policzonych metryk.',
+      infoAriaLabel: 'Informacje: {label}',
+    },
+    routePreview: {
+      mapAriaLabel: 'Mapa trasy: {name}',
+      gpsRoute: 'Trasa GPS',
+    },
+    lightweightRoutePreview: {
+      traceAriaLabel: 'Ślad trasy: {name}',
+    },
+    lapCard: {
+      intensity: {
+        VO2: 'VO2max',
+        THRESHOLD: 'Próg',
+        ENDURANCE: 'Wytrzymałość',
+        RECOVERY: 'Regeneracja',
+      },
+      lapFallbackName: 'Okr. {index}',
+      peakPower: 'Najmoc',
+      time: 'Czas',
+      power: 'Moc',
+      heartRate: 'Tętno',
+      speed: 'Prędkość',
+      elevationGain: 'Przewyższenie',
+      powerDrop: 'Spadek mocy',
+      altitude: 'Wysokość',
+    },
+    lapsTab: {
+      noLaps: 'Brak danych okrążeń.',
+      lapsCount: {
+        one: '{count} okrążenie',
+        few: '{count} okrążenia',
+        many: '{count} okrążeń',
+        other: '{count} okrążeń',
+      },
+      viewMode: 'Przegląd',
+      compareMode: 'Porównaj',
+      comparisonTitle: 'Porównanie okrążeń',
+      lapShort: 'Okr. {index}',
+    },
+    interactiveChart: {
+      altitude: 'Wysokość (m)',
+      power: 'Moc (W)',
+      heartRate: 'Tętno (bpm)',
+      cadence: 'Kadencja (rpm)',
+      velocity: 'Prędkość (m/s)',
+      hint: 'Najedź myszką, aby zobaczyć punkt na mapie • Kliknij i przeciągnij, aby wybrać odcinek',
+      selectedSegment: 'Zaznaczony odcinek',
+      clear: '✕ Wyczyść',
+    },
+  },
+  en: {
+    noRoute: 'No recorded route',
+    listCard: {
+      distance: 'distance',
+      movingTime: 'moving time',
+      avgPower: 'avg power',
+      avgHeartRate: 'avg heart rate',
+      avgSpeed: 'avg speed',
+      elevationGain: 'elevation gain',
+      segmentsCount: {
+        one: '{count} segment',
+        other: '{count} segments',
+      },
+      newRecordsCount: {
+        one: '{count} new record',
+        other: '{count} new records',
+      },
+      openAnalysis: 'Open analysis',
+    },
+    metricGrid: {
+      noMetrics: 'No calculated metrics.',
+      infoAriaLabel: 'Info: {label}',
+    },
+    routePreview: {
+      mapAriaLabel: 'Route map: {name}',
+      gpsRoute: 'GPS route',
+    },
+    lightweightRoutePreview: {
+      traceAriaLabel: 'Route trace: {name}',
+    },
+    lapCard: {
+      intensity: {
+        VO2: 'VO2max',
+        THRESHOLD: 'Threshold',
+        ENDURANCE: 'Endurance',
+        RECOVERY: 'Recovery',
+      },
+      lapFallbackName: 'Lap {index}',
+      peakPower: 'Peak power',
+      time: 'Time',
+      power: 'Power',
+      heartRate: 'Heart rate',
+      speed: 'Speed',
+      elevationGain: 'Elevation gain',
+      powerDrop: 'Power drop',
+      altitude: 'Altitude',
+    },
+    lapsTab: {
+      noLaps: 'No lap data.',
+      lapsCount: {
+        one: '{count} lap',
+        other: '{count} laps',
+      },
+      viewMode: 'Overview',
+      compareMode: 'Compare',
+      comparisonTitle: 'Lap comparison',
+      lapShort: 'Lap {index}',
+    },
+    interactiveChart: {
+      altitude: 'Altitude (m)',
+      power: 'Power (W)',
+      heartRate: 'HR (bpm)',
+      cadence: 'Cadence (rpm)',
+      velocity: 'Speed (m/s)',
+      hint: 'Hover to see the point on the map • Click and drag to select a segment',
+      selectedSegment: 'Selected segment',
+      clear: '✕ Clear',
+    },
+  },
+});

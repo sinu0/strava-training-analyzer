@@ -17,6 +17,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import { mmpTrendChartMessages } from '@/components/analytics/messages';
 import { useWeeklyMmp } from '@/hooks/usePowerAnalysis';
 import { Surface } from '@/ui';
 import { getChartVisuals } from '@/utils/chartStyles';
@@ -42,6 +43,7 @@ const shouldRenderLegend = !import.meta.env.VITEST && import.meta.env.MODE !== '
 export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
   const theme = useTheme();
   const chart = getChartVisuals(theme);
+  const t = mmpTrendChartMessages.useT();
   const {
     data: weeklyMmp = [],
     isLoading,
@@ -67,7 +69,7 @@ export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
         <Typography variant="subtitle1" sx={{
           fontWeight: 600
         }}>
-          Trend mocy maksymalnej (MMP)
+          {t('title')}
         </Typography>
         <Typography sx={{
           color: "text.secondary"
@@ -86,16 +88,16 @@ export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
   );
 
   if (isLoading) {
-    return renderState('Ładowanie danych MMP…');
+    return renderState(t('loading'));
   }
 
   if (isError) {
     const detail = error instanceof Error ? error.message : undefined;
-    return renderState('Nie udało się załadować trendu MMP.', detail);
+    return renderState(t('loadError'), detail);
   }
 
   if (chartData.length === 0) {
-    return renderState('Brak danych MMP dla wybranego zakresu.');
+    return renderState(t('noData'));
   }
 
   return (
@@ -104,7 +106,7 @@ export default function MmpTrendChart({ from, to }: MmpTrendChartProps) {
         <Typography variant="subtitle1" sx={{
           fontWeight: 600
         }}>
-          Trend mocy maksymalnej (MMP)
+          {t('title')}
         </Typography>
         <ToggleButtonGroup
           size="small"

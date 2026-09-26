@@ -1,18 +1,20 @@
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { Grid, Stack, Tooltip, Typography } from '@mui/material';
 
+import { activityMessages } from '@/components/activity/messages';
 import type { ActivityMetricValue } from '@/features/history/types';
 import { Surface } from '@/ui';
 import { formatActivityMetric, getActivityMetricMetadata } from '@/utils/activityMetricMetadata';
 
 export default function ActivityMetricGrid({ metrics }: { metrics: ActivityMetricValue[] }) {
+  const t = activityMessages.useT();
   const numericMetrics = metrics.filter((item) => item.numericValue != null).slice(0, 8);
 
   if (numericMetrics.length === 0) {
     return (
       <Typography variant="body2" sx={{
         color: "text.secondary"
-      }}>Brak policzonych metryk.</Typography>
+      }}>{t('metricGrid.noMetrics')}</Typography>
     );
   }
 
@@ -35,7 +37,7 @@ export default function ActivityMetricGrid({ metrics }: { metrics: ActivityMetri
                   {metadata.label}
                 </Typography>
                 <Tooltip title={metadata.description} arrow>
-                  <InfoOutlinedIcon aria-label={`Informacje: ${metadata.label}`} sx={{ fontSize: 15, color: 'text.secondary' }} />
+                  <InfoOutlinedIcon aria-label={t('metricGrid.infoAriaLabel', { label: metadata.label })} sx={{ fontSize: 15, color: 'text.secondary' }} />
                 </Tooltip>
               </Stack>
               <Typography variant="h6" sx={{ mt: 0.5, fontVariantNumeric: 'tabular-nums' }}>

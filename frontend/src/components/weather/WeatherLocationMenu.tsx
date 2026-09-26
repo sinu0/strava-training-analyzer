@@ -21,6 +21,7 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 
 import { searchGeocodingLocations, type GeocodingResult } from '@/api/externalApis';
+import { weatherMessages } from '@/components/weather/messages';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { WeatherLocation } from '@/types/analytics';
 import {
@@ -52,6 +53,7 @@ export default function WeatherLocationMenu({
   onDeleteLocation,
   onRefresh,
 }: WeatherLocationMenuProps) {
+  const t = weatherMessages.useT();
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<GeocodingResult[]>([]);
@@ -136,7 +138,7 @@ export default function WeatherLocationMenu({
       }}
     >
       <Typography variant="caption" sx={{ px: 2, py: 0.5, color: 'text.secondary', fontWeight: 700 }}>
-        LOKALIZACJE
+        {t('locationMenu.locations')}
       </Typography>
 
       {locations?.map((location) => (
@@ -162,7 +164,7 @@ export default function WeatherLocationMenu({
             }}
           />
           <IconButton
-            aria-label={`Usuń lokalizację ${location.name}`}
+            aria-label={t('locationMenu.deleteLocationAria', { name: location.name })}
             size="small"
             onClick={(event) => {
               event.stopPropagation();
@@ -183,7 +185,7 @@ export default function WeatherLocationMenu({
             <LocationOnIcon sx={{ color: CHART_COLORS.primary, fontSize: 18 }} />
           </ListItemIcon>
           <ListItemText
-            primary="Dodaj lokalizację"
+            primary={t('locationMenu.addLocation')}
             slotProps={{
               primary: { variant: 'body2' }
             }}
@@ -193,7 +195,7 @@ export default function WeatherLocationMenu({
         <Box sx={{ px: 2, py: 1 }}>
           <TextField
             size="small"
-            placeholder="Wyszukaj miejscowość..."
+            placeholder={t('locationMenu.searchPlaceholder')}
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             fullWidth
@@ -239,7 +241,7 @@ export default function WeatherLocationMenu({
                 textAlign: 'center',
                 py: 1
               }}>
-              Brak wyników
+              {t('locationMenu.noResults')}
             </Typography>
           )}
           <Button
@@ -251,7 +253,7 @@ export default function WeatherLocationMenu({
             fullWidth
             sx={{ textTransform: 'none', color: 'text.secondary', mt: 0.5 }}
           >
-            Anuluj
+            {t('locationMenu.cancel')}
           </Button>
         </Box>
       )}
@@ -268,7 +270,7 @@ export default function WeatherLocationMenu({
         <ListItemIcon>
           <RefreshIcon sx={{ color: STATUS_COLORS.info, fontSize: 18 }} />
         </ListItemIcon>
-        <ListItemText primary="Odśwież dane" slotProps={{
+        <ListItemText primary={t('locationMenu.refreshData')} slotProps={{
           primary: { variant: 'body2' }
         }} />
       </MenuItem>

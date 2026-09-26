@@ -25,6 +25,8 @@ export const pl = {
     notFoundDescription: 'Wygląda na to, że ta trasa prowadzi donikąd. Sprawdź adres URL lub wróć na dashboard.',
     backToDashboard: 'Wróć na dashboard',
     pwaHttpsRequired: 'Tryb instalowalny i bezpieczne wykonanie offline wymagają HTTPS. Na telefonie otwórz adres LAN skonfigurowany z zaufanym certyfikatem; zwykły adres HTTP nie udostępnia Service Workera.',
+    noMapData: 'Brak danych mapy',
+    datePlaceholder: 'DD.MM.RRRR',
   },
   nav: {
     today: { label: 'Dzisiaj', description: 'Decyzja i kontekst dnia' },

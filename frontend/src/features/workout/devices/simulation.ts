@@ -1,3 +1,4 @@
+import { devicesMessages } from './messages';
 import { NO_CAPABILITIES } from './types';
 
 import type { DeviceKind, DeviceReading, DeviceStatus, FitnessDevice, Trainer } from './types';
@@ -54,7 +55,7 @@ class SimulatedTrainer extends SimulatedDevice implements Trainer {
   resistancePct = 30;
 
   constructor() {
-    super('trainer', 'SUITO (symulator)', { power: true, cadence: true, speed: true, erg: true, resistance: true, simulation: true }, 72);
+    super('trainer', devicesMessages.t('simulatedTrainerName'), { power: true, cadence: true, speed: true, erg: true, resistance: true, simulation: true }, 72);
   }
 
   async setTargetPower(watts: number) {
@@ -96,7 +97,7 @@ export interface SimulatedRig {
 export function createSimulatedRig({ seed = 1 }: { seed?: number } = {}): SimulatedRig {
   const rand = random(seed);
   const trainer = new SimulatedTrainer();
-  const strap = new SimulatedDevice('heartRate', 'HRM-Pro (symulator)', { heartRate: true }, 88);
+  const strap = new SimulatedDevice('heartRate', devicesMessages.t('simulatedHrName'), { heartRate: true }, 88);
   let power = FREE_RIDE_WATTS;
   let heartRate = 72;
   const timers: Array<ReturnType<typeof setInterval>> = [];

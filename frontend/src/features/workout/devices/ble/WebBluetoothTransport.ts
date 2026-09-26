@@ -1,3 +1,5 @@
+import { devicesMessages } from '../messages';
+
 import type { BleConnection, BleDeviceHandle, BleTransport, DeviceRequest } from './BleTransport';
 
 type BluetoothNavigator = Navigator & { bluetooth?: Bluetooth & { getDevices?: () => Promise<BluetoothDevice[]> } };
@@ -43,13 +45,13 @@ export class WebBluetoothTransport implements BleTransport {
 
   async connect(handle: BleDeviceHandle): Promise<BleConnection> {
     const device = this.devices.get(handle.id);
-    if (!device?.gatt) throw new Error('Urządzenie nie jest już dostępne. Połącz je ponownie z listy.');
+    if (!device?.gatt) throw new Error(devicesMessages.t('deviceUnavailable'));
     const server = await device.gatt.connect();
     const services = new Map<number, BluetoothRemoteGATTService | null>();
     const service = async (uuid: number) => {
       if (!services.has(uuid)) services.set(uuid, await server.getPrimaryService(uuid).catch(() => null));
       const found = services.get(uuid);
-      if (!found) throw new Error(`Brak usługi Bluetooth 0x${uuid.toString(16)}`);
+      if (!found) throw new Error(devicesMessages.t('missingService', { uuid: uuid.toString(16) }));
       return found;
     };
     const characteristic = async (serviceUuid: number, uuid: number) => (await service(serviceUuid)).getCharacteristic(uuid);
@@ -87,7 +89,7 @@ export class WebBluetoothTransport implements BleTransport {
 
   private requireBluetooth() {
     if (!this.nav.bluetooth) {
-      throw new Error('Ta przeglądarka nie obsługuje Web Bluetooth. Użyj Chrome lub Edge na komputerze albo Chrome na Androidzie (HTTPS).');
+      throw new Error(devicesMessages.t('noWebBluetooth'));
     }
     return this.nav.bluetooth;
   }

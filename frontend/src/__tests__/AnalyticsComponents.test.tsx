@@ -1,8 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { describe, it, expect, vi, beforeAll, afterEach } from 'vitest';
 
 import MmpTrendChart from '../components/analytics/MmpTrendChart';
+import { I18nProvider } from '../i18n';
 
 beforeAll(() => {
   globalThis.ResizeObserver = class {
@@ -60,10 +61,25 @@ function wrap(ui: React.ReactElement) {
 }
 
 describe('MmpTrendChart', () => {
+  afterEach(() => window.localStorage.clear());
+
   it('renders chart title and duration toggles', () => {
     wrap(<MmpTrendChart from="2025-01-01" to="2025-01-31" />);
     expect(screen.getByText('Trend mocy maksymalnej (MMP)')).toBeDefined();
     expect(screen.getByText('5s')).toBeDefined();
     expect(screen.getByText('20min')).toBeDefined();
+  });
+
+  it('renders the English title when the language is switched', async () => {
+    window.localStorage.setItem('strava-analizator.language', 'en');
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <I18nProvider>
+        <QueryClientProvider client={qc}>
+          <MmpTrendChart from="2025-01-01" to="2025-01-31" />
+        </QueryClientProvider>
+      </I18nProvider>,
+    );
+    expect(await screen.findByText('Maximal power trend (MMP)')).toBeDefined();
   });
 });

@@ -4,6 +4,7 @@ import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import { Box, Button, Chip, FormControl, FormControlLabel, Grid, IconButton, InputAdornment, InputLabel, MenuItem, Pagination, Select, Stack, Switch, TextField, Typography } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
 
+import { segmentsMessages } from '@/features/segments/messages';
 import { useBackfillStatus, useSegments, useSetSegmentFavorite, useStartBackfill } from '@/hooks/useSegments';
 import { EmptyState, ErrorState, LoadingState, Metric, Page, Surface } from '@/ui';
 import { describeBackfillStatus, isBackfillBusy } from '@/utils/backfillStatus';
@@ -14,6 +15,7 @@ function duration(seconds?: number | null) {
 }
 
 export default function SegmentsPage() {
+  const t = segmentsMessages.useT();
   const [params, setParams] = useSearchParams();
   const query = params.get('q') ?? '';
   const favorite = params.get('favorite') === 'true';
@@ -43,27 +45,27 @@ export default function SegmentsPage() {
   };
 
   return (
-    <Page title="Segmenty" subtitle="Katalog wszystkich segmentów napotkanych w Twoich aktywnościach" maxWidth={1200}>
+    <Page title={t('list.title')} subtitle={t('list.subtitle')} maxWidth={1200}>
       <Surface padding="sm" sx={{ mb: 2.5 }}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{
           alignItems: { md: 'center' }
         }}>
-          <TextField fullWidth label="Szukaj segmentu" value={query} onChange={event => update('q', event.target.value)}
+          <TextField fullWidth label={t('list.searchLabel')} value={query} onChange={event => update('q', event.target.value)}
             slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchRoundedIcon /></InputAdornment> } }} />
-          <FormControl sx={{ minWidth: 190 }}><InputLabel id="segment-sort-label">Sortowanie</InputLabel>
-            <Select labelId="segment-sort-label" label="Sortowanie" value={sort} onChange={event => update('sort', event.target.value)}>
-              <MenuItem value="recent">Ostatnio przejechane</MenuItem><MenuItem value="attempts">Liczba prób</MenuItem>
-              <MenuItem value="distance">Dystans</MenuItem><MenuItem value="best">Najlepszy czas</MenuItem><MenuItem value="name">Nazwa</MenuItem>
+          <FormControl sx={{ minWidth: 190 }}><InputLabel id="segment-sort-label">{t('list.sortLabel')}</InputLabel>
+            <Select labelId="segment-sort-label" label={t('list.sortLabel')} value={sort} onChange={event => update('sort', event.target.value)}>
+              <MenuItem value="recent">{t('list.sortOptions.recent')}</MenuItem><MenuItem value="attempts">{t('list.sortOptions.attempts')}</MenuItem>
+              <MenuItem value="distance">{t('list.sortOptions.distance')}</MenuItem><MenuItem value="best">{t('list.sortOptions.best')}</MenuItem><MenuItem value="name">{t('list.sortOptions.name')}</MenuItem>
             </Select>
           </FormControl>
-          <FormControl sx={{ minWidth: 175 }}><InputLabel id="segment-distance-label">Dystans</InputLabel>
-            <Select labelId="segment-distance-label" label="Dystans" value={distance} onChange={event => update('distance', event.target.value === 'all' ? undefined : event.target.value)}>
-              <MenuItem value="all">Każdy dystans</MenuItem><MenuItem value="short">Do 1 km</MenuItem>
-              <MenuItem value="medium">1–5 km</MenuItem><MenuItem value="long">Powyżej 5 km</MenuItem>
+          <FormControl sx={{ minWidth: 175 }}><InputLabel id="segment-distance-label">{t('list.distanceLabel')}</InputLabel>
+            <Select labelId="segment-distance-label" label={t('list.distanceLabel')} value={distance} onChange={event => update('distance', event.target.value === 'all' ? undefined : event.target.value)}>
+              <MenuItem value="all">{t('list.distanceOptions.all')}</MenuItem><MenuItem value="short">{t('list.distanceOptions.short')}</MenuItem>
+              <MenuItem value="medium">{t('list.distanceOptions.medium')}</MenuItem><MenuItem value="long">{t('list.distanceOptions.long')}</MenuItem>
             </Select>
           </FormControl>
-          <FormControlLabel control={<Switch checked={favorite} onChange={event => update('favorite', event.target.checked ? 'true' : undefined)} />} label="Tylko ulubione" />
-          <FormControlLabel control={<Switch checked={climbs} onChange={event => update('climbs', event.target.checked ? 'true' : undefined)} />} label="Podjazdy ≥ 3%" />
+          <FormControlLabel control={<Switch checked={favorite} onChange={event => update('favorite', event.target.checked ? 'true' : undefined)} />} label={t('list.favoriteOnly')} />
+          <FormControlLabel control={<Switch checked={climbs} onChange={event => update('climbs', event.target.checked ? 'true' : undefined)} />} label={t('list.climbsOnly')} />
         </Stack>
       </Surface>
 
@@ -72,11 +74,11 @@ export default function SegmentsPage() {
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{
             alignItems: { sm: 'center' }
           }}>
-            <Box sx={{ flex: 1 }}><Typography sx={{ fontWeight: 800 }}>Backfill historycznych segmentów: {describeBackfillStatus(backfill.data)}</Typography>
+            <Box sx={{ flex: 1 }}><Typography sx={{ fontWeight: 800 }}>{t('list.segmentsBackfillTitle', { status: describeBackfillStatus(backfill.data) })}</Typography>
               <Typography variant="body2" sx={{
                 color: "text.secondary"
-              }}>{backfill.data.processed}/{backfill.data.total} aktywności · capability: {backfill.data.capability}</Typography></Box>
-            <Button variant="contained" disabled={isBackfillBusy(backfill.data.status) || startBackfill.isPending} onClick={() => startBackfill.mutate('segments')}>Uruchom / wznów</Button>
+              }}>{t('list.progressCapability', { processed: backfill.data.processed, total: backfill.data.total, capability: backfill.data.capability })}</Typography></Box>
+            <Button variant="contained" disabled={isBackfillBusy(backfill.data.status) || startBackfill.isPending} onClick={() => startBackfill.mutate('segments')}>{t('list.runResume')}</Button>
           </Stack>
         </Surface>
       )}
@@ -86,18 +88,18 @@ export default function SegmentsPage() {
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{
             alignItems: { sm: 'center' }
           }}>
-            <Box sx={{ flex: 1 }}><Typography sx={{ fontWeight: 800 }}>Lokalny backfill dopasowanych tras: {describeBackfillStatus(routeBackfill.data)}</Typography>
+            <Box sx={{ flex: 1 }}><Typography sx={{ fontWeight: 800 }}>{t('list.routesBackfillTitle', { status: describeBackfillStatus(routeBackfill.data) })}</Typography>
               <Typography variant="body2" sx={{
                 color: "text.secondary"
-              }}>{routeBackfill.data.processed}/{routeBackfill.data.total} aktywności · bez wywołań Stravy</Typography></Box>
-            <Button variant="outlined" disabled={isBackfillBusy(routeBackfill.data.status) || startBackfill.isPending} onClick={() => startBackfill.mutate('routes')}>Uruchom / wznów</Button>
+              }}>{t('list.progressLocal', { processed: routeBackfill.data.processed, total: routeBackfill.data.total })}</Typography></Box>
+            <Button variant="outlined" disabled={isBackfillBusy(routeBackfill.data.status) || startBackfill.isPending} onClick={() => startBackfill.mutate('routes')}>{t('list.runResume')}</Button>
           </Stack>
         </Surface>
       )}
 
-      {!!segments.isLoading && <LoadingState message="Ładowanie katalogu segmentów…" />}
-      {!!segments.isError && <ErrorState message="Nie udało się pobrać segmentów." onRetry={() => void segments.refetch()} />}
-      {segments.data?.items.length === 0 && <EmptyState title="Brak segmentów" description="Uruchom backfill lub zsynchronizuj nową jazdę ze Stravy." />}
+      {!!segments.isLoading && <LoadingState message={t('list.loading')} />}
+      {!!segments.isError && <ErrorState message={t('list.loadError')} onRetry={() => void segments.refetch()} />}
+      {segments.data?.items.length === 0 && <EmptyState title={t('list.emptyTitle')} description={t('list.emptyDescription')} />}
       <Grid container spacing={1.5}>
         {segments.data?.items.map(segment => (
           <Grid key={segment.id} size={{ xs: 12, md: 6 }}>
@@ -116,17 +118,17 @@ export default function SegmentsPage() {
                       mt: 0.5
                     }}>
                     {!!segment.city && <Chip size="small" label={segment.city} />}
-                    <Chip size="small" variant="outlined" label={`${segment.effortCount} ${segment.effortCount === 1 ? 'próba' : 'prób'}`} />
+                    <Chip size="small" variant="outlined" label={t('list.attempts', { count: segment.effortCount })} />
                   </Stack>
                 </Box>
-                <IconButton aria-label={segment.localFavorite ? `Usuń ${segment.name} z ulubionych` : `Dodaj ${segment.name} do ulubionych`} onClick={() => favoriteMutation.mutate({ id: segment.id, favorite: !segment.localFavorite })}>
+                <IconButton aria-label={segment.localFavorite ? t('list.removeFavorite', { name: segment.name }) : t('list.addFavorite', { name: segment.name })} onClick={() => favoriteMutation.mutate({ id: segment.id, favorite: !segment.localFavorite })}>
                   {segment.localFavorite ? <StarRoundedIcon color="warning" /> : <StarBorderRoundedIcon />}
                 </IconButton>
               </Stack>
               <Grid container spacing={1.5} sx={{ mt: 1.5 }}>
-                <Grid size={4}><Metric label="Dystans" value={segment.distanceM != null ? `${(segment.distanceM / 1000).toFixed(2)} km` : '—'} /></Grid>
-                <Grid size={4}><Metric label="Nachylenie" value={segment.averageGrade != null ? `${segment.averageGrade.toFixed(1)}%` : '—'} /></Grid>
-                <Grid size={4}><Metric label="Najlepszy" value={duration(segment.bestElapsedTimeSec)} tone="primary" /></Grid>
+                <Grid size={4}><Metric label={t('list.metricDistance')} value={segment.distanceM != null ? `${(segment.distanceM / 1000).toFixed(2)} km` : '—'} /></Grid>
+                <Grid size={4}><Metric label={t('list.metricGrade')} value={segment.averageGrade != null ? `${segment.averageGrade.toFixed(1)}%` : '—'} /></Grid>
+                <Grid size={4}><Metric label={t('list.metricBest')} value={duration(segment.bestElapsedTimeSec)} tone="primary" /></Grid>
               </Grid>
             </Surface>
           </Grid>

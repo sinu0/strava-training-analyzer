@@ -1,3 +1,4 @@
+import type { components } from '@/api/generated/schema';
 import { localized } from '@/i18n';
 export interface PredictionRequest {
   predictionType: PredictionType;
@@ -98,4 +99,14 @@ export interface AiNoteAskResponse {
   answer: string;
   modelId: string;
   providerName: string;
+}
+
+/** Preferred language of AI-generated text (`/v2/ai/settings`). */
+export type AiSettings = components['schemas']['AiSettingsDto'];
+export type AiLanguage = 'pl' | 'en';
+export type AiCoachingStyle = 'BALANCED_ADVISOR' | 'CONSERVATIVE_SCIENTIST' | 'AGGRESSIVE_COACH';
+/** Partial update — a missing field keeps its saved value. */
+export interface AiSettingsUpdate {
+  language?: AiLanguage;
+  coachingStyle?: AiCoachingStyle;
 }

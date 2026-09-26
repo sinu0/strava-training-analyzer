@@ -1,9 +1,6 @@
 import type { WorkoutStep } from '@/types/training';
 
-const STEP_NAMES: Record<string, string> = {
-  warmup: 'Rozgrzewka', cooldown: 'Schłodzenie', recovery: 'Odpoczynek', freeRide: 'Jazda dowolna',
-  ramp: 'Rampa', steady: 'Równy wysiłek', intervalOn: 'Interwał', interval: 'Interwały',
-};
+import { cockpitMessages } from './messages';
 
 export function formatClock(milliseconds: number): string {
   const total = Math.max(0, Math.floor(milliseconds / 1000));
@@ -23,8 +20,8 @@ export function formatDurationShort(seconds: number | undefined): string {
 }
 
 export function stepLabel(step: WorkoutStep | undefined, index: number): string {
-  if (!step) return 'Koniec treningu';
-  return step.name ?? STEP_NAMES[step.type] ?? `Krok ${index + 1}`;
+  if (!step) return cockpitMessages.t('format.workoutEnd');
+  return step.name ?? cockpitMessages.t(`format.stepNames.${step.type}`) ?? cockpitMessages.t('format.stepFallback', { index: index + 1 });
 }
 
 export interface StepTargetText {
@@ -38,7 +35,7 @@ export interface StepTargetText {
 export function stepTargetText(step: WorkoutStep | undefined, ftpWatts: number | null, adjustmentPct: number): StepTargetText {
   const low = step?.powerPctFtpLow ?? step?.onPowerPctFtpLow;
   const high = step?.powerPctFtpHigh ?? step?.onPowerPctFtpHigh ?? low;
-  if (low == null || high == null) return { pct: 'Dowolna', watts: '—', lowWatts: null, highWatts: null };
+  if (low == null || high == null) return { pct: cockpitMessages.t('format.anyIntensity'), watts: '—', lowWatts: null, highWatts: null };
   const factor = 1 + adjustmentPct / 100;
   const lowPct = Math.round(low * factor);
   const highPct = Math.round(high * factor);

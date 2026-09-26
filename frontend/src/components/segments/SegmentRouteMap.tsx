@@ -6,6 +6,8 @@ import { DEFAULT_MAP_TILE_VARIANT, MAP_TILE_CONFIG } from '@/constants/mapTiles'
 import { tokens } from '@/theme/theme';
 import { decodePolyline } from '@/utils/map';
 
+import { segmentComponentsMessages } from './messages';
+
 import 'leaflet/dist/leaflet.css';
 
 interface RouteItem {
@@ -42,8 +44,10 @@ export default function SegmentRouteMap({
   markers = [],
   onOpen,
   height = 340,
-  ariaLabel = 'Mapa segmentów',
+  ariaLabel,
 }: SegmentRouteMapProps) {
+  const t = segmentComponentsMessages.useT();
+  const resolvedAriaLabel = ariaLabel ?? t('routeMap.defaultAriaLabel');
   const decoded = useMemo(() => routes.map(route => ({
     ...route,
     positions: route.positions ?? (route.polyline ? decodePolyline(route.polyline) : []),
@@ -54,12 +58,12 @@ export default function SegmentRouteMap({
     return (
       <Box sx={{ height, display: 'grid', placeItems: 'center' }}><Typography sx={{
         color: "text.secondary"
-      }}>Brak geometrii segmentu</Typography></Box>
+      }}>{t('routeMap.emptyGeometry')}</Typography></Box>
     );
   }
 
   return (
-    <Box role="img" aria-label={ariaLabel} sx={{ height, '.leaflet-container': { height: '100%', borderRadius: 2 } }}>
+    <Box role="img" aria-label={resolvedAriaLabel} sx={{ height, '.leaflet-container': { height: '100%', borderRadius: 2 } }}>
       <MapContainer center={allPositions[0]} zoom={14} style={{ height: '100%', width: '100%' }}>
         <TileLayer {...MAP_TILE_CONFIG[DEFAULT_MAP_TILE_VARIANT]} />
         {decoded.map((route, index) => {

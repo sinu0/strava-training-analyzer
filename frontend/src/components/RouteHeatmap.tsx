@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 
 import 'leaflet/dist/leaflet.css';
+import { routePlannerControlsMessages } from '@/components/route-planner/messages';
+
 import { MAP_TILE_CONFIG } from '../constants/mapTiles';
 import { useRouteHeatmap } from '../hooks/useActivities';
 import {
@@ -169,11 +171,12 @@ interface StatsOverlayProps {
 }
 
 function StatsOverlay({ routeCount, totalDistanceKm, uniqueKm, maxCount }: StatsOverlayProps) {
+  const t = routePlannerControlsMessages.useT();
   const rows = [
-    { label: 'Łącznie', value: `${Math.round(totalDistanceKm)} km` },
-    { label: 'Unikalne drogi', value: `~${uniqueKm} km` },
-    { label: 'Tras', value: String(routeCount) },
-    { label: 'Maks. freq.', value: `${maxCount}×` },
+    { label: t('heatmap.total'), value: `${Math.round(totalDistanceKm)} km` },
+    { label: t('heatmap.uniqueRoads'), value: `~${uniqueKm} km` },
+    { label: t('heatmap.routes'), value: String(routeCount) },
+    { label: t('heatmap.maxFrequency'), value: `${maxCount}×` },
   ];
 
   return (
@@ -211,6 +214,7 @@ function StatsOverlay({ routeCount, totalDistanceKm, uniqueKm, maxCount }: Stats
 }
 
 function LegendOverlay() {
+  const t = routePlannerControlsMessages.useT();
   return (
     <Box
       sx={{
@@ -227,7 +231,7 @@ function LegendOverlay() {
       }}
     >
       <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-        Intensywność odcinków
+        {t('heatmap.intensityTitle')}
       </Typography>
       <Stack direction="row" spacing={0.75} sx={{ mb: 1 }}>
         {COLOR_STOPS.map((stop) => (
@@ -248,12 +252,12 @@ function LegendOverlay() {
         <Typography variant="caption" sx={{
           color: "text.secondary"
         }}>
-          Rzadziej
+          {t('heatmap.lessOften')}
         </Typography>
         <Typography variant="caption" sx={{
           color: "text.secondary"
         }}>
-          Częściej
+          {t('heatmap.moreOften')}
         </Typography>
       </Stack>
     </Box>
@@ -262,6 +266,7 @@ function LegendOverlay() {
 
 // ── RouteHeatmap (default export) ─────────────────────────────────────────────
 export default function RouteHeatmap() {
+  const t = routePlannerControlsMessages.useT();
   const { data, isLoading } = useRouteHeatmap();
 
   if (isLoading) {
@@ -277,7 +282,7 @@ export default function RouteHeatmap() {
           <Typography variant="body2" sx={{
             color: "text.secondary"
           }}>
-            Ładowanie mapy…
+            {t('heatmap.loadingMap')}
           </Typography>
         </Stack>
       </Box>
@@ -297,12 +302,12 @@ export default function RouteHeatmap() {
         <Typography variant="body2" sx={{
           color: "text.secondary"
         }}>
-          Przebudowuję heatmapę…
+          {t('heatmap.rebuilding')}
         </Typography>
         <Typography variant="caption" sx={{
           color: "text.disabled"
         }}>
-          Pierwsze uruchomienie może potrwać kilka minut
+          {t('heatmap.firstRunHint')}
         </Typography>
       </Stack>
       </Box>
@@ -320,11 +325,11 @@ export default function RouteHeatmap() {
         }}>
           <Typography variant="h6" sx={{
             color: "text.secondary"
-          }}>Brak tras</Typography>
+          }}>{t('heatmap.emptyTitle')}</Typography>
           <Typography variant="body2" sx={{
             color: "text.secondary"
           }}>
-            Zsynchronizuj aktywności, aby zobaczyć mapę.
+            {t('heatmap.emptyDescription')}
           </Typography>
         </Stack>
       </Box>

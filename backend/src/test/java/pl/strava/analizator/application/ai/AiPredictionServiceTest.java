@@ -45,6 +45,7 @@ class AiPredictionServiceTest {
     @Mock private ToolCallingLoop toolCallingLoop;
     @Mock private RagServiceV2 ragServiceV2;
     @Mock private AiNoteQueueProcessor noteQueueProcessor;
+    @Mock private AiPromptDirectives aiPromptDirectives;
 
     private PromptRegistry promptRegistry;
     private LlmProviderRegistry providerRegistry;
@@ -61,6 +62,8 @@ class AiPredictionServiceTest {
         when(llmPort.getProviderName()).thenReturn("ollama");
         providerRegistry = new LlmProviderRegistry(List.of(llmPort));
         lenient().when(customPromptService.getActiveForType(anyString())).thenReturn(Optional.empty());
+        lenient().when(aiPromptDirectives.language()).thenReturn(pl.strava.analizator.domain.ai.AiLanguage.PL);
+        lenient().when(aiPromptDirectives.systemSuffix()).thenReturn("SUFFIX");
         lenient().when(ragServiceV2.getRuntimeStatus())
                 .thenReturn(new RagServiceV2.RuntimeStatus("AVAILABLE", 12, "corpus-v1"));
         lenient().when(noteQueueProcessor.getRuntimeStatus())
@@ -69,13 +72,13 @@ class AiPredictionServiceTest {
         enabledService = new AiPredictionService(
                 trainingDataPort, promptRegistry, providerRegistry,
                 objectMapper, predictionRepository, customPromptService, null, ragServiceV2,
-                noteQueueProcessor, toolCallingLoop,
+                noteQueueProcessor, toolCallingLoop, aiPromptDirectives,
                 "ollama", "llama3", true, true, "0 0 3 * * *", true);
 
         disabledService = new AiPredictionService(
                 trainingDataPort, promptRegistry, providerRegistry,
                 objectMapper, predictionRepository, customPromptService, null, ragServiceV2,
-                noteQueueProcessor, toolCallingLoop,
+                noteQueueProcessor, toolCallingLoop, aiPromptDirectives,
                 "ollama", "llama3", false, true, "0 0 3 * * *", true);
     }
 
@@ -312,6 +315,37 @@ class AiPredictionServiceTest {
         PredictionResponseDto response = enabledService.predict(request);
 
         assertThat(response.getSummary()).contains("endurance").contains("90");
+    }
+
+    @Test
+    void predict_appendsConfiguredLanguageDirectiveToSystemPrompt() {
+        when(aiPromptDirectives.systemSuffix()).thenReturn("SUFFIX-EN");
+        when(trainingDataPort.buildContext(PredictionType.FTP_PREDICTION)).thenReturn(sampleContext());
+        when(llmPort.chat(anyString(), anyString(), anyString())).thenReturn("{\"confidence\":0.5}");
+
+        enabledService.predict(PredictionRequestDto.builder().predictionType("FTP_PREDICTION").build());
+
+        org.mockito.ArgumentCaptor<String> systemPrompt = org.mockito.ArgumentCaptor.forClass(String.class);
+        verify(llmPort).chat(systemPrompt.capture(), anyString(), anyString());
+        assertThat(systemPrompt.getValue())
+                .endsWith("SUFFIX-EN");
+    }
+
+    @Test
+    void predict_trainingRecommendationGuardrail_followsEnglishSetting() {
+        when(aiPromptDirectives.language()).thenReturn(pl.strava.analizator.domain.ai.AiLanguage.EN);
+        when(trainingDataPort.buildContext(PredictionType.TRAINING_TYPE_RECOMMENDATION))
+                .thenReturn(productiveFatigueContext());
+        when(llmPort.chat(anyString(), anyString(), anyString())).thenReturn("""
+                {"summary": "Take a full rest day today.", "action": "Full rest.", "confidence": 0.8, "warnings": []}
+                """);
+
+        PredictionResponseDto response = enabledService.predict(
+                PredictionRequestDto.builder().predictionType("TRAINING_TYPE_RECOMMENDATION").build());
+
+        assertThat(response.getStructuredData().get("summary")).asString()
+                .isEqualTo("A controlled stimulus is fine; you do not need a full day off.");
+        assertThat(response.getStructuredData().get("action")).asString().contains("60-90 min Z2");
     }
 
     @Test

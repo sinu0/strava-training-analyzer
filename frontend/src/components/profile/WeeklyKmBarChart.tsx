@@ -13,6 +13,7 @@ import {
   Cell,
 } from 'recharts';
 
+import { profileMessages } from '@/components/profile/messages';
 import { getLocale } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 import { STATUS_COLORS } from '@/utils/colors';
@@ -25,7 +26,7 @@ type MetricKey = 'distance' | 'time' | 'elevation';
 
 interface MetricOption {
   key: MetricKey;
-  label: string;
+  labelKey: 'weekly.distance' | 'weekly.time' | 'weekly.elevation';
   color: string;
   format: (v: number) => string;
   getValue: (s: { totalDistanceM: number; totalTimeSec: number; totalElevationM: number }) => number;
@@ -35,7 +36,7 @@ interface MetricOption {
 const METRICS: MetricOption[] = [
   {
     key: 'distance',
-    label: 'Dystans',
+    labelKey: 'weekly.distance',
     color: STATUS_COLORS.info,
     unit: 'km',
     getValue: (s) => Math.round((s.totalDistanceM / 1000) * 10) / 10,
@@ -43,7 +44,7 @@ const METRICS: MetricOption[] = [
   },
   {
     key: 'time',
-    label: 'Czas',
+    labelKey: 'weekly.time',
     color: STATUS_COLORS.accent,
     unit: 'h',
     getValue: (s) => Math.round((s.totalTimeSec / 3600) * 10) / 10,
@@ -51,7 +52,7 @@ const METRICS: MetricOption[] = [
   },
   {
     key: 'elevation',
-    label: 'Przewyższenie',
+    labelKey: 'weekly.elevation',
     color: STATUS_COLORS.success,
     unit: 'm',
     getValue: (s) => Math.round(s.totalElevationM),
@@ -104,6 +105,7 @@ function CustomTooltip({
 const WeeklyKmBarChart = memo(function WeeklyKmBarChart() {
   const theme = useTheme();
   const chart = getChartVisuals(theme);
+  const t = profileMessages.useT();
   const [metric, setMetric] = useState<MetricKey>('distance');
   const { data: summaries = [] } = useWeeklySummaries(12);
 
@@ -135,7 +137,7 @@ const WeeklyKmBarChart = memo(function WeeklyKmBarChart() {
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Typography sx={{ fontSize: '0.9rem', fontWeight: 800, color: 'text.primary' }}>
-          Ostatnie 12 tygodni
+          {t('weekly.last12Weeks')}
         </Typography>
         <ToggleButtonGroup
           value={metric}
@@ -146,7 +148,7 @@ const WeeklyKmBarChart = memo(function WeeklyKmBarChart() {
         >
           {METRICS.map((m) => (
             <ToggleButton key={m.key} value={m.key}>
-              {m.label}
+              {t(m.labelKey)}
             </ToggleButton>
           ))}
         </ToggleButtonGroup>

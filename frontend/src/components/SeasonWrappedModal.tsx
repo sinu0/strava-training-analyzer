@@ -4,20 +4,21 @@ import { Box, Button, Chip, Dialog, DialogContent, IconButton, Stack, Typography
 import { alpha } from '@mui/material/styles';
 import { useState, useCallback } from 'react';
 
+import { profileMessages, type ProfileTranslator } from '@/components/profile/messages';
 import { useSeasonWrapped, type SeasonWrappedData } from '@/hooks/useSeasonWrapped';
 import { getAppThemeTokens } from '@/theme/theme';
 
+type SlideId = 'numbers' | 'bestMonth' | 'favoriteTime' | 'records' | 'consistency' | 'average' | 'funFacts';
+
 interface Slide {
-  title: string;
-  subtitle: string;
-  render: (data: SeasonWrappedData) => React.ReactNode;
+  id: SlideId;
+  render: (data: SeasonWrappedData, t: ProfileTranslator) => React.ReactNode;
 }
 
 const SLIDES: Slide[] = [
   {
-    title: 'Rok w liczbach',
-    subtitle: 'Podsumowanie Twojego sezonu',
-    render: (d) => (
+    id: 'numbers',
+    render: (d, t) => (
       <Stack spacing={1} sx={{
         alignItems: "center"
       }}>
@@ -29,18 +30,17 @@ const SLIDES: Slide[] = [
           }}>{d.totalKm.toFixed(0)} km</Typography>
         <Typography variant="body2" sx={{
           color: "text.secondary"
-        }}>łącznie na rowerze</Typography>
+        }}>{t('wrapped.totalOnBike')}</Typography>
         <Stack direction="row" spacing={2}>
           <Chip label={`${d.totalElevation.toFixed(0)} m ↑`} variant="outlined" />
           <Chip label={`${d.totalHours.toFixed(0)} h`} variant="outlined" />
-          <Chip label={`${d.totalRides} jazd`} variant="outlined" />
+          <Chip label={t('wrapped.rides', { count: d.totalRides })} variant="outlined" />
         </Stack>
       </Stack>
     ),
   },
   {
-    title: 'Najlepszy miesiąc',
-    subtitle: 'Wtedy jeździłeś najwięcej',
+    id: 'bestMonth',
     render: (d) => (
       <Typography
         variant="h4"
@@ -51,22 +51,20 @@ const SLIDES: Slide[] = [
     ),
   },
   {
-    title: 'Ulubiona pora',
-    subtitle: 'Kiedy najchętniej wsiadasz na rower',
-    render: (d) => (
+    id: 'favoriteTime',
+    render: (d, t) => (
       <Stack spacing={1} sx={{
         alignItems: "center"
       }}>
         <Chip label={d.favoriteTime} size="medium" color="primary" />
         <Typography variant="body2" sx={{
           color: "text.secondary"
-        }}>{d.favoriteDay} to Twój dzień</Typography>
+        }}>{t('wrapped.favoriteDay', { day: d.favoriteDay })}</Typography>
       </Stack>
     ),
   },
   {
-    title: 'Rekordy',
-    subtitle: 'Twoje najlepsze wyniki w tym roku',
+    id: 'records',
     render: (d) => (
       <Stack
         spacing={1.5}
@@ -104,9 +102,8 @@ const SLIDES: Slide[] = [
     ),
   },
   {
-    title: 'Konsekwencja',
-    subtitle: 'Regularność to klucz',
-    render: (d) => (
+    id: 'consistency',
+    render: (d, t) => (
       <Stack spacing={1} sx={{
         alignItems: "center"
       }}>
@@ -118,14 +115,13 @@ const SLIDES: Slide[] = [
           }}>{d.longestStreak}</Typography>
         <Typography variant="body2" sx={{
           color: "text.secondary"
-        }}>dni z rzędu — najdłuższa seria</Typography>
-        <Chip label={`${d.totalActiveDays} dni aktywnych w roku`} variant="outlined" />
+        }}>{t('wrapped.longestStreak')}</Typography>
+        <Chip label={t('wrapped.activeDays', { count: d.totalActiveDays })} variant="outlined" />
       </Stack>
     ),
   },
   {
-    title: 'Średnio na jazdę',
-    subtitle: 'Twój typowy trening',
+    id: 'average',
     render: (d) => (
       <Typography
         variant="h4"
@@ -136,8 +132,7 @@ const SLIDES: Slide[] = [
     ),
   },
   {
-    title: 'Ciekawostki',
-    subtitle: 'Skala Twoich osiągnięć',
+    id: 'funFacts',
     render: (d) => (
       <Stack spacing={1.5} sx={{
         alignItems: "center"
@@ -150,6 +145,7 @@ const SLIDES: Slide[] = [
 ];
 
 export default function SeasonWrappedModal({ year, onClose }: { year: number; onClose: () => void }) {
+  const t = profileMessages.useT();
   const { data, isLoading } = useSeasonWrapped(year);
   const [slide, setSlide] = useState(0);
 
@@ -177,7 +173,7 @@ export default function SeasonWrappedModal({ year, onClose }: { year: number; on
           gap: 3,
         }}
       >
-        <IconButton onClick={onClose} sx={{ position: 'absolute', top: 16, right: 16 }}>
+        <IconButton aria-label={t('wrapped.close')} onClick={onClose} sx={{ position: 'absolute', top: 16, right: 16 }}>
           <CloseIcon />
         </IconButton>
 
@@ -187,25 +183,25 @@ export default function SeasonWrappedModal({ year, onClose }: { year: number; on
             color: "text.secondary",
             letterSpacing: 2
           }}>
-          {data.year} — SEZON WRAPPED
+          {t('wrapped.heading', { year: data.year })}
         </Typography>
 
         <Box sx={{ minHeight: 160, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 1 }}>
           <Typography variant="subtitle1" sx={{
             color: "text.secondary"
           }}>
-            {current.subtitle}
+            {t(`wrapped.slides.${current.id}.subtitle`)}
           </Typography>
           <Typography variant="h4" sx={{
             fontWeight: 800
-          }}>{current.title}</Typography>
-          <Box sx={{ mt: 2 }}>{current.render(data)}</Box>
+          }}>{t(`wrapped.slides.${current.id}.title`)}</Typography>
+          <Box sx={{ mt: 2 }}>{current.render(data, t)}</Box>
         </Box>
 
         <Box sx={{ display: 'flex', gap: 0.5 }}>
           {SLIDES.map((item, i) => (
             <Box
-              key={item.title}
+              key={item.id}
               sx={{
                 width: i === slide ? 24 : 6,
                 height: 6,
@@ -218,7 +214,7 @@ export default function SeasonWrappedModal({ year, onClose }: { year: number; on
         </Box>
 
         <Button variant="contained" size="large" onClick={goNext} sx={{ minWidth: 200 }}>
-          {slide < SLIDES.length - 1 ? 'Dalej' : 'Zamknij'}
+          {slide < SLIDES.length - 1 ? t('wrapped.next') : t('wrapped.close')}
         </Button>
       </DialogContent>
     </Dialog>

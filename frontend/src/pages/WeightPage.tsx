@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import PullToRefreshPanel from '@/components/common/PullToRefreshPanel';
 import AddWeightDialog from '@/components/weight/AddWeightDialog';
+import { weightMessages } from '@/components/weight/messages';
 import WeightChart from '@/components/weight/WeightChart';
 import WeightGoalDialog from '@/components/weight/WeightGoalDialog';
 import WeightHistoryTable from '@/components/weight/WeightHistoryTable';
@@ -30,6 +31,7 @@ function getTodayDate(): string {
 }
 
 export default function WeightPage() {
+  const t = weightMessages.useT();
   const queryClient = useQueryClient();
   const overviewQuery = useWeightOverview();
   const addWeight = useAddWeight();
@@ -122,10 +124,10 @@ export default function WeightPage() {
   if (overviewQuery.isLoading) {
     return (
       <Page
-        title="Waga"
+        title={t('page.title')}
         breadcrumbs={[
-          { label: 'Dashboard', href: '/' },
-          { label: 'Waga' },
+          { label: t('page.breadcrumbDashboard'), href: '/' },
+          { label: t('page.title') },
         ]}
       >
         <Grid container spacing={3}>
@@ -160,11 +162,11 @@ export default function WeightPage() {
 
   if (overviewQuery.isError) {
     return (
-      <Page title="Waga">
+      <Page title={t('page.title')}>
         <ErrorState
           message={getApiErrorMessage(
             overviewQuery.error,
-            'Nie udało się wczytać danych wagi.',
+            t('page.loadError'),
           )}
           onRetry={() => {
             void overviewQuery.refetch();
@@ -176,11 +178,11 @@ export default function WeightPage() {
 
   return (
     <Page
-      title="Waga"
-      subtitle="Stan dziś, cel i historia są rozdzielone na krótsze sekcje z czytelniejszym trendem."
+      title={t('page.title')}
+      subtitle={t('page.subtitle')}
       breadcrumbs={[
-        { label: 'Dashboard', href: '/' },
-        { label: 'Waga' },
+        { label: t('page.breadcrumbDashboard'), href: '/' },
+        { label: t('page.title') },
       ]}
       actions={(
         <Stack direction="row" spacing={1}>
@@ -190,7 +192,7 @@ export default function WeightPage() {
             onClick={openGoalDialog}
             size="small"
           >
-            {goal ? 'Zmień cel' : 'Ustaw cel'}
+            {goal ? t('page.changeGoal') : t('page.setGoal')}
           </Button>
           <Button
             variant="contained"
@@ -198,7 +200,7 @@ export default function WeightPage() {
             onClick={openAddWeightDialog}
             size="small"
           >
-            Dodaj wagę
+            {t('page.addWeight')}
           </Button>
         </Stack>
       )}
@@ -210,7 +212,7 @@ export default function WeightPage() {
       >
         <Grid container spacing={3}>
           <Grid size={12}>
-            <Widget title="Stan dziś" subtitle="Najważniejszy status: aktualna waga, tempo zmian i cel.">
+            <Widget title={t('page.todayTitle')} subtitle={t('page.todaySubtitle')}>
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="h3">
@@ -222,7 +224,7 @@ export default function WeightPage() {
                       color: "text.secondary",
                       mt: 0.5
                     }}>
-                    Ostatni pomiar: {latestWeight ? new Date(latestWeight.recordedDate).toLocaleDateString(getLocale()) : 'brak danych'}
+                    {t('page.lastMeasurement', { date: latestWeight ? new Date(latestWeight.recordedDate).toLocaleDateString(getLocale()) : t('page.noData') })}
                   </Typography>
                 </Box>
                 <Stack spacing={0.5} sx={{ minWidth: { xs: '100%', sm: 280 } }}>
@@ -230,18 +232,18 @@ export default function WeightPage() {
                     color: "text.secondary"
                   }}>
                     {goal
-                      ? `Cel: ${Number(goal.targetWeightKg).toFixed(1)} kg do ${new Date(goal.targetDate).toLocaleDateString(getLocale())}`
-                      : 'Brak ustawionego celu wagowego'}
+                      ? t('page.goalSummary', { weight: Number(goal.targetWeightKg).toFixed(1), date: new Date(goal.targetDate).toLocaleDateString(getLocale()) })
+                      : t('page.noGoalSet')}
                   </Typography>
                   <Typography variant="body2" sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label }}>
                     {weeklyChange != null
-                      ? `${weeklyChange > 0 ? '+' : ''}${weeklyChange.toFixed(1)} kg / tydzień`
-                      : 'Brak trendu tygodniowego'}
+                      ? t('page.weeklyChange', { sign: weeklyChange > 0 ? '+' : '', value: weeklyChange.toFixed(1) })
+                      : t('page.noWeeklyTrend')}
                   </Typography>
                   <Typography variant="caption" sx={{
                     color: "text.secondary"
                   }}>
-                    Odśwież, gdy chcesz szybko porównać dzisiejszy stan z ostatnim pomiarem.
+                    {t('page.refreshHint')}
                   </Typography>
                 </Stack>
               </Box>
