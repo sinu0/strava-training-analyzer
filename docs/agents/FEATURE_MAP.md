@@ -36,6 +36,7 @@ Tests sit alongside: FE `__tests__/<Name>.test.tsx`, BE `backend/src/test/java/.
 | Events / goals | `EventController` → `EventService`; FE `useAnalytics` → `/events/*` |
 | Fatigue / energy | `FatigueAndEnergyController` → `FatigueAndEnergyService` |
 | AI predictions, notes, tips | `AiPredictionController`, `AiActivityNoteController`, `AiV2Controller`, `OllamaManagementController` → `app/ai/*`; FE `hooks/useAi`; prompts `backend/src/main/resources/ai/prompts/` |
+| i18n (PL/EN) | `FE i18n/` — `I18nContext` (`useI18n`: `t`, `language`, `locale`, `toggleLanguage`), `translate.ts` (dotted keys, `{param}`, plurals via `Intl.PluralRules`), `locales/pl.ts` + `en.ts`; toggle in `components/layout/TopBar` |
 | Security | `BE infrastructure/config/SecurityConfig` — `permitAll` (protection only via loopback / nginx basic auth in the HTTPS variant) |
 | Backup | `scripts/backup.sh`, `scripts/verify-backup.sh`, doc `docs/BACKUP_AND_RECOVERY.md` |
 

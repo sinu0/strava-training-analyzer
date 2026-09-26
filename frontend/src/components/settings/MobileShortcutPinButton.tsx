@@ -3,6 +3,7 @@ import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
 import { Alert, Button, Chip, Menu, MenuItem, Stack } from '@mui/material';
 import { useState } from 'react';
 
+import { useI18n } from '@/i18n';
 import { PRIMARY_NAVIGATION_BY_PATH } from '@/navigation/appNavigation';
 import type { UiPreferences } from '@/types/uiPreferences';
 
@@ -21,6 +22,7 @@ export default function MobileShortcutPinButton({
   saving = false,
   onSave,
 }: MobileShortcutPinButtonProps) {
+  const { t } = useI18n();
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const [saveError, setSaveError] = useState(false);
   const isPinned = preferences.mobileNavigation.includes(path);
@@ -37,8 +39,13 @@ export default function MobileShortcutPinButton({
     }
   };
 
+  const navigationLabel = (shortcutPath: string) => {
+    const item = PRIMARY_NAVIGATION_BY_PATH.get(shortcutPath);
+    return item ? t(`nav.${item.key}.label`) : shortcutPath;
+  };
+
   if (isPinned) {
-    return <Chip icon={<CheckCircleOutlineIcon />} label={`${label} w skrótach`} color="success" variant="outlined" />;
+    return <Chip icon={<CheckCircleOutlineIcon />} label={t('shortcutPin.pinned', { label })} color="success" variant="outlined" />;
   }
 
   return (
@@ -51,16 +58,16 @@ export default function MobileShortcutPinButton({
         disabled={saving}
         onClick={(event) => setAnchor(event.currentTarget)}
       >
-        Przypnij {label}
+        {t('shortcutPin.pin', { label })}
       </Button>
       <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)}>
         {preferences.mobileNavigation.map((shortcutPath, index) => (
           <MenuItem key={shortcutPath} onClick={() => void replace(index)}>
-            Zastąp {PRIMARY_NAVIGATION_BY_PATH.get(shortcutPath)?.label ?? shortcutPath}
+            {t('shortcutPin.replace', { label: navigationLabel(shortcutPath) })}
           </MenuItem>
         ))}
       </Menu>
-      {saveError ? <Alert severity="error">Nie udało się zapisać skrótu.</Alert> : null}
+      {saveError ? <Alert severity="error">{t('shortcutPin.saveError')}</Alert> : null}
     </Stack>
   );
 }

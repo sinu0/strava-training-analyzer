@@ -6,7 +6,7 @@ Every item is binding until the user changes it. A new decision = a new item (1�
 
 - **Decision-first**: the `Today` screen answers "what should I do today?"; history, analysis and planning come second. Navigation: Today · History · Analysis · Plan · More.
 - **Local-only, single-user**: ports bound to `127.0.0.1` only; LAN only via the HTTPS variant + password. No account system.
-- **UI**: dark theme by default (light exists too), mobile-first, UI text in Polish. Code, docs and commits in English.
+- **UI**: dark theme by default (light exists too), mobile-first, UI in Polish (default) and English via the in-house `src/i18n` engine (no i18n library; keys in `locales/pl.ts`, `en.ts` type-checked against it; language stored in `localStorage`, toggle in TopBar next to the theme toggle). New/touched UI text goes through `t()`; remaining hard-coded Polish is migrated screen by screen. Code, docs and commits in English.
 - **AI never computes metrics or confidence** — it only explains verified results. Every AI feature sits behind the master flag and a provider flag; the app works fully without AI.
 
 ## Data and metrics

@@ -3,6 +3,7 @@ import { BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useUiPreferences } from '@/hooks/useUiPreferences';
+import { useI18n } from '@/i18n';
 import { PRIMARY_NAVIGATION_BY_PATH } from '@/navigation/appNavigation';
 import { getAppThemeTokens } from '@/theme/theme';
 import { DEFAULT_UI_PREFERENCES } from '@/utils/uiPreferences';
@@ -28,21 +29,23 @@ export default function MobileBottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const preferences = useUiPreferences();
+  const { t } = useI18n();
   const savedPaths = preferences.data?.mobileNavigation ?? DEFAULT_UI_PREFERENCES.mobileNavigation;
   const shortcuts = savedPaths
     .map((path) => PRIMARY_NAVIGATION_BY_PATH.get(path))
     .filter((item) => item != null);
+  const primaryItems = shortcuts.length === 4
+    ? shortcuts
+    : DEFAULT_UI_PREFERENCES.mobileNavigation.map((path) => PRIMARY_NAVIGATION_BY_PATH.get(path)!);
   const navigationItems: MobileNavigationItem[] = [
-    ...(shortcuts.length === 4
-      ? shortcuts
-      : DEFAULT_UI_PREFERENCES.mobileNavigation.map((path) => PRIMARY_NAVIGATION_BY_PATH.get(path)!)),
-    { label: 'Więcej', path: '/more', icon: <WidgetsIcon /> },
+    ...primaryItems.map((item) => ({ label: t(`nav.${item.key}.label`), path: item.path, icon: item.icon })),
+    { label: t('nav.more'), path: '/more', icon: <WidgetsIcon /> },
   ];
 
   return (
     <Box
       component="nav"
-      aria-label="Nawigacja główna"
+      aria-label={t('nav.mobileAriaLabel')}
       sx={{
         display: { xs: 'block', md: 'none' },
         position: 'fixed',

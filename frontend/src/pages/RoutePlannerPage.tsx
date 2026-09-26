@@ -5,6 +5,7 @@ import RouteElevationChart from '@/components/route-planner/RouteElevationChart'
 import RouteMap from '@/components/route-planner/RouteMap';
 import MobileShortcutPinButton from '@/components/settings/MobileShortcutPinButton';
 import { useSaveUiPreferences, useUiPreferences } from '@/hooks/useUiPreferences';
+import { useI18n } from '@/i18n';
 import RoutePlannerSidebar from '@/pages/route-planner/RoutePlannerSidebar';
 import { useRoutePlannerState } from '@/pages/route-planner/useRoutePlannerState';
 import { getAppThemeTokens } from '@/theme/theme';
@@ -15,6 +16,7 @@ export default function RoutePlannerPage() {
   const planner = useRoutePlannerState();
   const preferences = useUiPreferences();
   const savePreferences = useSaveUiPreferences();
+  const { t } = useI18n();
 
   return (
     <Page
@@ -40,7 +42,7 @@ export default function RoutePlannerPage() {
               }}
             >
               <MobileShortcutPinButton
-                label="Trasy"
+                label={t('nav.routes.label')}
                 path="/routes"
                 preferences={preferences.data}
                 saving={savePreferences.isPending}

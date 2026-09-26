@@ -14,6 +14,7 @@ import { alpha, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+import { useI18n, type TranslationKey } from '@/i18n';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION, type AppNavigationItem } from '@/navigation/appNavigation';
 import { getAppThemeTokens } from '@/theme/theme';
 import BrandMark from '@/ui/BrandMark';
@@ -25,7 +26,7 @@ interface SidebarProps {
 }
 
 interface NavGroup {
-  label: string;
+  labelKey: TranslationKey;
   items: AppNavigationItem[];
 }
 
@@ -33,16 +34,17 @@ const HERO_ITEM = PRIMARY_NAVIGATION[0]!;
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: 'Główne',
+    labelKey: 'nav.mainGroup',
     items: PRIMARY_NAVIGATION.slice(1),
   },
   {
-    label: 'Więcej',
+    labelKey: 'nav.more',
     items: SECONDARY_NAVIGATION,
   },
 ];
 
 function NavButton({ item, selected, onClick }: { item: AppNavigationItem; selected: boolean; onClick: () => void }) {
+  const { t } = useI18n();
   return (
     <ListItemButton
       selected={selected}
@@ -63,7 +65,7 @@ function NavButton({ item, selected, onClick }: { item: AppNavigationItem; selec
         {item.icon}
       </ListItemIcon>
       <ListItemText
-        primary={item.label}
+        primary={t(`nav.${item.key}.label`)}
         slotProps={{
           primary: {
             sx: {
@@ -111,6 +113,7 @@ export default function Sidebar({
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { t } = useI18n();
 
   const isSelected = (path: string) =>
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
@@ -169,7 +172,7 @@ export default function Sidebar({
               color: "text.secondary",
               fontSize: '0.68rem'
             }}>
-            cycling performance
+            {t('sidebar.tagline')}
           </Typography>
         </Box>
       </Toolbar>
@@ -186,8 +189,8 @@ export default function Sidebar({
       {/* Grouped navigation */}
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         {NAV_GROUPS.map((group) => (
-          <Box key={group.label}>
-            <GroupLabel label={group.label} />
+          <Box key={group.labelKey}>
+            <GroupLabel label={t(group.labelKey)} />
             <List component="div" disablePadding>
               {group.items.map((item) => (
                 <NavButton
@@ -226,7 +229,7 @@ export default function Sidebar({
               color: "text.secondary",
               fontSize: '0.68rem'
             }}>
-            Local-only · dane prywatne
+            {t('sidebar.privacy')}
           </Typography>
         </Stack>
       </Box>

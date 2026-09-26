@@ -1,0 +1,87 @@
+import type { Messages } from '@/i18n/types';
+
+/** English messages — structure mirrors `pl.ts`. */
+export const en: Messages = {
+  nav: {
+    today: { label: 'Today', description: 'Daily decision and context' },
+    history: { label: 'History', description: 'Completed activities' },
+    analysis: { label: 'Analysis', description: 'Trends and training load' },
+    plan: { label: 'Plan', description: 'Calendar and scenarios' },
+    routes: { label: 'Routes', description: 'Ride planning' },
+    segments: { label: 'Segments', description: 'Your efforts and records' },
+    weather: { label: 'Weather', description: 'Conditions for training' },
+    health: { label: 'Health', description: 'Recovery and body weight' },
+    profile: { label: 'Profile', description: 'Zones and athlete data' },
+    data: { label: 'Data', description: 'Import and data quality' },
+    settings: { label: 'Settings', description: 'Integrations and configuration' },
+    more: 'More',
+    mainGroup: 'Main',
+    mobileAriaLabel: 'Main navigation',
+  },
+  sidebar: {
+    tagline: 'cycling performance',
+    privacy: 'Local-only · private data',
+  },
+  topBar: {
+    toggleMenu: 'Toggle menu',
+    searchPlaceholder: 'Search activities…',
+    searchLabel: 'Search activities',
+    enableLightMode: 'Switch to light theme',
+    enableDarkMode: 'Switch to dark theme',
+    switchLanguage: 'Switch language to Polish',
+    profileMenu: 'Profile',
+    user: 'User',
+    profile: 'Profile',
+  },
+  sync: {
+    inProgress: 'Sync in progress…',
+    connectInSettings: 'Connect Strava in settings to sync your rides',
+    rateLimited: 'Strava API rate-limited',
+    failed: 'Sync failed — check Data and jobs',
+    newActivities: {
+      one: 'Sync: {count} new activity',
+      other: 'Sync: {count} new activities',
+    },
+    recent: 'Sync recent rides',
+    connectAction: 'Connect Strava to sync your rides',
+    syncAction: 'Sync recent rides',
+  },
+  more: {
+    title: 'More',
+    subtitle: 'Full weather, athlete profile, health and data control in one place.',
+    items: {
+      weather: { label: 'Weather', description: 'Forecast, locations and settings' },
+      profile: { label: 'Profile', description: 'FTP, heart rate and sport settings' },
+      health: { label: 'Health', description: 'Manual check-in and data availability' },
+      weight: { label: 'Body weight', description: 'History and weight goal' },
+      data: { label: 'Data', description: 'Sync, recalculations and diagnostics' },
+      settings: { label: 'Settings', description: 'Integrations and app configuration' },
+    },
+    shortcutsError: 'Could not load mobile shortcut settings.',
+    shortcutsLoading: 'Loading mobile shortcuts…',
+  },
+  mobileShortcuts: {
+    title: 'Mobile shortcuts',
+    description: 'Choose exactly four sections shown next to the “More” button.',
+    complete: '4 shortcuts selected.',
+    missing: {
+      one: 'Choose {count} more shortcut.',
+      other: 'Choose {count} more shortcuts.',
+    },
+    save: 'Save shortcuts',
+    saveError: 'Could not save shortcuts. Refresh the data and try again.',
+  },
+  shortcutPin: {
+    pinned: '{label} in shortcuts',
+    pin: 'Pin {label}',
+    replace: 'Replace {label}',
+    saveError: 'Could not save the shortcut.',
+  },
+  themeSettings: {
+    title: 'App theme',
+    description: 'Choose a light or dark look. The preference is stored locally on this device.',
+    ariaLabel: 'App theme selection',
+    dark: { label: 'Dark theme', description: 'Default high-contrast view for evening sessions.' },
+    light: { label: 'Light theme', description: 'Light view inspired by a training dashboard.' },
+  },
+};

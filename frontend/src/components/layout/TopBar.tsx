@@ -25,6 +25,7 @@ import { lazy, Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useColorMode } from '@/context/ThemeModeContext';
+import { useI18n } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 import BrandMark from '@/ui/BrandMark';
 
@@ -64,6 +65,8 @@ export default function TopBar({
 }: TopBarProps) {
   const navigate = useNavigate();
   const { mode, toggleMode } = useColorMode();
+  const { language, t, toggleLanguage } = useI18n();
+  const themeToggleLabel = mode === 'dark' ? t('topBar.enableLightMode') : t('topBar.enableDarkMode');
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -95,7 +98,7 @@ export default function TopBar({
             <IconButton
               edge="start"
               color="inherit"
-              aria-label="toggle menu"
+              aria-label={t('topBar.toggleMenu')}
               onClick={onToggleSidebar}
               sx={{ color: 'text.secondary' }}
             >
@@ -136,8 +139,8 @@ export default function TopBar({
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 onKeyDown={handleSearchKeyDown}
-                placeholder="Szukaj aktywności…"
-                inputProps={{ 'aria-label': 'Szukaj aktywności' }}
+                placeholder={t('topBar.searchPlaceholder')}
+                inputProps={{ 'aria-label': t('topBar.searchLabel') }}
                 sx={{
                   fontSize: '0.875rem',
                   color: 'text.primary',
@@ -175,9 +178,22 @@ export default function TopBar({
               <TopBarSyncButton />
             </Suspense>
 
-            <Tooltip title={mode === 'dark' ? 'Włącz jasny motyw' : 'Włącz ciemny motyw'}>
+            <Tooltip title={t('topBar.switchLanguage')}>
               <IconButton
-                aria-label={mode === 'dark' ? 'Włącz jasny motyw' : 'Włącz ciemny motyw'}
+                aria-label={t('topBar.switchLanguage')}
+                onClick={toggleLanguage}
+                sx={[
+                  roundActionButtonSx,
+                  (theme) => ({ fontSize: '0.72rem', fontWeight: getAppThemeTokens(theme).type.weight.label, letterSpacing: '0.06em' }),
+                ]}
+              >
+                {language.toUpperCase()}
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title={themeToggleLabel}>
+              <IconButton
+                aria-label={themeToggleLabel}
                 aria-pressed={mode === 'light'}
                 onClick={toggleMode}
                 sx={roundActionButtonSx}
@@ -193,7 +209,7 @@ export default function TopBar({
             <IconButton
               onClick={(e) => setAnchor(e.currentTarget)}
               sx={{ p: 0.25 }}
-              aria-label="profil"
+              aria-label={t('topBar.profileMenu')}
             >
               <Avatar
                 sx={{
@@ -233,7 +249,7 @@ export default function TopBar({
       >
         <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
           <Typography variant="body2" sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label }}>
-            Użytkownik
+            {t('topBar.user')}
           </Typography>
         </Box>
         <List disablePadding sx={{ py: 0.5 }}>
@@ -248,7 +264,7 @@ export default function TopBar({
               <AccountCircleIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText
-              primary="Profil"
+              primary={t('topBar.profile')}
               slotProps={{
                 primary: { sx: { fontSize: '0.85rem', fontWeight: 550 } }
               }}

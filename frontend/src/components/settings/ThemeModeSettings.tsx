@@ -3,52 +3,39 @@ import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 
 import { useColorMode } from '@/context/ThemeModeContext';
+import { useI18n } from '@/i18n';
 import type { AppColorMode } from '@/theme/theme';
 import { getAppThemeTokens } from '@/theme/theme';
 
 import type { ReactNode } from 'react';
 
-const OPTIONS: Array<{
-  mode: AppColorMode;
-  label: string;
-  description: string;
-  icon: ReactNode;
-}> = [
-  {
-    mode: 'dark',
-    label: 'Ciemny motyw',
-    description: 'Domyślny, kontrastowy widok do pracy wieczorem.',
-    icon: <DarkModeOutlinedIcon />,
-  },
-  {
-    mode: 'light',
-    label: 'Jasny motyw',
-    description: 'Lekki widok inspirowany panelem treningowym.',
-    icon: <LightModeOutlinedIcon />,
-  },
+const OPTIONS: Array<{ mode: AppColorMode; icon: ReactNode }> = [
+  { mode: 'dark', icon: <DarkModeOutlinedIcon /> },
+  { mode: 'light', icon: <LightModeOutlinedIcon /> },
 ];
 
 /** Lets people change the persistent color preference from Settings. */
 export default function ThemeModeSettings() {
   const { mode, setMode } = useColorMode();
+  const { t } = useI18n();
 
   return (
     <Box>
       <Typography component="h2" variant="h6" sx={{
         fontWeight: 780
-      }}>Motyw aplikacji</Typography>
+      }}>{t('themeSettings.title')}</Typography>
       <Typography
         variant="body2"
         sx={{
           color: "text.secondary",
           mt: 0.5
         }}>
-        Wybierz jasny lub ciemny wygląd. Zapisujemy tę preferencję lokalnie na tym urządzeniu.
+        {t('themeSettings.description')}
       </Typography>
       <ToggleButtonGroup
         exclusive
         value={mode}
-        aria-label="Wybór motywu aplikacji"
+        aria-label={t('themeSettings.ariaLabel')}
         onChange={(_event, nextMode: AppColorMode | null) => {
           if (nextMode) setMode(nextMode);
         }}
@@ -69,7 +56,7 @@ export default function ThemeModeSettings() {
           <ToggleButton
             key={option.mode}
             value={option.mode}
-            aria-label={option.label}
+            aria-label={t(`themeSettings.${option.mode}.label`)}
             sx={{
               justifyContent: 'flex-start',
               textAlign: 'left',
@@ -90,14 +77,14 @@ export default function ThemeModeSettings() {
             }}>
               <Typography variant="body2" sx={{
                 fontWeight: 760
-              }}>{option.label}</Typography>
+              }}>{t(`themeSettings.${option.mode}.label`)}</Typography>
               <Typography
                 variant="caption"
                 sx={{
                   color: "text.secondary",
                   textTransform: 'none'
                 }}>
-                {option.description}
+                {t(`themeSettings.${option.mode}.description`)}
               </Typography>
             </Stack>
           </ToggleButton>

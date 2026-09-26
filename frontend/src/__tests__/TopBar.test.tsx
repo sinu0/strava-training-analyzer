@@ -1,9 +1,10 @@
 import { ThemeProvider } from '@mui/material/styles';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import TopBar from '../components/layout/TopBar';
+import { I18nProvider } from '../i18n';
 import theme from '../theme/theme';
 
 
@@ -21,17 +22,32 @@ beforeAll(() => {
 
 function renderTopBar(pathname: string) {
   return render(
-    <ThemeProvider theme={theme}>
-      <MemoryRouter initialEntries={[pathname]}>
-        <TopBar
-          onToggleSidebar={vi.fn()}
-        />
-      </MemoryRouter>
-    </ThemeProvider>,
+    <I18nProvider>
+      <ThemeProvider theme={theme}>
+        <MemoryRouter initialEntries={[pathname]}>
+          <TopBar
+            onToggleSidebar={vi.fn()}
+          />
+        </MemoryRouter>
+      </ThemeProvider>
+    </I18nProvider>,
   );
 }
 
 describe('TopBar', () => {
+  afterEach(() => window.localStorage.clear());
+
+  it('switches the interface language next to the theme toggle', async () => {
+    renderTopBar('/');
+
+    expect(screen.getByPlaceholderText('Szukaj aktywności…')).toBeDefined();
+    fireEvent.click(screen.getByRole('button', { name: 'Zmień język na angielski' }));
+
+    expect(await screen.findByPlaceholderText('Search activities…')).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Switch language to Polish' }).textContent).toBe('EN');
+    expect(screen.getByRole('button', { name: 'Switch to dark theme' })).toBeDefined();
+  });
+
   it('shows only global application context on root route', () => {
     renderTopBar('/');
 
