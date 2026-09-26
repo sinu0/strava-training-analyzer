@@ -19,6 +19,7 @@ import {
   Typography,
 } from '@mui/material';
 
+import { getLocale } from '@/i18n';
 import type { WeightGoal, WeightOverview, WeightRecord } from '@/types/weight';
 import { Widget } from '@/ui';
 import { CHART_COLORS, STATUS_COLORS, alphaColor } from '@/utils/colors';
@@ -216,7 +217,7 @@ export default function WeightOverviewCards({
                   color: "text.secondary",
                   mb: 1
                 }}>
-                kg do {new Date(goal.targetDate).toLocaleDateString('pl-PL')}
+                kg do {new Date(goal.targetDate).toLocaleDateString(getLocale())}
               </Typography>
               {weeksRemaining != null && (
                 <Chip

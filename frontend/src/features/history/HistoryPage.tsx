@@ -21,6 +21,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import ActivityListCardV2 from '@/components/activity/ActivityListCardV2';
 import PolishDateField from '@/components/common/PolishDateField';
+import { getLocale } from '@/i18n';
 import { EmptyState, ErrorState, LoadingState, Page, Surface } from '@/ui';
 import { getPolishPaginationAriaLabel } from '@/utils/accessibility';
 
@@ -93,7 +94,7 @@ export default function HistoryPage() {
               <Surface padding="sm" sx={{ height: '100%' }}>
                 <Typography variant="overline" sx={{
                   color: "text.secondary"
-                }}>{new Date(date).toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}</Typography>
+                }}>{new Date(date).toLocaleDateString(getLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}</Typography>
                 <Stack spacing={1} sx={{ mt: 1 }}>
                   {items.map(item => (
                     <Button key={item.id} variant="text" onClick={() => navigate(`/activities/${item.id}`)} sx={{ justifyContent: 'flex-start' }}>

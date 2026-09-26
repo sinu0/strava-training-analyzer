@@ -8,6 +8,7 @@ import StraightenOutlinedIcon from '@mui/icons-material/StraightenOutlined';
 import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined';
 import { Box, Button, Stack, Typography } from '@mui/material';
 
+import { getLocale } from '@/i18n';
 import type { ActivitySummary } from '@/types/activity';
 import { StatusPill, Surface } from '@/ui';
 
@@ -19,7 +20,7 @@ interface ActivityListCardV2Props {
   priority?: boolean;
 }
 
-const decimal = new Intl.NumberFormat('pl-PL', {
+const decimal = new Intl.NumberFormat(getLocale(), {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
 });
@@ -55,13 +56,13 @@ function Stat({ icon, value, label }: { icon: React.ReactNode; value: string; la
 
 export default function ActivityListCardV2({ activity, onOpen, priority = false }: ActivityListCardV2Props) {
   const date = new Date(activity.startedAt);
-  const dateLabel = date.toLocaleDateString('pl-PL', {
+  const dateLabel = date.toLocaleDateString(getLocale(), {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   });
-  const timeLabel = date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+  const timeLabel = date.toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' });
 
   return (
     <Surface

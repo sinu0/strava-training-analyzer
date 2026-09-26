@@ -4,6 +4,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Box, IconButton, Typography, Grid } from '@mui/material';
 import { useState, useMemo } from 'react';
 
+import { getLocale } from '@/i18n';
 import { LoadingState } from '@/ui';
 import { localDate } from '@/utils/localDate';
 
@@ -17,7 +18,7 @@ import type { CalendarDay } from '../../types/training';
 const DAY_HEADERS = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
 
 function formatMonth(d: Date): string {
-  return d.toLocaleString('pl-PL', { month: 'long', year: 'numeric' });
+  return d.toLocaleString(getLocale(), { month: 'long', year: 'numeric' });
 }
 
 function monthRange(year: number, month: number) {

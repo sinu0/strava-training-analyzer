@@ -9,6 +9,7 @@ import SegmentProgressChart from '@/components/segments/SegmentProgressChart';
 import SegmentRankTrophy from '@/components/segments/SegmentRankTrophy';
 import SegmentRouteMap from '@/components/segments/SegmentRouteMap';
 import { useSegment, useSegmentComparison } from '@/hooks/useSegments';
+import { getLocale } from '@/i18n';
 import { EmptyState, ErrorState, LoadingState, Metric, Page, Surface } from '@/ui';
 
 function duration(seconds?: number | null) { return seconds == null ? '—' : `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`; }
@@ -81,7 +82,7 @@ export default function SegmentDetailPage() {
           }}>
             <FormControlLabel control={<Checkbox checked={selectedSet.has(effort.id)} disabled={!selectedSet.has(effort.id) && selected.length >= 3} onChange={() => toggle(effort.id)} />} label="Porównaj" />
             <FormControlLabel control={<Radio checked={reference === effort.id} disabled={!selectedSet.has(effort.id)} onChange={() => setReference(effort.id)} />} label="Odniesienie" />
-            <Box sx={{ flex: 1 }}><Typography sx={{ fontWeight: 800 }}>{new Date(effort.startedAt).toLocaleString('pl-PL')}</Typography><Typography variant="body2" sx={{
+            <Box sx={{ flex: 1 }}><Typography sx={{ fontWeight: 800 }}>{new Date(effort.startedAt).toLocaleString(getLocale())}</Typography><Typography variant="body2" sx={{
               color: "text.secondary"
             }}>{effort.activityName}</Typography></Box>
             <SegmentRankTrophy rank={effort.personalRank} />

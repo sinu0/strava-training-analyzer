@@ -6,13 +6,14 @@ import { Line, LineChart, ResponsiveContainer, YAxis } from 'recharts';
 
 import { speedChartDomain } from '@/features/matched-rides/chartScale';
 import { useMatchedRide } from '@/hooks/useMatchedRides';
+import { getLocale } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 import type { MatchedRideSummary } from '@/types/matchedRides';
 import { ErrorState, LoadingState, Metric, Surface } from '@/ui';
 
 interface MatchedRideCardProps { activityId: string }
 
-function signed(value?: number | null) { return value == null ? '—' : `${value >= 0 ? '+' : '−'}${Math.abs(value).toLocaleString('pl-PL', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km/h`; }
+function signed(value?: number | null) { return value == null ? '—' : `${value >= 0 ? '+' : '−'}${Math.abs(value).toLocaleString(getLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km/h`; }
 
 function isRenderableSummary(data: unknown): data is MatchedRideSummary {
   if (data == null || typeof data !== 'object' || Array.isArray(data)) return false;

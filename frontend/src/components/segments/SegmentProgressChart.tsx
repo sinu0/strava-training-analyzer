@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { useMemo } from 'react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
+import { getLocale } from '@/i18n';
 import { tokens } from '@/theme/theme';
 import type { SegmentEffort } from '@/types/segments';
 
@@ -12,7 +13,7 @@ export default function SegmentProgressChart({ efforts }: { efforts: SegmentEffo
     .map(effort => ({
       date: effort.startedAt,
       elapsedTimeSec: effort.elapsedTimeSec,
-      label: new Date(effort.startedAt).toLocaleDateString('pl-PL'),
+      label: new Date(effort.startedAt).toLocaleDateString(getLocale()),
     })), [efforts]);
 
   if (data.length === 0) return null;
@@ -23,9 +24,9 @@ export default function SegmentProgressChart({ efforts }: { efforts: SegmentEffo
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" tickFormatter={value => new Date(String(value)).toLocaleDateString('pl-PL')} />
+            <XAxis dataKey="date" tickFormatter={value => new Date(String(value)).toLocaleDateString(getLocale())} />
             <YAxis reversed unit=" s" domain={['dataMin - 3', 'dataMax + 3']} />
-            <Tooltip labelFormatter={value => new Date(String(value)).toLocaleString('pl-PL')} formatter={value => [`${Number(value)} s`, 'Czas']} />
+            <Tooltip labelFormatter={value => new Date(String(value)).toLocaleString(getLocale())} formatter={value => [`${Number(value)} s`, 'Czas']} />
             <Line type="monotone" dataKey="elapsedTimeSec" name="Czas" stroke={tokens.chart.primary} strokeWidth={2.5} activeDot={{ r: 6 }} />
           </LineChart>
         </ResponsiveContainer>

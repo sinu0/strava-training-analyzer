@@ -5,10 +5,12 @@ import ScheduleIcon from '@mui/icons-material/Schedule';
 import TimerIcon from '@mui/icons-material/Timer';
 import { Chip } from '@mui/material';
 
+import { getLocale } from '@/i18n';
+
 export function formatTimestamp(ts: string | null): string {
   if (!ts) return 'Nigdy';
   const d = new Date(ts);
-  return d.toLocaleString('pl-PL', {
+  return d.toLocaleString(getLocale(), {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

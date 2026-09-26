@@ -10,6 +10,7 @@ import { Box, Button, Stack, Typography } from '@mui/material';
 
 import LightweightRoutePreview from '@/components/activity/LightweightRoutePreview';
 import { LoadDotMatrix, RecoveryFormGauge } from '@/components/today/TrainingVisualizations';
+import { getLocale } from '@/i18n';
 import type { DashboardWidget } from '@/types/uiPreferences';
 import { HeroCard, Metric, Widget } from '@/ui';
 import { getCyclingHeroIllustrationPath } from '@/utils/illustrationAssets';
@@ -56,7 +57,7 @@ function DecisionWidget({ title, data, navigate }: { title: string; data: TodayR
   ].filter((metric): metric is { id: string; label: string; value: string; unit: string } => metric !== null);
   const [primaryMetric, ...secondaryMetrics] = heroMetrics;
   // Noon keeps the calendar day stable regardless of the runtime timezone.
-  const todayCaption = new Date(`${data.asOf}T12:00:00`).toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
+  const todayCaption = new Date(`${data.asOf}T12:00:00`).toLocaleDateString(getLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
   const needsInput = recommendation?.decision === 'NEEDS_INPUT';
   const heading = needsInput ? 'Ustaw dostępność'
     : recommendation?.decision === 'REST' ? 'Odpoczynek'
@@ -170,7 +171,7 @@ export default function TodayWidget({ widget, data, navigate }: TodayWidgetProps
           <>
             <Typography variant="h5">{next.plannedType}</Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              {new Date(`${next.date}T12:00:00`).toLocaleDateString('pl-PL')} · {next.plannedDurationMin ?? '—'} min
+              {new Date(`${next.date}T12:00:00`).toLocaleDateString(getLocale())} · {next.plannedDurationMin ?? '—'} min
             </Typography>
             <Button variant="contained" startIcon={<DirectionsBikeOutlinedIcon />} onClick={() => navigate(`/training/workouts/${next.id}`)} sx={{ mt: 2 }}>
               Otwórz trening

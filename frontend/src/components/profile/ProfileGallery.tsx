@@ -14,6 +14,7 @@ import { forwardRef, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useRecentActivities } from '@/hooks/useAnalytics';
+import { getLocale } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 import type { ActivitySummary } from '@/types/activity';
 import { EmptyState } from '@/ui';
@@ -57,7 +58,7 @@ function formatStartedAt(value?: string) {
     return null;
   }
 
-  return new Date(value).toLocaleString('pl-PL');
+  return new Date(value).toLocaleString(getLocale());
 }
 
 function Stat({ label, value }: { label: string; value: string | null }) {

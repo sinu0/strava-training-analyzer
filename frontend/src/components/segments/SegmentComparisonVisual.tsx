@@ -2,6 +2,7 @@ import { Box, FormControl, InputLabel, MenuItem, Select, Stack, Typography } fro
 import { useMemo, useState } from 'react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
+import { getLocale } from '@/i18n';
 import { tokens } from '@/theme/theme';
 import type { SegmentComparison } from '@/types/segments';
 
@@ -34,7 +35,7 @@ export default function SegmentComparisonVisual({ comparison }: SegmentCompariso
   }), [comparison, metric]);
   const routes = comparison.series.map(series => ({
     id: series.effortId,
-    label: `${new Date(series.startedAt).toLocaleDateString('pl-PL')} · ${series.elapsedTimeSec ?? '—'} s`,
+    label: `${new Date(series.startedAt).toLocaleDateString(getLocale())} · ${series.elapsedTimeSec ?? '—'} s`,
     positions: series.points.flatMap(point => point.latitude != null && point.longitude != null
       ? [[point.latitude, point.longitude] as [number, number]] : []),
   }));
@@ -54,7 +55,7 @@ export default function SegmentComparisonVisual({ comparison }: SegmentCompariso
             <LineChart data={chart} onMouseMove={state => { const index = Number(state.activeTooltipIndex); setHoverIndex(Number.isFinite(index) ? index : null); }} onMouseLeave={() => setHoverIndex(null)}>
               <CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="distanceM" unit=" m" /><YAxis unit=" m" domain={['dataMin - 5', 'dataMax + 5']} />
               <Tooltip />
-              {comparison.series.map((series, index) => <Line key={series.effortId} type="monotone" dataKey={`${series.effortId}:altitude`} name={new Date(series.startedAt).toLocaleDateString('pl-PL')} stroke={colors[index]} dot={false} connectNulls />)}
+              {comparison.series.map((series, index) => <Line key={series.effortId} type="monotone" dataKey={`${series.effortId}:altitude`} name={new Date(series.startedAt).toLocaleDateString(getLocale())} stroke={colors[index]} dot={false} connectNulls />)}
             </LineChart>
           </ResponsiveContainer>
         </Box>
@@ -66,7 +67,7 @@ export default function SegmentComparisonVisual({ comparison }: SegmentCompariso
             <LineChart data={chart} onMouseMove={state => { const index = Number(state.activeTooltipIndex); setHoverIndex(Number.isFinite(index) ? index : null); }} onMouseLeave={() => setHoverIndex(null)}>
               <CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="distanceM" unit=" m" /><YAxis unit=" s" />
               <Tooltip />
-              {comparison.series.map((series, index) => <Line key={series.effortId} type="monotone" dataKey={`${series.effortId}:delta`} name={new Date(series.startedAt).toLocaleDateString('pl-PL')} stroke={colors[index]} dot={false} connectNulls />)}
+              {comparison.series.map((series, index) => <Line key={series.effortId} type="monotone" dataKey={`${series.effortId}:delta`} name={new Date(series.startedAt).toLocaleDateString(getLocale())} stroke={colors[index]} dot={false} connectNulls />)}
             </LineChart>
           </ResponsiveContainer>
         </Box>
@@ -83,7 +84,7 @@ export default function SegmentComparisonVisual({ comparison }: SegmentCompariso
             <LineChart data={chart} onMouseMove={state => { const index = Number(state.activeTooltipIndex); setHoverIndex(Number.isFinite(index) ? index : null); }} onMouseLeave={() => setHoverIndex(null)}>
               <CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="distanceM" unit=" m" /><YAxis unit={` ${metrics[metric].unit}`} />
               <Tooltip />
-              {comparison.series.map((series, index) => <Line key={series.effortId} type="monotone" dataKey={`${series.effortId}:metric`} name={new Date(series.startedAt).toLocaleDateString('pl-PL')} stroke={colors[index]} dot={false} connectNulls />)}
+              {comparison.series.map((series, index) => <Line key={series.effortId} type="monotone" dataKey={`${series.effortId}:metric`} name={new Date(series.startedAt).toLocaleDateString(getLocale())} stroke={colors[index]} dot={false} connectNulls />)}
             </LineChart>
           </ResponsiveContainer>
         </Box>

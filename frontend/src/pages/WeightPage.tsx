@@ -17,6 +17,7 @@ import {
   useSetWeightGoal,
   useWeightOverview,
 } from '@/hooks/useWeight';
+import { getLocale } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 import { ErrorState, Page, SkeletonCard, Widget } from '@/ui';
 import { getApiErrorMessage } from '@/utils/errorHandling';
@@ -221,7 +222,7 @@ export default function WeightPage() {
                       color: "text.secondary",
                       mt: 0.5
                     }}>
-                    Ostatni pomiar: {latestWeight ? new Date(latestWeight.recordedDate).toLocaleDateString('pl-PL') : 'brak danych'}
+                    Ostatni pomiar: {latestWeight ? new Date(latestWeight.recordedDate).toLocaleDateString(getLocale()) : 'brak danych'}
                   </Typography>
                 </Box>
                 <Stack spacing={0.5} sx={{ minWidth: { xs: '100%', sm: 280 } }}>
@@ -229,7 +230,7 @@ export default function WeightPage() {
                     color: "text.secondary"
                   }}>
                     {goal
-                      ? `Cel: ${Number(goal.targetWeightKg).toFixed(1)} kg do ${new Date(goal.targetDate).toLocaleDateString('pl-PL')}`
+                      ? `Cel: ${Number(goal.targetWeightKg).toFixed(1)} kg do ${new Date(goal.targetDate).toLocaleDateString(getLocale())}`
                       : 'Brak ustawionego celu wagowego'}
                   </Typography>
                   <Typography variant="body2" sx={{ fontWeight: (theme) => getAppThemeTokens(theme).type.weight.label }}>

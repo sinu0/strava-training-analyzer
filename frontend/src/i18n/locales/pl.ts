@@ -4,6 +4,28 @@
  * Plural nodes are objects with an `other` form (plus `one`/`few`/`many` as the language needs).
  */
 export const pl = {
+  common: {
+    error: 'Wystąpił błąd',
+    retry: 'Spróbuj ponownie',
+    loading: 'Ładowanie…',
+    loadingPage: 'Ładowanie strony…',
+    loadingChart: 'Ładowanie wykresu…',
+    noData: 'Brak danych',
+    confirm: 'Potwierdź',
+    cancel: 'Anuluj',
+    unexpectedError: 'Wystąpił nieoczekiwany błąd',
+    somethingWentWrong: 'Coś poszło nie tak. Spróbuj odświeżyć stronę.',
+    reloadPage: 'Odśwież stronę',
+    refreshing: 'Odświeżanie…',
+    releaseToRefresh: 'Puść, aby odświeżyć',
+    pullToRefresh: 'Pociągnij, aby odświeżyć',
+    skipToContent: 'Przejdź do treści',
+    stravaConnected: 'Konto Strava zostało połączone. Możesz teraz uruchomić synchronizację aktywności.',
+    notFoundTitle: 'Strona nie znaleziona',
+    notFoundDescription: 'Wygląda na to, że ta trasa prowadzi donikąd. Sprawdź adres URL lub wróć na dashboard.',
+    backToDashboard: 'Wróć na dashboard',
+    pwaHttpsRequired: 'Tryb instalowalny i bezpieczne wykonanie offline wymagają HTTPS. Na telefonie otwórz adres LAN skonfigurowany z zaufanym certyfikatem; zwykły adres HTTP nie udostępnia Service Workera.',
+  },
   nav: {
     today: { label: 'Dzisiaj', description: 'Decyzja i kontekst dnia' },
     history: { label: 'Historia', description: 'Wykonane aktywności' },

@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { useMemo } from 'react';
 
+import { getLocale } from '@/i18n';
 import type { ActivitySummary } from '@/types/activity';
 import { STATUS_COLORS, alphaColor } from '@/utils/colors';
 
@@ -52,7 +53,7 @@ function buildWeeks(activities: ActivitySummary[]): WeekData[] {
       }
     }
 
-    const fmt = weekStart.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
+    const fmt = weekStart.toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' });
     return { weekLabel: fmt, days, totalTimeSec };
   });
 }

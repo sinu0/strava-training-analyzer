@@ -1,3 +1,4 @@
+import { defineMessages } from '@/i18n';
 import type {
   GradientDay,
   HourScore,
@@ -5,6 +6,31 @@ import type {
   WeatherGradient,
   WeatherScoringProfile,
 } from '@/types/analytics';
+
+const { t } = defineMessages({
+  pl: {
+    rideNow: 'Jedź teraz',
+    rideNowDetail: 'Warunki już są dobre. Aktualny score to {score}/100.',
+    waitUntil: 'Poczekaj do {time}',
+    waitDetail: 'Najlepsze okno daje dziś {score}/100.',
+    indoor: 'Rozważ indoor lub lżejszy dzień',
+    indoorDetail: 'Najlepsze okno nie przebija dziś sensownego progu ({score}/100).',
+    same: 'Tu i w {location} warunki są praktycznie takie same.',
+    better: 'Tu jest lepiej niż w {location} o {diff} pkt.',
+    worse: 'Tu jest trudniej niż w {location} o {diff} pkt.',
+  },
+  en: {
+    rideNow: 'Ride now',
+    rideNowDetail: 'Conditions are already good. Current score is {score}/100.',
+    waitUntil: 'Wait until {time}',
+    waitDetail: 'The best window today scores {score}/100.',
+    indoor: 'Consider indoor or an easier day',
+    indoorDetail: 'The best window today does not clear a sensible threshold ({score}/100).',
+    same: 'Conditions here and in {location} are practically the same.',
+    better: 'It is better here than in {location} by {diff} pts.',
+    worse: 'It is harder here than in {location} by {diff} pts.',
+  },
+});
 
 export const defaultWeatherScoringProfile: WeatherScoringProfile = {
   rideWindowStartHour: 6,
@@ -186,23 +212,23 @@ export function buildWeatherDecision(gradient: WeatherGradient) {
   if (currentScore >= 75) {
     return {
       variant: 'ride-now' as const,
-      title: 'Jedź teraz',
-      detail: `Warunki już są dobre. Aktualny score to ${currentScore}/100.`,
+      title: t('rideNow'),
+      detail: t('rideNowDetail', { score: currentScore }),
     };
   }
 
   if (bestScore >= 70 && today?.bestWindowStart) {
     return {
       variant: 'wait' as const,
-      title: `Poczekaj do ${today.bestWindowStart}`,
-      detail: `Najlepsze okno daje dziś ${bestScore}/100.`,
+      title: t('waitUntil', { time: today.bestWindowStart }),
+      detail: t('waitDetail', { score: bestScore }),
     };
   }
 
   return {
     variant: 'indoor' as const,
-    title: 'Rozważ indoor lub lżejszy dzień',
-    detail: `Najlepsze okno nie przebija dziś sensownego progu (${bestScore}/100).`,
+    title: t('indoor'),
+    detail: t('indoorDetail', { score: bestScore }),
   };
 }
 
@@ -216,9 +242,8 @@ export function buildWeatherComparison(
 
   const diff = selected.current.outdoorScore - baseline.current.outdoorScore;
   if (diff === 0) {
-    return `Tu i w ${baseline.locationName} warunki są praktycznie takie same.`;
+    return t('same', { location: baseline.locationName });
   }
 
-  const betterWorse = diff > 0 ? 'lepiej' : 'trudniej';
-  return `Tu jest ${betterWorse} niż w ${baseline.locationName} o ${Math.abs(diff)} pkt.`;
+  return t(diff > 0 ? 'better' : 'worse', { location: baseline.locationName, diff: Math.abs(diff) });
 }

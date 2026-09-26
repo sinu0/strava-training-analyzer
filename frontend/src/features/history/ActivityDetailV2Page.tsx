@@ -18,6 +18,7 @@ import LapsTab from '@/components/activity/LapsTab';
 import ActivityStreamsChart from '@/components/ActivityStreamsChart';
 import MatchedRideCard from '@/components/matched-rides/MatchedRideCard';
 import ActivitySegmentsPanel from '@/components/segments/ActivitySegmentsPanel';
+import { getLocale } from '@/i18n';
 import { EmptyState, ErrorState, LoadingState, Metric, Page, StatusPill, Surface, Widget } from '@/ui';
 
 import { useActivityLaps, useActivityStreams, useV2Activity } from './useHistory';
@@ -53,7 +54,7 @@ export default function ActivityDetailV2Page() {
   return (
     <Page
       title={data.name}
-      subtitle={`${new Date(data.startedAt).toLocaleString('pl-PL')} · ${data.sportType}`}
+      subtitle={`${new Date(data.startedAt).toLocaleString(getLocale())} · ${data.sportType}`}
       maxWidth={1200}
       breadcrumbs={[{ label: 'Historia', href: '/activities' }, { label: data.name }]}
       actions={<Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/activities')}>Historia</Button>}

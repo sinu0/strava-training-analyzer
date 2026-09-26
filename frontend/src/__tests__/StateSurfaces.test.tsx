@@ -14,7 +14,7 @@ describe('LoadingState', () => {
   it('renders default loading message with a spinner', () => {
     renderWithTheme(<LoadingState />);
 
-    expect(screen.getByText('Ładowanie...')).toBeDefined();
+    expect(screen.getByText('Ładowanie…')).toBeDefined();
     expect(screen.getByRole('progressbar')).toBeDefined();
   });
 

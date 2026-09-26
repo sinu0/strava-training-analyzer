@@ -1,6 +1,7 @@
 import { Box, Grid, Pagination, Stack, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 
+import { getLocale } from '@/i18n';
 import type { WeightRecord } from '@/types/weight';
 import { Widget } from '@/ui';
 import { getPolishPaginationAriaLabel } from '@/utils/accessibility';
@@ -50,7 +51,7 @@ export default function WeightHistoryTable({
                   <Typography variant="caption" sx={{
                     color: "text.secondary"
                   }}>
-                    {new Date(record.recordedDate).toLocaleDateString('pl-PL', {
+                    {new Date(record.recordedDate).toLocaleDateString(getLocale(), {
                       weekday: 'short',
                       year: 'numeric',
                       month: 'short',

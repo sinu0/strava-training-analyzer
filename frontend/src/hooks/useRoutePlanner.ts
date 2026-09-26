@@ -10,6 +10,7 @@ import apiClient from '@/api/client';
 import { lookupElevation } from '@/api/externalApis';
 import { STALE_SLOW } from '@/constants/queryConfig';
 import { invalidateActivityQueries } from '@/hooks/queryInvalidation';
+import { defineMessages } from '@/i18n';
 import type { WeatherData } from '@/types/analytics';
 import type {
   PlannedRoute,
@@ -20,6 +21,11 @@ import type {
   RoutePreview,
 } from '@/types/route';
 import type { RouteWeatherStop } from '@/utils/routePlannerMap';
+
+const { t } = defineMessages({
+  pl: { routingFallback: 'Nie udało się pobrać routingu — pokazano prostą linię między punktami.' },
+  en: { routingFallback: 'Could not fetch routing — showing a straight line between points.' },
+});
 
 export function useRoutes() {
   return useQuery<PlannedRoute[]>({
@@ -145,7 +151,7 @@ export async function fetchRoute(
       unpavedDistanceM: null,
       cyclewayDistanceM: null,
       quietDistanceM: null,
-      notices: ['Nie udało się pobrać routingu — pokazano prostą linię między punktami.'],
+      notices: [t('routingFallback')],
     };
   }
 }

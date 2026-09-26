@@ -1,3 +1,4 @@
+import { getLocale } from '@/i18n';
 export function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
@@ -25,7 +26,7 @@ export function formatPower(watts: number): string {
 }
 
 export function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('pl-PL', {
+  return new Date(dateString).toLocaleDateString(getLocale(), {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

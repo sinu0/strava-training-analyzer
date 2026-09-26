@@ -5,13 +5,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 import { useMatchedRideGroup } from '@/hooks/useMatchedRides';
+import { getLocale } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 import { ErrorState, LoadingState, Metric, Page, Surface } from '@/ui';
 
 import { speedChartDomain } from './chartScale';
 
 function duration(seconds?: number | null) { if (seconds == null) return '—'; const h = Math.floor(seconds / 3600); const m = Math.floor((seconds % 3600) / 60); return `${h}:${String(m).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`; }
-function signed(value?: number | null) { return value == null ? '—' : `${value >= 0 ? '+' : '−'}${Math.abs(value).toLocaleString('pl-PL', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km/h`; }
+function signed(value?: number | null) { return value == null ? '—' : `${value >= 0 ? '+' : '−'}${Math.abs(value).toLocaleString(getLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km/h`; }
 
 export default function MatchedRidesPage() {
   const { routeGroupId } = useParams<{ routeGroupId: string }>();
@@ -57,13 +58,13 @@ export default function MatchedRidesPage() {
       <Surface padding="sm" sx={{ mb: 2 }}>
         <Typography variant="h6" sx={{ mb: 1 }}>Progres na tej trasie</Typography>
         <Box sx={{ height: 340 }} aria-label="Wykres wszystkich przejazdów i wygładzonego trendu">
-          <ResponsiveContainer><LineChart data={data.rides}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="startedAt" tickFormatter={value => new Date(String(value)).toLocaleDateString('pl-PL')} /><YAxis unit=" km/h" domain={chartDomain} allowDataOverflow /><Tooltip labelFormatter={value => new Date(String(value)).toLocaleString('pl-PL')} />
+          <ResponsiveContainer><LineChart data={data.rides}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="startedAt" tickFormatter={value => new Date(String(value)).toLocaleDateString(getLocale())} /><YAxis unit=" km/h" domain={chartDomain} allowDataOverflow /><Tooltip labelFormatter={value => new Date(String(value)).toLocaleString(getLocale())} />
             <Line dataKey="averageSpeedKmh" name="Przejazd" stroke={tokens.chart.secondary} strokeWidth={1.5} /><Line dataKey="smoothedSpeedKmh" name="Wygładzony trend" stroke={tokens.chart.primary} strokeWidth={4} dot={false} /></LineChart></ResponsiveContainer>
         </Box>
       </Surface>
       <Surface padding="none">
         <TableContainer><Table size="small" aria-label="Dopasowane przejazdy"><TableHead><TableRow><TableCell>Data</TableCell><TableCell>Aktywność</TableCell><TableCell align="right">Prędkość</TableCell><TableCell align="right">Czas ruchu</TableCell><TableCell align="right">Moc</TableCell><TableCell align="right">Tętno</TableCell><TableCell align="right">Względny wysiłek</TableCell><TableCell align="right">Dopasowanie</TableCell></TableRow></TableHead>
-          <TableBody>{[...data.rides].reverse().map(ride => <TableRow hover key={ride.activityId} sx={{ cursor: 'pointer' }} onClick={() => navigate(`/activities/${ride.activityId}`)}><TableCell>{new Date(ride.startedAt).toLocaleDateString('pl-PL')}</TableCell><TableCell><Button onClick={() => navigate(`/activities/${ride.activityId}`)}>{ride.activityName}</Button></TableCell><TableCell align="right">{ride.averageSpeedKmh?.toFixed(1) ?? '—'} km/h</TableCell><TableCell align="right">{duration(ride.movingTimeSec)}</TableCell><TableCell align="right">{ride.averagePowerW ?? '—'} W</TableCell><TableCell align="right">{ride.averageHeartrate ?? '—'} bpm</TableCell><TableCell align="right">{ride.relativeEffort ?? '—'}</TableCell><TableCell align="right">{ride.similarityPercent.toFixed(0)}%</TableCell></TableRow>)}</TableBody>
+          <TableBody>{[...data.rides].reverse().map(ride => <TableRow hover key={ride.activityId} sx={{ cursor: 'pointer' }} onClick={() => navigate(`/activities/${ride.activityId}`)}><TableCell>{new Date(ride.startedAt).toLocaleDateString(getLocale())}</TableCell><TableCell><Button onClick={() => navigate(`/activities/${ride.activityId}`)}>{ride.activityName}</Button></TableCell><TableCell align="right">{ride.averageSpeedKmh?.toFixed(1) ?? '—'} km/h</TableCell><TableCell align="right">{duration(ride.movingTimeSec)}</TableCell><TableCell align="right">{ride.averagePowerW ?? '—'} W</TableCell><TableCell align="right">{ride.averageHeartrate ?? '—'} bpm</TableCell><TableCell align="right">{ride.relativeEffort ?? '—'}</TableCell><TableCell align="right">{ride.similarityPercent.toFixed(0)}%</TableCell></TableRow>)}</TableBody>
         </Table></TableContainer>
       </Surface>
       <Stack

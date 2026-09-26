@@ -26,6 +26,8 @@ import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, 
 import { alpha } from '@mui/material/styles';
 import { useEffect, useState, type ReactNode } from 'react';
 
+import { dashboardMessages } from '@/components/dashboard/messages';
+import { useI18n } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 import {
   DASHBOARD_WIDGET_TYPES,
@@ -41,16 +43,9 @@ import {
   resizeDashboardWidget,
 } from '@/utils/uiPreferences';
 
-export const WIDGET_LABELS: Record<DashboardWidgetType, string> = {
-  decision: 'Rekomendacja dnia',
-  recovery: 'Regeneracja',
-  load: 'Obciążenie',
-  lastActivity: 'Ostatni trening',
-  nextWorkout: 'Następny trening',
-  weather: 'Pogoda',
-  weeklyVolume: 'Objętość tygodnia',
-  goal: 'Cel treningowy',
-};
+export function getWidgetLabel(type: DashboardWidgetType): string {
+  return dashboardMessages.t(`widgets.${type}`);
+}
 
 interface EditableDashboardProps {
   preferences: UiPreferences;
@@ -86,7 +81,8 @@ function SortableWidget({
     transition,
     isDragging,
   } = useSortable({ id: widget.id, disabled: !editing });
-  const label = WIDGET_LABELS[widget.type];
+  const t = dashboardMessages.useT();
+  const label = t(`widgets.${widget.type}`);
 
   return (
     <Box
@@ -125,7 +121,7 @@ function SortableWidget({
             ref={setActivatorNodeRef}
             size="small"
             color="inherit"
-            aria-label={`Przenieś widget ${label}`}
+            aria-label={t('move', { label })}
             {...attributes}
             {...listeners}
           >
@@ -134,7 +130,7 @@ function SortableWidget({
           <IconButton
             size="small"
             color="inherit"
-            aria-label={`Zmniejsz widget ${label}`}
+            aria-label={t('shrink', { label })}
             onClick={() => onResize(widget.span - 1)}
           >
             <RemoveIcon fontSize="small" />
@@ -142,7 +138,7 @@ function SortableWidget({
           <IconButton
             size="small"
             color="inherit"
-            aria-label={`Zwiększ widget ${label}`}
+            aria-label={t('grow', { label })}
             onClick={() => onResize(widget.span + 1)}
           >
             <AddIcon fontSize="small" />
@@ -150,7 +146,7 @@ function SortableWidget({
           <IconButton
             size="small"
             color="inherit"
-            aria-label={`Ustawienia widgetu ${label}`}
+            aria-label={t('configure', { label })}
             onClick={onConfigure}
           >
             <SettingsOutlinedIcon fontSize="small" />
@@ -158,7 +154,7 @@ function SortableWidget({
           <IconButton
             size="small"
             color="error"
-            aria-label={`Usuń widget ${label}`}
+            aria-label={t('remove', { label })}
             onClick={onRemove}
           >
             <CloseIcon fontSize="small" />
@@ -187,8 +183,10 @@ export default function EditableDashboard({
   saving = false,
   toolbarStart,
 }: EditableDashboardProps) {
+  const t = dashboardMessages.useT();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(() => structuredClone(preferences));
+  const { t: common } = useI18n();
   const [addOpen, setAddOpen] = useState(false);
   const [configuredId, setConfiguredId] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState('');
@@ -228,8 +226,8 @@ export default function EditableDashboard({
         && 'response' in error
         && (error as { response?: { status?: number } }).response?.status === 409;
       setSaveError(isConflict
-        ? 'Układ zmienił się w innym widoku. Odśwież stronę i spróbuj ponownie.'
-        : 'Nie udało się zapisać układu. Spróbuj ponownie.');
+        ? t('conflict')
+        : t('saveError'));
     }
   };
 
@@ -275,10 +273,10 @@ export default function EditableDashboard({
           {editing ? (
             <>
             <Button startIcon={<AddIcon />} onClick={() => setAddOpen(true)}>
-              Dodaj widget
+              {t('addWidget')}
             </Button>
             <Button startIcon={<RestartAltIcon />} onClick={restoreDefaults}>
-              Przywróć domyślny
+              {t('restoreDefault')}
             </Button>
             <Button
               variant="contained"
@@ -286,14 +284,14 @@ export default function EditableDashboard({
               disabled={saving}
               onClick={() => void handleSave()}
             >
-              Zapisz układ
+              {t('saveLayout')}
             </Button>
             </>
           ) : (
-            <Tooltip title="Edytuj układ">
+            <Tooltip title={t('editLayout')}>
               <IconButton
                 color="primary"
-                aria-label="Edytuj układ"
+                aria-label={t('editLayout')}
                 onClick={() => setEditing(true)}
                 sx={{
                   border: '1px solid',
@@ -316,22 +314,22 @@ export default function EditableDashboard({
 
       {widgets.length === 0 ? (
         <Surface variant="outlined" sx={{ p: 5, textAlign: 'center', borderStyle: 'dashed' }}>
-          <Typography variant="h6">Pulpit jest pusty</Typography>
+          <Typography variant="h6">{t('emptyTitle')}</Typography>
           <Typography
             sx={{
               color: "text.secondary",
               mt: 1,
               mb: 2
             }}>
-            Dodaj wybrane moduły lub wróć do sprawdzonego układu startowego.
+            {t('emptyDescription')}
           </Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{
             justifyContent: "center"
           }}>
             <Button variant="contained" onClick={() => { setEditing(true); setAddOpen(true); }}>
-              Dodaj widget
+              {t('addWidget')}
             </Button>
-            <Button onClick={restoreDefaults}>Przywróć domyślny układ</Button>
+            <Button onClick={restoreDefaults}>{t('restoreDefaultLayout')}</Button>
           </Stack>
         </Surface>
       ) : (
@@ -369,7 +367,7 @@ export default function EditableDashboard({
       )}
 
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>Dodaj widget</DialogTitle>
+        <DialogTitle>{t('addWidget')}</DialogTitle>
         <DialogContent dividers>
           <List disablePadding>
             {DASHBOARD_WIDGET_TYPES.map((type) => (
@@ -380,7 +378,7 @@ export default function EditableDashboard({
                   setAddOpen(false);
                 }}
               >
-                <ListItemText primary={WIDGET_LABELS[type]} />
+                <ListItemText primary={t(`widgets.${type}`)} />
               </ListItemButton>
             ))}
           </List>
@@ -388,19 +386,19 @@ export default function EditableDashboard({
       </Dialog>
 
       <Dialog open={configuredId !== null} onClose={() => setConfiguredId(null)} fullWidth maxWidth="xs">
-        <DialogTitle>Ustawienia widgetu</DialogTitle>
+        <DialogTitle>{t('settingsTitle')}</DialogTitle>
         <DialogContent>
           <TextField
             fullWidth
-            label="Własny tytuł"
+            label={t('customTitle')}
             value={titleDraft}
             onChange={(event) => setTitleDraft(event.target.value)}
             sx={{ mt: 1 }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfiguredId(null)}>Anuluj</Button>
-          <Button variant="contained" onClick={applyConfiguration}>Zastosuj</Button>
+          <Button onClick={() => setConfiguredId(null)}>{common('common.cancel')}</Button>
+          <Button variant="contained" onClick={applyConfiguration}>{t('apply')}</Button>
         </DialogActions>
       </Dialog>
     </Stack>

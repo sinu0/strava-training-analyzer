@@ -2,6 +2,8 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { useRef, useState } from 'react';
 
+import { useI18n } from '@/i18n';
+
 import type { ReactNode, TouchEvent } from 'react';
 
 interface PullToRefreshPanelProps {
@@ -21,6 +23,7 @@ export default function PullToRefreshPanel({
   onRefresh,
   disabled = false,
 }: PullToRefreshPanelProps) {
+  const { t } = useI18n();
   const startYRef = useRef<number | null>(null);
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -112,10 +115,10 @@ export default function PullToRefreshPanel({
         )}
         <Typography variant="caption" sx={{ fontSize: '0.78rem' }}>
           {isRefreshing
-            ? 'Odświeżanie…'
+            ? t('common.refreshing')
             : progress >= 100
-              ? 'Puść, aby odświeżyć'
-              : 'Pociągnij, aby odświeżyć'}
+              ? t('common.releaseToRefresh')
+              : t('common.pullToRefresh')}
         </Typography>
       </Box>
       {children}

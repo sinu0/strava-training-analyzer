@@ -13,6 +13,7 @@ import {
   Cell,
 } from 'recharts';
 
+import { getLocale } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 import { STATUS_COLORS } from '@/utils/colors';
 
@@ -112,7 +113,7 @@ const WeeklyKmBarChart = memo(function WeeklyKmBarChart() {
     return [...summaries]
       .reverse()
       .map((s) => ({
-        week: new Date(s.weekStart).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' }),
+        week: new Date(s.weekStart).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' }),
         value: activeMetric.getValue(s),
         isCurrent:
           new Date(s.weekStart).toISOString().slice(0, 10) ===

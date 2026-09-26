@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { pl } from '@/i18n/locales/pl';
+import { getLanguage, localeFor, setRuntimeLanguage } from '@/i18n/runtime';
 import { translate, type TranslationParams } from '@/i18n/translate';
 import type { Language, Messages, TranslationKey } from '@/i18n/types';
 
@@ -11,7 +12,7 @@ const LOADERS: Record<Language, () => Promise<Messages>> = {
   pl: () => Promise.resolve(pl),
   en: () => import('@/i18n/locales/en').then((module) => module.en),
 };
-const LOCALES: Record<Language, string> = { pl: 'pl-PL', en: 'en-GB' };
+const loadedCatalogs: Partial<Record<Language, Messages>> = { pl };
 
 interface I18nContextValue {
   language: Language;
@@ -28,7 +29,7 @@ function createValue(
   setLanguage: (language: Language) => void,
   toggleLanguage: () => void,
 ): I18nContextValue {
-  const locale = LOCALES[language];
+  const locale = localeFor(language);
   return {
     language,
     locale,
@@ -36,6 +37,14 @@ function createValue(
     toggleLanguage,
     t: (key, params) => translate(messages, locale, key, params),
   };
+}
+
+/** Core translator bound to the current runtime language, for class components and non-React code. */
+export function createCoreTranslator(): I18nContextValue['t'] {
+  const language = getLanguage();
+  // Non-Polish catalogs load lazily; until then fall back to Polish.
+  const messages = loadedCatalogs[language] ?? pl;
+  return (key, params) => translate(messages, localeFor(language), key, params);
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -73,6 +82,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     if (catalog.language === language) return undefined;
     let cancelled = false;
     void LOADERS[language]().then((messages) => {
+      loadedCatalogs[language] = messages;
       if (!cancelled) setCatalog({ language, messages });
     });
     return () => {
@@ -83,6 +93,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = catalog.language;
   }, [catalog.language]);
+
+  // Synchronous so non-React helpers (`defineMessages().t`, formatters) see the language during this render.
+  setRuntimeLanguage(catalog.language);
 
   const value = useMemo(
     () => createValue(catalog.language, catalog.messages, setLanguage, toggleLanguage),

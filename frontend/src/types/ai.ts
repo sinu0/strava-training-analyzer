@@ -1,3 +1,4 @@
+import { localized } from '@/i18n';
 export interface PredictionRequest {
   predictionType: PredictionType;
   modelId?: string;
@@ -56,15 +57,26 @@ export type PredictionType =
   | 'RACE_READINESS'
   | 'TRAINING_COACH_SUMMARY';
 
-export const PREDICTION_TYPE_LABELS: Record<PredictionType, string> = {
-  FTP_PREDICTION: 'Predykcja FTP',
-  FATIGUE_PREDICTION: 'Ocena zmęczenia',
-  TRAINING_TYPE_RECOMMENDATION: 'Rekomendacja treningu',
-  PERFORMANCE_TREND: 'Trend wydolności',
-  OVERTRAINING_RISK: 'Ryzyko przetrenowania',
-  RACE_READINESS: 'Gotowość wyścigowa',
-  TRAINING_COACH_SUMMARY: 'Podsumowanie trenera AI',
-};
+export const PREDICTION_TYPE_LABELS: Record<PredictionType, string> = localized<Record<PredictionType, string>>({
+  pl: {
+    FTP_PREDICTION: 'Predykcja FTP',
+    FATIGUE_PREDICTION: 'Ocena zmęczenia',
+    TRAINING_TYPE_RECOMMENDATION: 'Rekomendacja treningu',
+    PERFORMANCE_TREND: 'Trend wydolności',
+    OVERTRAINING_RISK: 'Ryzyko przetrenowania',
+    RACE_READINESS: 'Gotowość wyścigowa',
+    TRAINING_COACH_SUMMARY: 'Podsumowanie trenera AI',
+  },
+  en: {
+    FTP_PREDICTION: 'FTP prediction',
+    FATIGUE_PREDICTION: 'Fatigue assessment',
+    TRAINING_TYPE_RECOMMENDATION: 'Workout recommendation',
+    PERFORMANCE_TREND: 'Performance trend',
+    OVERTRAINING_RISK: 'Overtraining risk',
+    RACE_READINESS: 'Race readiness',
+    TRAINING_COACH_SUMMARY: 'AI coach summary',
+  },
+});
 
 // AI Activity Note (Coach analysis per activity)
 export interface AiActivityNote {

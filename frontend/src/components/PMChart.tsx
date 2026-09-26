@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { memo } from 'react';
 import { ResponsiveContainer, ComposedChart, Line, Area, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine } from 'recharts';
 
+import { getLocale } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 
 import { getChartVisuals } from '../utils/chartStyles';
@@ -42,7 +43,7 @@ function PmcTooltipContent({ active, payload, label }: { active?: boolean; paylo
   return (
     <Box sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: getAppThemeTokens(theme).cardShadow, p: 1.5, borderRadius: 2, minWidth: 180 }}>
       <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0.5, display: 'block' }}>
-        {label ? new Date(label).toLocaleDateString('pl-PL') : ''}
+        {label ? new Date(label).toLocaleDateString(getLocale()) : ''}
       </Typography>
       {metrics.map((m) => (
         <Box key={m.key} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, py: 0.25 }}>
@@ -123,7 +124,7 @@ const PMChart = memo(function PMChart({ data }: PMChartProps) {
             <XAxis
               dataKey="date"
               {...chart.axis}
-              tickFormatter={(v) => new Date(v).toLocaleDateString('pl-PL', { month: 'short', day: 'numeric' })}
+              tickFormatter={(v) => new Date(v).toLocaleDateString(getLocale(), { month: 'short', day: 'numeric' })}
             />
             <YAxis {...chart.axis} />
             <Tooltip content={<PmcTooltipContent />} cursor={chart.tooltip.cursor} />

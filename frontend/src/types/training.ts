@@ -1,3 +1,4 @@
+import { localized } from '@/i18n';
 import { TRAINING_ZONE_COLORS } from '@/utils/colors';
 
 export interface WeekPhase {
@@ -108,16 +109,28 @@ export function getZoneForPower(pctFtp: number): string {
   return 'Z7';
 }
 
-export const CATEGORY_LABELS: Record<WorkoutCategory, string> = {
-  RECOVERY: 'Regeneracja',
-  ENDURANCE: 'Wytrzymałość',
-  TEMPO: 'Tempo',
-  SWEET_SPOT: 'Sweet Spot',
-  THRESHOLD: 'Próg',
-  VO2MAX: 'VO2max',
-  ANAEROBIC: 'Anaerobowy',
-  SPRINT: 'Sprint',
-};
+export const CATEGORY_LABELS: Record<WorkoutCategory, string> = localized<Record<WorkoutCategory, string>>({
+  pl: {
+    RECOVERY: 'Regeneracja',
+    ENDURANCE: 'Wytrzymałość',
+    TEMPO: 'Tempo',
+    SWEET_SPOT: 'Sweet Spot',
+    THRESHOLD: 'Próg',
+    VO2MAX: 'VO2max',
+    ANAEROBIC: 'Anaerobowy',
+    SPRINT: 'Sprint',
+  },
+  en: {
+    RECOVERY: 'Recovery',
+    ENDURANCE: 'Endurance',
+    TEMPO: 'Tempo',
+    SWEET_SPOT: 'Sweet Spot',
+    THRESHOLD: 'Threshold',
+    VO2MAX: 'VO2max',
+    ANAEROBIC: 'Anaerobic',
+    SPRINT: 'Sprint',
+  },
+});
 
 // --- Training Plans ---
 

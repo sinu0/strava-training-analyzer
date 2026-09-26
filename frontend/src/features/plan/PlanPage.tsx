@@ -12,6 +12,7 @@ import TrainingCalendar from '@/components/training/TrainingCalendar';
 import TrainingContextPanel from '@/components/training/TrainingContextPanel';
 import WeeklyReviewPanel from '@/components/training/WeeklyReviewPanel';
 import WorkoutLibrary from '@/components/training/WorkoutLibrary';
+import { getLocale } from '@/i18n';
 import { EmptyState, ErrorState, HeroCard, LoadingState, Metric, Page, Surface } from '@/ui';
 import { getChartVisuals } from '@/utils/chartStyles';
 import { PMC_COLORS } from '@/utils/colors';
@@ -121,7 +122,7 @@ export default function PlanPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={scenario.data.points}>
                     <CartesianGrid {...chart.grid} />
-                    <XAxis dataKey="date" tickFormatter={value => new Date(value).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })} {...chart.axis} />
+                    <XAxis dataKey="date" tickFormatter={value => new Date(value).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })} {...chart.axis} />
                     <YAxis {...chart.axis} />
                     <Tooltip {...chart.tooltip} />
                     <Legend {...chart.legend} />

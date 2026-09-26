@@ -2,6 +2,28 @@ import type { Messages } from '@/i18n/types';
 
 /** English messages — structure mirrors `pl.ts`. */
 export const en: Messages = {
+  common: {
+    error: 'Something went wrong',
+    retry: 'Try again',
+    loading: 'Loading…',
+    loadingPage: 'Loading page…',
+    loadingChart: 'Loading chart…',
+    noData: 'No data',
+    confirm: 'Confirm',
+    cancel: 'Cancel',
+    unexpectedError: 'An unexpected error occurred',
+    somethingWentWrong: 'Something went wrong. Try reloading the page.',
+    reloadPage: 'Reload page',
+    refreshing: 'Refreshing…',
+    releaseToRefresh: 'Release to refresh',
+    pullToRefresh: 'Pull to refresh',
+    skipToContent: 'Skip to content',
+    stravaConnected: 'Your Strava account is connected. You can now start syncing activities.',
+    notFoundTitle: 'Page not found',
+    notFoundDescription: 'This route seems to lead nowhere. Check the URL or go back to the dashboard.',
+    backToDashboard: 'Back to dashboard',
+    pwaHttpsRequired: 'Installable mode and safe offline execution require HTTPS. On your phone open the LAN address configured with a trusted certificate; a plain HTTP address does not provide a Service Worker.',
+  },
   nav: {
     today: { label: 'Today', description: 'Daily decision and context' },
     history: { label: 'History', description: 'Completed activities' },

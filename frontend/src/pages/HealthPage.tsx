@@ -40,6 +40,7 @@ import PullToRefreshPanel from '@/components/common/PullToRefreshPanel';
 import SwipeableContent from '@/components/common/SwipeableContent';
 import TabsNav from '@/components/common/TabsNav';
 import { useHealthOverview, useHealthTimeline, useRecoveryStatus } from '@/hooks/useHealth';
+import { getLocale } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 import { EmptyState, Page, SkeletonCard, Widget } from '@/ui';
 import { CHART_ACTIVE_DOT, getChartVisuals } from '@/utils/chartStyles';
@@ -107,7 +108,7 @@ function RecoveryGauge({ score }: { score: number }) {
 
 function formatDate(dateStr: string): string {
   const date = new Date(`${dateStr}T00:00:00`);
-  return date.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' });
+  return date.toLocaleDateString(getLocale(), { day: '2-digit', month: '2-digit' });
 }
 
 function formatSleepHours(seconds: number | null): string {

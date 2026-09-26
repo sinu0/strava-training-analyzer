@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 
+import { getLocale } from '@/i18n';
 import { EmptyState, ErrorState, LoadingState, Metric, Page, Surface } from '@/ui';
 
 import {
@@ -141,7 +142,7 @@ export default function DataJobsPage() {
               <LinearProgress variant="determinate" value={progress} sx={{ mt: 2, height: 8, borderRadius: 4 }} />
               {activeJob.status === 'RETRYABLE' && activeJob.retryAt ? (
                 <Alert severity="info" sx={{ mt: 2 }}>
-                  Limit API. Zadanie wznowi się automatycznie {new Date(activeJob.retryAt).toLocaleString('pl-PL')}.
+                  Limit API. Zadanie wznowi się automatycznie {new Date(activeJob.retryAt).toLocaleString(getLocale())}.
                 </Alert>
               ) : null}
               {activeJob.errorMessage ? <Alert severity="error" sx={{ mt: 2 }}>{activeJob.errorMessage}</Alert> : null}

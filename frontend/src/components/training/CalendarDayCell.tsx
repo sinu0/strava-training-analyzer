@@ -1,5 +1,7 @@
 import { ButtonBase, Chip, Typography } from '@mui/material';
 
+import { getLocale } from '@/i18n';
+
 import { CATEGORY_LABELS, type WorkoutCategory } from '../../types/training';
 
 import type { CalendarDay } from '../../types/training';
@@ -28,7 +30,7 @@ export default function CalendarDayCell({ day, date, dateNum, isCurrentMonth, is
 
   return (
     <ButtonBase
-      aria-label={`Otwórz ${new Date(`${date}T12:00:00`).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+      aria-label={`Otwórz ${new Date(`${date}T12:00:00`).toLocaleDateString(getLocale(), { day: 'numeric', month: 'long', year: 'numeric' })}`}
       onClick={onClick}
       sx={{
         display: 'block',

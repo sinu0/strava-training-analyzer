@@ -4,6 +4,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
+import { useI18n } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 import { STATUS_COLORS, alphaColor } from '@/utils/colors';
 
@@ -18,6 +19,7 @@ const SIDEBAR_WIDTH = 260;
  */
 export default function AppLayout() {
   const theme = useTheme();
+  const { t } = useI18n();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [sidebarOpen, setSidebarOpen] = useState(() => !isMobile);
   const [oauthNoticeOpen, setOauthNoticeOpen] = useState(true);
@@ -67,7 +69,7 @@ export default function AppLayout() {
           '&:focus': { transform: 'translateY(0)' },
         }}
       >
-        Przejdź do treści
+        {t('common.skipToContent')}
       </Box>
       <Snackbar
         open={showStravaConnected}
@@ -85,7 +87,7 @@ export default function AppLayout() {
             boxShadow: `0 12px 32px ${alphaColor(STATUS_COLORS.success, 0.28)}`,
           }}
         >
-          Konto Strava zostało połączone. Możesz teraz uruchomić synchronizację aktywności.
+          {t('common.stravaConnected')}
         </Alert>
       </Snackbar>
       <Sidebar

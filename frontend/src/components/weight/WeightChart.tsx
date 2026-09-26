@@ -11,6 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import { getLocale } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 import type { WeightGoal, WeightRecord } from '@/types/weight';
 import { ChartFrame } from '@/ui';
@@ -56,7 +57,7 @@ export default function WeightChart({
                 dataKey="date"
                 {...chart.axis}
                 tickFormatter={(value) =>
-                  new Date(String(value)).toLocaleDateString('pl-PL', {
+                  new Date(String(value)).toLocaleDateString(getLocale(), {
                     month: 'short',
                     day: 'numeric',
                   })}
@@ -69,7 +70,7 @@ export default function WeightChart({
               <RechartsTooltip
                 {...chart.tooltip}
                 formatter={(value) => [`${Number(value ?? 0).toFixed(1)} kg`, 'Waga']}
-                labelFormatter={(value) => new Date(String(value)).toLocaleDateString('pl-PL')}
+                labelFormatter={(value) => new Date(String(value)).toLocaleDateString(getLocale())}
               />
               {!!goal && (
                 <ReferenceLine

@@ -1,12 +1,18 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios';
 
 import { emitNotification } from '@/hooks/useNotification';
+import { defineMessages } from '@/i18n';
 import { getApiErrorMessage, isRetryableApiError } from '@/utils/errorHandling';
 
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   _retryCount?: number;
   skipErrorNotification?: boolean;
 }
+
+const { t } = defineMessages({
+  pl: { apiError: 'Wystąpił błąd komunikacji z API.' },
+  en: { apiError: 'Could not communicate with the API.' },
+});
 
 const apiClient = axios.create({
   baseURL: '/api',
@@ -30,7 +36,7 @@ apiClient.interceptors.response.use(
 
     if (!requestConfig?.skipErrorNotification && !axios.isCancel(error)) {
       emitNotification(
-        getApiErrorMessage(error, 'Wystąpił błąd komunikacji z API.'),
+        getApiErrorMessage(error, t('apiError')),
         'error',
       );
     }

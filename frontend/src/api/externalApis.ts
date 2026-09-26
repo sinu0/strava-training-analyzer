@@ -1,3 +1,4 @@
+import { defineMessages, getLanguage } from '@/i18n';
 export interface GeocodingResult {
   name: string;
   latitude: number;
@@ -14,6 +15,17 @@ interface ElevationApiResponse {
   results: { elevation: number }[];
 }
 
+const { t } = defineMessages({
+  pl: {
+    geocodingError: 'Błąd wyszukiwania lokalizacji: {status}',
+    elevationError: 'Błąd pobierania wysokości: {status}',
+  },
+  en: {
+    geocodingError: 'Location search failed: {status}',
+    elevationError: 'Elevation lookup failed: {status}',
+  },
+});
+
 export async function searchGeocodingLocations(
   query: string,
   signal?: AbortSignal,
@@ -21,11 +33,11 @@ export async function searchGeocodingLocations(
   const trimmed = query.trim();
   if (trimmed.length < 2) return [];
 
-  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(trimmed)}&count=5&language=pl&format=json`;
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(trimmed)}&count=5&language=${getLanguage()}&format=json`;
   const resp = await fetch(url, { signal });
 
   if (!resp.ok) {
-    throw new Error(`Błąd wyszukiwania lokalizacji: ${resp.status}`);
+    throw new Error(t('geocodingError', { status: resp.status }));
   }
 
   const json: GeocodingApiResponse = await resp.json();
@@ -43,7 +55,7 @@ export async function lookupElevation(
   const resp = await fetch(url, { signal });
 
   if (!resp.ok) {
-    throw new Error(`Błąd pobierania wysokości: ${resp.status}`);
+    throw new Error(t('elevationError', { status: resp.status }));
   }
 
   const data: ElevationApiResponse = await resp.json();

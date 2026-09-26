@@ -1,3 +1,4 @@
+import { localized } from '@/i18n';
 import { tokens } from '@/theme/theme';
 
 export interface ActivityTrainingEffect {
@@ -17,24 +18,40 @@ export interface ActivityTrainingEffect {
   details: Record<string, unknown> | null;
 }
 
-export const BENEFIT_LABELS: Record<string, string> = {
-  RECOVERY: 'Regeneracja',
-  ENDURANCE: 'Wytrzymałość',
-  TEMPO: 'Tempo',
-  THRESHOLD: 'Próg',
-  VO2MAX: 'VO2max',
-  ANAEROBIC: 'Anaerobowy',
-  SPRINT: 'Sprint',
-};
+export const BENEFIT_LABELS: Record<string, string> = localized<Record<string, string>>({
+  pl: {
+    RECOVERY: 'Regeneracja',
+    ENDURANCE: 'Wytrzymałość',
+    TEMPO: 'Tempo',
+    THRESHOLD: 'Próg',
+    VO2MAX: 'VO2max',
+    ANAEROBIC: 'Anaerobowy',
+    SPRINT: 'Sprint',
+  },
+  en: {
+    RECOVERY: 'Recovery',
+    ENDURANCE: 'Endurance',
+    TEMPO: 'Tempo',
+    THRESHOLD: 'Threshold',
+    VO2MAX: 'VO2max',
+    ANAEROBIC: 'Anaerobic',
+    SPRINT: 'Sprint',
+  },
+});
+
+const SCORE_LABELS = localized({
+  pl: { extreme: 'Ekstremalny', hard: 'Intensywny', moderate: 'Umiarkowany', mild: 'Łagodny', light: 'Lekki' },
+  en: { extreme: 'Extreme', hard: 'Hard', moderate: 'Moderate', mild: 'Mild', light: 'Light' },
+});
 
 export const BENEFIT_COLORS: Record<string, string> = tokens.chart.benefit;
 
 export function getTrainingScoreLabel(score: number): string {
-  if (score >= 80) return 'Ekstremalny';
-  if (score >= 60) return 'Intensywny';
-  if (score >= 40) return 'Umiarkowany';
-  if (score >= 20) return 'Łagodny';
-  return 'Lekki';
+  if (score >= 80) return SCORE_LABELS.extreme;
+  if (score >= 60) return SCORE_LABELS.hard;
+  if (score >= 40) return SCORE_LABELS.moderate;
+  if (score >= 20) return SCORE_LABELS.mild;
+  return SCORE_LABELS.light;
 }
 
 export function getTrainingScoreColor(score: number): string {

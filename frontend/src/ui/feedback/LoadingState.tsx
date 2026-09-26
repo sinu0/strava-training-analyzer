@@ -1,5 +1,7 @@
 import { Box, CircularProgress, Typography } from '@mui/material';
 
+import { useI18n } from '@/i18n';
+
 import IconBubble from '../IconBubble';
 
 interface LoadingStateProps {
@@ -10,7 +12,9 @@ interface LoadingStateProps {
  * Displays a centered loading indicator with an optional status message.
  * The spinner sits inside a soft iconBubble circle matching the dashboard style.
  */
-export default function LoadingState({ message = 'Ładowanie...' }: LoadingStateProps) {
+export default function LoadingState({ message: messageProp }: LoadingStateProps) {
+  const { t } = useI18n();
+  const message = messageProp ?? t('common.loading');
   return (
     <Box
       sx={{

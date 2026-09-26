@@ -4,6 +4,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import { Box, Typography } from '@mui/material';
 
+import { getLocale } from '@/i18n';
 import { getAppThemeTokens, tokens } from '@/theme/theme';
 
 import { formatDistance, formatDuration } from '../../utils/formatters';
@@ -46,7 +47,7 @@ function formatWeekRange(weekStart: string): string {
   const d = parts[2] ?? 1;
   const start = new Date(y, m - 1, d);
   const end = new Date(y, m - 1, d + 6);
-  const fmt = (date: Date) => date.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
+  const fmt = (date: Date) => date.toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' });
   return `${fmt(start)} – ${fmt(end)}`;
 }
 

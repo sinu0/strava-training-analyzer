@@ -13,6 +13,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 
+import { getLocale } from '@/i18n';
 import { getAppThemeTokens } from '@/theme/theme';
 import { StatusPill, Widget } from '@/ui';
 
@@ -27,7 +28,7 @@ interface TrainingProjectionChartProps {
 
 function formatDateTick(dateStr: string): string {
   const date = new Date(`${dateStr}T00:00:00`);
-  return date.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
+  return date.toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' });
 }
 
 export default function TrainingProjectionChart({ days }: TrainingProjectionChartProps) {
